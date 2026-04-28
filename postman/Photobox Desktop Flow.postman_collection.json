@@ -1,0 +1,402 @@
+{
+  "info": {
+    "name": "Photobox Desktop Flow",
+    "_postman_id": "6ef14968-4257-4a7e-b9cd-1f9ca42c7a68",
+    "description": "Collection untuk testing alur desktop photobox (Electron -> CI4 API).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:8080"
+    },
+    {
+      "key": "bookingCode",
+      "value": ""
+    },
+    {
+      "key": "bookingId",
+      "value": ""
+    },
+    {
+      "key": "printOptionId",
+      "value": ""
+    },
+    {
+      "key": "paymentId",
+      "value": ""
+    },
+    {
+      "key": "frameId",
+      "value": ""
+    },
+    {
+      "key": "filterId",
+      "value": ""
+    },
+    {
+      "key": "sessionId",
+      "value": ""
+    },
+    {
+      "key": "email",
+      "value": "user@example.com"
+    },
+    {
+      "key": "photoPath1",
+      "value": "C:/temp/photo1.jpg"
+    },
+    {
+      "key": "photoPath2",
+      "value": "C:/temp/photo2.jpg"
+    }
+  ],
+  "item": [
+    {
+      "name": "1) Verify Booking",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"booking_code\": \"{{bookingCode}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/customer/booking/verify",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "desktop",
+            "customer",
+            "booking",
+            "verify"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "var json = pm.response.json();",
+              "if (json.booking && json.booking.id) {",
+              "  pm.collectionVariables.set('bookingId', json.booking.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2) List Print Options",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/customer/print-options?booking_code={{bookingCode}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "desktop",
+            "customer",
+            "print-options"
+          ],
+          "query": [
+            {
+              "key": "booking_code",
+              "value": "{{bookingCode}}"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "var json = pm.response.json();",
+              "if (json.print_options && json.print_options.length > 0) {",
+              "  pm.collectionVariables.set('printOptionId', json.print_options[0].id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3) Create Payment QR",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"booking_id\": \"{{bookingId}}\",\n  \"print_option_id\": \"{{printOptionId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/payment/qr",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "desktop",
+            "payment",
+            "qr"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "var json = pm.response.json();",
+              "if (json.payment && json.payment.id) {",
+              "  pm.collectionVariables.set('paymentId', json.payment.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4) Check Payment Status",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/payment/{{paymentId}}/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "desktop",
+            "payment",
+            "{{paymentId}}",
+            "status"
+          ]
+        }
+      }
+    },
+    {
+      "name": "5) Simulate Midtrans Callback (Paid)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"order_id\": \"{{paymentId}}\",\n  \"transaction_status\": \"settlement\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/payment/midtrans/callback",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "desktop",
+            "payment",
+            "midtrans",
+            "callback"
+          ]
+        }
+      }
+    },
+    {
+      "name": "6) List Frames",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/customer/frames",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "desktop",
+            "customer",
+            "frames"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "var json = pm.response.json();",
+              "if (json.frames && json.frames.length > 0) {",
+              "  pm.collectionVariables.set('frameId', json.frames[0].id);",
+              "}",
+              "if (json.filters && json.filters.length > 0) {",
+              "  pm.collectionVariables.set('filterId', json.filters[0].id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7) Start Session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"booking_id\": \"{{bookingId}}\",\n  \"frame_id\": \"{{frameId}}\",\n  \"filter_id\": \"{{filterId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/session/start",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "desktop",
+            "session",
+            "start"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "var json = pm.response.json();",
+              "if (json.session && json.session.id) {",
+              "  pm.collectionVariables.set('sessionId', json.session.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8) Upload Photos",
+      "request": {
+        "method": "POST",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "photos",
+              "type": "file",
+              "src": "{{photoPath1}}"
+            },
+            {
+              "key": "photos",
+              "type": "file",
+              "src": "{{photoPath2}}"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/photo/session/{{sessionId}}/upload",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "desktop",
+            "photo",
+            "session",
+            "{{sessionId}}",
+            "upload"
+          ]
+        }
+      }
+    },
+    {
+      "name": "9) Submit Email",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/session/{{sessionId}}/email",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "desktop",
+            "session",
+            "{{sessionId}}",
+            "email"
+          ]
+        }
+      }
+    },
+    {
+      "name": "10) Complete Session",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{baseUrl}}/api/session/{{sessionId}}/complete",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "desktop",
+            "session",
+            "{{sessionId}}",
+            "complete"
+          ]
+        }
+      }
+    }
+  ]
+}

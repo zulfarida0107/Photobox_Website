@@ -20,7 +20,7 @@ class SessionModel extends Model
 		'drive_folder_url',
 	];
 
-	protected bool $useSoftDeletes = false;
+	protected $useSoftDeletes = false;
 	protected $useTimestamps = true;
 	protected $dateFormat = 'datetime';
 	protected $createdField = 'created_at';

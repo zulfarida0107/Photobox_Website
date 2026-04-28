@@ -20,7 +20,7 @@ class SlotModel extends Model
 		'booked_count',
 	];
 
-	protected bool $useSoftDeletes = false;
+	protected $useSoftDeletes = false;
 	protected $useTimestamps = true;
 	protected $dateFormat = 'datetime';
 	protected $createdField = 'created_at';
