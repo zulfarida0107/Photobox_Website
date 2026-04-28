@@ -17,7 +17,7 @@ class PrintOptionModel extends Model
 		'extra_price',
 	];
 
-	protected bool $useSoftDeletes = false;
+	protected $useSoftDeletes = false;
 	protected $useTimestamps = true;
 	protected $dateFormat = 'datetime';
 	protected $createdField = 'created_at';

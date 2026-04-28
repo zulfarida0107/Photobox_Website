@@ -19,7 +19,7 @@ class PhotoModel extends Model
 		'shot_number',
 	];
 
-	protected bool $useSoftDeletes = false;
+	protected $useSoftDeletes = false;
 	protected $useTimestamps = true;
 	protected $dateFormat = 'datetime';
 	protected $createdField = 'created_at';
