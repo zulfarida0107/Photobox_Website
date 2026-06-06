@@ -1,8 +1,8 @@
 <?php $this->extend('Admin/layouts/main'); ?>
 <?php $this->section('content'); ?>
 
-<main class="ml-0 pt-16 min-h-screen">
-    <div class="p-6">
+<main class="pt-16 min-h-screen flex flex-col">
+    <div class="p-6 flex-1">
 
         <!-- Breadcrumbs -->
         <nav class="flex items-center gap-2 mb-6 text-slate-500 text-xs font-medium">

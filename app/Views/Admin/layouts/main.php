@@ -102,6 +102,15 @@
     </script>
 
     <style>
+        /* Sembunyikan scrollbar global namun tetap bisa di-scroll */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        * {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
             vertical-align: middle;
@@ -137,13 +146,13 @@
     <!-- Sidebar -->
     <?= $this->include('Admin/layouts/sidebar') ?>
 
-    <!-- Main wrapper -->
+    <!-- Main wrapper: offset by sidebar width, allow full height flex column -->
     <div class="flex-1 ml-[260px] flex flex-col min-h-screen">
 
-        <!-- Header -->
+        <!-- Fixed Header -->
         <?= $this->include('Admin/layouts/header') ?>
 
-        <!-- Page Content -->
+        <!-- Page Content (each view handles its own pt-16 top padding) -->
         <?= $this->renderSection('content') ?>
 
     </div>

@@ -50,7 +50,7 @@ class AdminDashboardController extends BaseController
             'totalRevenueThisMonth' => $totalRevenueThisMonth,
         ];
 
-        return view('Admin/AdminDashboard', $data);
+        return view('Admin/AdminDashboard/AdminDashboard', $data);
     }
 }
 

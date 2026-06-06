@@ -1,7 +1,7 @@
 <?php $this->extend('Admin/layouts/main'); ?>
 <?php $this->section('content'); ?>
 
-<main class="ml-[260px] pt-16 min-h-screen flex flex-col">
+<main class="pt-16 min-h-screen flex flex-col">
     <div class="p-6 flex-1">
 
         <!-- Breadcrumbs -->

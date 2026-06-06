@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Customer;
+
+use App\Controllers\BaseController;
 
 class Preview extends BaseController
 {

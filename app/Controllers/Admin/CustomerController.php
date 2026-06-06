@@ -77,7 +77,7 @@ class CustomerController extends BaseController
             'keyword'         => $keyword,
         ];
 
-        return view('Admin/CustomerManajemen', $data);
+        return view('Admin/Customer/CustomerManajemen', $data);
     }
 
     // =========================================================================
@@ -97,7 +97,7 @@ class CustomerController extends BaseController
             'customer' => $customer,
         ];
 
-        return view('Admin/CustomerDetail', $data);
+        return view('Admin/Customer/CustomerDetail', $data);
     }
 
     // =========================================================================
@@ -110,7 +110,7 @@ class CustomerController extends BaseController
             'validation' => \Config\Services::validation(),
         ];
 
-        return view('Admin/CustomerForm', $data);
+        return view('Admin/Customer/CustomerForm', $data);
     }
 
     // =========================================================================
@@ -164,7 +164,7 @@ class CustomerController extends BaseController
             'validation' => \Config\Services::validation(),
         ];
 
-        return view('Admin/CustomerForm', $data);
+        return view('Admin/Customer/CustomerForm', $data);
     }
 
     // =========================================================================

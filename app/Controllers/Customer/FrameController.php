@@ -4,7 +4,7 @@ namespace App\Controllers\Customer;
 
 use App\Controllers\BaseController;
 
-class frameController extends BaseController
+class FrameController extends BaseController
 {
     public function allFrame()
     {

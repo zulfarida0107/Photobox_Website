@@ -122,7 +122,7 @@ class PaymentController extends BaseController
             'statPrintProfit'   => $statPrintProfit,
         ];
 
-        return view('Admin/PaymentManajemen', $data);
+        return view('Admin/Payment/PaymentManajemen', $data);
     }
 
     // =========================================================================
@@ -174,7 +174,7 @@ class PaymentController extends BaseController
 
         // TODO: Integrasikan library PDF (misal: DOMPDF) untuk generate invoice
         // Sementara tampilkan view invoice HTML
-        return view('Admin/PaymentInvoice', [
+        return view('Admin/Payment/PaymentInvoice', [
             'title'   => 'Invoice #' . $id,
             'payment' => $payment,
         ]);

@@ -1,8 +1,16 @@
 <?php $this->extend('Admin/layouts/main'); ?>
 <?php $this->section('content'); ?>
 
-<div class="ml-0 flex flex-col min-h-screen">
-    <main class="mt-16 p-6 flex-grow">
+<main class="pt-16 min-h-screen flex flex-col">
+    <div class="p-6 flex-1">
+
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 mb-6 text-slate-500 text-xs font-medium">
+            <a class="hover:text-primary transition-colors" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
+            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span class="text-slate-900">Mesin Booth</span>
+        </nav>
+
 
         <!-- Header Section -->
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-8">
@@ -267,9 +275,8 @@
             </div>
         </div>
 
-    </main>
-
-    <?= $this->include('Admin/layouts/footer') ?>
-</div>
+        <?= $this->include('Admin/layouts/footer') ?>
+    </div>
+</main>
 
 <?php $this->endSection(); ?>

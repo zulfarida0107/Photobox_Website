@@ -56,7 +56,7 @@ class FrameAndFilterController extends BaseController
             'statFramesThisMonth' => $statFramesThisMonth,
         ];
 
-        return view('Admin/FrameAndFilterManajemen', $data);
+        return view('Admin/FrameAndFilter/FrameAndFilterManajemen', $data);
     }
 
     // =========================================================================
@@ -97,7 +97,7 @@ class FrameAndFilterController extends BaseController
     // =========================================================================
     public function createFrame()
     {
-        return view('Admin/FrameForm', [
+        return view('Admin/FrameAndFilter/FrameForm', [
             'title'      => 'Unggah Frame Baru | Admin Panel',
             'validation' => \Config\Services::validation(),
         ]);
@@ -114,7 +114,7 @@ class FrameAndFilterController extends BaseController
                 ->with('error', 'Frame tidak ditemukan.');
         }
 
-        return view('Admin/FrameForm', [
+        return view('Admin/FrameAndFilter/FrameForm', [
             'title'      => 'Edit Frame | Admin Panel',
             'frame'      => $frame,
             'validation' => \Config\Services::validation(),
@@ -184,7 +184,7 @@ class FrameAndFilterController extends BaseController
     // =========================================================================
     public function createFilter()
     {
-        return view('Admin/FilterForm', [
+        return view('Admin/FrameAndFilter/FilterForm', [
             'title'      => 'Tambah Filter | Admin Panel',
             'validation' => \Config\Services::validation(),
         ]);
@@ -230,7 +230,7 @@ class FrameAndFilterController extends BaseController
                 ->with('error', 'Filter tidak ditemukan.');
         }
 
-        return view('Admin/FilterForm', [
+        return view('Admin/FrameAndFilter/FilterForm', [
             'title'      => 'Edit Filter | Admin Panel',
             'filter'     => $filter,
             'validation' => \Config\Services::validation(),

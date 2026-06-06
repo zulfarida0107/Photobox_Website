@@ -88,7 +88,7 @@ class SessionAndPhotoController extends BaseController
             'latestSession'  => $latestSession,
         ];
 
-        return view('Admin/SessionAndPhotoManajemen', $data);
+        return view('Admin/SessionAndPhoto/SessionAndPhotoManajemen', $data);
     }
 
     // =========================================================================
@@ -115,7 +115,7 @@ class SessionAndPhotoController extends BaseController
             ->orderBy('shot_number', 'ASC')
             ->findAll();
 
-        return view('Admin/SessionDetail', [
+        return view('Admin/SessionAndPhoto/SessionDetail', [
             'title'   => 'Detail Sesi #' . $id . ' | Admin Panel',
             'session' => $session,
             'photos'  => $photos,
