@@ -105,7 +105,7 @@ class BookingAndSlotController extends BaseController
             'statTopBoothPct'     => $statTopBoothPct,
         ];
 
-        return view('Admin/BookingAndSlotManajemen', $data);
+        return view('Admin/BookingAndSlot/BookingAndSlotManajemen', $data);
     }
 
     // =========================================================================
@@ -126,7 +126,7 @@ class BookingAndSlotController extends BaseController
                 ->with('error', 'Booking tidak ditemukan.');
         }
 
-        return view('Admin/BookingDetail', ['title' => 'Detail Booking', 'booking' => $booking]);
+        return view('Admin/BookingAndSlot/BookingDetail', ['title' => 'Detail Booking', 'booking' => $booking]);
     }
 
     // =========================================================================
@@ -147,7 +147,7 @@ class BookingAndSlotController extends BaseController
             ->where('slot_date >=', date('Y-m-d'))
             ->findAll();
 
-        return view('Admin/BookingForm', [
+        return view('Admin/BookingAndSlot/BookingForm', [
             'title'      => 'Edit Booking',
             'booking'    => $booking,
             'slots'      => $slots,
@@ -226,7 +226,7 @@ class BookingAndSlotController extends BaseController
             ->orderBy('slots.start_time', 'ASC')
             ->findAll();
 
-        return view('Admin/SlotKalender', [
+        return view('Admin/BookingAndSlot/SlotKalender', [
             'title' => 'Kalender Slot | Admin Panel',
             'slots' => $slots,
         ]);
@@ -237,7 +237,7 @@ class BookingAndSlotController extends BaseController
     // =========================================================================
     public function createSlot()
     {
-        return view('Admin/SlotForm', [
+        return view('Admin/BookingAndSlot/SlotForm', [
             'title'      => 'Buat Slot Baru | Admin Panel',
             'validation' => \Config\Services::validation(),
         ]);

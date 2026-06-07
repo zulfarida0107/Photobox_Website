@@ -60,7 +60,7 @@ class AdminAccessController extends BaseController
             'statAdmin'    => $statAdmin,
         ];
 
-        return view('Admin/AdminAccessManajemen', $data);
+        return view('Admin/AdminAccess/AdminAccessManajemen', $data);
     }
 
     // =========================================================================
@@ -68,7 +68,7 @@ class AdminAccessController extends BaseController
     // =========================================================================
     public function create()
     {
-        return view('Admin/AdminAccessForm', [
+        return view('Admin/AdminAccess/AdminAccessForm', [
             'title'      => 'Tambah Admin Baru | Admin Panel',
             'validation' => \Config\Services::validation(),
         ]);
@@ -118,7 +118,7 @@ class AdminAccessController extends BaseController
                 ->with('error', 'Admin tidak ditemukan.');
         }
 
-        return view('Admin/AdminAccessForm', [
+        return view('Admin/AdminAccess/AdminAccessForm', [
             'title'      => 'Edit Admin | Admin Panel',
             'admin'      => $admin,
             'validation' => \Config\Services::validation(),

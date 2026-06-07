@@ -73,7 +73,7 @@ class BoothController extends BaseController
             'maintenanceBooths' => $maintenanceBooths,
         ];
 
-        return view('Admin/BoothManajemen', $data);
+        return view('Admin/Booth/BoothManajemen', $data);
     }
 
     // =========================================================================
@@ -81,7 +81,7 @@ class BoothController extends BaseController
     // =========================================================================
     public function create()
     {
-        return view('Admin/BoothForm', [
+        return view('Admin/Booth/BoothForm', [
             'title'      => 'Tambah Booth Baru | Admin Panel',
             'validation' => \Config\Services::validation(),
         ]);
@@ -127,7 +127,7 @@ class BoothController extends BaseController
                 ->with('error', 'Booth tidak ditemukan.');
         }
 
-        return view('Admin/BoothForm', [
+        return view('Admin/Booth/BoothForm', [
             'title'      => 'Edit Booth | Admin Panel',
             'booth'      => $booth,
             'validation' => \Config\Services::validation(),

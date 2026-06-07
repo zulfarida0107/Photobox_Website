@@ -1,8 +1,29 @@
 <?php $this->extend('Admin/layouts/main'); ?>
 <?php $this->section('content'); ?>
 
-<main class="ml-[260px] pt-16 min-h-screen">
-    <div class="p-6 space-y-6">
+<main class="pt-16 min-h-screen flex flex-col">
+    <div class="p-6 space-y-6 flex-1">
+
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 mb-2 text-slate-500 text-xs font-medium">
+            <a class="hover:text-primary transition-colors" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
+            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span class="text-slate-900">Manajemen Reservasi</span>
+        </nav>
+
+        <!-- Flash Messages -->
+        <?php if (session()->getFlashdata('success')): ?>
+            <div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2">
+                <span class="material-symbols-outlined text-green-500">check_circle</span>
+                <?= esc(session()->getFlashdata('success')) ?>
+            </div>
+        <?php endif; ?>
+        <?php if (session()->getFlashdata('error')): ?>
+            <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2">
+                <span class="material-symbols-outlined text-red-500">error</span>
+                <?= esc(session()->getFlashdata('error')) ?>
+            </div>
+        <?php endif; ?>
 
         <!-- Header Actions -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">

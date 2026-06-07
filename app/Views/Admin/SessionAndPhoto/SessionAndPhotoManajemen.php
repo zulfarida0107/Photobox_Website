@@ -1,8 +1,8 @@
 <?php $this->extend('Admin/layouts/main'); ?>
 <?php $this->section('content'); ?>
 
-<div class="flex-1 ml-0 flex flex-col">
-    <main class="mt-16 p-6 flex-1 space-y-6">
+<main class="pt-16 min-h-screen flex flex-col">
+    <div class="p-6 space-y-6 flex-1">
 
         <!-- Breadcrumbs -->
         <nav class="flex text-sm text-slate-500 gap-2 items-center">
@@ -295,9 +295,8 @@
             </div>
 
         </div>
-    </main>
-
-    <?= $this->include('Admin/layouts/footer') ?>
-</div>
+        <?= $this->include('Admin/layouts/footer') ?>
+    </div>
+</main>
 
 <?php $this->endSection(); ?>

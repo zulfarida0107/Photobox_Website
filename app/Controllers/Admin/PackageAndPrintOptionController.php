@@ -76,7 +76,7 @@ class PackageAndPrintOptionController extends BaseController
             'statTopPackage'      => $statTopPackage,
         ];
 
-        return view('Admin/PackageAndPrintOptionManajemen', $data);
+        return view('Admin/PackageAndPrintOption/PackageAndPrintOptionManajemen', $data);
     }
 
     // =========================================================================
@@ -84,7 +84,7 @@ class PackageAndPrintOptionController extends BaseController
     // =========================================================================
     public function createPackage()
     {
-        return view('Admin/PackageForm', [
+        return view('Admin/PackageAndPrintOption/PackageForm', [
             'title'      => 'Tambah Paket Baru | Admin Panel',
             'validation' => \Config\Services::validation(),
         ]);
@@ -135,7 +135,7 @@ class PackageAndPrintOptionController extends BaseController
                 ->with('error', 'Paket tidak ditemukan.');
         }
 
-        return view('Admin/PackageForm', [
+        return view('Admin/PackageAndPrintOption/PackageForm', [
             'title'      => 'Edit Paket | Admin Panel',
             'package'    => $package,
             'validation' => \Config\Services::validation(),
@@ -221,7 +221,7 @@ class PackageAndPrintOptionController extends BaseController
     // =========================================================================
     public function createPrintOption()
     {
-        return view('Admin/PrintOptionForm', [
+        return view('Admin/PackageAndPrintOption/PrintOptionForm', [
             'title'      => 'Tambah Opsi Cetak | Admin Panel',
             'validation' => \Config\Services::validation(),
         ]);
@@ -266,7 +266,7 @@ class PackageAndPrintOptionController extends BaseController
                 ->with('error', 'Opsi cetak tidak ditemukan.');
         }
 
-        return view('Admin/PrintOptionForm', [
+        return view('Admin/PackageAndPrintOption/PrintOptionForm', [
             'title'      => 'Edit Opsi Cetak | Admin Panel',
             'option'     => $option,
             'validation' => \Config\Services::validation(),
@@ -327,7 +327,7 @@ class PackageAndPrintOptionController extends BaseController
     {
         $printOptions = $this->printOptionModel->orderBy('extra_price', 'ASC')->findAll();
 
-        return view('Admin/PrintOptionManajemen', [
+        return view('Admin/PackageAndPrintOption/PrintOptionManajemen', [
             'title'        => 'Kelola Opsi Cetak | Admin Panel',
             'printOptions' => $printOptions,
         ]);
