@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photobox - Pilih Frame</title>
+    <title>CuitBox Studio - Pilih Frame</title>
     <style>
         * {
             margin: 0;
@@ -325,7 +325,7 @@
 <div class="kiosk-kategori">
     <!-- HEADER YANG SUDAH DISAMAKAN DENGAN VERIFY_CODE -->
     <header class="header">
-        <div class="logo">Photobox</div>
+        <div class="logo">CuitBox Studio</div>
         <div class="header-right">
             <!-- Language Button -->
             <div class="language-btn">
@@ -462,6 +462,24 @@
             submitBtn.disabled = false;
         });
     });
+
+    // Active session forced reset check
+    const currentBoothId = '<?= esc($booking['booth_id'] ?? '') ?>';
+    const currentBookingId = '<?= esc($booking['id'] ?? '') ?>';
+    
+    if (currentBoothId && currentBookingId) {
+        setInterval(() => {
+            fetch(`/api/booths/${currentBoothId}/session-check`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 200 && data.active_booking_id !== currentBookingId) {
+                        alert('Sesi Anda telah di-reset oleh administrator.');
+                        window.location.href = '/customer/verify';
+                    }
+                })
+                .catch(err => console.error('Error checking session status:', err));
+        }, 3000);
+    }
 </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photobox - Booking Kiosk</title>
+    <title>CuitBox Studio - Booking Kiosk</title>
     <style>
         * {
             margin: 0;
@@ -392,8 +392,8 @@
         <!-- Header -->
         <div class="header-topappbar">
             <div class="container-header">
-                <div class="logo">📸 Photobox Studio</div>
-                <button class="help-btn" onclick="alert('Need help? Contact support@photobox.com')">
+                <div class="logo">📸 CuitBox Studio</div>
+                <button class="help-btn" onclick="alert('Need help? Contact support@cuitboxstudio.com')">
                     <span>❓</span>
                     <span>Help</span>
                 </button>
@@ -643,6 +643,19 @@
     // Update confirm email
     document.querySelector('input[name="email"]').addEventListener('input', (e) => {
         document.getElementById('confirmEmail').textContent = e.target.value || '-';
+    });
+
+    // Auto-select booth if booth_id query parameter is present in URL
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const preselectedBoothId = urlParams.get('booth_id');
+        if (preselectedBoothId) {
+            const matchingCard = document.querySelector(`.booth-card[data-id="${preselectedBoothId}"]`);
+            if (matchingCard) {
+                // If we are at step 1, clicking won't automatically advance steps but will preselect the card
+                matchingCard.click();
+            }
+        }
     });
 </script>
 </body>

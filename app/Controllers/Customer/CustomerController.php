@@ -38,7 +38,7 @@ class CustomerController extends BaseController
     public function bookingForm()
     {
         $data = [
-            'title'    => 'Photobox - Booking Kiosk',
+            'title'    => 'CuitBox Studio - Booking Kiosk',
             'packages' => $this->packageModel->getActivePackages(),
             'slots'    => $this->slotModel->getAvailableSlots(date('Y-m-d')),
             'booths'   => $this->boothModel->getActiveBooths(),
@@ -149,6 +149,13 @@ class CustomerController extends BaseController
             session()->remove('pending_booking');
             session()->set('verified_booking', $verifiedBooking);
             
+            // Set active booking for the booth
+            if (!empty($verifiedBooking['booth_id'])) {
+                $this->boothModel->update($verifiedBooking['booth_id'], [
+                    'active_booking_id' => $verifiedBooking['id']
+                ]);
+            }
+            
             return redirect()->to('/customer/choose-frame')
                 ->with('success', 'Booking verified! Please choose your frame.');
         }
@@ -205,6 +212,14 @@ class CustomerController extends BaseController
         
         if (!$updated) {
             return redirect()->back()->with('error', 'Failed to save frame choice');
+        }
+        
+        // Clear active booking from the booth
+        $booking = $this->bookingModel->find($bookingId);
+        if ($booking && !empty($booking['booth_id'])) {
+            $this->boothModel->update($booking['booth_id'], [
+                'active_booking_id' => null
+            ]);
         }
         
         session()->remove('verified_booking');

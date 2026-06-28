@@ -8,7 +8,7 @@
         <div class="flex justify-between items-end">
             <div>
                 <h2 class="font-h1 text-h1 text-on-surface">Manajemen Paket &amp; Cetak</h2>
-                <p class="text-slate-500 text-body-base mt-1">Konfigurasi produk layanan photobox dan variasi opsi cetak tambahan.</p>
+                <p class="text-slate-500 text-body-base mt-1">Konfigurasi produk layanan CuitBox Studio dan variasi opsi cetak tambahan.</p>
             </div>
             <div class="flex gap-3">
                 <a href="<?= base_url('admin/packages/export') ?>"
