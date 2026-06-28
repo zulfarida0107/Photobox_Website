@@ -129,6 +129,7 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->post('frames',                      'Admin\FrameAndFilterController::storeFrame');
 	$routes->get('frames/(:segment)/edit',       'Admin\FrameAndFilterController::editFrame/$1');
 	$routes->post('frames/(:segment)/update',    'Admin\FrameAndFilterController::updateFrame/$1');
+	$routes->post('frames/(:segment)/toggle',    'Admin\FrameAndFilterController::toggleFrame/$1');
 	$routes->post('frames/(:segment)/delete',    'Admin\FrameAndFilterController::deleteFrame/$1');
 	$routes->get('filters/create',               'Admin\FrameAndFilterController::createFilter');
 	$routes->post('filters',                     'Admin\FrameAndFilterController::storeFilter');
@@ -136,6 +137,11 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->post('filters/(:segment)/update',   'Admin\FrameAndFilterController::updateFilter/$1');
 	$routes->post('filters/(:segment)/toggle',   'Admin\FrameAndFilterController::toggleFilter/$1');
 	$routes->post('filters/(:segment)/delete',   'Admin\FrameAndFilterController::deleteFilter/$1');
+
+	// ---- Kategori Frame ----
+	$routes->post('categories',                  'Admin\FrameAndFilterController::storeCategory');
+	$routes->post('categories/(:segment)/update', 'Admin\FrameAndFilterController::updateCategory/$1');
+	$routes->post('categories/(:segment)/delete', 'Admin\FrameAndFilterController::deleteCategory/$1');
 
 	// ---- Tab 7: Mesin Booth ----
 	$routes->get('booths',                      'Admin\BoothController::index');
