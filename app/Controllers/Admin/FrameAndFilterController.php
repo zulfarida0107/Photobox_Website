@@ -25,15 +25,33 @@ class FrameAndFilterController extends BaseController
         $perPage          = 8;
         $currentFramePage = max(1, (int) ($this->request->getGet('page') ?? 1));
 
-        // --- Frame dengan pagination ---
-        $totalFrames      = $this->frameModel->countAll();
+        $search   = $this->request->getGet('search') ?? '';
+        $category = $this->request->getGet('category') ?? '';
+
+        // --- Frame query builder + Join category name ---
+        $frameQuery = $this->frameModel
+            ->select('frames.*, frame_categories.name as category_name')
+            ->join('frame_categories', 'frame_categories.id = frames.category_id', 'left');
+
+        if (!empty($search)) {
+            $frameQuery->like('frames.name', $search);
+        }
+
+        if (!empty($category)) {
+            $frameQuery->where('frames.category_id', $category);
+        }
+
+        $totalFrames      = $frameQuery->countAllResults(false);
         $totalFramePages  = max(1, (int) ceil($totalFrames / $perPage));
-        $frames           = $this->frameModel
-            ->orderBy('created_at', 'DESC')
+        $frames           = $frameQuery
+            ->orderBy('frames.created_at', 'DESC')
             ->findAll($perPage, ($currentFramePage - 1) * $perPage);
 
         // --- Semua filter (tidak di-paginate) ---
         $filters = $this->filterModel->orderBy('name', 'ASC')->findAll();
+
+        // --- Semua kategori frame ---
+        $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
 
         // --- Stats ---
         $statTotalFrames      = $this->frameModel->countAll();
@@ -50,6 +68,9 @@ class FrameAndFilterController extends BaseController
             'currentFramePage'  => $currentFramePage,
             'totalFramePages'   => $totalFramePages,
             'filters'           => $filters,
+            'categories'        => $categories,
+            'search'            => $search,
+            'selectedCategory'  => $category,
             'statTotalFrames'   => $statTotalFrames,
             'statTotalFilters'  => $statTotalFilters,
             'statActiveFilters' => $statActiveFilters,
@@ -65,8 +86,9 @@ class FrameAndFilterController extends BaseController
     public function storeFrame()
     {
         $rules = [
-            'name'       => 'required|min_length[3]|max_length[100]',
-            'frame_file' => 'uploaded[frame_file]|max_size[frame_file,2048]|ext_in[frame_file,png,jpg,jpeg]',
+            'name'        => 'required|min_length[3]|max_length[100]',
+            'category_id' => 'permit_empty|max_length[20]',
+            'frame_file'  => 'uploaded[frame_file]|max_size[frame_file,2048]|ext_in[frame_file,png,jpg,jpeg]',
         ];
 
         if (!$this->validate($rules)) {
@@ -83,9 +105,10 @@ class FrameAndFilterController extends BaseController
         $newId = sprintf('FRM-%03d', $count + 1);
 
         $this->frameModel->insert([
-            'id'        => $newId,
-            'name'      => $this->request->getPost('name'),
-            'file_path' => 'uploads/frames/' . $newName,
+            'id'          => $newId,
+            'name'        => $this->request->getPost('name'),
+            'category_id' => $this->request->getPost('category_id') ?: null,
+            'file_path'   => 'uploads/frames/' . $newName,
         ]);
 
         return redirect()->to(base_url('admin/frames'))
@@ -97,8 +120,10 @@ class FrameAndFilterController extends BaseController
     // =========================================================================
     public function createFrame()
     {
+        $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
         return view('Admin/FrameAndFilter/FrameForm', [
             'title'      => 'Unggah Frame Baru | Admin Panel',
+            'categories' => $categories,
             'validation' => \Config\Services::validation(),
         ]);
     }
@@ -114,9 +139,12 @@ class FrameAndFilterController extends BaseController
                 ->with('error', 'Frame tidak ditemukan.');
         }
 
+        $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
+
         return view('Admin/FrameAndFilter/FrameForm', [
             'title'      => 'Edit Frame | Admin Panel',
             'frame'      => $frame,
+            'categories' => $categories,
             'validation' => \Config\Services::validation(),
         ]);
     }
@@ -132,7 +160,10 @@ class FrameAndFilterController extends BaseController
                 ->with('error', 'Frame tidak ditemukan.');
         }
 
-        $updateData = ['name' => $this->request->getPost('name')];
+        $updateData = [
+            'name'        => $this->request->getPost('name'),
+            'category_id' => $this->request->getPost('category_id') ?: null,
+        ];
 
         // Ganti file jika ada upload baru
         $file = $this->request->getFile('frame_file');
@@ -301,5 +332,92 @@ class FrameAndFilterController extends BaseController
 
         return redirect()->to(base_url('admin/frames'))
             ->with('success', 'Filter berhasil dihapus.');
+    }
+
+    // =========================================================================
+    // CATEGORY — Store
+    // =========================================================================
+    public function storeCategory()
+    {
+        $rules = [
+            'name' => 'required|min_length[3]|max_length[100]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->to(base_url('admin/frames'))
+                ->with('error', implode(' ', $this->validator->getErrors()));
+        }
+
+        $db    = $this->frameModel->db;
+        $count = $db->table('frame_categories')->countAllResults();
+        $newId = sprintf('cat_custom_%02d', $count + 1);
+
+        $db->table('frame_categories')->insert([
+            'id'         => $newId,
+            'name'       => $this->request->getPost('name'),
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        return redirect()->to(base_url('admin/frames'))
+            ->with('success', 'Kategori baru berhasil ditambahkan.');
+    }
+
+    // =========================================================================
+    // CATEGORY — Update
+    // =========================================================================
+    public function updateCategory(string $id)
+    {
+        $rules = [
+            'name' => 'required|min_length[3]|max_length[100]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->to(base_url('admin/frames'))
+                ->with('error', implode(' ', $this->validator->getErrors()));
+        }
+
+        $db = $this->frameModel->db;
+        $db->table('frame_categories')->where('id', $id)->update([
+            'name'       => $this->request->getPost('name'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        return redirect()->to(base_url('admin/frames'))
+            ->with('success', 'Kategori berhasil diperbarui.');
+    }
+
+    // =========================================================================
+    // CATEGORY — Delete
+    // =========================================================================
+    public function deleteCategory(string $id)
+    {
+        $db = $this->frameModel->db;
+        
+        // Nullify the category_id on any frames belonging to this category
+        $db->table('frames')->where('category_id', $id)->update(['category_id' => null]);
+
+        $db->table('frame_categories')->where('id', $id)->delete();
+
+        return redirect()->to(base_url('admin/frames'))
+            ->with('success', 'Kategori berhasil dihapus.');
+    }
+
+    // =========================================================================
+    // FRAME — Toggle aktif/nonaktif
+    // =========================================================================
+    public function toggleFrame(string $id)
+    {
+        $frame = $this->frameModel->find($id);
+        if (!$frame) {
+            return redirect()->to(base_url('admin/frames'))
+                ->with('error', 'Frame tidak ditemukan.');
+        }
+
+        $this->frameModel->update($id, ['is_active' => !$frame['is_active']]);
+
+        $status = !$frame['is_active'] ? 'diaktifkan (siap digunakan)' : 'dinonaktifkan (disembunyikan)';
+        return redirect()->to(base_url('admin/frames'))
+            ->with('success', "Frame {$frame['name']} berhasil {$status}.");
     }
 }

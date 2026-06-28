@@ -54,7 +54,7 @@ class CatalogController extends BaseApiController
     public function listFrames(): ResponseInterface
     {
         return $this->respondOk([
-            'frames' => $this->frameModel->findAll(),
+            'frames' => $this->frameModel->where('is_active', 1)->findAll(),
             'filters' => $this->filterModel->where('is_active', 1)->findAll(),
         ]);
     }
