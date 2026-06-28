@@ -1,6 +1,9 @@
 <?php $this->extend('Admin/layouts/main'); ?>
 <?php $this->section('content'); ?>
 
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 <main class="pt-16 min-h-screen flex flex-col">
     <div class="p-6 flex-1">
 
@@ -36,6 +39,15 @@
         <?php if (session()->getFlashdata('error')): ?>
             <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-medium">
                 <?= esc(session()->getFlashdata('error')) ?>
+            </div>
+        <?php endif; ?>
+        <?php if (!empty(session()->getFlashdata('errors'))): ?>
+            <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-medium">
+                <ul class="list-disc list-inside space-y-1">
+                    <?php foreach (session()->getFlashdata('errors') as $err): ?>
+                        <li><?= esc($err) ?></li>
+                    <?php endforeach; ?>
+                </ul>
             </div>
         <?php endif; ?>
 
@@ -114,6 +126,8 @@
                         <tr class="bg-surface-container-low border-b border-outline-variant">
                             <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider">ID Booth</th>
                             <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider">Nama Mesin</th>
+                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider">Alamat IP</th>
+                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider">Sesi Aktif</th>
                             <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider text-center">Antrean</th>
                             <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider">Status</th>
                             <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider">Waktu Daftar</th>
@@ -126,14 +140,33 @@
                                 <?php
                                     $statusMap = [
                                         'active'      => ['bg-emerald-100 text-emerald-800', 'bg-emerald-500', 'Aktif'],
-                                        'maintenance' => ['bg-tertiary-fixed text-on-tertiary-fixed-variant', 'bg-tertiary', 'Maintenance'],
-                                        'inactive'    => ['bg-slate-100 text-slate-500', 'bg-slate-400', 'Nonaktif'],
+                                        'maintenance' => ['bg-amber-100 text-amber-800', 'bg-amber-500', 'Maintenance'],
+                                        'inactive'    => ['bg-slate-100 text-slate-700', 'bg-slate-500', 'Nonaktif'],
                                     ];
                                     $st = $statusMap[$booth['status']] ?? ['bg-slate-100 text-slate-500', 'bg-slate-400', ucfirst($booth['status'])];
                                 ?>
                                 <tr class="hover:bg-blue-50/30 transition-colors group">
                                     <td class="p-4 font-data-tabular text-data-tabular text-primary font-semibold"><?= esc($booth['id']) ?></td>
                                     <td class="p-4 font-body-base text-body-base text-on-surface"><?= esc($booth['name']) ?></td>
+                                    <td class="p-4 font-mono text-xs text-slate-600"><?= esc($booth['ip_address'] ?? '-') ?></td>
+                                    <td class="p-4">
+                                        <?php if (!empty($booth['active_booking_id'])): ?>
+                                            <div class="flex items-center gap-2">
+                                                <span class="inline-flex items-center px-2 py-1 rounded bg-blue-50 text-blue-700 text-xs font-semibold">
+                                                    <span class="material-symbols-outlined text-[14px] mr-1">meeting_room</span>
+                                                    #<?= esc($booth['active_booking_id']) ?>
+                                                </span>
+                                                <form action="<?= base_url('admin/booths/' . $booth['id'] . '/reset-session') ?>" method="post" class="inline">
+                                                    <?= csrf_field() ?>
+                                                    <button type="submit" class="p-1 text-red-500 hover:bg-red-50 rounded transition-colors" title="Forced Reset Sesi" onclick="return confirm('Paksa keluar customer dari sesi ini dan reset layar booth?')">
+                                                        <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="text-xs text-slate-400 font-medium">Idle / Kosong</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="p-4 text-center">
                                         <span class="text-lg font-black text-slate-500"><?= esc($booth['current_queue'] ?? 0) ?></span>
                                     </td>
@@ -148,6 +181,15 @@
                                     </td>
                                     <td class="p-4 text-right">
                                         <div class="flex justify-end space-x-2">
+                                            <a href="<?= base_url('admin/booths/' . $booth['id']) ?>"
+                                               class="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors" title="Detail Booth">
+                                                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                            </a>
+                                            <button type="button"
+                                                    class="p-1.5 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors" title="Generate QR Code"
+                                                    onclick="showQrModal('<?= esc($booth['id'], 'js') ?>', '<?= esc($booth['name'], 'js') ?>')">
+                                                <span class="material-symbols-outlined text-[20px]">qr_code</span>
+                                            </button>
                                             <a href="<?= base_url('admin/booths/' . $booth['id'] . '/edit') ?>"
                                                class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" title="Edit">
                                                 <span class="material-symbols-outlined text-[20px]">edit</span>
@@ -161,20 +203,12 @@
                                                         <span class="material-symbols-outlined text-[20px]">engineering</span>
                                                     </button>
                                                 </form>
-                                            <?php elseif ($booth['status'] === 'maintenance'): ?>
+                                            <?php else: ?>
                                                 <form action="<?= base_url('admin/booths/' . $booth['id'] . '/activate') ?>" method="post" class="inline">
                                                     <?= csrf_field() ?>
                                                     <button type="submit"
                                                             class="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors" title="Aktifkan Kembali">
                                                         <span class="material-symbols-outlined text-[20px]">play_circle</span>
-                                                    </button>
-                                                </form>
-                                            <?php else: ?>
-                                                <form action="<?= base_url('admin/booths/' . $booth['id'] . '/activate') ?>" method="post" class="inline">
-                                                    <?= csrf_field() ?>
-                                                    <button type="submit"
-                                                            class="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors" title="Aktifkan">
-                                                        <span class="material-symbols-outlined text-[20px]">power_settings_new</span>
                                                     </button>
                                                 </form>
                                             <?php endif; ?>
@@ -192,7 +226,7 @@
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="6" class="p-10 text-center text-sm text-slate-400">
+                                <td colspan="8" class="p-10 text-center text-sm text-slate-400">
                                     Belum ada booth terdaftar.
                                     <a href="<?= base_url('admin/booths/create') ?>" class="text-primary font-semibold ml-1">Tambah sekarang</a>.
                                 </td>
@@ -231,17 +265,8 @@
             <!-- Map Preview -->
             <div class="lg:col-span-2 bg-white border border-outline-variant rounded-xl shadow-sm p-6">
                 <h3 class="font-h2 text-h2 mb-4">Sebaran Geografis Mesin</h3>
-                <div class="h-64 bg-slate-100 rounded-lg overflow-hidden relative">
-                    <img alt="Map Indonesia"
-                         class="w-full h-full object-cover grayscale opacity-50"
-                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpyfmSL3DtqqnK130WF11HLVY1VmAwt9uJEHyVNKjZP93sCMtqiUiMF2ob5weZGHt3C2vmyplnZul5FDZG7ANm6dN6eg6nuKEbVJNKYy9Jyxc1Nh6IxSR0Yu1dgcnRVKAWWV-VMv-NKFffEWCdcPxErpMWig18MXGCMrpQVyyhTnZAcC1XQJFVLPkAfDsJ86g6YgjGX-9iytkPzcOpZ8Aq3AHh9QLrj7t4KRHA870NX7BSXJbxGwwjcPoTVm3ZwNDXmaciGtoj2Rxr"/>
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-primary/20 flex items-center">
-                            <span class="material-symbols-outlined text-primary mr-2">location_searching</span>
-                            <span class="font-label-bold text-label-bold"><?= $statTotal ?? 0 ?> Mesin tersebar di berbagai kota</span>
-                        </span>
-                    </div>
-                </div>
+                <!-- Container Peta Leaflet Interaktif -->
+                <div id="map" class="h-64 bg-slate-100 rounded-lg overflow-hidden border border-outline-variant relative" style="z-index: 1;"></div>
             </div>
 
             <!-- Alerts Panel -->
@@ -278,5 +303,148 @@
         <?= $this->include('Admin/layouts/footer') ?>
     </div>
 </main>
+
+<!-- QR Code Modal -->
+<div id="qrModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-sm w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="qrModalContent">
+        <!-- Modal Header -->
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-purple-600">qr_code_2</span>
+                QR Code Kiosk Booth
+            </h4>
+            <button type="button" onclick="closeQrModal()" class="text-slate-400 hover:text-slate-600">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        
+        <!-- Modal Body -->
+        <div class="p-6 flex flex-col items-center text-center">
+            <p class="text-xs font-semibold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full mb-3" id="modalBoothId"></p>
+            <h3 class="font-bold text-slate-800 text-base mb-1" id="modalBoothName"></h3>
+            <p class="text-xs text-slate-400 mb-6">Scan QR untuk membuka halaman booking dengan booth ini terpilih otomatis.</p>
+            
+            <!-- QR Container -->
+            <div class="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm mb-6 flex items-center justify-center">
+                <img id="qrImageElement" src="" alt="QR Code" class="w-48 h-48" />
+            </div>
+
+            <!-- URL Input (Copy link) -->
+            <div class="w-full flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg p-2 mb-6">
+                <input type="text" id="qrUrlInput" readonly class="bg-transparent text-xs text-slate-600 w-full outline-none select-all font-mono pl-1" />
+                <button type="button" onclick="copyQrUrl()" class="px-2.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-md text-xs font-semibold flex items-center gap-1 shadow-sm transition-all" id="copyBtn">
+                    <span class="material-symbols-outlined text-[14px]">content_copy</span>
+                    <span>Copy</span>
+                </button>
+            </div>
+            
+            <!-- Action buttons -->
+            <div class="w-full flex gap-3">
+                <a id="downloadQrBtn" href="" download="qr_code.png" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-sm rounded-lg text-center shadow-md transition-colors flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined text-[18px]">download</span>
+                    Download PNG
+                </a>
+                <button type="button" onclick="closeQrModal()" class="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-lg transition-colors">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialize map centered in Indonesia
+        const map = L.map('map').setView([-2.548926, 118.0148634], 5);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        const boothsData = <?= $boothsJson ?? '[]' ?>;
+        let bounds = [];
+
+        boothsData.forEach(function(booth) {
+            if (booth.latitude && booth.longitude) {
+                const lat = parseFloat(booth.latitude);
+                const lng = parseFloat(booth.longitude);
+                bounds.push([lat, lng]);
+
+                const marker = L.marker([lat, lng]).addTo(map);
+                
+                const statusColor = booth.status === 'active' ? 'text-emerald-600' : 'text-slate-500';
+                const statusLabel = booth.status === 'active' ? 'Aktif' : 'Nonaktif/Maintenance';
+
+                marker.bindPopup(`
+                    <div class="p-1 font-sans">
+                        <h4 class="font-bold text-slate-800 text-sm mb-1">${booth.name}</h4>
+                        <p class="text-xs text-slate-500 m-0">Status: <span class="font-semibold ${statusColor}">${statusLabel}</span></p>
+                    </div>
+                `);
+            }
+        });
+
+        // Fit map bounds if there are booths with coordinates
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [30, 30] });
+        }
+    });
+
+    function showQrModal(boothId, boothName) {
+        const modal = document.getElementById('qrModal');
+        const content = document.getElementById('qrModalContent');
+        const modalBoothId = document.getElementById('modalBoothId');
+        const modalBoothName = document.getElementById('modalBoothName');
+        const qrImage = document.getElementById('qrImageElement');
+        const qrUrlInput = document.getElementById('qrUrlInput');
+        const downloadBtn = document.getElementById('downloadQrBtn');
+        const copyBtn = document.getElementById('copyBtn');
+
+        // Reset copy button state
+        copyBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">content_copy</span><span>Copy</span>';
+        copyBtn.className = 'px-2.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-md text-xs font-semibold flex items-center gap-1 shadow-sm transition-all';
+
+        const targetUrl = `<?= base_url('customer/booking') ?>?booth_id=${encodeURIComponent(boothId)}`;
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(targetUrl)}`;
+
+        modalBoothId.textContent = boothId;
+        modalBoothName.textContent = boothName;
+        qrImage.src = qrApiUrl;
+        qrUrlInput.value = targetUrl;
+        downloadBtn.href = qrApiUrl;
+
+        // Show Modal
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeQrModal() {
+        const modal = document.getElementById('qrModal');
+        const content = document.getElementById('qrModalContent');
+
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    function copyQrUrl() {
+        const urlInput = document.getElementById('qrUrlInput');
+        urlInput.select();
+        document.execCommand('copy');
+
+        const copyBtn = document.getElementById('copyBtn');
+        copyBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">done</span><span>Copied!</span>';
+        copyBtn.className = 'px-2.5 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-md text-xs font-semibold flex items-center gap-1 shadow-sm transition-all';
+    }
+</script>
 
 <?php $this->endSection(); ?>

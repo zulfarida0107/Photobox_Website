@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Photobox - Metode Pembayaran</title>
+    <title>CuitBox Studio - Metode Pembayaran</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
@@ -22,7 +22,7 @@
 
 <!-- HEADER PUTIH (RAPI) -->
 <div class="header">
-    <div class="logo">Photobox</div>
+    <div class="logo">CuitBox Studio</div>
     <div class="header-right">
         <!-- Language Button -->
         <button class="header-btn" onclick="alert('Language selection')">
@@ -31,7 +31,7 @@
         </button>
         
         <!-- Help Button -->
-        <button class="header-btn" onclick="alert('Help - Contact support@photobox.com')">
+        <button class="header-btn" onclick="alert('Help - Contact support@cuitboxstudio.com')">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="12" cy="12" r="10" stroke="#008393" stroke-width="2"/>
                 <path d="M9 9C9 7.89543 9.89543 7 11 7H13C14.1046 7 15 7.89543 15 9C15 10.1046 14.1046 11 13 11H12V13" stroke="#008393" stroke-width="2" stroke-linecap="round"/>
@@ -160,7 +160,7 @@
 <!-- Footer -->
 <footer class="bg-slate-50 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center w-full px-10 py-6">
     <div class="font-inter text-sm text-slate-500 mb-4 md:mb-0">
-        © 2026 Photobox Systems. Hak Cipta Dilindungi.
+        © 2026 CuitBox Studio Systems. Hak Cipta Dilindungi.
     </div>
     <div class="flex gap-8">
         <a class="font-inter text-sm text-slate-400 hover:text-slate-900 transition-colors duration-200" href="#">Bantuan</a>
@@ -200,7 +200,24 @@
             const newData = 'PHOTOBOX-' + Date.now();
             qrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + newData;
         }
-    }, 240000);
+    
+    // Active session forced reset check
+    const currentBoothId = '<?= esc($booking['booth_id'] ?? '') ?>';
+    const currentBookingId = '<?= esc($booking['id'] ?? '') ?>';
+    
+    if (currentBoothId && currentBookingId) {
+        setInterval(() => {
+            fetch(`/api/booths/${currentBoothId}/session-check`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 200 && data.active_booking_id !== currentBookingId) {
+                        alert('Sesi Anda telah di-reset oleh administrator.');
+                        window.location.href = '/customer/verify';
+                    }
+                })
+                .catch(err => console.error('Error checking session status:', err));
+        }, 3000);
+    }
 </script>
 
 </body>

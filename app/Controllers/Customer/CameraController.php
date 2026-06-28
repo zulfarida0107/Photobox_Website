@@ -17,7 +17,7 @@ class CameraController extends BaseController
     public function index()
     {
         $data = [
-            'title' => 'Photobox - Camera',
+            'title' => 'CuitBox Studio - Camera',
         ];
         
         return view('customer/camera_view', $data);

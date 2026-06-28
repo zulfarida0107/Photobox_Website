@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photobox - Capture the Moment</title>
+    <title>CuitBox Studio - Capture the Moment</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
@@ -281,13 +281,13 @@
 <body>
     <!-- HEADER PUTIH (RAPI) -->
     <div class="header">
-        <div class="logo">Photobox</div>
+        <div class="logo">CuitBox Studio</div>
         <div class="header-right">
             <button class="header-btn" onclick="alert('Language selection')">
                 <span>🌐</span>
                 <span>ID</span>
             </button>
-            <button class="header-btn" onclick="alert('Help - Contact support@photobox.com')">
+            <button class="header-btn" onclick="alert('Help - Contact support@cuitboxstudio.com')">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="12" cy="12" r="10" stroke="#008393" stroke-width="2"/>
                     <path d="M9 9C9 7.89543 9.89543 7 11 7H13C14.1046 7 15 7.89543 15 9C15 10.1046 14.1046 11 13 11H12V13" stroke="#008393" stroke-width="2" stroke-linecap="round"/>

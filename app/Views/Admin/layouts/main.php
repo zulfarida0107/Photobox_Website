@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title><?= esc($title ?? 'Admin Panel') ?> | Photobox v2</title>
+    <title><?= esc($title ?? 'Admin Panel') ?> | CuitBox Studio v2</title>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
