@@ -124,7 +124,7 @@ class DemoFlowSeeder extends Seeder
 
         $db->table('bookings')->insert([
             'id' => 'bok_demo_001',
-            'booking_code' => 'BOOK-DEMO-001',
+            'booking_code' => '842000',
             'customer_id' => 'cus_demo_001',
             'slot_id' => 'slo_demo_001',
             'booth_id' => 'boo_demo_001',
