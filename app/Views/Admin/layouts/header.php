@@ -21,7 +21,7 @@
         <!-- Ikon Profil -->
         <div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onclick="openModal('modalProfile')">
             <div class="text-right hidden sm:block">
-                <p class="text-xs font-bold text-on-surface leading-none">Admin Photobox</p>
+                <p class="text-xs font-bold text-on-surface leading-none">Admin CuitBox Studio</p>
                 <p class="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Super Admin</p>
             </div>
             <img alt="Admin Profile" class="w-10 h-10 rounded-full border border-slate-100 object-cover"
@@ -269,7 +269,7 @@
         <div class="flex justify-between items-center mb-8">
             <div>
                 <h2 class="font-h1 text-h1 text-[#001848] mb-1">Informasi Profil</h2>
-                <p class="text-slate-500 text-sm">Kelola preferensi akun dan konfigurasi profil PhotoBox Anda.</p>
+                <p class="text-slate-500 text-sm">Kelola preferensi akun dan konfigurasi profil CuitBox Studio Anda.</p>
             </div>
             <button onclick="forceClose('modalProfile')" class="text-slate-400 hover:bg-slate-100 p-2 rounded-full"><span class="material-symbols-outlined">close</span></button>
         </div>
@@ -352,6 +352,9 @@
             </section>
 
             <div class="flex items-center justify-end gap-4 pt-4">
+                <a href="<?= base_url('admin/logout') ?>" class="px-6 py-2.5 rounded-lg bg-red-600 text-white font-bold text-sm shadow-md hover:bg-red-700 transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">logout</span>Keluar
+                </a>
                 <button onclick="forceClose('modalProfile')" class="px-6 py-2.5 rounded-lg border border-[#003d9b] text-[#003d9b] font-bold text-sm hover:bg-blue-50 transition-colors bg-white">Batalkan Perubahan</button>
                 <button class="px-6 py-2.5 rounded-lg bg-[#003d9b] text-white font-bold text-sm shadow-md hover:bg-blue-800 transition-all flex items-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">save</span>Simpan Pengaturan

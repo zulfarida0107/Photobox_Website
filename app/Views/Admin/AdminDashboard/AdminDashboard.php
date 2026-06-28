@@ -26,7 +26,7 @@
         <!-- Page Header -->
         <header class="mb-8">
             <h2 class="font-h1 text-h1 text-on-surface">Ringkasan Sistem</h2>
-            <p class="text-slate-500 font-body-base mt-1">Pantau performa operasional Photobox Anda hari ini.</p>
+            <p class="text-slate-500 font-body-base mt-1">Pantau performa operasional CuitBox Studio Anda hari ini.</p>
         </header>
 
         <!-- Stats Cards -->

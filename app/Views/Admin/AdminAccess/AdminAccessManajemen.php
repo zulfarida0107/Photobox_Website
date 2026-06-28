@@ -38,7 +38,7 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
                 <h2 class="font-h1 text-h1 text-on-surface">Pengaturan Akses</h2>
-                <p class="text-body-sm text-on-surface-variant">Kelola daftar administrator dan hak akses sistem Photobox v2.</p>
+                <p class="text-body-sm text-on-surface-variant">Kelola daftar administrator dan hak akses sistem CuitBox Studio v2.</p>
             </div>
             <a href="<?= base_url('admin/settings/create') ?>"
                class="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-primary-container transition-colors shadow-sm">

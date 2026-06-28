@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photobox - Verify Booking</title>
+    <title>CuitBox Studio - Verify Booking</title>
     <style>
         * {
             margin: 0;
@@ -352,7 +352,7 @@
 <div class="container">
     <!-- HEADER YANG SUDAH DIRAPIHKAN -->
     <div class="header">
-        <div class="logo">Photobox</div>
+        <div class="logo">CuitBox Studio</div>
         <div class="header-right">
             <!-- Language Button -->
             <div class="language-btn">

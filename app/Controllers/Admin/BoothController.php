@@ -58,9 +58,21 @@ class BoothController extends BaseController
             ->orderBy('updated_at', 'DESC')
             ->findAll(5);
 
+        // Fetch all booths for mapping
+        $allBooths = $this->boothModel->findAll();
+        $boothsJson = json_encode(array_map(function($b) {
+            return [
+                'name'      => $b['name'],
+                'status'    => $b['status'],
+                'latitude'  => $b['latitude'] ? (float)$b['latitude'] : null,
+                'longitude' => $b['longitude'] ? (float)$b['longitude'] : null,
+            ];
+        }, $allBooths));
+
         $data = [
             'title'             => 'Manajemen Mesin Booth | Admin Panel',
             'booths'            => $booths,
+            'boothsJson'        => $boothsJson,
             'totalBooths'       => $totalBooths,
             'currentPage'       => $currentPage,
             'totalPages'        => $totalPages,
@@ -93,7 +105,10 @@ class BoothController extends BaseController
     public function store()
     {
         $rules = [
-            'name' => 'required|min_length[3]|max_length[100]',
+            'name'       => 'required|min_length[3]|max_length[100]',
+            'ip_address' => 'permit_empty|valid_ip',
+            'latitude'   => 'permit_empty|numeric',
+            'longitude'  => 'permit_empty|numeric',
         ];
 
         if (!$this->validate($rules)) {
@@ -108,12 +123,32 @@ class BoothController extends BaseController
         $this->boothModel->insert([
             'id'            => $newId,
             'name'          => $this->request->getPost('name'),
+            'ip_address'    => $this->request->getPost('ip_address') ?: null,
+            'latitude'      => $this->request->getPost('latitude') !== '' ? $this->request->getPost('latitude') : null,
+            'longitude'     => $this->request->getPost('longitude') !== '' ? $this->request->getPost('longitude') : null,
             'status'        => 'active',
             'current_queue' => 0,
         ]);
 
         return redirect()->to(base_url('admin/booths'))
             ->with('success', "Booth {$newId} berhasil ditambahkan.");
+    }
+
+    // =========================================================================
+    // SHOW — Detail booth
+    // =========================================================================
+    public function show(string $id)
+    {
+        $booth = $this->boothModel->find($id);
+        if (!$booth) {
+            return redirect()->to(base_url('admin/booths'))
+                ->with('error', 'Booth tidak ditemukan.');
+        }
+
+        return view('Admin/Booth/BoothDetail', [
+            'title' => 'Detail Booth | Admin Panel',
+            'booth' => $booth,
+        ]);
     }
 
     // =========================================================================
@@ -146,8 +181,11 @@ class BoothController extends BaseController
         }
 
         $rules = [
-            'name'   => 'required|min_length[3]|max_length[100]',
-            'status' => 'required|in_list[active,maintenance,inactive]',
+            'name'       => 'required|min_length[3]|max_length[100]',
+            'ip_address' => 'permit_empty|valid_ip',
+            'latitude'   => 'permit_empty|numeric',
+            'longitude'  => 'permit_empty|numeric',
+            'status'     => 'required|in_list[active,maintenance,inactive]',
         ];
 
         if (!$this->validate($rules)) {
@@ -155,9 +193,14 @@ class BoothController extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
+        $statusInput = $this->request->getPost('status');
+
         $this->boothModel->update($id, [
-            'name'   => $this->request->getPost('name'),
-            'status' => $this->request->getPost('status'),
+            'name'       => $this->request->getPost('name'),
+            'ip_address' => $this->request->getPost('ip_address') ?: null,
+            'latitude'   => $this->request->getPost('latitude') !== '' ? $this->request->getPost('latitude') : null,
+            'longitude'  => $this->request->getPost('longitude') !== '' ? $this->request->getPost('longitude') : null,
+            'status'     => $statusInput,
         ]);
 
         return redirect()->to(base_url('admin/booths'))
@@ -238,6 +281,24 @@ class BoothController extends BaseController
             ]);
         }
         fclose($output);
-        exit;
+    }
+
+    // =========================================================================
+    // RESET ACTIVE SESSION
+    // =========================================================================
+    public function resetActiveSession(string $id)
+    {
+        $booth = $this->boothModel->find($id);
+        if (!$booth) {
+            return redirect()->to(base_url('admin/booths'))
+                ->with('error', 'Booth tidak ditemukan.');
+        }
+
+        $this->boothModel->update($id, [
+            'active_booking_id' => null
+        ]);
+
+        return redirect()->to(base_url('admin/booths'))
+            ->with('success', "Sesi aktif pada booth {$booth['name']} berhasil di-reset.");
     }
 }
