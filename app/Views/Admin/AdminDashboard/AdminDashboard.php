@@ -24,85 +24,75 @@
         <?php endif; ?>
 
         <!-- Page Header -->
-        <header class="mb-8">
-            <h2 class="font-h1 text-h1 text-on-surface">Ringkasan Sistem</h2>
-            <p class="text-slate-500 font-body-base mt-1">Pantau performa operasional CuitBox Studio Anda hari ini.</p>
-        </header>
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="font-h1 text-h1 text-on-surface">Ringkasan Sistem</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Pantau performa operasional CuitBox Studio Anda hari ini.</p>
+            </div>
+        </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
 
             <!-- Total Pelanggan -->
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden group">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                        <span class="material-symbols-outlined">group</span>
-                    </div>
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm relative overflow-hidden group">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">group</span>
                 </div>
-                <div>
-                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total Pelanggan</h3>
-                    <p class="text-2xl font-bold text-on-surface">
-                        <?= number_format($totalCustomers ?? 0, 0, ',', '.') ?>
-                    </p>
-                </div>
+                <p class="text-sm font-medium text-slate-500">Total Pelanggan</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1">
+                    <?= number_format($totalCustomers ?? 0, 0, ',', '.') ?>
+                </h3>
+                <?php $pctCustomers = min(100, (($totalCustomers ?? 0) / 1000) * 100); ?>
                 <div class="mt-4 h-2 bg-blue-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-blue-600" style="width: 70%"></div>
+                    <div class="h-full bg-blue-600" style="width: <?= $pctCustomers ?>%"></div>
                 </div>
             </div>
 
             <!-- Transaksi Berhasil -->
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden group">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-2 bg-green-50 text-green-600 rounded-lg">
-                        <span class="material-symbols-outlined">check_circle</span>
-                    </div>
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm relative overflow-hidden group">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-green-600 bg-green-50 p-2 rounded-lg material-symbols-outlined">check_circle</span>
                 </div>
-                <div>
-                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Transaksi Berhasil</h3>
-                    <p class="text-2xl font-bold text-on-surface">
-                        <?= number_format($totalPaidTransactions ?? 0, 0, ',', '.') ?>
-                    </p>
-                </div>
+                <p class="text-sm font-medium text-slate-500">Transaksi Berhasil</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1">
+                    <?= number_format($totalPaidTransactions ?? 0, 0, ',', '.') ?>
+                </h3>
+                <?php $pctPaid = ($totalTransactions ?? 0) > 0 ? round((($totalPaidTransactions ?? 0) / $totalTransactions) * 100) : 0; ?>
                 <div class="mt-4 h-2 bg-green-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-green-600" style="width: 85%"></div>
+                    <div class="h-full bg-green-600" style="width: <?= $pctPaid ?>%"></div>
                 </div>
             </div>
 
             <!-- Reservasi Menunggu -->
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden group">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-2 bg-amber-50 text-amber-600 rounded-lg">
-                        <span class="material-symbols-outlined">pending_actions</span>
-                    </div>
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm relative overflow-hidden group">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-amber-600 bg-amber-50 p-2 rounded-lg material-symbols-outlined">pending_actions</span>
                     <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
                         <?= esc($totalPendingBookings ?? 0) ?> Baru
                     </span>
                 </div>
-                <div>
-                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Reservasi Menunggu</h3>
-                    <p class="text-2xl font-bold text-on-surface">
-                        <?= number_format($totalPendingBookings ?? 0, 0, ',', '.') ?>
-                    </p>
-                </div>
+                <p class="text-sm font-medium text-slate-500">Reservasi Menunggu</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1">
+                    <?= number_format($totalPendingBookings ?? 0, 0, ',', '.') ?>
+                </h3>
+                <?php $pctPending = ($totalBookings ?? 0) > 0 ? round((($totalPendingBookings ?? 0) / $totalBookings) * 100) : 0; ?>
                 <div class="mt-4 h-2 bg-amber-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-amber-600" style="width: 40%"></div>
+                    <div class="h-full bg-amber-600" style="width: <?= $pctPending ?>%"></div>
                 </div>
             </div>
 
             <!-- Mesin Booth Aktif -->
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden group">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-2 bg-purple-50 text-purple-600 rounded-lg">
-                        <span class="material-symbols-outlined">nest_display</span>
-                    </div>
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm relative overflow-hidden group">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-purple-600 bg-purple-50 p-2 rounded-lg material-symbols-outlined">nest_display</span>
                     <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Online</span>
                 </div>
-                <div>
-                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Mesin Booth Aktif</h3>
-                    <p class="text-2xl font-bold text-on-surface"><?= esc($totalActiveBooths ?? 0) ?> Unit</p>
-                </div>
+                <p class="text-sm font-medium text-slate-500">Mesin Booth Aktif</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= esc($totalActiveBooths ?? 0) ?> Unit</h3>
+                <?php $pctBooths = ($totalBooths ?? 0) > 0 ? round((($totalActiveBooths ?? 0) / $totalBooths) * 100) : 0; ?>
                 <div class="mt-4 h-2 bg-purple-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-purple-600" style="width: 80%"></div>
+                    <div class="h-full bg-purple-600" style="width: <?= $pctBooths ?>%"></div>
                 </div>
             </div>
         </div>

@@ -19,8 +19,14 @@ class AdminDashboardController extends BaseController
 
         // Stats widget
         $totalCustomers       = $customerModel->countAll();
+        
+        $totalTransactions     = $paymentModel->countAllResults();
         $totalPaidTransactions = $paymentModel->where('status', 'paid')->countAllResults();
+        
+        $totalBookings         = $bookingModel->countAllResults();
         $totalPendingBookings  = $bookingModel->where('status', 'pending')->countAllResults();
+        
+        $totalBooths           = $boothModel->countAllResults();
         $totalActiveBooths     = $boothModel->where('status', 'active')->countAllResults();
 
         // Pemesanan terbaru dengan nama pelanggan
@@ -43,8 +49,11 @@ class AdminDashboardController extends BaseController
         $data = [
             'title'                 => 'Dashboard | Admin Panel',
             'totalCustomers'        => $totalCustomers,
+            'totalTransactions'     => $totalTransactions,
             'totalPaidTransactions' => $totalPaidTransactions,
+            'totalBookings'         => $totalBookings,
             'totalPendingBookings'  => $totalPendingBookings,
+            'totalBooths'           => $totalBooths,
             'totalActiveBooths'     => $totalActiveBooths,
             'recentBookings'        => $recentBookings,
             'totalRevenueThisMonth' => $totalRevenueThisMonth,

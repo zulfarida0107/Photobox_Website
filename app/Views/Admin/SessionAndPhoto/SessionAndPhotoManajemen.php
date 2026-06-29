@@ -24,10 +24,10 @@
         <?php endif; ?>
 
         <!-- Page Title & Actions -->
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between mb-6">
             <div>
                 <h2 class="font-h1 text-h1 text-on-surface">Manajemen Sesi</h2>
-                <p class="text-slate-500 text-body-sm">Kelola arsip sesi pemotretan dan kirim ulang galeri digital.</p>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Kelola arsip sesi pemotretan dan kirim ulang galeri digital.</p>
             </div>
             <div class="flex gap-2">
                 <a href="<?= base_url('admin/sessions/export') ?>"
@@ -40,6 +40,42 @@
                     <span class="material-symbols-outlined">mail</span>
                     Kirim Ulang Email
                 </a>
+            </div>
+        </div>
+
+        <!-- Bento Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <!-- Total Sesi -->
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">camera</span>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Total Sesi</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $totalSessions ?? 0 ?></h3>
+            </div>
+            <!-- Sesi Hari Ini -->
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">today</span>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Sesi Hari Ini</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statToday ?? 0 ?></h3>
+            </div>
+            <!-- Sesi Bulan Ini -->
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">calendar_month</span>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Sesi Bulan Ini</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statThisMonth ?? 0 ?></h3>
+            </div>
+            <!-- Total Foto -->
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">collections</span>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Total Foto</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= number_format($statTotalPhotos ?? 0) ?></h3>
             </div>
         </div>
 
@@ -162,31 +198,12 @@
                 <!-- Storage Card -->
                 <div class="bg-white border border-slate-200 rounded shadow-sm p-6 space-y-4">
                     <div class="flex items-center justify-between">
-                        <h3 class="font-h2 text-h2 text-on-surface">Penyimpanan</h3>
-                        <span class="material-symbols-outlined text-blue-600">cloud_done</span>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-body-sm">
-                            <span class="text-slate-500">Total Foto Tersimpan</span>
-                            <span class="font-bold text-slate-900"><?= number_format($statTotalPhotos ?? 0) ?></span>
-                        </div>
-                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-blue-600 h-full" style="width: <?= min(100, ($statTotalPhotos ?? 0) > 0 ? min(100, round(($statTotalPhotos / 1000) * 100)) : 0) ?>%"></div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="p-3 bg-slate-50 rounded border border-slate-200 text-center">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Sesi Hari Ini</p>
-                            <p class="text-lg font-bold text-blue-700"><?= $statToday ?? 0 ?></p>
-                        </div>
-                        <div class="p-3 bg-slate-50 rounded border border-slate-200 text-center">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Bulan Ini</p>
-                            <p class="text-lg font-bold text-blue-700"><?= $statThisMonth ?? 0 ?></p>
-                        </div>
+                        <h3 class="font-h2 text-h2 text-on-surface">Sesi Terbaru</h3>
+                        <span class="material-symbols-outlined text-blue-600">history</span>
                     </div>
                     <?php if (!empty($latestSession)): ?>
                         <div class="p-3 bg-slate-50 rounded border border-slate-200">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Sesi Terbaru</label>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Terakhir Ditambahkan</label>
                             <div class="flex items-center justify-between gap-2 overflow-hidden">
                                 <p class="text-xs truncate text-blue-700 font-medium">
                                     #<?= esc($latestSession['id']) ?> — <?= esc($latestSession['email_recipient'] ?? 'No email') ?>

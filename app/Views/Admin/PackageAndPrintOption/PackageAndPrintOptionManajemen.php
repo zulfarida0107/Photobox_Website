@@ -2,13 +2,13 @@
 <?php $this->section('content'); ?>
 
 <main class="pt-16 min-h-screen flex flex-col">
-    <div class="mt-0 p-8 space-y-8 flex-1">
+    <div class="p-6 flex-1">
 
         <!-- Hero Header -->
-        <div class="flex justify-between items-end">
+        <div class="flex items-center justify-between mb-6">
             <div>
                 <h2 class="font-h1 text-h1 text-on-surface">Manajemen Paket &amp; Cetak</h2>
-                <p class="text-slate-500 text-body-base mt-1">Konfigurasi produk layanan CuitBox Studio dan variasi opsi cetak tambahan.</p>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Konfigurasi produk layanan CuitBox Studio dan variasi opsi cetak tambahan.</p>
             </div>
             <div class="flex gap-3">
                 <a href="<?= base_url('admin/packages/export') ?>"
@@ -36,49 +36,44 @@
             </div>
         <?php endif; ?>
 
-        <!-- Bento Grid -->
         <div class="grid grid-cols-12 gap-6">
 
             <!-- Quick Stats Row -->
-            <div class="col-span-12 grid grid-cols-4 gap-4">
+            <div class="col-span-12 grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                 <!-- Total Paket -->
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-slate-500 text-label-bold font-label-bold mb-2">Total Paket</p>
-                    <div class="flex items-end justify-between">
-                        <h3 class="text-3xl font-bold text-primary"><?= str_pad($statTotalPackages ?? 0, 2, '0', STR_PAD_LEFT) ?></h3>
-                        <div class="h-10 w-24 bg-blue-50 rounded-lg flex items-end justify-center pb-1">
-                            <div class="w-2 h-4 bg-primary mx-0.5 rounded-t-sm"></div>
-                            <div class="w-2 h-6 bg-primary mx-0.5 rounded-t-sm"></div>
-                            <div class="w-2 h-3 bg-primary mx-0.5 rounded-t-sm"></div>
-                            <div class="w-2 h-8 bg-primary mx-0.5 rounded-t-sm"></div>
-                        </div>
+                <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">inventory_2</span>
                     </div>
+                    <p class="text-sm font-medium text-slate-500">Total Paket</p>
+                    <h3 class="text-2xl font-black text-slate-900 mt-1"><?= str_pad($statTotalPackages ?? 0, 2, '0', STR_PAD_LEFT) ?></h3>
                 </div>
                 <!-- Opsi Cetak Aktif -->
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-slate-500 text-label-bold font-label-bold mb-2">Opsi Cetak Aktif</p>
-                    <div class="flex items-end justify-between">
-                        <h3 class="text-3xl font-bold text-primary"><?= str_pad($statTotalPrintOptions ?? 0, 2, '0', STR_PAD_LEFT) ?></h3>
-                        <div class="text-xs text-green-600 font-semibold bg-green-50 px-2 py-1 rounded">Aktif</div>
+                <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">print</span>
                     </div>
+                    <p class="text-sm font-medium text-slate-500">Opsi Cetak Aktif</p>
+                    <h3 class="text-2xl font-black text-slate-900 mt-1"><?= str_pad($statTotalPrintOptions ?? 0, 2, '0', STR_PAD_LEFT) ?></h3>
                 </div>
                 <!-- Rata-rata Harga -->
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-slate-500 text-label-bold font-label-bold mb-2">Rata-rata Harga</p>
-                    <div class="flex items-end justify-between">
-                        <h3 class="text-3xl font-bold text-primary">
-                            Rp <?= number_format(($statAvgPrice ?? 0) / 1000, 0) ?>k
-                        </h3>
-                        <span class="material-symbols-outlined text-slate-300 text-3xl">payments</span>
+                <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">payments</span>
                     </div>
+                    <p class="text-sm font-medium text-slate-500">Rata-rata Harga</p>
+                    <h3 class="text-2xl font-black text-slate-900 mt-1">
+                        Rp <?= number_format(($statAvgPrice ?? 0) / 1000, 0) ?>k
+                    </h3>
                 </div>
                 <!-- Paket Terpopuler -->
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-slate-500 text-label-bold font-label-bold mb-2">Paket Terpopuler</p>
-                    <div class="flex items-end justify-between">
-                        <h3 class="text-lg font-bold text-primary"><?= esc($statTopPackage ?? 'N/A') ?></h3>
+                <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">star</span>
                         <span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-bold">TOP</span>
                     </div>
+                    <p class="text-sm font-medium text-slate-500">Paket Terpopuler</p>
+                    <h3 class="text-2xl font-black text-slate-900 mt-1"><?= esc($statTopPackage ?? 'N/A') ?></h3>
                 </div>
             </div>
 

@@ -35,10 +35,10 @@
         <?php endif; ?>
 
         <!-- Page Header -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
-                <h2 class="font-h1 text-h1 text-on-surface">Pengaturan Akses</h2>
-                <p class="text-body-sm text-on-surface-variant">Kelola daftar administrator dan hak akses sistem CuitBox Studio v2.</p>
+                <h2 class="font-h1 text-h1 text-on-surface">Manajemen Pengaturan Akses</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Kelola daftar administrator dan hak akses sistem CuitBox Studio v2.</p>
             </div>
             <a href="<?= base_url('admin/settings/create') ?>"
                class="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-primary-container transition-colors shadow-sm">
@@ -50,44 +50,36 @@
         <!-- Stats Bento -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <!-- Total Admin -->
-            <div class="bg-white p-5 border border-slate-200 rounded-xl shadow-sm flex items-center gap-4">
-                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
-                    <span class="material-symbols-outlined">manage_accounts</span>
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">manage_accounts</span>
                 </div>
-                <div>
-                    <p class="text-label-bold text-slate-500">Total Admin</p>
-                    <h3 class="text-h2 text-on-surface font-bold"><?= $statTotal ?? 0 ?></h3>
-                </div>
+                <p class="text-sm font-medium text-slate-500">Total Admin</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statTotal ?? 0 ?></h3>
             </div>
             <!-- Superadmin -->
-            <div class="bg-white p-5 border border-slate-200 rounded-xl shadow-sm flex items-center gap-4">
-                <div class="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center">
-                    <span class="material-symbols-outlined">verified_user</span>
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-green-600 bg-green-50 p-2 rounded-lg material-symbols-outlined">verified_user</span>
                 </div>
-                <div>
-                    <p class="text-label-bold text-slate-500">Superadmin</p>
-                    <h3 class="text-h2 text-on-surface font-bold"><?= $statSuperadmin ?? 0 ?></h3>
-                </div>
+                <p class="text-sm font-medium text-slate-500">Superadmin</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statSuperadmin ?? 0 ?></h3>
             </div>
             <!-- Admin biasa -->
-            <div class="bg-white p-5 border border-slate-200 rounded-xl shadow-sm flex items-center gap-4">
-                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center">
-                    <span class="material-symbols-outlined">badge</span>
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-amber-600 bg-amber-50 p-2 rounded-lg material-symbols-outlined">badge</span>
                 </div>
-                <div>
-                    <p class="text-label-bold text-slate-500">Admin</p>
-                    <h3 class="text-h2 text-on-surface font-bold"><?= $statAdmin ?? 0 ?></h3>
-                </div>
+                <p class="text-sm font-medium text-slate-500">Admin</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statAdmin ?? 0 ?></h3>
             </div>
             <!-- Status Keamanan -->
-            <div class="bg-white p-5 border border-slate-200 rounded-xl shadow-sm flex items-center gap-4">
-                <div class="w-12 h-12 bg-slate-50 text-slate-600 rounded-full flex items-center justify-center">
-                    <span class="material-symbols-outlined">security</span>
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-slate-600 bg-slate-50 p-2 rounded-lg material-symbols-outlined">security</span>
                 </div>
-                <div>
-                    <p class="text-label-bold text-slate-500">Status Keamanan</p>
-                    <h3 class="text-h2 text-on-surface font-bold">Optimal</h3>
-                </div>
+                <p class="text-sm font-medium text-slate-500">Status Keamanan</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1">Optimal</h3>
             </div>
         </div>
 

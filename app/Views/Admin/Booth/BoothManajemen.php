@@ -16,10 +16,10 @@
 
 
         <!-- Header Section -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between mb-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
             <div>
-                <h2 class="font-h1 text-h1 text-on-background">Daftar Mesin Booth</h2>
-                <p class="font-body-sm text-body-sm text-outline">Kelola status operasional dan inventaris perangkat keras Anda.</p>
+                <h2 class="font-h1 text-h1 text-on-surface">Daftar Mesin Booth</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Kelola status operasional dan inventaris perangkat keras Anda.</p>
             </div>
             <div class="mt-4 md:mt-0">
                 <a href="<?= base_url('admin/booths/create') ?>"
@@ -52,45 +52,45 @@
         <?php endif; ?>
 
         <!-- Stats Bento Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <!-- Total Mesin -->
-            <div class="bg-white border border-outline-variant p-5 rounded-xl shadow-sm">
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
-                    <span class="material-symbols-outlined text-blue-600 bg-blue-50 p-2 rounded-lg">devices</span>
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">devices</span>
                     <span class="text-blue-600 font-label-bold text-label-bold">Total</span>
                 </div>
-                <p class="text-outline text-label-bold uppercase">Total Mesin</p>
-                <h3 class="text-2xl font-bold text-on-surface"><?= $statTotal ?? 0 ?> Unit</h3>
+                <p class="text-sm font-medium text-slate-500">Total Mesin</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statTotal ?? 0 ?> Unit</h3>
             </div>
             <!-- Aktif -->
-            <div class="bg-white border border-outline-variant p-5 rounded-xl shadow-sm">
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
-                    <span class="material-symbols-outlined text-emerald-600 bg-emerald-50 p-2 rounded-lg">check_circle</span>
+                    <span class="text-emerald-600 bg-emerald-50 p-2 rounded-lg material-symbols-outlined">check_circle</span>
                     <span class="text-emerald-600 font-label-bold text-label-bold">
                         <?= $statTotal > 0 ? round(($statActive / $statTotal) * 100) : 0 ?>%
                     </span>
                 </div>
-                <p class="text-outline text-label-bold uppercase">Aktif Sekarang</p>
-                <h3 class="text-2xl font-bold text-on-surface"><?= $statActive ?? 0 ?> Unit</h3>
+                <p class="text-sm font-medium text-slate-500">Aktif Sekarang</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statActive ?? 0 ?> Unit</h3>
             </div>
             <!-- Maintenance -->
-            <div class="bg-white border border-outline-variant p-5 rounded-xl shadow-sm">
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
-                    <span class="material-symbols-outlined text-tertiary p-2 bg-tertiary-fixed rounded-lg">build</span>
+                    <span class="text-tertiary bg-tertiary-fixed p-2 rounded-lg material-symbols-outlined">build</span>
                     <span class="text-tertiary font-label-bold text-label-bold">
                         <?= ($statMaintenance ?? 0) > 0 ? 'High Priority' : 'Normal' ?>
                     </span>
                 </div>
-                <p class="text-outline text-label-bold uppercase">Maintenance</p>
-                <h3 class="text-2xl font-bold text-on-surface"><?= $statMaintenance ?? 0 ?> Unit</h3>
+                <p class="text-sm font-medium text-slate-500">Maintenance</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statMaintenance ?? 0 ?> Unit</h3>
             </div>
             <!-- Antrean Aktif -->
-            <div class="bg-white border border-outline-variant p-5 rounded-xl shadow-sm">
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
-                    <span class="material-symbols-outlined text-secondary bg-secondary-fixed p-2 rounded-lg">queue</span>
+                    <span class="text-secondary bg-secondary-fixed p-2 rounded-lg material-symbols-outlined">queue</span>
                 </div>
-                <p class="text-outline text-label-bold uppercase">Total Antrean</p>
-                <h3 class="text-2xl font-bold text-on-surface"><?= $statTotalQueue ?? 0 ?></h3>
+                <p class="text-sm font-medium text-slate-500">Total Antrean</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statTotalQueue ?? 0 ?></h3>
             </div>
         </div>
 

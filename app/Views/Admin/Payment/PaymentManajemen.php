@@ -13,10 +13,11 @@
         </nav>
 
         <!-- Header Section -->
-        <div class="flex justify-between items-end mb-8">
+        <!-- Header Section -->
+        <div class="flex justify-between items-end mb-6">
             <div>
-                <h2 class="font-h2 text-h2 text-on-surface mb-1">Manajemen Pembayaran</h2>
-                <p class="text-body-sm text-secondary">Pantau dan kelola semua transaksi masuk secara real-time.</p>
+                <h2 class="font-h1 text-h1 text-on-surface mb-1">Manajemen Pembayaran</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Pantau dan kelola semua transaksi masuk secara real-time.</p>
             </div>
             <div class="flex gap-3">
                 <a href="<?= base_url('admin/payments/export') ?>"
@@ -33,56 +34,57 @@
         </div>
 
         <!-- Bento Stats Grid -->
-        <div class="grid grid-cols-4 gap-6 mb-8">
+        <!-- Bento Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <!-- Total Pendapatan -->
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <span class="material-symbols-outlined text-5xl text-blue-600">account_balance_wallet</span>
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">account_balance_wallet</span>
+                    <div class="flex items-center gap-1 text-emerald-600 font-bold text-[12px]">
+                        <span class="material-symbols-outlined text-[14px]">trending_up</span>
+                        +12.5% bulan ini
+                    </div>
                 </div>
-                <p class="text-label-bold text-secondary uppercase mb-2">Total Pendapatan</p>
-                <h3 class="text-2xl font-bold text-on-surface mb-1">
+                <p class="text-sm font-medium text-slate-500">Total Pendapatan</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1">
                     Rp <?= number_format($statTotalRevenue ?? 0, 0, ',', '.') ?>
                 </h3>
-                <div class="flex items-center gap-1 text-emerald-600 font-bold text-[12px]">
-                    <span class="material-symbols-outlined text-[14px]">trending_up</span>
-                    +12.5% bulan ini
-                </div>
             </div>
             <!-- Transaksi Sukses -->
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <span class="material-symbols-outlined text-5xl text-blue-600">receipt_long</span>
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">receipt_long</span>
+                    <div class="flex items-center gap-1 text-slate-500 font-bold text-[12px]">
+                        <span class="material-symbols-outlined text-[14px]">analytics</span>
+                        Konversi <?= $statConversion ?? '0' ?>%
+                    </div>
                 </div>
-                <p class="text-label-bold text-secondary uppercase mb-2">Transaksi Sukses</p>
-                <h3 class="text-2xl font-bold text-on-surface mb-1"><?= number_format($statPaid ?? 0) ?></h3>
-                <div class="flex items-center gap-1 text-slate-500 font-bold text-[12px]">
-                    <span class="material-symbols-outlined text-[14px]">analytics</span>
-                    Konversi <?= $statConversion ?? '0' ?>%
-                </div>
+                <p class="text-sm font-medium text-slate-500">Transaksi Sukses</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= number_format($statPaid ?? 0) ?></h3>
             </div>
             <!-- Gagal/Pending -->
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <span class="material-symbols-outlined text-5xl text-red-600">error</span>
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-red-600 bg-red-50 p-2 rounded-lg material-symbols-outlined">error</span>
+                    <div class="flex items-center gap-1 text-red-600 font-bold text-[12px]">
+                        <span class="material-symbols-outlined text-[14px]">priority_high</span>
+                        Perlu Verifikasi
+                    </div>
                 </div>
-                <p class="text-label-bold text-secondary uppercase mb-2">Gagal/Pending</p>
-                <h3 class="text-2xl font-bold text-on-surface mb-1"><?= number_format($statFailedPending ?? 0) ?></h3>
-                <div class="flex items-center gap-1 text-red-600 font-bold text-[12px]">
-                    <span class="material-symbols-outlined text-[14px]">priority_high</span>
-                    Perlu Verifikasi
-                </div>
+                <p class="text-sm font-medium text-slate-500">Gagal/Pending</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= number_format($statFailedPending ?? 0) ?></h3>
             </div>
             <!-- Add-on Cetak -->
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <span class="material-symbols-outlined text-5xl text-blue-600">print</span>
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">print</span>
+                    <div class="flex items-center gap-1 text-blue-600 font-bold text-[12px]">
+                        <span class="material-symbols-outlined text-[14px]">add</span>
+                        Rp <?= number_format($statPrintProfit ?? 0, 0, ',', '.') ?> profit
+                    </div>
                 </div>
-                <p class="text-label-bold text-secondary uppercase mb-2">Add-on Cetak</p>
-                <h3 class="text-2xl font-bold text-on-surface mb-1"><?= number_format($statPrintAddon ?? 0) ?></h3>
-                <div class="flex items-center gap-1 text-blue-600 font-bold text-[12px]">
-                    <span class="material-symbols-outlined text-[14px]">add</span>
-                    Rp <?= number_format($statPrintProfit ?? 0, 0, ',', '.') ?> profit
-                </div>
+                <p class="text-sm font-medium text-slate-500">Add-on Cetak</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= number_format($statPrintAddon ?? 0) ?></h3>
             </div>
         </div>
 
