@@ -26,12 +26,28 @@ class BookingAndSlotController extends BaseController
         $currentPage = max(1, (int) ($this->request->getGet('page') ?? 1));
         $perPage     = 10;
         $today       = date('Y-m-d');
+        
+        // Menentukan rentang tanggal berdasarkan filter period
+        $dateStart = $today;
+        $dateEnd   = $today;
+        
+        if ($period === 'week') {
+            $dateStart = date('Y-m-d', strtotime('monday this week'));
+            $dateEnd   = date('Y-m-d', strtotime('sunday this week'));
+        } elseif ($period === 'month') {
+            $dateStart = date('Y-m-01');
+            $dateEnd   = date('Y-m-t');
+        } elseif ($period === 'all') {
+            $dateStart = '2000-01-01'; // Masa lalu
+            $dateEnd   = '2099-12-31'; // Masa depan
+        }
 
-        // --- Slot Operasional hari ini ---
+        // --- Slot Operasional ---
         $slots = $this->slotModel
             ->select('slots.*, booths.name AS booth_name')
             ->join('booths', 'booths.id = slots.booth_id', 'left')
-            ->where('slots.slot_date', $today)
+            ->where('slots.slot_date >=', $dateStart)
+            ->where('slots.slot_date <=', $dateEnd)
             ->orderBy('slots.start_time', 'ASC')
             ->findAll();
 
@@ -45,17 +61,9 @@ class BookingAndSlotController extends BaseController
             ->join('customers', 'customers.id = bookings.customer_id', 'left')
             ->join('slots',     'slots.id = bookings.slot_id', 'left')
             ->join('booths',    'booths.id = bookings.booth_id', 'left')
-            ->join('packages',  'packages.id = bookings.package_id', 'left');
-
-        if ($period === 'week') {
-            $weekStart = date('Y-m-d', strtotime('monday this week'));
-            $weekEnd   = date('Y-m-d', strtotime('sunday this week'));
-            $bookingBuilder->where('slots.slot_date >=', $weekStart)
-                           ->where('slots.slot_date <=', $weekEnd);
-        } else {
-            // Default: hari ini
-            $bookingBuilder->where('slots.slot_date', $today);
-        }
+            ->join('packages',  'packages.id = bookings.package_id', 'left')
+            ->where('slots.slot_date >=', $dateStart)
+            ->where('slots.slot_date <=', $dateEnd);
 
         $totalBookings = $bookingBuilder->countAllResults(false);
         $totalPages    = max(1, (int) ceil($totalBookings / $perPage));
@@ -237,8 +245,12 @@ class BookingAndSlotController extends BaseController
     // =========================================================================
     public function createSlot()
     {
+        $boothModel = new \App\Models\BoothModel();
+        $booths = $boothModel->where('status', 'active')->findAll();
+
         return view('Admin/BookingAndSlot/SlotForm', [
             'title'      => 'Buat Slot Baru | Admin Panel',
+            'booths'     => $booths,
             'validation' => \Config\Services::validation(),
         ]);
     }
