@@ -97,11 +97,35 @@
             </div>
         </div>
 
-        <!-- Revenue + Recent Bookings -->
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <!-- Revenue Card (New Row) -->
+        <div class="bg-primary rounded-xl overflow-hidden relative min-h-[200px] flex flex-col justify-end p-8 text-white shadow-lg mb-6">
+            <div class="relative z-10">
+                <div class="mb-4 inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest border border-white/20">
+                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                    Sistem Normal
+                </div>
+                <h3 class="text-2xl font-black mb-1 tracking-tight">Pendapatan Bulan Ini</h3>
+                <p class="text-3xl font-black text-white mb-4">
+                    Rp <?= number_format($totalRevenueThisMonth ?? 0, 0, ',', '.') ?>
+                </p>
+                <p class="text-sm text-blue-100/80 mb-6 leading-relaxed">
+                    <?= $totalActiveBooths ?? 0 ?> mesin booth aktif beroperasi optimal hari ini.
+                </p>
+                <div class="flex gap-4">
+                    <a href="<?= base_url('admin/booths') ?>"
+                       class="px-4 py-2 bg-white text-blue-700 font-bold rounded-lg text-xs hover:bg-blue-50 transition-colors">
+                        Cek Status
+                    </a>
+                    <a href="<?= base_url('admin/payments') ?>"
+                       class="px-4 py-2 bg-blue-600/40 backdrop-blur-sm text-white font-bold rounded-lg text-xs hover:bg-blue-600/60 transition-colors border border-white/20">
+                        Lihat Transaksi
+                    </a>
+                </div>
+            </div>
+        </div>
 
-            <!-- Tabel Pemesanan Terbaru -->
-            <div class="xl:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+        <!-- Tabel Pemesanan Terbaru (New Row) -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                 <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                     <div>
                         <h3 class="font-h2 text-on-surface">Pemesanan Terbaru</h3>
@@ -174,34 +198,6 @@
                 </div>
             </div>
 
-            <!-- Revenue Card -->
-            <div class="bg-primary rounded-xl overflow-hidden relative min-h-[300px] flex flex-col justify-end p-8 text-white shadow-lg">
-                <div class="relative z-10">
-                    <div class="mb-4 inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest border border-white/20">
-                        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                        Sistem Normal
-                    </div>
-                    <h3 class="text-2xl font-black mb-1 tracking-tight">Pendapatan Bulan Ini</h3>
-                    <p class="text-3xl font-black text-white mb-4">
-                        Rp <?= number_format($totalRevenueThisMonth ?? 0, 0, ',', '.') ?>
-                    </p>
-                    <p class="text-sm text-blue-100/80 mb-6 leading-relaxed">
-                        <?= $totalActiveBooths ?? 0 ?> mesin booth aktif beroperasi optimal hari ini.
-                    </p>
-                    <div class="flex gap-4">
-                        <a href="<?= base_url('admin/booths') ?>"
-                           class="px-4 py-2 bg-white text-blue-700 font-bold rounded-lg text-xs hover:bg-blue-50 transition-colors">
-                            Cek Status
-                        </a>
-                        <a href="<?= base_url('admin/payments') ?>"
-                           class="px-4 py-2 bg-blue-600/40 backdrop-blur-sm text-white font-bold rounded-lg text-xs hover:bg-blue-600/60 transition-colors border border-white/20">
-                            Lihat Transaksi
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-        </div>
     </div>
 
     <?= $this->include('Admin/layouts/footer') ?>
