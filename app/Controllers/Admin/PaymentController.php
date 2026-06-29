@@ -49,6 +49,9 @@ class PaymentController extends BaseController
         $totalPayments = $builder->countAllResults(false);
         $totalPages    = max(1, (int) ceil($totalPayments / $perPage));
 
+        // PENTING: countAllResults() mengubah SELECT menjadi COUNT(*), jadi kita harus set ulang SELECT-nya
+        $builder->select('payments.*, bookings.booking_code, print_options.copies AS print_option_copies, print_options.extra_price AS print_option_extra');
+        
         $payments = $builder
             ->orderBy('payments.created_at', 'DESC')
             ->findAll($perPage, ($currentPage - 1) * $perPage);
@@ -216,6 +219,13 @@ class PaymentController extends BaseController
         header('Content-Disposition: attachment; filename="' . $filename . '"');
 
         $output = fopen('php://output', 'w');
+        
+        // Tambahkan UTF-8 BOM agar karakter khusus terbaca dengan benar di Excel
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        // Tambahkan deklarasi separator khusus agar Excel otomatis memisahkan kolom (karena pengaturan region Indonesia biasanya menggunakan titik koma)
+        fputs($output, "sep=,\n");
+        
         fputcsv($output, ['ID Pembayaran', 'Kode Booking', 'Opsi Cetak (Copy)', 'Harga Extra Cetak', 'Nominal', 'Gateway Ref', 'Status', 'Waktu']);
         foreach ($data as $row) {
             fputcsv($output, [

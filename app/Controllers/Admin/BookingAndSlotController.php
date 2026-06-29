@@ -178,7 +178,7 @@ class BookingAndSlotController extends BaseController
         $rules = [
             'slot_id'      => 'required',
             'queue_number' => 'required|max_length[10]',
-            'status'       => 'required|in_list[pending,confirmed,completed,cancelled]',
+            'status'       => 'required|in_list[pending,paid,completed,cancelled]',
         ];
 
         if (!$this->validate($rules)) {
