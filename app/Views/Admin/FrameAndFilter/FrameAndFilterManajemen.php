@@ -7,9 +7,13 @@
         <!-- Breadcrumbs -->
         <nav aria-label="Breadcrumb" class="flex mb-6 text-xs font-medium text-slate-500">
             <ol class="flex items-center space-x-2">
-                <li><a class="hover:text-blue-600" href="<?= base_url('admin/dashboard') ?>">Home</a></li>
-                <li><span class="material-symbols-outlined text-[14px]">chevron_right</span></li>
-                <li class="text-blue-700">Manajemen Aset Desain</li>
+                <li>
+                    <a class="hover:text-blue-600 flex items-center gap-1 transition-colors" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                    <span class="text-blue-700 font-bold">Manajemen Aset Desain</span>
+                </li>
             </ol>
         </nav>
 
