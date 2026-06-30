@@ -120,16 +120,6 @@
             <section class="lg:col-span-8 space-y-4">
                 <div class="flex items-center justify-between">
                     <h3 class="font-h2 text-h2">Daftar Booking Masuk</h3>
-                    <div class="flex rounded-lg border border-slate-200 bg-white p-1">
-                        <a href="<?= base_url('admin/bookings?period=today') ?>"
-                           class="px-3 py-1 text-xs font-bold rounded-md <?= ($period ?? 'today') === 'today' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100' ?>">
-                            Hari Ini
-                        </a>
-                        <a href="<?= base_url('admin/bookings?period=week') ?>"
-                           class="px-3 py-1 text-xs font-medium rounded-md <?= ($period ?? '') === 'week' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100' ?>">
-                            Mingguan
-                        </a>
-                    </div>
                 </div>
                 <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                     <div class="overflow-x-auto">
@@ -295,11 +285,5 @@
 
     <?= $this->include('Admin/layouts/footer') ?>
 </main>
-
-<!-- FAB -->
-<a href="<?= base_url('admin/slots/create') ?>"
-   class="fixed bottom-8 right-8 h-14 w-14 rounded-full bg-primary text-on-primary shadow-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-transform z-50">
-    <span class="material-symbols-outlined text-[32px]">event</span>
-</a>
 
 <?php $this->endSection(); ?>
