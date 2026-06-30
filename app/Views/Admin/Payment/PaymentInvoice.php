@@ -118,4 +118,34 @@
         </div>
     </div>
 </main>
+
+<style>
+@media print {
+    /* Sembunyikan elemen layout admin */
+    aside, header { 
+        display: none !important; 
+    }
+    
+    /* Reset margin sidebar dan padding header */
+    .ml-\[260px\] { 
+        margin-left: 0 !important; 
+    }
+    main.pt-16 { 
+        padding-top: 0 !important; 
+    }
+    
+    /* Reset background dan padding kontainer agar pas di kertas */
+    body, html { 
+        background-color: white !important; 
+    }
+    .p-6 { 
+        padding: 0 !important; 
+    }
+    
+    /* Pastikan lebar maksimal */
+    .max-w-4xl {
+        max-width: 100% !important;
+    }
+}
+</style>
 <?php $this->endSection(); ?>
