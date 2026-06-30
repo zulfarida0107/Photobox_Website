@@ -30,11 +30,12 @@
                     <span class="material-symbols-outlined text-[18px]">cloud_download</span>
                     Ekspor Laporan
                 </a>
-                <a href="<?= base_url('admin/payments/verify-bulk') ?>"
-                   class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded font-semibold text-sm hover:bg-primary-container transition-colors shadow-sm">
-                    <span class="material-symbols-outlined text-[18px]">verified_user</span>
-                    Verifikasi Massal
-                </a>
+                <form action="<?= base_url('admin/payments/verify-bulk') ?>" method="post" class="inline">
+                    <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded font-semibold text-sm hover:bg-primary-container transition-colors shadow-sm">
+                        <span class="material-symbols-outlined text-[18px]">verified_user</span>
+                        Verifikasi Massal
+                    </button>
+                </form>
             </div>
         </div>
 

@@ -83,7 +83,7 @@
                         <span class="block text-xs text-slate-500 mb-1">Status Reservasi</span>
                         <?php
                             $statusMap = [
-                                'confirmed' => ['bg-blue-100 text-blue-700', 'Terkonfirmasi'],
+                                'paid'      => ['bg-blue-100 text-blue-700', 'Terkonfirmasi/Lunas'],
                                 'pending'   => ['bg-yellow-100 text-yellow-700', 'Menunggu'],
                                 'completed' => ['bg-green-100 text-green-700', 'Selesai'],
                                 'cancelled' => ['bg-red-100 text-red-700', 'Dibatalkan'],

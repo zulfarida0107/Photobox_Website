@@ -81,7 +81,7 @@
                     <div class="relative">
                         <select name="status" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-label text-label text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all appearance-none cursor-pointer">
                             <option value="pending" <?= (old('status') ?? $booking['status']) == 'pending' ? 'selected' : '' ?>>Menunggu (Pending)</option>
-                            <option value="confirmed" <?= (old('status') ?? $booking['status']) == 'confirmed' ? 'selected' : '' ?>>Terkonfirmasi (Confirmed)</option>
+                            <option value="paid" <?= (old('status') ?? $booking['status']) == 'paid' ? 'selected' : '' ?>>Lunas / Terkonfirmasi (Paid)</option>
                             <option value="completed" <?= (old('status') ?? $booking['status']) == 'completed' ? 'selected' : '' ?>>Selesai (Completed)</option>
                             <option value="cancelled" <?= (old('status') ?? $booking['status']) == 'cancelled' ? 'selected' : '' ?>>Dibatalkan (Cancelled)</option>
                         </select>
