@@ -53,6 +53,12 @@ class AuthController extends BaseController
                 'isLoggedIn' => true,
             ]);
 
+            // Set Remember Me Cookie (berlaku 30 hari)
+            if ($this->request->getPost('remember')) {
+                helper('cookie');
+                set_cookie('remember_admin', $admin['id'], 30 * 24 * 60 * 60);
+            }
+
             return redirect()->to('/admin/dashboard')
                 ->with('success', 'Selamat datang kembali, ' . esc($admin['name']) . '!');
         }
@@ -65,6 +71,9 @@ class AuthController extends BaseController
     public function logout()
     {
         session()->destroy();
+        helper('cookie');
+        delete_cookie('remember_admin');
+        
         return redirect()->to('/admin/login')
             ->with('success', 'Anda telah berhasil logout.');
     }

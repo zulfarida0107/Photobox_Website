@@ -71,12 +71,12 @@
                 <p class="text-sm font-medium text-slate-500">Superadmin</p>
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statSuperadmin ?? 0 ?></h3>
             </div>
-            <!-- Admin biasa -->
+            <!-- Staff -->
             <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-amber-600 bg-amber-50 p-2 rounded-lg material-symbols-outlined">badge</span>
                 </div>
-                <p class="text-sm font-medium text-slate-500">Admin</p>
+                <p class="text-sm font-medium text-slate-500">Staff</p>
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statAdmin ?? 0 ?></h3>
             </div>
             <!-- Status Keamanan -->
@@ -100,10 +100,10 @@
                 <div class="flex items-center gap-2">
                     <form method="get" action="<?= base_url('admin/settings') ?>" class="flex gap-2">
                         <select name="role" onchange="this.form.submit()"
-                                class="text-xs bg-white border border-slate-300 rounded px-3 py-1.5 focus:ring-primary outline-none">
+                                class="text-xs bg-white border border-slate-300 rounded px-3 py-1.5 focus:ring-primary outline-none w-32">
                             <option value="" <?= ($filterRole ?? '') === '' ? 'selected' : '' ?>>Semua Role</option>
                             <option value="superadmin" <?= ($filterRole ?? '') === 'superadmin' ? 'selected' : '' ?>>Superadmin</option>
-                            <option value="admin"      <?= ($filterRole ?? '') === 'admin'      ? 'selected' : '' ?>>Admin</option>
+                            <option value="staff"      <?= ($filterRole ?? '') === 'staff'      ? 'selected' : '' ?>>Staff</option>
                         </select>
                         <input name="q" value="<?= esc($keyword ?? '') ?>"
                                placeholder="Cari admin..."
@@ -151,7 +151,7 @@
                                     <td class="px-5 py-4 text-center">
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold <?= $badgeClass ?> uppercase tracking-wide">
                                             <span class="w-1.5 h-1.5 <?= $isSuperadmin ? 'bg-blue-500' : 'bg-slate-500' ?> rounded-full"></span>
-                                            <?= esc(ucfirst($admin['role'] ?? 'admin')) ?>
+                                            <?= $isSuperadmin ? 'SUPER ADMIN' : 'STAFF' ?>
                                         </span>
                                     </td>
                                     <td class="px-5 py-4 text-body-sm text-slate-500 text-center">
@@ -162,14 +162,17 @@
                                            class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
                                             <span class="material-symbols-outlined text-[20px]">edit</span>
                                         </a>
-                                        <form action="<?= base_url('admin/settings/' . $admin['id'] . '/delete') ?>" method="post" class="inline">
-                                            <?= csrf_field() ?>
-                                            <button type="submit"
-                                                    class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
-                                                    >
+                                        <?php if ($admin['id'] !== ($loggedInId ?? '')): ?>
+                                            <button type="button"
+                                                    class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Admin"
+                                                    onclick="showDeleteAdminModal('<?= esc($admin['id'], 'js') ?>', '<?= esc($admin['name'], 'js') ?>', '<?= esc(ucfirst($admin['role']), 'js') ?>')">
                                                 <span class="material-symbols-outlined text-[20px]">delete</span>
                                             </button>
-                                        </form>
+                                        <?php else: ?>
+                                            <span class="inline p-1.5 text-slate-300 rounded cursor-not-allowed" title="Tidak bisa menghapus akun aktif Anda">
+                                                <span class="material-symbols-outlined text-[20px]">lock</span>
+                                            </span>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -214,5 +217,73 @@
 
     <?= $this->include('Admin/layouts/footer') ?>
 </main>
+
+<!-- ================================================================
+     Modal Konfirmasi Hapus ADMIN
+================================================================ -->
+<div id="deleteAdminModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0 duration-300" id="deleteAdminModalContent">
+        <!-- Header -->
+        <div class="p-5 border-b border-slate-100 bg-slate-50/50">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-red-500">admin_panel_settings</span>
+                Hapus Akun Admin?
+            </h4>
+        </div>
+        <!-- Body -->
+        <div class="p-6 text-center">
+            <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-4xl text-red-500">person_remove</span>
+            </div>
+            <h3 class="text-lg font-black text-slate-800 mb-1">Yakin hapus admin ini?</h3>
+            <p class="text-xs text-slate-400 mb-1" id="deleteAdminIdLabel"></p>
+            <p class="text-sm text-slate-500 leading-relaxed mb-6">
+                Akun <strong id="deleteAdminName"></strong>
+                (<span id="deleteAdminRole" class="font-semibold text-red-600"></span>)
+                akan dihapus permanen dan tidak dapat dipulihkan.
+            </p>
+            <form id="deleteAdminForm" method="post">
+                <?= csrf_field() ?>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeDeleteAdminModal()"
+                            class="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm rounded-lg transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors">
+                        Ya, Hapus Admin
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const baseSettingsUrl = '<?= base_url("admin/settings") ?>';
+
+    function showDeleteAdminModal(adminId, adminName, adminRole) {
+        document.getElementById('deleteAdminIdLabel').textContent = '#' + adminId;
+        document.getElementById('deleteAdminName').textContent    = adminName;
+        document.getElementById('deleteAdminRole').textContent    = adminRole;
+        document.getElementById('deleteAdminForm').action         = baseSettingsUrl + '/' + adminId + '/delete';
+
+        const modal   = document.getElementById('deleteAdminModal');
+        const content = document.getElementById('deleteAdminModalContent');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeDeleteAdminModal() {
+        const modal   = document.getElementById('deleteAdminModal');
+        const content = document.getElementById('deleteAdminModalContent');
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+</script>
 
 <?php $this->endSection(); ?>
