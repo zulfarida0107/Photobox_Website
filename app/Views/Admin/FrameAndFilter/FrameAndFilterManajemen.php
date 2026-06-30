@@ -189,7 +189,7 @@
                                                     <?= csrf_field() ?>
                                                     <button type="submit"
                                                             class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
-                                                            onclick="return confirm('Hapus frame ini?')">
+                                                            >
                                                         <span class="material-symbols-outlined text-[20px]">delete</span>
                                                     </button>
                                                 </form>

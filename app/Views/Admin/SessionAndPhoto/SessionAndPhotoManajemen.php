@@ -37,9 +37,9 @@
             </div>
             <div class="flex gap-2">
                 <a href="<?= base_url('admin/sessions/export') ?>"
-                   class="bg-white border border-outline-variant text-blue-600 px-4 py-2 rounded font-label-bold text-label-bold flex items-center gap-2 hover:bg-slate-50 transition-colors">
-                    <span class="material-symbols-outlined">download</span>
-                    Ekspor CSV
+                   class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2 rounded font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">cloud_download</span>
+                    Ekspor Laporan
                 </a>
                 <a href="<?= base_url('admin/sessions/resend-all') ?>"
                    class="bg-primary text-on-primary px-4 py-2 rounded font-label-bold text-label-bold flex items-center gap-2 hover:bg-blue-800 transition-colors">
@@ -155,7 +155,7 @@
                                             <form action="<?= base_url('admin/sessions/' . $session['id'] . '/delete') ?>" method="post" class="inline">
                                                 <?= csrf_field() ?>
                                                 <button type="submit" class="text-slate-400 hover:text-red-600 p-1" title="Hapus Sesi"
-                                                        onclick="return confirm('Hapus sesi ini beserta seluruh fotonya?')">
+                                                        >
                                                     <span class="material-symbols-outlined text-xl">delete</span>
                                                 </button>
                                             </form>
@@ -283,7 +283,7 @@
                                                 <?= csrf_field() ?>
                                                 <button type="submit"
                                                         class="bg-white/20 backdrop-blur-md p-2 rounded-full text-white hover:bg-error transition-colors"
-                                                        onclick="return confirm('Hapus foto ini?')">
+                                                        >
                                                     <span class="material-symbols-outlined text-sm">delete</span>
                                                 </button>
                                             </form>

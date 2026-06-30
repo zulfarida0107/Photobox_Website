@@ -89,7 +89,7 @@
                 <form action="<?= base_url('admin/customers/' . $customer['id'] . '/delete') ?>" method="post" class="inline">
                     <?= csrf_field() ?>
                     <button type="submit" class="px-4 py-2 border border-red-200 text-red-600 rounded-lg text-xs font-bold hover:bg-red-50 transition-colors"
-                            onclick="return confirm('Hapus pelanggan ini?')">
+                            >
                         Hapus Akun Pelanggan
                     </button>
                 </form>

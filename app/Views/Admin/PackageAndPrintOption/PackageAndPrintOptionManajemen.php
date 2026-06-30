@@ -24,8 +24,8 @@
             </div>
             <div class="flex gap-3">
                 <a href="<?= base_url('admin/packages/export') ?>"
-                   class="flex items-center gap-2 bg-white border border-outline-variant text-on-surface px-4 py-2 rounded font-label-bold text-label-bold hover:bg-slate-50 transition-colors">
-                    <span class="material-symbols-outlined text-[18px]">download</span>
+                   class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2 rounded font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">cloud_download</span>
                     Ekspor Laporan
                 </a>
                 <a href="<?= base_url('admin/packages/create') ?>"
@@ -36,17 +36,7 @@
             </div>
         </div>
 
-        <!-- Flash messages -->
-        <?php if (session()->getFlashdata('success')): ?>
-            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm font-medium">
-                <?= esc(session()->getFlashdata('success')) ?>
-            </div>
-        <?php endif; ?>
-        <?php if (session()->getFlashdata('error')): ?>
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-medium">
-                <?= esc(session()->getFlashdata('error')) ?>
-            </div>
-        <?php endif; ?>
+        <!-- Flash messages (handled globally in main.php) -->
 
         <div class="grid grid-cols-12 gap-6">
 
@@ -73,7 +63,7 @@
                     <div class="flex items-center justify-between mb-3">
                         <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">payments</span>
                     </div>
-                    <p class="text-sm font-medium text-slate-500">Rata-rata Harga</p>
+                    <p class="text-sm font-medium text-slate-500">Rata-rata Harga Paket</p>
                     <h3 class="text-2xl font-black text-slate-900 mt-1">
                         Rp <?= number_format(($statAvgPrice ?? 0) / 1000, 0) ?>k
                     </h3>
@@ -141,9 +131,9 @@
                                                 </a>
                                                 <form action="<?= base_url('admin/packages/' . $pkg['id'] . '/delete') ?>" method="post" class="inline">
                                                     <?= csrf_field() ?>
-                                                    <button type="submit"
+                                                    <button type="button"
                                                             class="p-1.5 text-error hover:bg-error-container rounded-md" title="Hapus"
-                                                            onclick="return confirm('Hapus paket ini?')">
+                                                            onclick="Swal.fire({title: 'Hapus paket ini?', text: 'Tindakan ini mungkin mempengaruhi data lain.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Ya, hapus!', cancelButtonText: 'Batal'}).then((result) => { if (result.isConfirmed) { this.closest('form').submit(); } })">
                                                         <span class="material-symbols-outlined text-[18px]">delete</span>
                                                     </button>
                                                 </form>
@@ -222,8 +212,8 @@
                                                 </a>
                                                 <form action="<?= base_url('admin/print-options/' . $opt['id'] . '/delete') ?>" method="post" class="inline">
                                                     <?= csrf_field() ?>
-                                                    <button type="submit" class="p-1 text-error hover:bg-error-container rounded" title="Hapus"
-                                                            onclick="return confirm('Hapus opsi cetak ini?')">
+                                                    <button type="button" class="p-1 text-error hover:bg-error-container rounded" title="Hapus"
+                                                            onclick="Swal.fire({title: 'Hapus opsi cetak ini?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Ya, hapus!', cancelButtonText: 'Batal'}).then((result) => { if (result.isConfirmed) { this.closest('form').submit(); } })">
                                                         <span class="material-symbols-outlined text-[16px]">delete</span>
                                                     </button>
                                                 </form>
@@ -241,11 +231,11 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="p-4 text-center bg-blue-50 border-t border-slate-100">
+                <!-- <div class="p-4 text-center bg-blue-50 border-t border-slate-100">
                     <a href="<?= base_url('admin/print-options') ?>" class="text-xs font-bold text-primary hover:underline">
                         Kelola Detail Opsi
                     </a>
-                </div>
+                </div> -->
             </div>
 
             <!-- Promo & Preview Bento -->
@@ -258,7 +248,7 @@
                         <h4 class="mt-4 text-xl font-bold">Bundling Hemat!</h4>
                         <p class="text-sm text-blue-100 mt-2">Paket dengan durasi &gt; 30 menit cenderung meningkatkan konversi cetak tambahan hingga 25%.</p>
                     </div>
-                    <button class="mt-8 bg-white text-blue-700 font-label-bold text-label-bold py-2 rounded shadow-lg hover:bg-slate-50 transition-colors">
+                    <button type="button" onclick="Swal.fire('Fitur Mendatang', 'Fitur pembuatan campaign promosi sedang dalam tahap pengembangan.', 'info')" class="mt-8 bg-white text-blue-700 font-label-bold text-label-bold py-2 rounded shadow-lg hover:bg-slate-50 transition-colors">
                         Buat Campaign
                     </button>
                 </div>
@@ -287,13 +277,9 @@
     <?= $this->include('Admin/layouts/footer') ?>
 </main>
 
-<!-- FAB -->
-<div class="fixed bottom-8 right-8 z-[60]">
-    <a href="<?= base_url('admin/packages/create') ?>"
-       class="bg-primary-container text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center hover:scale-105 transition-transform active:scale-95 group relative">
-        <span class="material-symbols-outlined text-3xl">add</span>
-        <span class="absolute right-full mr-4 bg-slate-800 text-white text-[10px] py-1 px-3 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Paket Cepat</span>
-    </a>
-</div>
+
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <?php $this->endSection(); ?>
