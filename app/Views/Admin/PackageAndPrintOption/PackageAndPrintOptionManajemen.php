@@ -99,10 +99,10 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50/80 text-slate-500 font-label-bold text-label-bold uppercase tracking-wider">
-                                <th class="px-6 py-4">ID Paket</th>
+                                <th class="px-6 py-4 text-center">ID Paket</th>
                                 <th class="px-6 py-4">Nama Paket</th>
-                                <th class="px-6 py-4">Foto / Durasi</th>
-                                <th class="px-6 py-4 text-right">Harga</th>
+                                <th class="px-6 py-4 text-center">Foto / Durasi</th>
+                                <th class="px-6 py-4 text-center">Harga</th>
                                 <th class="px-6 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -110,9 +110,9 @@
                             <?php if (!empty($packages)): ?>
                                 <?php foreach ($packages as $pkg): ?>
                                     <tr class="hover:bg-blue-50/30 transition-colors group">
-                                        <td class="px-6 py-4 font-mono text-xs text-slate-500"><?= esc($pkg['id']) ?></td>
+                                        <td class="px-6 py-4 font-mono text-xs text-slate-500 text-center"><?= esc($pkg['id']) ?></td>
                                         <td class="px-6 py-4 font-bold text-on-surface"><?= esc($pkg['name']) ?></td>
-                                        <td class="px-6 py-4 text-body-sm text-slate-500">
+                                        <td class="px-6 py-4 text-body-sm text-slate-500 text-center">
                                             <span class="bg-slate-100 px-2 py-1 rounded text-xs font-medium text-slate-600">
                                                 <?= esc($pkg['photo_count']) ?> Foto
                                             </span>
@@ -120,24 +120,22 @@
                                                 <?= esc($pkg['duration']) ?> Mnt
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 text-right font-bold text-primary">
+                                        <td class="px-6 py-4 font-bold text-primary text-center">
                                             Rp <?= number_format($pkg['base_price'], 0, ',', '.') ?>
                                         </td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <a href="<?= base_url('admin/packages/' . $pkg['id'] . '/edit') ?>"
-                                                   class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md" title="Edit">
-                                                    <span class="material-symbols-outlined text-[18px]">edit</span>
-                                                </a>
-                                                <form action="<?= base_url('admin/packages/' . $pkg['id'] . '/delete') ?>" method="post" class="inline">
-                                                    <?= csrf_field() ?>
-                                                    <button type="button"
-                                                            class="p-1.5 text-error hover:bg-error-container rounded-md" title="Hapus"
-                                                            onclick="Swal.fire({title: 'Hapus paket ini?', text: 'Tindakan ini mungkin mempengaruhi data lain.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Ya, hapus!', cancelButtonText: 'Batal'}).then((result) => { if (result.isConfirmed) { this.closest('form').submit(); } })">
-                                                        <span class="material-symbols-outlined text-[18px]">delete</span>
-                                                    </button>
-                                                </form>
-                                            </div>
+                                        <td class="px-6 py-4 text-center space-x-2">
+                                            <a href="<?= base_url('admin/packages/' . $pkg['id'] . '/edit') ?>"
+                                               class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                                <span class="material-symbols-outlined text-[20px]">edit</span>
+                                            </a>
+                                            <form action="<?= base_url('admin/packages/' . $pkg['id'] . '/delete') ?>" method="post" class="inline">
+                                                <?= csrf_field() ?>
+                                                <button type="button"
+                                                        class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
+                                                        onclick="Swal.fire({title: 'Hapus paket ini?', text: 'Tindakan ini mungkin mempengaruhi data lain.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Ya, hapus!', cancelButtonText: 'Batal'}).then((result) => { if (result.isConfirmed) { this.closest('form').submit(); } })">
+                                                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -184,7 +182,7 @@
                             <tr class="bg-slate-50/80 text-slate-500 font-label-bold text-label-bold uppercase tracking-wider sticky top-0">
                                 <th class="px-5 py-4">Opsi</th>
                                 <th class="px-5 py-4 text-center">Copies</th>
-                                <th class="px-5 py-4 text-right">Harga</th>
+                                <th class="px-5 py-4 text-center">Harga</th>
                                 <th class="px-5 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -201,23 +199,21 @@
                                                 <?= esc($opt['copies']) ?> Lbr
                                             </span>
                                         </td>
-                                        <td class="px-5 py-4 text-right font-bold text-on-surface">
+                                        <td class="px-5 py-4 font-bold text-on-surface text-center">
                                             Rp <?= number_format(($opt['extra_price'] ?? 0) / 1000, 0) ?>k
                                         </td>
-                                        <td class="px-5 py-4 text-center">
-                                            <div class="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <a href="<?= base_url('admin/print-options/' . $opt['id'] . '/edit') ?>"
-                                                   class="p-1 text-blue-600 hover:bg-blue-100 rounded" title="Edit">
-                                                    <span class="material-symbols-outlined text-[16px]">edit</span>
-                                                </a>
-                                                <form action="<?= base_url('admin/print-options/' . $opt['id'] . '/delete') ?>" method="post" class="inline">
-                                                    <?= csrf_field() ?>
-                                                    <button type="button" class="p-1 text-error hover:bg-error-container rounded" title="Hapus"
-                                                            onclick="Swal.fire({title: 'Hapus opsi cetak ini?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Ya, hapus!', cancelButtonText: 'Batal'}).then((result) => { if (result.isConfirmed) { this.closest('form').submit(); } })">
-                                                        <span class="material-symbols-outlined text-[16px]">delete</span>
-                                                    </button>
-                                                </form>
-                                            </div>
+                                        <td class="px-5 py-4 text-center space-x-2">
+                                            <a href="<?= base_url('admin/print-options/' . $opt['id'] . '/edit') ?>"
+                                               class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                                <span class="material-symbols-outlined text-[20px]">edit</span>
+                                            </a>
+                                            <form action="<?= base_url('admin/print-options/' . $opt['id'] . '/delete') ?>" method="post" class="inline">
+                                                <?= csrf_field() ?>
+                                                <button type="button" class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
+                                                        onclick="Swal.fire({title: 'Hapus opsi cetak ini?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Ya, hapus!', cancelButtonText: 'Batal'}).then((result) => { if (result.isConfirmed) { this.closest('form').submit(); } })">
+                                                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

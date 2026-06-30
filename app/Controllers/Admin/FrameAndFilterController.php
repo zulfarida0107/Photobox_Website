@@ -101,8 +101,12 @@ class FrameAndFilterController extends BaseController
         $file->move(FCPATH . 'uploads/frames/', $newName);
 
         // Generate ID: FRM-XXX
-        $count = $this->frameModel->countAll();
-        $newId = sprintf('FRM-%03d', $count + 1);
+        $lastRow = $this->frameModel->orderBy('id', 'DESC')->first();
+        $lastIdNumber = 0;
+        if ($lastRow && preg_match('/FRM-(\d+)/', $lastRow['id'], $matches)) {
+            $lastIdNumber = (int)$matches[1];
+        }
+        $newId = sprintf('FRM-%03d', $lastIdNumber + 1);
 
         $this->frameModel->insert([
             'id'          => $newId,
@@ -236,8 +240,12 @@ class FrameAndFilterController extends BaseController
                 ->with('error', implode(' ', $this->validator->getErrors()));
         }
 
-        $count = $this->filterModel->countAll();
-        $newId = sprintf('FLT-%02d', $count + 1);
+        $lastRow = $this->filterModel->orderBy('id', 'DESC')->first();
+        $lastIdNumber = 0;
+        if ($lastRow && preg_match('/FLT-(\d+)/', $lastRow['id'], $matches)) {
+            $lastIdNumber = (int)$matches[1];
+        }
+        $newId = sprintf('FLT-%02d', $lastIdNumber + 1);
 
         $this->filterModel->insert([
             'id'        => $newId,
@@ -349,8 +357,17 @@ class FrameAndFilterController extends BaseController
         }
 
         $db    = $this->frameModel->db;
-        $count = $db->table('frame_categories')->countAllResults();
-        $newId = sprintf('cat_custom_%02d', $count + 1);
+        $customCategories = $db->table('frame_categories')
+            ->like('id', 'cat_custom_')
+            ->get()->getResultArray();
+        $maxNum = 0;
+        foreach ($customCategories as $cat) {
+            if (preg_match('/cat_custom_(\d+)/', $cat['id'], $matches)) {
+                $num = (int)$matches[1];
+                if ($num > $maxNum) $maxNum = $num;
+            }
+        }
+        $newId = sprintf('cat_custom_%02d', $maxNum + 1);
 
         $db->table('frame_categories')->insert([
             'id'         => $newId,

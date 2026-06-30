@@ -68,7 +68,7 @@
                                 <tr>
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Slot &amp; Booth</th>
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Waktu</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Status</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 text-center">Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
@@ -95,8 +95,8 @@
                                                 <div class="text-xs font-medium"><?= date('d M Y', strtotime($slot['slot_date'])) ?></div>
                                                 <div class="text-xs text-slate-500"><?= date('H:i', strtotime($slot['start_time'])) ?> - <?= $endTime ?></div>
                                             </td>
-                                            <td class="px-4 py-3">
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase <?= $sc ?>">
+                                            <td class="px-4 py-3 text-center">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase <?= $sc ?>">
                                                     <?= $sl ?>
                                                 </span>
                                             </td>
@@ -129,8 +129,8 @@
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Kode &amp; Cust</th>
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Slot / Paket</th>
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Antrean</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Status</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-right">Aksi</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Status</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
@@ -157,32 +157,31 @@
                                             <td class="px-4 py-3 text-center">
                                                 <span class="text-lg font-black text-slate-400"><?= esc($bk['queue_number']) ?></span>
                                             </td>
-                                            <td class="px-4 py-3">
-                                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold <?= $st[0] ?>"><?= $st[1] ?></span>
+                                            <td class="px-4 py-3 text-center">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold <?= $st[0] ?>"><?= $st[1] ?></span>
                                             </td>
-                                            <td class="px-4 py-3 text-right">
-                                                <div class="flex justify-end gap-2">
+                                            <td class="px-4 py-3 text-center">
+                                                <div class="flex justify-center gap-2">
                                                     <?php if (in_array($bk['status'], ['confirmed', 'pending'])): ?>
                                                         <a href="<?= base_url('admin/bookings/' . $bk['id'] . '/edit') ?>"
-                                                           class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg" title="Edit">
-                                                            <span class="material-symbols-outlined text-[18px]">edit</span>
+                                                           class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                                            <span class="material-symbols-outlined text-[20px]">edit</span>
                                                         </a>
                                                         <form action="<?= base_url('admin/bookings/' . $bk['id'] . '/cancel') ?>" method="post" class="inline">
                                                             <?= csrf_field() ?>
-                                                            <button type="submit" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg" title="Batalkan"
-                                                                    >
-                                                                <span class="material-symbols-outlined text-[18px]">cancel</span>
+                                                            <button type="submit" class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Batalkan">
+                                                                <span class="material-symbols-outlined text-[20px]">cancel</span>
                                                             </button>
                                                         </form>
                                                     <?php elseif ($bk['status'] === 'completed'): ?>
                                                         <a href="<?= base_url('admin/bookings/' . $bk['id']) ?>"
-                                                           class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg" title="Detail">
-                                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                           class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Detail">
+                                                            <span class="material-symbols-outlined text-[20px]">visibility</span>
                                                         </a>
                                                     <?php else: ?>
                                                         <a href="<?= base_url('admin/bookings/' . $bk['id']) ?>"
-                                                           class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg" title="Riwayat">
-                                                            <span class="material-symbols-outlined text-[18px]">history</span>
+                                                           class="inline p-1.5 text-slate-500 hover:bg-slate-100 rounded transition-colors" title="Riwayat">
+                                                            <span class="material-symbols-outlined text-[20px]">history</span>
                                                         </a>
                                                     <?php endif; ?>
                                                 </div>

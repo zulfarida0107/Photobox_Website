@@ -120,13 +120,13 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50 text-[11px] font-black uppercase tracking-wider text-slate-500 border-b border-outline-variant">
-                            <th class="px-6 py-4">ID Customer</th>
+                            <th class="px-6 py-4 text-center">ID Customer</th>
                             <th class="px-6 py-4">Nama Pelanggan</th>
-                            <th class="px-6 py-4">Email</th>
-                            <th class="px-6 py-4">Nomor Telepon</th>
-                            <th class="px-6 py-4">Tanggal Registrasi</th>
+                            <th class="px-6 py-4 text-center">Email</th>
+                            <th class="px-6 py-4 text-center">Nomor Telepon</th>
+                            <th class="px-6 py-4 text-center">Tanggal Registrasi</th>
                             <th class="px-6 py-4 text-center">Status</th>
-                            <th class="px-6 py-4 text-right">Aksi</th>
+                            <th class="px-6 py-4 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -143,35 +143,34 @@
                                     $badgeText  = $isActive ? 'Aktif' : 'Non-Aktif';
                                 ?>
                                 <tr class="hover:bg-blue-50/30 transition-colors group">
-                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-900 font-bold">#<?= esc($cust['id']) ?></td>
+                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-900 font-bold text-center">#<?= esc($cust['id']) ?></td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full bg-<?= $color ?>-100 flex items-center justify-center text-<?= $color ?>-700 font-bold text-xs"><?= esc($initials) ?></div>
                                             <span class="font-bold text-slate-900"><?= esc($cust['name']) ?></span>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-600"><?= esc($cust['email']) ?></td>
-                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-600"><?= esc($cust['phone'] ?? '-') ?></td>
-                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-600"><?= date('d M Y', strtotime($cust['created_at'])) ?></td>
+                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-600 text-center"><?= esc($cust['email']) ?></td>
+                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-600 text-center"><?= esc($cust['phone'] ?? '-') ?></td>
+                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-600 text-center"><?= date('d M Y', strtotime($cust['created_at'])) ?></td>
                                     <td class="px-6 py-4 text-center">
-                                        <span class="px-2 py-1 rounded <?= $badgeClass ?> text-[10px] font-black uppercase"><?= $badgeText ?></span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold <?= $badgeClass ?>"><?= $badgeText ?></span>
                                     </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <a href="<?= base_url('admin/customers/' . $cust['id']) ?>" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-all" title="Detail">
-                                                <span class="material-symbols-outlined text-lg">visibility</span>
-                                            </a>
-                                            <a href="<?= base_url('admin/customers/' . $cust['id'] . '/edit') ?>" class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded transition-all" title="Edit">
-                                                <span class="material-symbols-outlined text-lg">edit</span>
-                                            </a>
-                                            <form action="<?= base_url('admin/customers/' . $cust['id'] . '/delete') ?>" method="post" class="inline">
-                                                <?= csrf_field() ?>
-                                                <button type="submit" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-all" title="Hapus"
-                                                        >
-                                                    <span class="material-symbols-outlined text-lg">delete</span>
-                                                </button>
-                                            </form>
-                                        </div>
+                                    <td class="px-6 py-4 text-center space-x-2">
+                                        <button type="button" 
+                                                onclick="showCustomerPreviewModal('<?= esc($cust['id'], 'js') ?>', '<?= esc($cust['name'], 'js') ?>', '<?= esc($cust['email'], 'js') ?>', '<?= esc($cust['phone'] ?? '-', 'js') ?>', '<?= date('d M Y', strtotime($cust['created_at'])) ?>', '<?= $badgeText ?>', '<?= $badgeClass ?>')" 
+                                                class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Detail">
+                                            <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                        </button>
+                                        <a href="<?= base_url('admin/customers/' . $cust['id'] . '/edit') ?>" class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                            <span class="material-symbols-outlined text-[20px]">edit</span>
+                                        </a>
+                                        <form action="<?= base_url('admin/customers/' . $cust['id'] . '/delete') ?>" method="post" class="inline">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus">
+                                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -212,8 +211,96 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <?= $this->include('Admin/layouts/footer') ?>
 </main>
+
+<!-- Customer Preview Modal -->
+<div id="customerPreviewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="customerPreviewModalContent">
+        <!-- Modal Header -->
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-emerald-600">visibility</span>
+                Detail Pelanggan
+            </h4>
+        </div>
+        
+        <!-- Modal Body -->
+        <div class="p-6 flex flex-col items-center">
+            <!-- Icon/Avatar Wrapper -->
+            <div class="w-24 h-24 bg-blue-50 text-blue-600 border border-slate-200 rounded-full overflow-hidden flex items-center justify-center p-4 mb-5 shadow-inner">
+                <span class="material-symbols-outlined text-[48px]">person</span>
+            </div>
+
+            <!-- Details List -->
+            <div class="w-full space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-left text-sm mb-6">
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">ID Pelanggan</span>
+                    <span class="font-mono text-slate-800 font-bold" id="modalCustId"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Nama Pelanggan</span>
+                    <span class="text-slate-800 font-semibold" id="modalCustName"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Email</span>
+                    <span class="text-slate-800 font-semibold" id="modalCustEmail"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Telepon</span>
+                    <span class="text-slate-800 font-semibold" id="modalCustPhone"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Tanggal Registrasi</span>
+                    <span class="text-slate-800" id="modalCustRegistered"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-semibold text-slate-500">Status</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold" id="modalCustStatus"></span>
+                </div>
+            </div>
+            
+            <!-- Close Button -->
+            <button type="button" onclick="closeCustomerPreviewModal()" class="w-full py-2.5 bg-primary hover:bg-primary-container text-white font-semibold text-sm rounded-lg transition-colors shadow-md">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showCustomerPreviewModal(id, name, email, phone, registeredAt, badgeText, badgeClass) {
+        const modal = document.getElementById('customerPreviewModal');
+        const content = document.getElementById('customerPreviewModalContent');
+        
+        document.getElementById('modalCustId').textContent = '#' + id;
+        document.getElementById('modalCustName').textContent = name;
+        document.getElementById('modalCustEmail').textContent = email;
+        document.getElementById('modalCustPhone').textContent = phone;
+        document.getElementById('modalCustRegistered').textContent = registeredAt;
+        
+        const statusEl = document.getElementById('modalCustStatus');
+        statusEl.textContent = badgeText;
+        statusEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ' + badgeClass;
+
+        // Show Modal
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeCustomerPreviewModal() {
+        const modal = document.getElementById('customerPreviewModal');
+        const content = document.getElementById('customerPreviewModalContent');
+
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+</script>
 
 <?php $this->endSection(); ?>
