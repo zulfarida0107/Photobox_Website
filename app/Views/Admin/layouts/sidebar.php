@@ -98,11 +98,13 @@ function sidebarClass(string $key, string $activeKey, string $clsActive, string 
             <span>Pengaturan Akses</span>
         </a>
 
-        <a class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200"
+    </nav>
+
+    <div class="mt-auto pt-4 border-t border-slate-100">
+        <a class="flex items-center justify-center gap-2 w-full py-2.5 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white rounded-lg transition-all duration-200 font-bold text-sm"
            href="<?= base_url('admin/logout') ?>">
-            <span class="material-symbols-outlined">logout</span>
+            <span class="material-symbols-outlined text-[20px]">logout</span>
             <span>Logout</span>
         </a>
-
-    </nav>
+    </div>
 </aside>

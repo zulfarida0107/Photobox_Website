@@ -100,7 +100,7 @@
                 <div class="flex items-center gap-2">
                     <form method="get" action="<?= base_url('admin/settings') ?>" class="flex gap-2">
                         <select name="role" onchange="this.form.submit()"
-                                class="text-xs bg-white border border-slate-300 rounded px-3 py-1.5 focus:ring-primary outline-none">
+                                class="text-xs bg-white border border-slate-300 rounded px-3 py-1.5 focus:ring-primary outline-none w-32">
                             <option value="" <?= ($filterRole ?? '') === '' ? 'selected' : '' ?>>Semua Role</option>
                             <option value="superadmin" <?= ($filterRole ?? '') === 'superadmin' ? 'selected' : '' ?>>Superadmin</option>
                             <option value="staff"      <?= ($filterRole ?? '') === 'staff'      ? 'selected' : '' ?>>Staff</option>
