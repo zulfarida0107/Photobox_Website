@@ -213,13 +213,11 @@
                                                 <span class="material-symbols-outlined text-[20px]">play_circle</span>
                                             </button>
                                         <?php endif; ?>
-                                        <form action="<?= base_url('admin/booths/' . $booth['id'] . '/delete') ?>" method="post" class="inline">
-                                            <?= csrf_field() ?>
-                                            <button type="submit"
-                                                    class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus">
-                                                <span class="material-symbols-outlined text-[20px]">delete</span>
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                                class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
+                                                onclick="openUniversalDeleteModal('<?= base_url('admin/booths/' . $booth['id'] . '/delete') ?>', '<?= esc($booth['name'], 'js') ?>', 'Hapus Mesin Booth?')">
+                                            <span class="material-symbols-outlined text-[20px]">delete</span>
+                                        </button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -240,22 +238,22 @@
                 <span class="text-body-sm text-outline">
                     Menampilkan <?= count($booths ?? []) ?> dari <?= $totalBooths ?? 0 ?> mesin
                 </span>
-                <div class="flex space-x-1">
-                    <a href="<?= base_url('admin/booths?page=' . max(1, ($currentPage ?? 1) - 1) . '&q=' . ($keyword ?? '') . '&status=' . ($filterStatus ?? '')) ?>"
-                       class="p-2 border border-outline-variant rounded hover:bg-white transition-colors <?= ($currentPage ?? 1) <= 1 ? 'opacity-50 pointer-events-none' : '' ?>">
-                        <span class="material-symbols-outlined text-sm">chevron_left</span>
-                    </a>
-                    <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
-                        <a href="<?= base_url('admin/booths?page=' . $i . '&q=' . ($keyword ?? '') . '&status=' . ($filterStatus ?? '')) ?>"
-                           class="px-3 py-1 border rounded font-label-bold text-label-bold <?= $i === ($currentPage ?? 1) ? 'bg-primary text-on-primary border-primary' : 'border-outline-variant hover:bg-white' ?>">
-                            <?= $i ?>
-                        </a>
-                    <?php endfor; ?>
-                    <a href="<?= base_url('admin/booths?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&q=' . ($keyword ?? '') . '&status=' . ($filterStatus ?? '')) ?>"
-                       class="p-2 border border-outline-variant rounded hover:bg-white transition-colors <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-50 pointer-events-none' : '' ?>">
-                        <span class="material-symbols-outlined text-sm">chevron_right</span>
-                    </a>
-                </div>
+                        <div class="flex gap-1">
+                            <a href="<?= base_url('admin/booths?page=' . max(1, ($currentPage ?? 1) - 1) . '&q=' . ($keyword ?? '') . '&status=' . ($filterStatus ?? '')) ?>"
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_left</span>
+                            </a>
+                            <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
+                                <a href="<?= base_url('admin/booths?page=' . $i . '&q=' . ($keyword ?? '') . '&status=' . ($filterStatus ?? '')) ?>"
+                                   class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
+                                    <?= $i ?>
+                                </a>
+                            <?php endfor; ?>
+                            <a href="<?= base_url('admin/booths?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&q=' . ($keyword ?? '') . '&status=' . ($filterStatus ?? '')) ?>"
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                            </a>
+                        </div>
             </div>
         </div>
 

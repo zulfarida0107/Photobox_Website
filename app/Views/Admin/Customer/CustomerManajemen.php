@@ -165,12 +165,10 @@
                                         <a href="<?= base_url('admin/customers/' . $cust['id'] . '/edit') ?>" class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
                                             <span class="material-symbols-outlined text-[20px]">edit</span>
                                         </a>
-                                        <form action="<?= base_url('admin/customers/' . $cust['id'] . '/delete') ?>" method="post" class="inline">
-                                            <?= csrf_field() ?>
-                                            <button type="submit" class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus">
-                                                <span class="material-symbols-outlined text-[20px]">delete</span>
-                                            </button>
-                                        </form>
+                                        <button type="button" class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
+                                                onclick="openUniversalDeleteModal('<?= base_url('admin/customers/' . $cust['id'] . '/delete') ?>', '<?= esc($cust['name'], 'js') ?>', 'Hapus Pelanggan?')">
+                                            <span class="material-symbols-outlined text-[20px]">delete</span>
+                                        </button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -190,19 +188,19 @@
             <!-- Pagination -->
             <div class="p-4 border-t border-outline-variant bg-white flex items-center justify-between">
                 <p class="text-xs font-medium text-slate-500">Menampilkan <?= count($customers ?? []) ?> dari <?= $totalCustomers ?? 0 ?> pelanggan</p>
-                <div class="flex items-center gap-1">
+                <div class="flex gap-1">
                     <a href="<?= base_url('admin/customers?page=' . max(1, ($currentPage ?? 1) - 1) . '&status=' . ($filterStatus ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                       class="p-2 rounded hover:bg-slate-50 text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                         <span class="material-symbols-outlined text-sm">chevron_left</span>
                     </a>
                     <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
                         <a href="<?= base_url('admin/customers?page=' . $i . '&status=' . ($filterStatus ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                           class="w-8 h-8 rounded <?= $i === ($currentPage ?? 1) ? 'bg-blue-600 text-white' : 'hover:bg-slate-50 text-slate-600' ?> text-xs font-bold flex items-center justify-center">
+                           class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                             <?= $i ?>
                         </a>
                     <?php endfor; ?>
                     <a href="<?= base_url('admin/customers?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&status=' . ($filterStatus ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                       class="p-2 rounded hover:bg-slate-50 text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                         <span class="material-symbols-outlined text-sm">chevron_right</span>
                     </a>
                 </div>

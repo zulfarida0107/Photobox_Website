@@ -128,14 +128,11 @@
                                                class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
                                                 <span class="material-symbols-outlined text-[20px]">edit</span>
                                             </a>
-                                            <form action="<?= base_url('admin/packages/' . $pkg['id'] . '/delete') ?>" method="post" class="inline">
-                                                <?= csrf_field() ?>
-                                                <button type="button"
-                                                        class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
-                                                        onclick="Swal.fire({title: 'Hapus paket ini?', text: 'Tindakan ini mungkin mempengaruhi data lain.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Ya, hapus!', cancelButtonText: 'Batal'}).then((result) => { if (result.isConfirmed) { this.closest('form').submit(); } })">
-                                                    <span class="material-symbols-outlined text-[20px]">delete</span>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                    class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
+                                                    onclick="openUniversalDeleteModal('<?= base_url('admin/packages/' . $pkg['id'] . '/delete') ?>', '<?= esc($pkg['name'], 'js') ?>', 'Hapus Paket?')">
+                                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                                            </button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -153,13 +150,20 @@
                 <div class="p-4 bg-slate-50 text-slate-500 text-xs flex justify-between items-center border-t border-slate-100">
                     <span>Menampilkan <?= count($packages ?? []) ?> dari <?= $totalPackages ?? 0 ?> paket</span>
                     <div class="flex gap-1">
+                        <a href="<?= base_url('admin/packages?page=' . max(1, ($currentPkgPage ?? 1) - 1) . '&q=' . ($keyword ?? '')) ?>"
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPkgPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                            <span class="material-symbols-outlined text-sm">chevron_left</span>
+                        </a>
                         <?php for ($i = 1; $i <= ($totalPkgPages ?? 1); $i++): ?>
                             <a href="<?= base_url('admin/packages?page=' . $i . '&q=' . ($keyword ?? '')) ?>"
-                               class="w-8 h-8 flex items-center justify-center border border-slate-200 rounded text-xs font-bold
-                                      <?= $i === ($currentPkgPage ?? 1) ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-white' ?>">
+                               class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPkgPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                                 <?= $i ?>
                             </a>
                         <?php endfor; ?>
+                        <a href="<?= base_url('admin/packages?page=' . min(($totalPkgPages ?? 1), ($currentPkgPage ?? 1) + 1) . '&q=' . ($keyword ?? '')) ?>"
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPkgPage ?? 1) >= ($totalPkgPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -207,13 +211,10 @@
                                                class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
                                                 <span class="material-symbols-outlined text-[20px]">edit</span>
                                             </a>
-                                            <form action="<?= base_url('admin/print-options/' . $opt['id'] . '/delete') ?>" method="post" class="inline">
-                                                <?= csrf_field() ?>
-                                                <button type="button" class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
-                                                        onclick="Swal.fire({title: 'Hapus opsi cetak ini?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Ya, hapus!', cancelButtonText: 'Batal'}).then((result) => { if (result.isConfirmed) { this.closest('form').submit(); } })">
-                                                    <span class="material-symbols-outlined text-[20px]">delete</span>
-                                                </button>
-                                            </form>
+                                            <button type="button" class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
+                                                    onclick="openUniversalDeleteModal('<?= base_url('admin/print-options/' . $opt['id'] . '/delete') ?>', '<?= esc($opt['name'] ?? ('Opsi ' . $opt['copies'] . ' Lembar'), 'js') ?>', 'Hapus Opsi Cetak?')">
+                                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                                            </button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
