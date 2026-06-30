@@ -207,5 +207,30 @@
         </script>
     <?php endif; ?>
 
+    <!-- Hidden form for Universal Delete -->
+    <form id="universalDeleteForm" method="post" class="hidden">
+        <?= csrf_field() ?>
+    </form>
+
+    <script>
+        function openUniversalDeleteModal(actionUrl, itemName, title = 'Hapus Data?') {
+            Swal.fire({
+                title: title,
+                text: `Tindakan ini mungkin mempengaruhi data lain.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#2563eb',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('universalDeleteForm');
+                    form.action = actionUrl;
+                    form.submit();
+                }
+            });
+        }
+    </script>
 </body>
 </html>

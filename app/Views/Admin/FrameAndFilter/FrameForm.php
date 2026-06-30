@@ -33,7 +33,8 @@
                 </div>
             <?php endif; ?>
 
-            <form method="post" action="<?= isset($frame) ? base_url('admin/frames/' . $frame['id'] . '/update') : base_url('admin/frames') ?>" enctype="multipart/form-data" class="p-6 space-y-5">
+            <?php $returnParam = $this->request->getGet('return'); ?>
+            <form method="post" action="<?= isset($frame) ? base_url('admin/frames/' . $frame['id'] . '/update') . ($returnParam ? '?return=' . esc($returnParam, 'url') : '') : base_url('admin/frames') ?>" enctype="multipart/form-data" class="p-6 space-y-5">
                 <?= csrf_field() ?>
 
                 <?php if (isset($frame)): ?>
@@ -104,7 +105,7 @@
                 </div>
 
                 <div class="flex flex-col-reverse sm:flex-row sm:items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                    <a href="<?= base_url('admin/frames') ?>" class="w-full sm:w-auto text-center px-5 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors">Batal</a>
+                    <a href="<?= $returnParam ? esc($returnParam) : base_url('admin/frames') ?>" class="w-full sm:w-auto text-center px-5 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors">Batal</a>
                     <button type="submit" class="w-full sm:w-auto justify-center px-5 py-2.5 bg-primary text-white font-semibold text-sm rounded-lg shadow-md hover:bg-blue-800 transition-all flex items-center gap-2">
                         <span class="material-symbols-outlined text-[18px]">save</span>
                         <?= isset($frame) ? 'Perbarui Frame' : 'Unggah Frame' ?>

@@ -165,7 +165,7 @@
                                         <?php if ($admin['id'] !== ($loggedInId ?? '')): ?>
                                             <button type="button"
                                                     class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Admin"
-                                                    onclick="showDeleteAdminModal('<?= esc($admin['id'], 'js') ?>', '<?= esc($admin['name'], 'js') ?>', '<?= esc(ucfirst($admin['role']), 'js') ?>')">
+                                                    onclick="openUniversalDeleteModal('<?= base_url('admin/settings/' . $admin['id'] . '/delete') ?>', '<?= esc($admin['name'], 'js') ?>', 'Hapus Akun Admin?')">
                                                 <span class="material-symbols-outlined text-[20px]">delete</span>
                                             </button>
                                         <?php else: ?>
@@ -195,19 +195,18 @@
                 </p>
                 <div class="flex items-center gap-1">
                     <a href="<?= base_url('admin/settings?page=' . max(1, ($currentPage ?? 1) - 1) . '&role=' . ($filterRole ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                       class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-400 hover:bg-white hover:text-primary transition-all <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
-                        <span class="material-symbols-outlined text-lg">chevron_left</span>
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                        <span class="material-symbols-outlined text-sm">chevron_left</span>
                     </a>
                     <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
                         <a href="<?= base_url('admin/settings?page=' . $i . '&role=' . ($filterRole ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                           class="w-8 h-8 flex items-center justify-center rounded text-xs font-bold
-                                  <?= $i === ($currentPage ?? 1) ? 'bg-primary text-white' : 'border border-slate-200 text-slate-600 hover:bg-white hover:text-primary' ?>">
+                           class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                             <?= $i ?>
                         </a>
                     <?php endfor; ?>
                     <a href="<?= base_url('admin/settings?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&role=' . ($filterRole ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                       class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-400 hover:bg-white hover:text-primary transition-all <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
-                        <span class="material-symbols-outlined text-lg">chevron_right</span>
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
                     </a>
                 </div>
             </div>
@@ -217,73 +216,5 @@
 
     <?= $this->include('Admin/layouts/footer') ?>
 </main>
-
-<!-- ================================================================
-     Modal Konfirmasi Hapus ADMIN
-================================================================ -->
-<div id="deleteAdminModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0 duration-300" id="deleteAdminModalContent">
-        <!-- Header -->
-        <div class="p-5 border-b border-slate-100 bg-slate-50/50">
-            <h4 class="font-bold text-slate-800 flex items-center gap-2">
-                <span class="material-symbols-outlined text-red-500">admin_panel_settings</span>
-                Hapus Akun Admin?
-            </h4>
-        </div>
-        <!-- Body -->
-        <div class="p-6 text-center">
-            <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-                <span class="material-symbols-outlined text-4xl text-red-500">person_remove</span>
-            </div>
-            <h3 class="text-lg font-black text-slate-800 mb-1">Yakin hapus admin ini?</h3>
-            <p class="text-xs text-slate-400 mb-1" id="deleteAdminIdLabel"></p>
-            <p class="text-sm text-slate-500 leading-relaxed mb-6">
-                Akun <strong id="deleteAdminName"></strong>
-                (<span id="deleteAdminRole" class="font-semibold text-red-600"></span>)
-                akan dihapus permanen dan tidak dapat dipulihkan.
-            </p>
-            <form id="deleteAdminForm" method="post">
-                <?= csrf_field() ?>
-                <div class="flex gap-3">
-                    <button type="button" onclick="closeDeleteAdminModal()"
-                            class="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm rounded-lg transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors">
-                        Ya, Hapus Admin
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script>
-    const baseSettingsUrl = '<?= base_url("admin/settings") ?>';
-
-    function showDeleteAdminModal(adminId, adminName, adminRole) {
-        document.getElementById('deleteAdminIdLabel').textContent = '#' + adminId;
-        document.getElementById('deleteAdminName').textContent    = adminName;
-        document.getElementById('deleteAdminRole').textContent    = adminRole;
-        document.getElementById('deleteAdminForm').action         = baseSettingsUrl + '/' + adminId + '/delete';
-
-        const modal   = document.getElementById('deleteAdminModal');
-        const content = document.getElementById('deleteAdminModalContent');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            content.classList.remove('scale-95', 'opacity-0');
-            content.classList.add('scale-100', 'opacity-100');
-        }, 10);
-    }
-
-    function closeDeleteAdminModal() {
-        const modal   = document.getElementById('deleteAdminModal');
-        const content = document.getElementById('deleteAdminModalContent');
-        content.classList.remove('scale-100', 'opacity-100');
-        content.classList.add('scale-95', 'opacity-0');
-        setTimeout(() => modal.classList.add('hidden'), 300);
-    }
-</script>
 
 <?php $this->endSection(); ?>
