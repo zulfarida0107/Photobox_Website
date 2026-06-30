@@ -1,30 +1,22 @@
 <?php $this->extend('Admin/layouts/main'); ?>
 <?php $this->section('content'); ?>
 
-<main class="pt-16 min-h-screen flex flex-col bg-slate-50">
-    <div class="p-6 flex-1 max-w-4xl mx-auto w-full">
+<main class="pt-16 min-h-screen flex flex-col">
+    <div class="p-6 flex-1">
 
         <!-- Breadcrumbs -->
-        <nav aria-label="Breadcrumb" class="flex mb-6 text-xs font-medium text-slate-500">
-            <ol class="flex items-center space-x-2">
-                <li><a class="hover:text-primary flex items-center gap-1 transition-colors" href="<?= base_url('admin/dashboard') ?>">Dashboard</a></li>
-                <li class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
-                    <a class="hover:text-primary transition-colors" href="<?= base_url('admin/packages') ?>">Paket & Cetak</a>
-                </li>
-                <li class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
-                    <span class="text-primary font-bold"><?= isset($option) ? 'Edit Opsi Cetak' : 'Buat Opsi Cetak' ?></span>
-                </li>
-            </ol>
+        <nav class="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 mb-4">
+            <a class="hover:text-blue-700" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
+            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+            <a class="hover:text-blue-700" href="<?= base_url('admin/packages') ?>">Paket & Cetak</a>
+            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span class="text-blue-700"><?= isset($option) ? 'Edit Opsi Cetak' : 'Buat Opsi Cetak' ?></span>
         </nav>
 
-        <!-- Header -->
-        <div class="mb-8">
-            <h1 class="font-h1 text-h1 text-on-surface tracking-tight"><?= isset($option) ? 'Edit Opsi Cetak' : 'Buat Opsi Cetak Baru' ?></h1>
-            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
-                <?= isset($option) ? 'Perbarui informasi opsi tambahan cetak foto.' : 'Tambahkan opsi tambahan jumlah cetakan foto (ekstra print).' ?>
-            </p>
+        <!-- Page Header -->
+        <div class="mb-6">
+            <h2 class="font-h1 text-h1 text-on-surface"><?= isset($option) ? 'Edit Opsi Cetak' : 'Buat Opsi Cetak Baru' ?></h2>
+            <p class="font-body-sm text-body-sm text-on-surface-variant"><?= isset($option) ? 'Perbarui informasi opsi tambahan cetak foto.' : 'Tambahkan opsi tambahan jumlah cetakan foto (ekstra print).' ?></p>
         </div>
 
         <?php if (session()->getFlashdata('errors')): ?>
@@ -46,52 +38,52 @@
             </script>
         <?php endif; ?>
 
-        <!-- Form Container -->
-        <div class="bg-white rounded-2xl shadow-sm border border-outline-variant overflow-hidden">
+        <!-- Form Card -->
+        <div class="bg-white border border-outline-variant rounded-xl shadow-sm w-full overflow-hidden">
             
-            <div class="border-b border-outline-variant px-8 py-5 bg-slate-50/50 flex items-center gap-3">
+            <div class="p-6 border-b border-outline-variant bg-slate-50/50 flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">print</span>
-                <h2 class="font-h3 text-h3 text-on-surface">Informasi Opsi Cetak</h2>
+                <h4 class="font-bold text-on-surface">Informasi Opsi Cetak</h4>
             </div>
 
             <?php
             $actionUrl = isset($option) ? base_url('admin/print-options/' . $option['id'] . '/update') : base_url('admin/print-options');
             ?>
-            <form action="<?= $actionUrl ?>" method="post" class="p-8">
+            <form action="<?= $actionUrl ?>" method="post" class="p-6 space-y-5">
                 <?= csrf_field() ?>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     
                     <!-- Copies -->
                     <div>
-                        <label class="block font-label-bold text-label-bold text-on-surface uppercase mb-2">Jumlah Lembar (Copy) *</label>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jumlah Lembar (Copy) *</label>
                         <input type="number" name="copies" required min="1"
                                value="<?= old('copies') ?? ($option['copies'] ?? '') ?>"
                                placeholder="Contoh: 2"
-                               class="w-full px-4 py-3 bg-white border border-outline-variant rounded-xl font-body text-body text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                               class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white">
                         <p class="text-[11px] text-slate-500 mt-2">Jumlah lembar foto fisik yang akan dicetak sebagai tambahan.</p>
                     </div>
 
                     <!-- Harga Tambahan -->
                     <div>
-                        <label class="block font-label-bold text-label-bold text-on-surface uppercase mb-2">Harga Ekstra (Rp) *</label>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Harga Ekstra (Rp) *</label>
                         <input type="number" name="extra_price" required min="0"
                                value="<?= old('extra_price') ?? (isset($option['extra_price']) ? (int)$option['extra_price'] : '') ?>"
                                placeholder="Contoh: 15000"
-                               class="w-full px-4 py-3 bg-white border border-outline-variant rounded-xl font-body text-body text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                               class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white">
                         <p class="text-[11px] text-slate-500 mt-2">Biaya tambahan yang dikenakan untuk opsi ini. Isi 0 jika gratis.</p>
                     </div>
 
                 </div>
 
                 <!-- Footer Buttons -->
-                <div class="mt-10 pt-6 border-t border-outline-variant flex items-center justify-end gap-3">
+                <div class="flex flex-col-reverse sm:flex-row sm:items-center justify-end gap-3 pt-4 border-t border-slate-100">
                     <a href="<?= base_url('admin/packages') ?>"
-                       class="px-6 py-2.5 bg-white border border-outline-variant text-on-surface rounded-xl font-label-bold text-label-bold hover:bg-slate-50 transition-colors">
+                       class="w-full sm:w-auto text-center px-5 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors">
                         Batal
                     </a>
                     <button type="submit"
-                            class="flex items-center gap-2 px-6 py-2.5 bg-primary text-on-primary rounded-xl font-label-bold text-label-bold hover:opacity-90 transition-opacity shadow-sm">
+                            class="w-full sm:w-auto justify-center px-5 py-2.5 bg-primary text-white font-semibold text-sm rounded-lg shadow-md hover:bg-blue-800 transition-all flex items-center gap-2">
                         <span class="material-symbols-outlined text-[18px]">save</span>
                         <?= isset($option) ? 'Simpan Perubahan' : 'Simpan Opsi Cetak' ?>
                     </button>

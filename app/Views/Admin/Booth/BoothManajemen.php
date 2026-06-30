@@ -131,14 +131,14 @@
                 <table class="w-full text-left">
                     <thead>
                         <tr class="bg-surface-container-low border-b border-outline-variant">
-                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider">ID Booth</th>
+                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider text-center">ID Booth</th>
                             <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider">Nama Mesin</th>
-                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider">Alamat IP</th>
+                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider text-center">Alamat IP</th>
                             <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider">Sesi Aktif</th>
                             <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider text-center">Antrean</th>
-                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider">Status</th>
-                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider">Waktu Daftar</th>
-                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider text-right">Aksi</th>
+                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider text-center">Status</th>
+                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider text-center">Waktu Daftar</th>
+                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-outline-variant">
@@ -153,9 +153,9 @@
                                     $st = $statusMap[$booth['status']] ?? ['bg-slate-100 text-slate-500', 'bg-slate-400', ucfirst($booth['status'])];
                                 ?>
                                 <tr class="hover:bg-blue-50/30 transition-colors group">
-                                    <td class="p-4 font-data-tabular text-data-tabular text-primary font-semibold"><?= esc($booth['id']) ?></td>
+                                    <td class="p-4 font-data-tabular text-data-tabular text-primary font-semibold text-center"><?= esc($booth['id']) ?></td>
                                     <td class="p-4 font-body-base text-body-base text-on-surface"><?= esc($booth['name']) ?></td>
-                                    <td class="p-4 font-mono text-xs text-slate-600"><?= esc($booth['ip_address'] ?? '-') ?></td>
+                                    <td class="p-4 font-mono text-xs text-slate-600 text-center"><?= esc($booth['ip_address'] ?? '-') ?></td>
                                     <td class="p-4">
                                         <?php if (!empty($booth['active_booking_id'])): ?>
                                             <div class="flex items-center gap-2">
@@ -177,56 +177,54 @@
                                     <td class="p-4 text-center">
                                         <span class="text-lg font-black text-slate-500"><?= esc($booth['current_queue'] ?? 0) ?></span>
                                     </td>
-                                    <td class="p-4">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= $st[0] ?>">
-                                            <span class="w-1.5 h-1.5 <?= $st[1] ?> rounded-full mr-1.5"></span>
+                                    <td class="p-4 text-center">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold <?= $st[0] ?>">
+                                            <span class="w-1.5 h-1.5 <?= $st[1] ?> rounded-full"></span>
                                             <?= $st[2] ?>
                                         </span>
                                     </td>
-                                    <td class="p-4 font-data-tabular text-data-tabular text-outline">
+                                    <td class="p-4 font-data-tabular text-data-tabular text-outline text-center">
                                         <?= date('d M Y, H:i', strtotime($booth['created_at'])) ?>
                                     </td>
-                                    <td class="p-4 text-right">
-                                        <div class="flex justify-end space-x-2">
-                                            <a href="<?= base_url('admin/booths/' . $booth['id']) ?>"
-                                               class="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors" title="Detail Booth">
-                                                <span class="material-symbols-outlined text-[20px]">visibility</span>
-                                            </a>
-                                            <button type="button"
-                                                    class="p-1.5 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors" title="Generate QR Code"
-                                                    onclick="showQrModal('<?= esc($booth['id'], 'js') ?>', '<?= esc($booth['name'], 'js') ?>')">
-                                                <span class="material-symbols-outlined text-[20px]">qr_code</span>
-                                            </button>
-                                            <a href="<?= base_url('admin/booths/' . $booth['id'] . '/edit') ?>"
-                                               class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" title="Edit">
-                                                <span class="material-symbols-outlined text-[20px]">edit</span>
-                                            </a>
-                                            <?php if ($booth['status'] === 'active'): ?>
-                                                <form action="<?= base_url('admin/booths/' . $booth['id'] . '/maintenance') ?>" method="post" class="inline">
-                                                    <?= csrf_field() ?>
-                                                    <button type="submit"
-                                                            class="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg transition-colors" title="Set Maintenance"
-                                                            onclick="return confirm('Set booth ini ke mode Maintenance?')">
-                                                        <span class="material-symbols-outlined text-[20px]">engineering</span>
-                                                    </button>
-                                                </form>
-                                            <?php else: ?>
-                                                <form action="<?= base_url('admin/booths/' . $booth['id'] . '/activate') ?>" method="post" class="inline">
-                                                    <?= csrf_field() ?>
-                                                    <button type="submit"
-                                                            class="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors" title="Aktifkan Kembali">
-                                                        <span class="material-symbols-outlined text-[20px]">play_circle</span>
-                                                    </button>
-                                                </form>
-                                            <?php endif; ?>
-                                            <form action="<?= base_url('admin/booths/' . $booth['id'] . '/delete') ?>" method="post" class="inline">
+                                    <td class="p-4 text-center space-x-2">
+                                        <a href="<?= base_url('admin/booths/' . $booth['id']) ?>"
+                                           class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Detail Booth">
+                                            <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                        </a>
+                                        <button type="button"
+                                                class="inline p-1.5 text-purple-600 hover:bg-purple-50 rounded transition-colors" title="Generate QR Code"
+                                                onclick="showQrModal('<?= esc($booth['id'], 'js') ?>', '<?= esc($booth['name'], 'js') ?>')">
+                                            <span class="material-symbols-outlined text-[20px]">qr_code</span>
+                                        </button>
+                                        <a href="<?= base_url('admin/booths/' . $booth['id'] . '/edit') ?>"
+                                           class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                            <span class="material-symbols-outlined text-[20px]">edit</span>
+                                        </a>
+                                        <?php if ($booth['status'] === 'active'): ?>
+                                            <form action="<?= base_url('admin/booths/' . $booth['id'] . '/maintenance') ?>" method="post" class="inline">
                                                 <?= csrf_field() ?>
                                                 <button type="submit"
-                                                        class="p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors" title="Hapus">
-                                                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                                                        class="inline p-1.5 text-amber-600 hover:bg-amber-50 rounded transition-colors" title="Set Maintenance"
+                                                        onclick="return confirm('Set booth ini ke mode Maintenance?')">
+                                                    <span class="material-symbols-outlined text-[20px]">engineering</span>
                                                 </button>
                                             </form>
-                                        </div>
+                                        <?php else: ?>
+                                            <form action="<?= base_url('admin/booths/' . $booth['id'] . '/activate') ?>" method="post" class="inline">
+                                                <?= csrf_field() ?>
+                                                <button type="submit"
+                                                        class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Aktifkan Kembali">
+                                                    <span class="material-symbols-outlined text-[20px]">play_circle</span>
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
+                                        <form action="<?= base_url('admin/booths/' . $booth['id'] . '/delete') ?>" method="post" class="inline">
+                                            <?= csrf_field() ?>
+                                            <button type="submit"
+                                                    class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus">
+                                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

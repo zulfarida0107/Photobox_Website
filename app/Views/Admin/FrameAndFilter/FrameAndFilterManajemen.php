@@ -129,11 +129,11 @@
                             <thead class="bg-slate-50/50 border-b border-slate-200">
                                 <tr>
                                     <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600">ID Frame</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600">Nama Frame</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600">Kategori</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600">Preview</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600">Status</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 text-right">Aksi</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 text-center">Nama Frame</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 text-center">Kategori</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 text-center">Preview</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 text-center">Status</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
@@ -141,14 +141,14 @@
                                     <?php foreach ($frames as $frame): ?>
                                         <tr class="hover:bg-blue-50/30 transition-colors">
                                             <td class="px-6 py-4 font-data-tabular text-data-tabular"><?= esc($frame['id']) ?></td>
-                                            <td class="px-6 py-4 font-body-base text-body-base text-on-surface"><?= esc($frame['name']) ?></td>
-                                            <td class="px-6 py-4 font-body-sm text-body-sm text-slate-600">
+                                            <td class="px-6 py-4 font-body-base text-body-base text-on-surface text-center"><?= esc($frame['name']) ?></td>
+                                            <td class="px-6 py-4 font-body-sm text-body-sm text-slate-600 text-center">
                                                 <span class="inline-flex items-center px-2.5 py-1 rounded bg-blue-50 text-blue-700 text-xs font-semibold">
                                                     <?= esc($frame['category_name'] ?? 'Uncategorized') ?>
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4">
-                                                <div class="w-16 h-10 rounded border border-slate-200 bg-slate-100 overflow-hidden">
+                                                <div class="w-16 h-10 rounded border border-slate-200 bg-slate-100 overflow-hidden mx-auto">
                                                     <?php if (!empty($frame['file_path'])): ?>
                                                         <img alt="<?= esc($frame['name']) ?> preview"
                                                              class="w-full h-full object-cover"
@@ -160,14 +160,14 @@
                                                     <?php endif; ?>
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4">
+                                            <td class="px-6 py-4 text-center">
                                                 <?php if ($frame['is_active']): ?>
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700">Aktif</span>
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Aktif</span>
                                                 <?php else: ?>
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">Nonaktif</span>
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">Non-Aktif</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td class="px-6 py-4 text-right space-x-2">
+                                            <td class="px-6 py-4 text-center space-x-2">
                                                 <button type="button"
                                                         class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Lihat Preview"
                                                         onclick="showPreviewModal('<?= esc($frame['id'], 'js') ?>', '<?= esc($frame['name'], 'js') ?>', '<?= esc($frame['category_name'] ?? 'Uncategorized', 'js') ?>', '<?= base_url($frame['file_path']) ?>', '<?= date('d M Y, H:i', strtotime($frame['created_at'])) ?>')">
@@ -251,7 +251,7 @@
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Nama</th>
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">CSS Value</th>
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Status</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 text-right">Aksi</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
@@ -267,19 +267,19 @@
                                             </td>
                                             <td class="px-4 py-4">
                                                 <?php if ($filter['is_active']): ?>
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700">Aktif</span>
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Aktif</span>
                                                 <?php else: ?>
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">Nonaktif</span>
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">Non-Aktif</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td class="px-4 py-4 text-right flex justify-end gap-1">
+                                            <td class="px-4 py-4 text-center flex justify-center gap-1">
                                                 <a href="<?= base_url('admin/filters/' . $filter['id'] . '/edit') ?>"
-                                                   class="p-1 text-slate-400 hover:text-blue-600" title="Edit">
+                                                   class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
                                                     <span class="material-symbols-outlined text-[20px]">settings</span>
                                                 </a>
                                                 <form action="<?= base_url('admin/filters/' . $filter['id'] . '/toggle') ?>" method="post" class="inline">
                                                     <?= csrf_field() ?>
-                                                    <button type="submit" class="p-1 text-slate-400 hover:text-green-600" title="Toggle Aktif">
+                                                    <button type="submit" class="inline p-1.5 text-slate-400 hover:bg-slate-100 hover:text-green-600 rounded transition-colors" title="Toggle Aktif">
                                                         <span class="material-symbols-outlined text-[20px]">
                                                             <?= $filter['is_active'] ? 'toggle_on' : 'toggle_off' ?>
                                                         </span>
@@ -339,26 +339,26 @@
                         <table class="w-full text-left">
                             <thead class="bg-slate-50/50 border-b border-slate-200">
                                 <tr>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">ID</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Nama Kategori</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 text-right">Aksi</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 text-center">ID</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 text-center">Nama Kategori</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
                                 <?php if (!empty($categories)): ?>
                                     <?php foreach ($categories as $cat): ?>
                                         <tr class="hover:bg-blue-50/30 transition-colors">
-                                            <td class="px-4 py-4 font-data-tabular text-data-tabular"><?= esc($cat['id']) ?></td>
-                                            <td class="px-4 py-4 font-body-base text-body-base text-on-surface"><?= esc($cat['name']) ?></td>
-                                            <td class="px-4 py-4 text-right flex justify-end gap-2">
+                                            <td class="px-4 py-4 font-data-tabular text-data-tabular text-center"><?= esc($cat['id']) ?></td>
+                                            <td class="px-4 py-4 font-body-base text-body-base text-on-surface text-center"><?= esc($cat['name']) ?></td>
+                                            <td class="px-4 py-4 text-center flex justify-center gap-2">
                                                 <button type="button" 
                                                         onclick="openEditCategoryModal('<?= esc($cat['id'], 'js') ?>', '<?= esc($cat['name'], 'js') ?>')"
-                                                        class="p-1 text-slate-400 hover:text-blue-600" title="Edit">
+                                                        class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
                                                     <span class="material-symbols-outlined text-[20px]">edit</span>
                                                 </button>
                                                 <form action="<?= base_url('admin/categories/' . $cat['id'] . '/delete') ?>" method="post" class="inline">
                                                     <?= csrf_field() ?>
-                                                    <button type="submit" class="p-1 text-slate-400 hover:text-red-500" title="Hapus Kategori"
+                                                    <button type="submit" class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Kategori"
                                                             onclick="return confirm('Hapus kategori ini? Semua frame dalam kategori ini akan diubah menjadi uncategorized.')">
                                                         <span class="material-symbols-outlined text-[20px]">delete</span>
                                                     </button>
@@ -458,9 +458,7 @@
                 <span class="material-symbols-outlined text-emerald-600">visibility</span>
                 Detail &amp; Preview Frame
             </h4>
-            <button type="button" onclick="closePreviewModal()" class="text-slate-400 hover:text-slate-600">
-                <span class="material-symbols-outlined text-[20px]">close</span>
-            </button>
+
         </div>
         
         <!-- Modal Body -->

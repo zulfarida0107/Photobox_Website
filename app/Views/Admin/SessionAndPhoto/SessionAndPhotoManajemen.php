@@ -109,54 +109,53 @@
                     <table class="w-full text-left">
                         <thead class="bg-slate-50 text-slate-600 uppercase text-[11px] font-bold tracking-wider">
                             <tr>
-                                <th class="px-6 py-3">ID Sesi</th>
-                                <th class="px-6 py-3">Kode Booking</th>
-                                <th class="px-6 py-3">Frame / Filter</th>
-                                <th class="px-6 py-3">Penerima Email</th>
-                                <th class="px-6 py-3">Waktu</th>
-                                <th class="px-6 py-3 text-right">Aksi</th>
+                                <th class="px-6 py-3 text-center">ID Sesi</th>
+                                <th class="px-6 py-3 text-center">Kode Booking</th>
+                                <th class="px-6 py-3 text-center">Frame / Filter</th>
+                                <th class="px-6 py-3 text-center">Penerima Email</th>
+                                <th class="px-6 py-3 text-center">Waktu</th>
+                                <th class="px-6 py-3 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             <?php if (!empty($sessions)): ?>
                                 <?php foreach ($sessions as $session): ?>
                                     <tr class="hover:bg-blue-50/50 transition-colors group">
-                                        <td class="px-6 py-4 font-data-tabular text-data-tabular text-blue-700 font-bold">
+                                        <td class="px-6 py-4 font-data-tabular text-data-tabular text-blue-700 font-bold text-center">
                                             #<?= esc($session['id']) ?>
                                         </td>
-                                        <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-900">
+                                        <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-900 text-center">
                                             <?= esc($session['booking_id'] ?? '-') ?>
                                         </td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex flex-col">
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="flex flex-col items-center">
                                                 <span class="text-body-sm font-medium"><?= esc($session['frame_name'] ?? 'N/A') ?></span>
                                                 <span class="text-[10px] text-slate-500 uppercase"><?= esc($session['filter_name'] ?? 'N/A') ?></span>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 text-body-sm text-slate-600">
+                                        <td class="px-6 py-4 text-body-sm text-slate-600 text-center">
                                             <?= esc($session['email_recipient'] ?? '-') ?>
                                         </td>
-                                        <td class="px-6 py-4 text-body-sm text-slate-500">
+                                        <td class="px-6 py-4 text-body-sm text-slate-500 text-center">
                                             <?= date('H:i', strtotime($session['created_at'])) ?> WIB
                                         </td>
-                                        <td class="px-6 py-4 text-right flex justify-end items-center gap-2">
+                                        <td class="px-6 py-4 text-center space-x-2">
                                             <a href="<?= base_url('admin/sessions/' . $session['id']) ?>"
-                                               class="text-slate-400 hover:text-blue-600 p-1" title="Lihat Detail">
-                                                <span class="material-symbols-outlined text-xl">open_in_new</span>
+                                               class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Lihat Detail">
+                                                <span class="material-symbols-outlined text-[20px]">open_in_new</span>
                                             </a>
                                             <?php if (!empty($session['email_recipient'])): ?>
                                                 <form action="<?= base_url('admin/sessions/' . $session['id'] . '/resend') ?>" method="post" class="inline">
                                                     <?= csrf_field() ?>
-                                                    <button type="submit" class="text-slate-400 hover:text-green-600 p-1" title="Kirim Ulang Email">
-                                                        <span class="material-symbols-outlined text-xl">send</span>
+                                                    <button type="submit" class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Kirim Ulang Email">
+                                                        <span class="material-symbols-outlined text-[20px]">send</span>
                                                     </button>
                                                 </form>
                                             <?php endif; ?>
                                             <form action="<?= base_url('admin/sessions/' . $session['id'] . '/delete') ?>" method="post" class="inline">
                                                 <?= csrf_field() ?>
-                                                <button type="submit" class="text-slate-400 hover:text-red-600 p-1" title="Hapus Sesi"
-                                                        >
-                                                    <span class="material-symbols-outlined text-xl">delete</span>
+                                                <button type="submit" class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Sesi">
+                                                    <span class="material-symbols-outlined text-[20px]">delete</span>
                                                 </button>
                                             </form>
                                         </td>

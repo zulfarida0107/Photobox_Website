@@ -134,14 +134,14 @@
                 <table class="w-full text-left">
                     <thead class="bg-slate-50 text-slate-500 uppercase text-[11px] font-bold tracking-wider">
                         <tr>
-                            <th class="px-6 py-4">ID Pembayaran</th>
-                            <th class="px-6 py-4">Kode Booking</th>
-                            <th class="px-6 py-4">Opsi Cetak</th>
-                            <th class="px-6 py-4 text-right">Nominal</th>
-                            <th class="px-6 py-4">Gateway Ref</th>
+                            <th class="px-6 py-4 text-center">ID Pembayaran</th>
+                            <th class="px-6 py-4 text-center">Kode Booking</th>
+                            <th class="px-6 py-4 text-center">Opsi Cetak</th>
+                            <th class="px-6 py-4 text-center">Nominal</th>
+                            <th class="px-6 py-4 text-center">Gateway Ref</th>
                             <th class="px-6 py-4 text-center">Status</th>
-                            <th class="px-6 py-4">Waktu</th>
-                            <th class="px-6 py-4 text-right">Aksi</th>
+                            <th class="px-6 py-4 text-center">Waktu</th>
+                            <th class="px-6 py-4 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -157,9 +157,9 @@
                                     $isPaid = $pay['status'] === 'paid';
                                 ?>
                                 <tr class="hover:bg-blue-50/40 transition-colors">
-                                    <td class="px-6 py-4 font-semibold text-primary">#<?= esc($pay['id']) ?></td>
-                                    <td class="px-6 py-4 text-slate-600 font-medium"><?= esc($pay['booking_code'] ?? $pay['booking_id']) ?></td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 font-semibold text-primary text-center">#<?= esc($pay['id']) ?></td>
+                                    <td class="px-6 py-4 text-slate-600 font-medium text-center"><?= esc($pay['booking_code'] ?? $pay['booking_id']) ?></td>
+                                    <td class="px-6 py-4 text-center">
                                         <span class="px-2 py-1 bg-slate-100 rounded text-[11px] text-slate-600 font-bold">
                                             <?php if (!empty($pay['print_option_copies'])): ?>
                                                 <?= esc($pay['print_option_copies']) ?> copy
@@ -169,41 +169,38 @@
                                             <?php endif; ?>
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-right font-bold text-slate-900">
+                                    <td class="px-6 py-4 font-bold text-slate-900 text-center">
                                         Rp <?= number_format($pay['amount'] ?? 0, 0, ',', '.') ?>
                                     </td>
-                                    <td class="px-6 py-4 text-slate-500 text-xs font-mono"><?= esc($pay['gateway_ref'] ?? '-') ?></td>
+                                    <td class="px-6 py-4 text-slate-500 text-xs font-mono text-center"><?= esc($pay['gateway_ref'] ?? '-') ?></td>
                                     <td class="px-6 py-4 text-center">
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold <?= $st[0] ?>">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold <?= $st[0] ?>">
                                             <span class="w-1.5 h-1.5 rounded-full <?= $st[1] ?>"></span>
                                             <?= $st[2] ?>
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-xs text-slate-500">
+                                    <td class="px-6 py-4 text-xs text-slate-500 text-center">
                                         <?= date('d M Y, H:i', strtotime($pay['created_at'])) ?>
                                     </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <div class="flex justify-end gap-2">
-                                            <?php if ($isPaid): ?>
-                                                <a href="<?= base_url('admin/payments/' . $pay['id'] . '/invoice') ?>"
-                                                   class="p-1.5 text-blue-600 hover:bg-blue-100 rounded transition-colors" title="Cetak Invoice PDF">
-                                                    <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
-                                                </a>
-                                            <?php else: ?>
-                                                <span class="p-1.5 text-slate-300 cursor-not-allowed" title="Invoice hanya tersedia untuk pembayaran sukses">
-                                                    <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
-                                                </span>
-                                            <?php endif; ?>
-                                            <form action="<?= base_url('admin/payments/' . $pay['id'] . '/verify') ?>" method="post" class="inline">
-                                                <?= csrf_field() ?>
-                                                <button type="submit"
-                                                        class="p-1.5 <?= $isPaid ? 'text-slate-400 hover:text-primary' : 'text-blue-600 hover:bg-blue-100' ?> rounded transition-colors"
-                                                        title="Verifikasi Manual"
-                                                        >
-                                                    <span class="material-symbols-outlined text-[20px]">verified</span>
-                                                </button>
-                                            </form>
-                                        </div>
+                                    <td class="px-6 py-4 text-center space-x-2">
+                                        <?php if ($isPaid): ?>
+                                            <a href="<?= base_url('admin/payments/' . $pay['id'] . '/invoice') ?>"
+                                               class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Cetak Invoice PDF">
+                                                <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="inline p-1.5 text-slate-300 cursor-not-allowed" title="Invoice hanya tersedia untuk pembayaran sukses">
+                                                <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+                                            </span>
+                                        <?php endif; ?>
+                                        <form action="<?= base_url('admin/payments/' . $pay['id'] . '/verify') ?>" method="post" class="inline">
+                                            <?= csrf_field() ?>
+                                            <button type="submit"
+                                                    class="inline p-1.5 <?= $isPaid ? 'text-slate-400 hover:text-blue-600 hover:bg-blue-50' : 'text-emerald-600 hover:bg-emerald-50' ?> rounded transition-colors"
+                                                    title="Verifikasi Manual">
+                                                <span class="material-symbols-outlined text-[20px]">verified</span>
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

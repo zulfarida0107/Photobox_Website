@@ -120,12 +120,12 @@
                 <table class="w-full text-left">
                     <thead>
                         <tr class="bg-white border-b border-slate-100">
-                            <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider">ID Admin</th>
+                            <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider text-center">ID Admin</th>
                             <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider">Nama / Username</th>
                             <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider">Email</th>
-                            <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider">Role</th>
-                            <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider">Terdaftar</th>
-                            <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider text-right">Aksi</th>
+                            <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider text-center">Role</th>
+                            <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider text-center">Terdaftar</th>
+                            <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -138,7 +138,7 @@
                                     $badgeClass   = $isSuperadmin ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600';
                                 ?>
                                 <tr class="hover:bg-blue-50/30 transition-colors group">
-                                    <td class="px-5 py-4 text-data-tabular font-medium text-slate-900">#<?= esc($admin['id']) ?></td>
+                                    <td class="px-5 py-4 text-data-tabular font-medium text-slate-900 text-center">#<?= esc($admin['id']) ?></td>
                                     <td class="px-5 py-4">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full <?= $avatarClass ?> flex items-center justify-center font-bold text-xs flex-shrink-0">
@@ -148,29 +148,28 @@
                                         </div>
                                     </td>
                                     <td class="px-5 py-4 text-body-base text-on-surface-variant"><?= esc($admin['email']) ?></td>
-                                    <td class="px-5 py-4">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold <?= $badgeClass ?> uppercase tracking-wide">
+                                    <td class="px-5 py-4 text-center">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold <?= $badgeClass ?> uppercase tracking-wide">
+                                            <span class="w-1.5 h-1.5 <?= $isSuperadmin ? 'bg-blue-500' : 'bg-slate-500' ?> rounded-full"></span>
                                             <?= esc(ucfirst($admin['role'] ?? 'admin')) ?>
                                         </span>
                                     </td>
-                                    <td class="px-5 py-4 text-body-sm text-slate-500">
+                                    <td class="px-5 py-4 text-body-sm text-slate-500 text-center">
                                         <?= date('d M Y, H:i', strtotime($admin['created_at'])) ?>
                                     </td>
-                                    <td class="px-5 py-4 text-right">
-                                        <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <a href="<?= base_url('admin/settings/' . $admin['id'] . '/edit') ?>"
-                                               class="p-2 text-slate-500 hover:text-primary hover:bg-white rounded border border-transparent hover:border-slate-200" title="Edit">
-                                                <span class="material-symbols-outlined text-xl">edit_square</span>
-                                            </a>
-                                            <form action="<?= base_url('admin/settings/' . $admin['id'] . '/delete') ?>" method="post" class="inline">
-                                                <?= csrf_field() ?>
-                                                <button type="submit"
-                                                        class="p-2 text-slate-500 hover:text-error hover:bg-white rounded border border-transparent hover:border-slate-200" title="Hapus"
-                                                        >
-                                                    <span class="material-symbols-outlined text-xl">delete</span>
-                                                </button>
-                                            </form>
-                                        </div>
+                                    <td class="px-5 py-4 text-center space-x-2">
+                                        <a href="<?= base_url('admin/settings/' . $admin['id'] . '/edit') ?>"
+                                           class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                            <span class="material-symbols-outlined text-[20px]">edit</span>
+                                        </a>
+                                        <form action="<?= base_url('admin/settings/' . $admin['id'] . '/delete') ?>" method="post" class="inline">
+                                            <?= csrf_field() ?>
+                                            <button type="submit"
+                                                    class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
+                                                    >
+                                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
