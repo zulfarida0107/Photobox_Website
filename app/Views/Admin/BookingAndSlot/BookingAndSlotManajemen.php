@@ -170,7 +170,7 @@
                                                         <form action="<?= base_url('admin/bookings/' . $bk['id'] . '/cancel') ?>" method="post" class="inline">
                                                             <?= csrf_field() ?>
                                                             <button type="submit" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg" title="Batalkan"
-                                                                    onclick="return confirm('Batalkan booking ini?')">
+                                                                    >
                                                                 <span class="material-symbols-outlined text-[18px]">cancel</span>
                                                             </button>
                                                         </form>

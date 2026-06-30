@@ -167,7 +167,7 @@
                                             <form action="<?= base_url('admin/customers/' . $cust['id'] . '/delete') ?>" method="post" class="inline">
                                                 <?= csrf_field() ?>
                                                 <button type="submit" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-all" title="Hapus"
-                                                        onclick="return confirm('Hapus pelanggan ini?')">
+                                                        >
                                                     <span class="material-symbols-outlined text-lg">delete</span>
                                                 </button>
                                             </form>

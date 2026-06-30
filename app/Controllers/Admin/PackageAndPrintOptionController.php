@@ -33,6 +33,10 @@ class PackageAndPrintOptionController extends BaseController
         }
         $totalPackages  = $pkgBuilder->countAllResults(false);
         $totalPkgPages  = max(1, (int) ceil($totalPackages / $perPage));
+        
+        // PENTING: reset SELECT setelah countAllResults
+        $pkgBuilder->select('*');
+
         $packages       = $pkgBuilder
             ->orderBy('created_at', 'DESC')
             ->findAll($perPage, ($currentPage - 1) * $perPage);
@@ -107,9 +111,16 @@ class PackageAndPrintOptionController extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        // Generate ID: PKT-XXX
-        $count = $this->packageModel->countAll();
-        $newId = sprintf('PKT-%03d', $count + 1);
+        // Generate ID: PKT-XXX yang kebal dari crash hapus data
+        $allPackages = $this->packageModel->select('id')->findAll();
+        $maxNum = 0;
+        foreach ($allPackages as $p) {
+            $num = (int) substr($p['id'], 4);
+            if ($num > $maxNum) {
+                $maxNum = $num;
+            }
+        }
+        $newId = sprintf('PKT-%03d', $maxNum + 1);
 
         $this->packageModel->insert([
             'id'          => $newId,
@@ -187,6 +198,14 @@ class PackageAndPrintOptionController extends BaseController
                 ->with('error', 'Paket tidak ditemukan.');
         }
 
+        // Mencegah data loss: Cek apakah paket ini sudah pernah dipesan (ada di bookings)
+        $bookingModel = new \App\Models\BookingModel();
+        $isUsed = $bookingModel->where('package_id', $id)->countAllResults() > 0;
+        if ($isUsed) {
+            return redirect()->to(base_url('admin/packages'))
+                ->with('error', 'Penghapusan ditolak! Paket ini sedang digunakan pada data reservasi pelanggan.');
+        }
+
         $this->packageModel->delete($id);
 
         return redirect()->to(base_url('admin/packages'))
@@ -200,18 +219,41 @@ class PackageAndPrintOptionController extends BaseController
     {
         $packages = $this->packageModel->orderBy('created_at', 'DESC')->findAll();
 
-        $filename = 'packages_export_' . date('Ymd_His') . '.csv';
+        // Nama file dinamis dengan format Hari, Tanggal Bulan Tahun, Jam-Menit-Detik
+        $hariIndo = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        $hari = $hariIndo[date('w')];
+        $tanggal = date('d');
+        $bulan = $bulanIndo[date('n')];
+        $tahun = date('Y');
+        $waktu = date('H-i-s');
+        $filename = "Laporan Paket Dan Cetak {$hari}, {$tanggal} {$bulan} {$tahun}, {$waktu}.csv";
+
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
 
         $output = fopen('php://output', 'w');
-        fputcsv($output, ['ID', 'Nama Paket', 'Jumlah Foto', 'Durasi (Menit)', 'Harga Dasar']);
+        
+        // Tambahkan UTF-8 BOM dan deklarasi separator khusus agar rapi di Excel
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        fputs($output, "sep=,\n");
+        
+        fputcsv($output, ['ID', 'Nama Paket', 'Jumlah Foto', 'Durasi (Menit)', 'Harga']);
         foreach ($packages as $p) {
             fputcsv($output, [
                 $p['id'], $p['name'], $p['photo_count'],
-                $p['duration'], $p['base_price'],
+                $p['duration'], 'Rp ' . number_format($p['base_price'], 0, ',', '.'),
             ]);
         }
+        
+        // Tanda Tangan Pertanggungjawaban
+        fputcsv($output, []); // Baris kosong
+        fputcsv($output, []); // Baris kosong
+        fputcsv($output, ['--- RIWAYAT PERTANGGUNGJAWABAN EKSPOR ---']);
+        fputcsv($output, ['Dihasilkan Oleh:', session()->get('adminName') ?? 'Admin (Sistem)']);
+        fputcsv($output, ['Waktu Unduh:', date('Y-m-d H:i:s')]);
+        fputcsv($output, ['Catatan Khusus:', 'Laporan ini dihasilkan secara otomatis oleh sistem CuitBox Studio dan sah sebagai bukti audit operasional.']);
+
         fclose($output);
         exit;
     }
@@ -242,8 +284,16 @@ class PackageAndPrintOptionController extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        $count = $this->printOptionModel->countAll();
-        $newId = sprintf('OPT-%02d', $count + 1);
+        // Generate ID: OPT-XX yang kebal dari crash hapus data
+        $allOpts = $this->printOptionModel->select('id')->findAll();
+        $maxNum = 0;
+        foreach ($allOpts as $o) {
+            $num = (int) substr($o['id'], 4);
+            if ($num > $maxNum) {
+                $maxNum = $num;
+            }
+        }
+        $newId = sprintf('OPT-%02d', $maxNum + 1);
 
         $this->printOptionModel->insert([
             'id'          => $newId,
@@ -312,6 +362,14 @@ class PackageAndPrintOptionController extends BaseController
         if (!$option) {
             return redirect()->to(base_url('admin/packages'))
                 ->with('error', 'Opsi cetak tidak ditemukan.');
+        }
+
+        // Mencegah data loss/kebingungan: Cek apakah opsi cetak dipakai di riwayat pembayaran
+        $paymentModel = new \App\Models\PaymentModel();
+        $isUsed = $paymentModel->where('print_option_id', $id)->countAllResults() > 0;
+        if ($isUsed) {
+            return redirect()->to(base_url('admin/packages'))
+                ->with('error', 'Penghapusan ditolak! Opsi cetak ini terikat dengan data riwayat pembayaran.');
         }
 
         $this->printOptionModel->delete($id);

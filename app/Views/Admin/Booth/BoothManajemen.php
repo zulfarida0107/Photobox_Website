@@ -120,8 +120,9 @@
                     </select>
                 </form>
                 <a href="<?= base_url('admin/booths/export') ?>"
-                   class="px-3 py-2 border border-outline-variant rounded-lg flex items-center text-body-sm text-secondary hover:bg-slate-50 transition-colors whitespace-nowrap">
-                    <span class="material-symbols-outlined mr-2">download</span> Export
+                   class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2 rounded font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm whitespace-nowrap">
+                    <span class="material-symbols-outlined text-[18px]">cloud_download</span>
+                    Ekspor Laporan
                 </a>
             </div>
 
@@ -221,8 +222,7 @@
                                             <form action="<?= base_url('admin/booths/' . $booth['id'] . '/delete') ?>" method="post" class="inline">
                                                 <?= csrf_field() ?>
                                                 <button type="submit"
-                                                        class="p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors" title="Hapus"
-                                                        onclick="return confirm('Hapus booth ini? Data terkait booking & slot akan terpengaruh.')">
+                                                        class="p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors" title="Hapus">
                                                     <span class="material-symbols-outlined text-[20px]">delete</span>
                                                 </button>
                                             </form>

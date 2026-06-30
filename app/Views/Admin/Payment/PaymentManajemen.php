@@ -26,7 +26,7 @@
             </div>
             <div class="flex gap-3">
                 <a href="<?= base_url('admin/payments/export') ?>"
-                   class="flex items-center gap-2 px-4 py-2 border border-primary text-primary rounded font-semibold text-sm hover:bg-blue-50 transition-colors">
+                   class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2 rounded font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm">
                     <span class="material-symbols-outlined text-[18px]">cloud_download</span>
                     Ekspor Laporan
                 </a>
@@ -199,7 +199,7 @@
                                                 <button type="submit"
                                                         class="p-1.5 <?= $isPaid ? 'text-slate-400 hover:text-primary' : 'text-blue-600 hover:bg-blue-100' ?> rounded transition-colors"
                                                         title="Verifikasi Manual"
-                                                        onclick="return confirm('Verifikasi pembayaran ini sebagai Paid?')">
+                                                        >
                                                     <span class="material-symbols-outlined text-[20px]">verified</span>
                                                 </button>
                                             </form>

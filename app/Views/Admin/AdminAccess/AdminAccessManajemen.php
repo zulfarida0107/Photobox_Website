@@ -166,7 +166,7 @@
                                                 <?= csrf_field() ?>
                                                 <button type="submit"
                                                         class="p-2 text-slate-500 hover:text-error hover:bg-white rounded border border-transparent hover:border-slate-200" title="Hapus"
-                                                        onclick="return confirm('Hapus admin ini?')">
+                                                        >
                                                     <span class="material-symbols-outlined text-xl">delete</span>
                                                 </button>
                                             </form>

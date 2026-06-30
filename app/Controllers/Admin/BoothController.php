@@ -265,11 +265,25 @@ class BoothController extends BaseController
     {
         $booths = $this->boothModel->orderBy('created_at', 'DESC')->findAll();
 
-        $filename = 'booths_export_' . date('Ymd_His') . '.csv';
+        // Nama file dinamis dengan format Hari, Tanggal Bulan Tahun, Jam-Menit-Detik
+        $hariIndo = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        $hari = $hariIndo[date('w')];
+        $tanggal = date('d');
+        $bulan = $bulanIndo[date('n')];
+        $tahun = date('Y');
+        $waktu = date('H-i-s');
+        $filename = "Laporan Booth {$hari}, {$tanggal} {$bulan} {$tahun}, {$waktu}.csv";
+
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
 
         $output = fopen('php://output', 'w');
+        
+        // Tambahkan UTF-8 BOM dan deklarasi separator khusus agar rapi di Excel
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        fputs($output, "sep=,\n");
+        
         fputcsv($output, ['ID Booth', 'Nama Mesin', 'Status', 'Antrean Sekarang', 'Terdaftar']);
         foreach ($booths as $b) {
             fputcsv($output, [
@@ -280,7 +294,17 @@ class BoothController extends BaseController
                 $b['created_at'],
             ]);
         }
+        
+        // Tanda Tangan Pertanggungjawaban
+        fputcsv($output, []); // Baris kosong
+        fputcsv($output, []); // Baris kosong
+        fputcsv($output, ['--- RIWAYAT PERTANGGUNGJAWABAN EKSPOR ---']);
+        fputcsv($output, ['Dihasilkan Oleh:', session()->get('adminName') ?? 'Admin (Sistem)']);
+        fputcsv($output, ['Waktu Unduh:', date('Y-m-d H:i:s')]);
+        fputcsv($output, ['Catatan Khusus:', 'Laporan ini dihasilkan secara otomatis oleh sistem CuitBox Studio dan sah sebagai bukti audit operasional.']);
+
         fclose($output);
+        exit;
     }
 
     // =========================================================================
