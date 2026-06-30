@@ -116,9 +116,20 @@ class BoothController extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        // Auto-generate ID: PBX-XXXXX
-        $count = $this->boothModel->countAll();
-        $newId = sprintf('PBX-%05d', $count + 1);
+        // Auto-generate ID: PBX-XXXXX — gunakan MAX untuk menghindari duplicate saat ada data dihapus
+        $lastRow = $this->boothModel->db
+            ->table('booths')
+            ->select('id')
+            ->orderBy('id', 'DESC')
+            ->limit(1)
+            ->get()->getRowArray();
+
+        $lastNum = 0;
+        if ($lastRow) {
+            // Ambil angka di belakang prefix "PBX-"
+            $lastNum = (int) preg_replace('/\D/', '', $lastRow['id']);
+        }
+        $newId = sprintf('PBX-%05d', $lastNum + 1);
 
         $this->boothModel->insert([
             'id'            => $newId,

@@ -112,7 +112,7 @@
                                placeholder="Cari ID atau Nama Booth..."/>
                     </div>
                     <select name="status" onchange="this.form.submit()"
-                            class="px-3 py-2 border border-outline-variant rounded-lg text-body-sm text-secondary hover:bg-slate-50 transition-colors">
+                            class="w-48 px-3 py-2 border border-outline-variant rounded-lg text-body-sm text-secondary hover:bg-slate-50 transition-colors">
                         <option value="" <?= ($filterStatus ?? '') === '' ? 'selected' : '' ?>>Semua Status</option>
                         <option value="active"      <?= ($filterStatus ?? '') === 'active'      ? 'selected' : '' ?>>Aktif</option>
                         <option value="maintenance" <?= ($filterStatus ?? '') === 'maintenance' ? 'selected' : '' ?>>Maintenance</option>
@@ -146,9 +146,9 @@
                             <?php foreach ($booths as $booth): ?>
                                 <?php
                                     $statusMap = [
-                                        'active'      => ['bg-emerald-100 text-emerald-800', 'bg-emerald-500', 'Aktif'],
-                                        'maintenance' => ['bg-amber-100 text-amber-800', 'bg-amber-500', 'Maintenance'],
-                                        'inactive'    => ['bg-slate-100 text-slate-700', 'bg-slate-500', 'Nonaktif'],
+                                        'active'      => ['bg-emerald-100 text-emerald-700', 'bg-emerald-500', 'Aktif'],
+                                        'maintenance' => ['bg-amber-100 text-amber-700', 'bg-amber-500', 'Maintenance'],
+                                        'inactive'    => ['bg-red-100 text-red-700', 'bg-red-500', 'Non-Aktif'],
                                     ];
                                     $st = $statusMap[$booth['status']] ?? ['bg-slate-100 text-slate-500', 'bg-slate-400', ucfirst($booth['status'])];
                                 ?>
@@ -178,8 +178,8 @@
                                         <span class="text-lg font-black text-slate-500"><?= esc($booth['current_queue'] ?? 0) ?></span>
                                     </td>
                                     <td class="p-4 text-center">
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold <?= $st[0] ?>">
-                                            <span class="w-1.5 h-1.5 <?= $st[1] ?> rounded-full"></span>
+                                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold <?= $st[0] ?>">
+                                            <span class="w-2 h-2 <?= $st[1] ?> rounded-full flex-shrink-0"></span>
                                             <?= $st[2] ?>
                                         </span>
                                     </td>
@@ -201,22 +201,17 @@
                                             <span class="material-symbols-outlined text-[20px]">edit</span>
                                         </a>
                                         <?php if ($booth['status'] === 'active'): ?>
-                                            <form action="<?= base_url('admin/booths/' . $booth['id'] . '/maintenance') ?>" method="post" class="inline">
-                                                <?= csrf_field() ?>
-                                                <button type="submit"
-                                                        class="inline p-1.5 text-amber-600 hover:bg-amber-50 rounded transition-colors" title="Set Maintenance"
-                                                        onclick="return confirm('Set booth ini ke mode Maintenance?')">
-                                                    <span class="material-symbols-outlined text-[20px]">engineering</span>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                    class="inline p-1.5 text-amber-600 hover:bg-amber-50 rounded transition-colors" title="Set Maintenance"
+                                                    onclick="showMaintenanceModal('<?= esc($booth['id'], 'js') ?>', '<?= esc($booth['name'], 'js') ?>', 'maintenance')">
+                                                <span class="material-symbols-outlined text-[20px]">engineering</span>
+                                            </button>
                                         <?php else: ?>
-                                            <form action="<?= base_url('admin/booths/' . $booth['id'] . '/activate') ?>" method="post" class="inline">
-                                                <?= csrf_field() ?>
-                                                <button type="submit"
-                                                        class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Aktifkan Kembali">
-                                                    <span class="material-symbols-outlined text-[20px]">play_circle</span>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                    class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Aktifkan Kembali"
+                                                    onclick="showMaintenanceModal('<?= esc($booth['id'], 'js') ?>', '<?= esc($booth['name'], 'js') ?>', 'activate')">
+                                                <span class="material-symbols-outlined text-[20px]">play_circle</span>
+                                            </button>
                                         <?php endif; ?>
                                         <form action="<?= base_url('admin/booths/' . $booth['id'] . '/delete') ?>" method="post" class="inline">
                                             <?= csrf_field() ?>
@@ -449,6 +444,88 @@
         copyBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">done</span><span>Copied!</span>';
         copyBtn.className = 'px-2.5 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-md text-xs font-semibold flex items-center gap-1 shadow-sm transition-all';
     }
+
+    // =========================================================================
+    // MAINTENANCE / ACTIVATE MODAL
+    // =========================================================================
+    const maintenanceBaseUrl  = '<?= base_url("admin/booths") ?>';
+
+    function showMaintenanceModal(boothId, boothName, action) {
+        const modal   = document.getElementById('maintenanceModal');
+        const content = document.getElementById('maintenanceModalContent');
+        const form    = document.getElementById('maintenanceForm');
+
+        const isMaintenance = (action === 'maintenance');
+
+        document.getElementById('maintModalIcon').textContent    = isMaintenance ? 'engineering' : 'play_circle';
+        document.getElementById('maintModalIconWrap').className  = isMaintenance
+            ? 'w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4'
+            : 'w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4';
+        document.getElementById('maintModalIcon').className      = isMaintenance
+            ? 'material-symbols-outlined text-4xl text-amber-600'
+            : 'material-symbols-outlined text-4xl text-emerald-600';
+        document.getElementById('maintModalTitle').textContent   = isMaintenance ? 'Set ke Maintenance?' : 'Aktifkan Kembali?';
+        document.getElementById('maintModalDesc').innerHTML      = isMaintenance
+            ? `Mesin <strong>${boothName}</strong> akan dialihkan ke mode <span class="font-bold text-amber-600">Maintenance</span> dan tidak dapat menerima reservasi baru.`
+            : `Mesin <strong>${boothName}</strong> akan diaktifkan kembali ke status <span class="font-bold text-emerald-600">Aktif</span>.`;
+
+        const confirmBtn = document.getElementById('maintConfirmBtn');
+        confirmBtn.className = isMaintenance
+            ? 'flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors'
+            : 'flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors';
+        confirmBtn.textContent = isMaintenance ? 'Ya, Set Maintenance' : 'Ya, Aktifkan';
+
+        form.action = `${maintenanceBaseUrl}/${boothId}/${action === 'maintenance' ? 'maintenance' : 'activate'}`;
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeMaintenanceModal() {
+        const modal   = document.getElementById('maintenanceModal');
+        const content = document.getElementById('maintenanceModalContent');
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    }
 </script>
 
+<!-- Maintenance / Activate Confirmation Modal -->
+<div id="maintenanceModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-sm w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="maintenanceModalContent">
+        <!-- Header -->
+        <div class="p-5 border-b border-slate-100 flex items-center bg-slate-50/50">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-amber-500">build_circle</span>
+                Konfirmasi Aksi Booth
+            </h4>
+        </div>
+        <!-- Body -->
+        <div class="p-6 text-center">
+            <div id="maintModalIconWrap" class="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
+                <span id="maintModalIcon" class="material-symbols-outlined text-4xl text-amber-600">engineering</span>
+            </div>
+            <h3 id="maintModalTitle" class="text-lg font-black text-slate-800 mb-2">Set ke Maintenance?</h3>
+            <p id="maintModalDesc" class="text-sm text-slate-500 leading-relaxed mb-6"></p>
+            <form id="maintenanceForm" method="post">
+                <?= csrf_field() ?>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeMaintenanceModal()"
+                            class="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm rounded-lg transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" id="maintConfirmBtn"
+                            class="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors">
+                        Ya, Set Maintenance
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <?php $this->endSection(); ?>
+
