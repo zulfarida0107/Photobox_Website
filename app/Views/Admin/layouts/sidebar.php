@@ -35,14 +35,14 @@ function sidebarClass(string $key, string $activeKey, string $clsActive, string 
     return $key === $activeKey ? $clsActive : $clsDefault;
 }
 ?>
-<aside class="fixed left-0 top-0 h-screen w-[260px] z-50 bg-white border-r border-slate-200 flex flex-col py-6 px-4 space-y-2">
+<aside class="fixed left-0 top-0 h-screen w-[260px] z-50 bg-white border-r border-slate-200 flex flex-col py-6 px-4">
     <div class="px-4 mb-8 flex items-center gap-3">
         <div>
             <h1 class="text-lg font-black tracking-tight text-blue-700">CuitBox Studio</h1>
             <p class="text-xs text-slate-500">Admin Management</p>
         </div>
     </div>
-    <nav class="flex-1 space-y-1">
+    <nav class="flex-1 space-y-1 overflow-y-auto pr-1 pb-4">
 
         <a class="<?= sidebarClass('dashboard', $activeKey, $clsActive, $clsDefault) ?>"
            href="<?= base_url('admin/dashboard') ?>">
@@ -100,7 +100,7 @@ function sidebarClass(string $key, string $activeKey, string $clsActive, string 
 
     </nav>
 
-    <div class="mt-auto pt-4 border-t border-slate-100">
+    <div class="mt-auto pt-4 border-t border-slate-100 flex-shrink-0">
         <a class="flex items-center justify-center gap-2 w-full py-2.5 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white rounded-lg transition-all duration-200 font-bold text-sm"
            href="<?= base_url('admin/logout') ?>">
             <span class="material-symbols-outlined text-[20px]">logout</span>
