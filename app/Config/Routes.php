@@ -69,6 +69,31 @@ $routes->post('admin/login', 'Admin\AuthController::attemptLogin');
 $routes->get('admin/logout', 'Admin\AuthController::logout');
 
 // ============================================================
+// CUSTOMER ROUTES
+// ============================================================
+$routes->group('customer', static function ($routes) {
+    $routes->get('/', 'Customer\CustomerController::index');
+    $routes->get('booking', 'Customer\CustomerController::bookingForm');
+    $routes->post('create-booking', 'Customer\CustomerController::createBooking');
+    $routes->get('verify', 'Customer\CustomerController::verifyPage');
+    $routes->post('check-verification', 'Customer\CustomerController::checkVerification');
+    $routes->get('choose-frame', 'Customer\CustomerController::chooseFrame');
+    $routes->post('save-frame', 'Customer\CustomerController::saveFrameChoice');
+    $routes->get('bookings/(:segment)', 'Customer\CustomerController::showBooking/$1');
+    $routes->get('my-bookings/(:segment)', 'Customer\CustomerController::myBookings/$1');
+
+    // Camera
+    $routes->get('camera', 'Customer\CameraController::index');
+    $routes->post('camera/upload', 'Customer\CameraController::upload');
+    $routes->post('camera/save-photo', 'Customer\CameraController::savePhoto');
+
+    // Payment
+    $routes->get('payment', 'Customer\PaymentController::index');
+    $routes->post('payment/process', 'Customer\PaymentController::processPayment');
+    $routes->get('payment/status', 'Customer\PaymentController::checkStatus');
+});
+
+// ============================================================
 // ADMIN ROUTES
 // ============================================================
 $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
