@@ -3,9 +3,8 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
-use CodeIgniter\Controller;
 
-class UserController extends Controller
+class UserController extends BaseController
 {
     protected $userModel;
 
@@ -14,122 +13,56 @@ class UserController extends Controller
         $this->userModel = new UserModel();
     }
 
-    // GET /user — daftar semua user (admin)
-    public function index()
+    // ============================================================
+    // REGISTER - TAMPILKAN FORM
+    // ============================================================
+    
+    public function register()
     {
-        $data['users'] = $this->userModel->findAll();
-        return view('user/index', $data);
+        // ✅ Path yang benar: 'user/register' (tanpa 'Views/')
+        return view('user/register');
     }
 
-    // GET /user/add — form register
-    public function add()
+    // ============================================================
+    // REGISTER - PROSES SIMPAN DATA
+    // ============================================================
+    
+    public function doRegister()
     {
-        return view('user/add');
-    }
-
-    // POST /user/store — simpan user baru ke DB
-    public function store()
-    {
-        $data = [
-            'username' => $this->request->getPost('username'),
-            'email'    => $this->request->getPost('email'),
-            'password' => $this->request->getPost('password'),
-            'role'     => 'user',
-        ];
-
-        // Cek email sudah ada
-        if ($this->userModel->findByEmail($data['email'])) {
-            return redirect()->back()->with('error', 'Email sudah terdaftar.');
-        }
-
-        $this->userModel->insert($data); // otomatis hash password via beforeInsert
-        session()->set([
-            'user_id'   => $this->userModel->getInsertID(),
-            'username'  => $data['username'],
-            'email'     => $data['email'],
-            'role'      => 'user',
-        ]);
-
-        return redirect()->to('/games')->with('success', 'Akun berhasil dibuat!');
-    }
-
-    // GET /user/login — form login
-    public function login()
-    {
-        if (session()->get('user_id')) {
-            return redirect()->to('/games');
-        }
-        return view('user/login');
-    }
-
-    // POST /user/authenticate — proses login
-    public function authenticate()
-    {
-        $email    = $this->request->getPost('email');
+        // Ambil data dari form
+        $name = $this->request->getPost('nama');
+        $email = $this->request->getPost('email');
         $password = $this->request->getPost('password');
+        $confirmPassword = $this->request->getPost('konfirmasi');
 
-        $user = $this->userModel->findByEmail($email);
-
-        if (!$user || !password_verify($password, $user['password'])) {
-            return redirect()->back()->with('error', 'Email atau password salah.');
-        }
-
-        session()->set([
-            'user_id'  => $user['id'],
-            'username' => $user['username'],
-            'email'    => $user['email'],
-            'role'     => $user['role'],
+        // Validasi sederhana
+        $validation = \Config\Services::validation();
+        $validation->setRules([
+            'nama' => 'required|min_length[3]',
+            'email' => 'required|valid_email|is_unique[users.email]',
+            'password' => 'required|min_length[6]',
+            'konfirmasi' => 'required|matches[password]'
         ]);
 
-        return redirect()->to('/games')->with('success', 'Login berhasil!');
-    }
-
-    // GET /user/logout
-    public function logout()
-    {
-        session()->destroy();
-        return redirect()->to('/user/login')->with('success', 'Berhasil logout.');
-    }
-
-    // GET /user/profile/:id — lihat profil
-    public function profile($id)
-    {
-        $data['user'] = $this->userModel->find($id);
-        if (!$data['user']) {
-            return redirect()->to('/games')->with('error', 'User tidak ditemukan.');
+        if (!$validation->run($this->request->getPost())) {
+            // Jika validasi gagal, kembali ke form dengan error
+            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
-        return view('user/profile', $data);
-    }
 
-    // POST /user/show/:id — update profil sendiri
-    public function show($id)
-    {
+        // Hash password
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        // Simpan ke database
         $data = [
-            'username' => $this->request->getPost('username'),
-            'email'    => $this->request->getPost('email'),
+            'name' => $name,
+            'email' => $email,
+            'password' => $hashedPassword,
+            'is_active' => 1
         ];
 
-        $newPass = $this->request->getPost('password');
-        if ($newPass) {
-            $data['password'] = $newPass; // akan di-hash via beforeUpdate
-        }
+        $this->userModel->save($data);
 
-        $this->userModel->update($id, $data);
-        return redirect()->to('/user/profile/' . $id)->with('success', 'Profil berhasil diupdate!');
-    }
-
-    // PUT /user/update/:id
-    public function update($id)
-    {
-        $data = $this->request->getRawInput();
-        $this->userModel->update($id, $data);
-        return redirect()->back()->with('success', 'User berhasil diupdate.');
-    }
-
-    // DELETE /user/delete/:id
-    public function delete($id)
-    {
-        $this->userModel->delete($id);
-        return redirect()->to('/user')->with('success', 'User berhasil dihapus.');
+        // Redirect ke halaman login atau sukses
+        return redirect()->to('/login')->with('success', 'Registrasi berhasil! Silakan login.');
     }
 }

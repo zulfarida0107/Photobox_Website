@@ -6,30 +6,20 @@ use CodeIgniter\Model;
 
 class UserModel extends Model
 {
-    protected $table         = 'users';
-    protected $primaryKey    = 'id';
-    protected $allowedFields = ['username', 'email', 'password', 'role'];
+    protected $table = 'users';
+    protected $primaryKey = 'id';
+    protected $allowedFields = ['name', 'email', 'password', 'phone', 'is_active'];
     protected $useTimestamps = true;
+    protected $createdField = 'created_at';
+    protected $updatedField = 'updated_at';
+    protected $hidden = ['password'];
 
-    // Hash password otomatis sebelum disimpan
-    protected function beforeInsert(array $data): array
+    public function getBookings($userId)
     {
-        if (isset($data['data']['password'])) {
-            $data['data']['password'] = password_hash($data['data']['password'], PASSWORD_DEFAULT);
-        }
-        return $data;
-    }
-
-    protected function beforeUpdate(array $data): array
-    {
-        if (isset($data['data']['password'])) {
-            $data['data']['password'] = password_hash($data['data']['password'], PASSWORD_DEFAULT);
-        }
-        return $data;
-    }
-
-    public function findByEmail(string $email)
-    {
-        return $this->where('email', $email)->first();
+        return $this->select('users.*, bookings.*, booths.name as booth_name')
+                    ->join('bookings', 'bookings.user_id = users.id')
+                    ->join('booths', 'booths.id = bookings.booth_id')
+                    ->where('users.id', $userId)
+                    ->findAll();
     }
 }
