@@ -253,7 +253,7 @@
                             <thead class="bg-slate-50/50 border-b border-slate-200">
                                 <tr>
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">ID</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Nama</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Nama Filter</th>
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">CSS Value</th>
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Status</th>
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 text-center">Aksi</th>
