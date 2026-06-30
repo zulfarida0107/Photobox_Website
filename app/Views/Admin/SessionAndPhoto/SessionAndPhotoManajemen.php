@@ -152,12 +152,11 @@
                                                     </button>
                                                 </form>
                                             <?php endif; ?>
-                                            <form action="<?= base_url('admin/sessions/' . $session['id'] . '/delete') ?>" method="post" class="inline">
-                                                <?= csrf_field() ?>
-                                                <button type="submit" class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Sesi">
-                                                    <span class="material-symbols-outlined text-[20px]">delete</span>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                    class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Sesi"
+                                                    onclick="showDeleteSessionModal('<?= esc($session['id'], 'js') ?>')">
+                                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                                            </button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -278,14 +277,11 @@
                                                     <span class="material-symbols-outlined text-sm">download</span>
                                                 </a>
                                             <?php endif; ?>
-                                            <form action="<?= base_url('admin/photos/' . $photo['id'] . '/delete') ?>" method="post" class="inline">
-                                                <?= csrf_field() ?>
-                                                <button type="submit"
-                                                        class="bg-white/20 backdrop-blur-md p-2 rounded-full text-white hover:bg-error transition-colors"
-                                                        >
-                                                    <span class="material-symbols-outlined text-sm">delete</span>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                    class="bg-white/20 backdrop-blur-md p-2 rounded-full text-white hover:bg-red-500 transition-colors"
+                                                    onclick="showDeletePhotoModal('<?= esc($photo['id'], 'js') ?>', <?= (int)($photo['shot_number'] ?? ($index + 1)) ?>)">
+                                                <span class="material-symbols-outlined text-sm">delete</span>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -320,5 +316,122 @@
         <?= $this->include('Admin/layouts/footer') ?>
     </div>
 </main>
+
+<!-- ================================================================
+     Modal Konfirmasi Hapus SESI
+================================================================ -->
+<div id="deleteSessionModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0 duration-300" id="deleteSessionModalContent">
+        <div class="p-5 border-b border-slate-100 bg-slate-50/50">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-red-500">warning</span>
+                Hapus Sesi?
+            </h4>
+        </div>
+        <div class="p-6 text-center">
+            <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-4xl text-red-500">delete_forever</span>
+            </div>
+            <h3 class="text-lg font-black text-slate-800 mb-2">Yakin ingin menghapus?</h3>
+            <p class="text-sm text-slate-500 leading-relaxed mb-6">
+                Sesi <strong id="deleteSessionId"></strong> beserta <span class="font-bold text-red-600">seluruh foto fisiknya</span> akan dihapus permanen dan tidak dapat dipulihkan.
+            </p>
+            <form id="deleteSessionForm" method="post">
+                <?= csrf_field() ?>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeDeleteSessionModal()"
+                            class="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm rounded-lg transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors">
+                        Ya, Hapus Sesi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================================
+     Modal Konfirmasi Hapus FOTO
+================================================================ -->
+<div id="deletePhotoModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0 duration-300" id="deletePhotoModalContent">
+        <div class="p-5 border-b border-slate-100 bg-slate-50/50">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-red-500">warning</span>
+                Hapus Foto?
+            </h4>
+        </div>
+        <div class="p-6 text-center">
+            <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-4xl text-red-500">hide_image</span>
+            </div>
+            <h3 class="text-lg font-black text-slate-800 mb-2">Hapus foto ini?</h3>
+            <p class="text-sm text-slate-500 leading-relaxed mb-6">
+                <strong id="deletePhotoLabel"></strong> akan dihapus permanen dari server. Tindakan ini <span class="font-bold text-red-600">tidak dapat dibatalkan</span>.
+            </p>
+            <form id="deletePhotoForm" method="post">
+                <?= csrf_field() ?>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeDeletePhotoModal()"
+                            class="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm rounded-lg transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors">
+                        Ya, Hapus Foto
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const baseSessionUrl = '<?= base_url("admin/sessions") ?>';
+    const basePhotoUrl   = '<?= base_url("admin/photos") ?>';
+
+    function showDeleteSessionModal(sessionId) {
+        document.getElementById('deleteSessionId').textContent = '#' + sessionId;
+        document.getElementById('deleteSessionForm').action = baseSessionUrl + '/' + sessionId + '/delete';
+        const modal = document.getElementById('deleteSessionModal');
+        const content = document.getElementById('deleteSessionModalContent');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeDeleteSessionModal() {
+        const modal = document.getElementById('deleteSessionModal');
+        const content = document.getElementById('deleteSessionModalContent');
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    function showDeletePhotoModal(photoId, shotNumber) {
+        document.getElementById('deletePhotoLabel').textContent = 'Shot #' + String(shotNumber).padStart(2, '0');
+        document.getElementById('deletePhotoForm').action = basePhotoUrl + '/' + photoId + '/delete';
+        const modal = document.getElementById('deletePhotoModal');
+        const content = document.getElementById('deletePhotoModalContent');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeDeletePhotoModal() {
+        const modal = document.getElementById('deletePhotoModal');
+        const content = document.getElementById('deletePhotoModalContent');
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+</script>
 
 <?php $this->endSection(); ?>
