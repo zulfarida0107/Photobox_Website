@@ -5,12 +5,20 @@
     <div class="p-6 flex-1">
 
         <!-- Breadcrumbs -->
-        <nav class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-4">
-            <a class="hover:text-blue-700" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
-            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-            <a class="hover:text-blue-700" href="<?= base_url('admin/customers') ?>">Manajemen Pelanggan</a>
-            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span class="text-blue-700">Detail Pelanggan</span>
+        <nav aria-label="Breadcrumb" class="flex mb-6 text-xs font-medium text-slate-500">
+            <ol class="flex items-center space-x-2">
+                <li>
+                    <a class="hover:text-blue-600 flex items-center gap-1 transition-colors" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                    <a class="hover:text-blue-600 flex items-center gap-1 transition-colors" href="<?= base_url('admin/customers') ?>">Manajemen Pelanggan</a>
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                    <span class="text-blue-700 font-bold">Detail Pelanggan</span>
+                </li>
+            </ol>
         </nav>
 
         <!-- Page Header -->
@@ -27,7 +35,7 @@
         </div>
 
         <!-- Detail Card -->
-        <div class="bg-white border border-outline-variant rounded-xl shadow-sm max-w-2xl overflow-hidden">
+        <div class="bg-white border border-outline-variant rounded-xl shadow-sm w-full overflow-hidden">
             <div class="p-6 border-b border-outline-variant bg-slate-50/50 flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">contact_page</span>
                 <h4 class="font-bold text-on-surface">Data Registrasi Kontak</h4>
@@ -50,6 +58,18 @@
                 <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
                     <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Nomor Telepon</span>
                     <span class="col-span-2 text-sm text-slate-800 font-mono"><?= esc($customer['phone'] ?? '-') ?></span>
+                </div>
+
+                <!-- Info Row Status -->
+                <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Status Akun</span>
+                    <span class="col-span-2">
+                        <?php if (($customer['status'] ?? 'active') === 'active'): ?>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold border bg-green-50 text-green-700 border-green-200">Aktif</span>
+                        <?php else: ?>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold border bg-red-50 text-red-700 border-red-200">Non-Aktif</span>
+                        <?php endif; ?>
+                    </span>
                 </div>
 
                 <!-- Info Row 4 -->

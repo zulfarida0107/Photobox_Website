@@ -24,6 +24,9 @@ class CustomerController extends BaseController
         $filterStatus  = $this->request->getGet('status') ?? 'all'; // all | active | inactive
         $keyword       = $this->request->getGet('q') ?? '';
 
+        // Hitung total keseluruhan pelanggan sebelum merubah state query builder
+        $totalAll = $this->customerModel->countAll();
+
         // --- Query builder ---
         $builder = $this->customerModel;
 
@@ -36,17 +39,14 @@ class CustomerController extends BaseController
                 ->groupEnd();
         }
 
-        // Catatan: CustomerModel saat ini tidak memiliki kolom 'status'.
-        // Jika nanti kolom status ditambahkan ke tabel customers,
-        // aktifkan blok filter berikut:
-        // if ($filterStatus === 'active') {
-        //     $builder = $builder->where('status', 'active');
-        // } elseif ($filterStatus === 'inactive') {
-        //     $builder = $builder->where('status', 'inactive');
-        // }
+        // Filter Status
+        if ($filterStatus === 'active') {
+            $builder = $builder->where('status', 'active');
+        } elseif ($filterStatus === 'inactive') {
+            $builder = $builder->where('status', 'inactive');
+        }
 
-        // Hitung total untuk pagination
-        $totalAll      = $this->customerModel->countAll();
+        // Hitung total yang terfilter untuk pagination
         $totalFiltered = $builder->countAllResults(false); // false = jangan reset query
 
         // Ambil data dengan pagination
@@ -56,9 +56,15 @@ class CustomerController extends BaseController
 
         // --- Statistik card ---
         $totalCustomers  = $totalAll;
-        // Placeholder — ganti dengan query nyata jika kolom status tersedia
-        $totalActive     = $totalAll;
-        $totalInactive   = 0;
+        
+        // Hitung Pelanggan Aktif / Non-Aktif
+        $totalActive = $this->customerModel
+            ->where('status', 'active')
+            ->countAllResults();
+            
+        $totalInactive = $this->customerModel
+            ->where('status', 'inactive')
+            ->countAllResults();
 
         // Hitung total halaman
         $totalPages = (int) ceil($totalFiltered / $perPage);
@@ -130,16 +136,28 @@ class CustomerController extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        // Generate ID unik: CUST-YYYY-XXX
-        $year      = date('Y');
-        $lastCount = $this->customerModel->where("id LIKE 'CUST-{$year}-%'")->countAllResults();
-        $newId     = sprintf('CUST-%s-%03d', $year, $lastCount + 1);
+        // Generate ID unik: CUST-YYYY-XXX yang kebal terhadap data terhapus
+        $year = date('Y');
+        $lastCustomer = $this->customerModel
+            ->like('id', "CUST-{$year}-", 'after')
+            ->orderBy('id', 'DESC')
+            ->first();
+
+        if ($lastCustomer) {
+            $lastIdNumber = (int) substr($lastCustomer['id'], -3);
+            $newIdNumber  = $lastIdNumber + 1;
+        } else {
+            $newIdNumber  = 1;
+        }
+        
+        $newId = sprintf('CUST-%s-%03d', $year, $newIdNumber);
 
         $this->customerModel->insert([
-            'id'    => $newId,
-            'name'  => $this->request->getPost('name'),
-            'email' => $this->request->getPost('email'),
-            'phone' => $this->request->getPost('phone'),
+            'id'     => $newId,
+            'name'   => $this->request->getPost('name'),
+            'email'  => $this->request->getPost('email'),
+            'phone'  => $this->request->getPost('phone'),
+            'status' => $this->request->getPost('status') ?? 'active',
         ]);
 
         return redirect()->to(base_url('admin/customers'))
@@ -193,9 +211,10 @@ class CustomerController extends BaseController
         }
 
         $this->customerModel->update($id, [
-            'name'  => $this->request->getPost('name'),
-            'email' => $this->request->getPost('email'),
-            'phone' => $this->request->getPost('phone'),
+            'name'   => $this->request->getPost('name'),
+            'email'  => $this->request->getPost('email'),
+            'phone'  => $this->request->getPost('phone'),
+            'status' => $this->request->getPost('status') ?? 'active',
         ]);
 
         return redirect()->to(base_url('admin/customers'))

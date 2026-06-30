@@ -5,10 +5,16 @@
     <div class="p-6 flex-1">
 
         <!-- Breadcrumbs -->
-        <nav class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-4">
-            <a class="hover:text-blue-700" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
-            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span class="text-blue-700">Manajemen Pelanggan</span>
+        <nav aria-label="Breadcrumb" class="flex mb-6 text-xs font-medium text-slate-500">
+            <ol class="flex items-center space-x-2">
+                <li>
+                    <a class="hover:text-blue-600 flex items-center gap-1 transition-colors" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                    <span class="text-blue-700 font-bold">Manajemen Pelanggan</span>
+                </li>
+            </ol>
         </nav>
 
         <!-- Page Header -->
@@ -43,9 +49,9 @@
             <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-orange-600 bg-orange-50 p-2 rounded-lg material-symbols-outlined">person_pin</span>
-                    <span class="text-xs font-bold text-slate-400">Terdaftar</span>
+                    <span class="text-xs font-bold text-slate-400">Status Aktif</span>
                 </div>
-                <p class="text-sm font-medium text-slate-500">Pelanggan Terdaftar</p>
+                <p class="text-sm font-medium text-slate-500">Pelanggan Aktif</p>
                 <h3 class="text-2xl font-black text-slate-900 mt-1">
                     <?= number_format($totalActive ?? 0, 0, ',', '.') ?>
                 </h3>
@@ -133,8 +139,8 @@
                                     $colors    = ['blue', 'purple', 'pink', 'amber', 'emerald', 'cyan', 'rose', 'indigo'];
                                     $color     = $colors[crc32($cust['name'] ?? '') % count($colors)];
                                     $isActive  = ($cust['status'] ?? 'active') === 'active';
-                                    $badgeClass = $isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600';
-                                    $badgeText  = $isActive ? 'Aktif' : 'Nonaktif';
+                                    $badgeClass = $isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+                                    $badgeText  = $isActive ? 'Aktif' : 'Non-Aktif';
                                 ?>
                                 <tr class="hover:bg-blue-50/30 transition-colors group">
                                     <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-900 font-bold">#<?= esc($cust['id']) ?></td>

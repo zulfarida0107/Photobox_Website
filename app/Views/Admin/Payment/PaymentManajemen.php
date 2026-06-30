@@ -5,11 +5,16 @@
     <div class="p-6 flex-1">
 
         <!-- Breadcrumbs -->
-        <nav class="flex items-center gap-2 text-xs text-slate-500 mb-6">
-            <span class="material-symbols-outlined text-[16px]">home</span>
-            <a href="<?= base_url('admin/dashboard') ?>" class="hover:text-blue-600">Dashboard</a>
-            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-            <span class="font-medium text-blue-600">Manajemen Pembayaran</span>
+        <nav aria-label="Breadcrumb" class="flex mb-6 text-xs font-medium text-slate-500">
+            <ol class="flex items-center space-x-2">
+                <li>
+                    <a class="hover:text-blue-600 flex items-center gap-1 transition-colors" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                    <span class="text-blue-700 font-bold">Manajemen Pembayaran</span>
+                </li>
+            </ol>
         </nav>
 
         <!-- Header Section -->

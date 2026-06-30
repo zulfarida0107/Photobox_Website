@@ -5,12 +5,20 @@
     <div class="p-6 flex-1">
 
         <!-- Breadcrumbs -->
-        <nav class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-4">
-            <a class="hover:text-blue-700" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
-            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-            <a class="hover:text-blue-700" href="<?= base_url('admin/customers') ?>">Manajemen Pelanggan</a>
-            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span class="text-blue-700"><?= isset($customer) ? 'Edit Pelanggan' : 'Tambah Pelanggan' ?></span>
+        <nav aria-label="Breadcrumb" class="flex mb-6 text-xs font-medium text-slate-500">
+            <ol class="flex items-center space-x-2">
+                <li>
+                    <a class="hover:text-blue-600 flex items-center gap-1 transition-colors" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                    <a class="hover:text-blue-600 flex items-center gap-1 transition-colors" href="<?= base_url('admin/customers') ?>">Manajemen Pelanggan</a>
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                    <span class="text-blue-700 font-bold"><?= isset($customer) ? 'Edit Pelanggan' : 'Tambah Pelanggan' ?></span>
+                </li>
+            </ol>
         </nav>
 
         <!-- Page Header -->
@@ -20,7 +28,7 @@
         </div>
 
         <!-- Form Card -->
-        <div class="bg-white border border-outline-variant rounded-xl shadow-sm max-w-2xl overflow-hidden">
+        <div class="bg-white border border-outline-variant rounded-xl shadow-sm w-full overflow-hidden">
             <div class="p-6 border-b border-outline-variant bg-slate-50/50 flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">person</span>
                 <h4 class="font-bold text-on-surface">Informasi Profil Pelanggan</h4>
@@ -69,6 +77,14 @@
                            value="<?= esc(old('phone', $customer['phone'] ?? '')) ?>"
                            placeholder="Contoh: 081234567890"
                            class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
+                </div>
+
+                <div>
+                    <label for="status" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Status Akun</label>
+                    <select name="status" id="status" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white">
+                        <option value="active" <?= (old('status', $customer['status'] ?? 'active') === 'active') ? 'selected' : '' ?>>Aktif</option>
+                        <option value="inactive" <?= (old('status', $customer['status'] ?? '') === 'inactive') ? 'selected' : '' ?>>Non-Aktif</option>
+                    </select>
                 </div>
 
                 <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">

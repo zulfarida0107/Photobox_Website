@@ -5,10 +5,16 @@
     <div class="p-6 space-y-6 flex-1">
 
         <!-- Breadcrumbs -->
-        <nav class="flex text-sm text-slate-500 gap-2 items-center">
-            <a class="hover:text-blue-600 transition-colors" href="<?= base_url('admin/dashboard') ?>">Admin Dashboard</a>
-            <span class="material-symbols-outlined text-xs">chevron_right</span>
-            <span class="text-slate-900 font-medium">Manajemen Sesi &amp; Galeri Foto</span>
+        <nav aria-label="Breadcrumb" class="flex mb-6 text-xs font-medium text-slate-500">
+            <ol class="flex items-center space-x-2">
+                <li>
+                    <a class="hover:text-blue-600 flex items-center gap-1 transition-colors" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                    <span class="text-blue-700 font-bold">Manajemen Sesi</span>
+                </li>
+            </ol>
         </nav>
 
         <!-- Flash Messages -->
