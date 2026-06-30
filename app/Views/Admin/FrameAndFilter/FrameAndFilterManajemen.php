@@ -2,7 +2,7 @@
 <?php $this->section('content'); ?>
 
 <main class="pt-16 min-h-screen flex flex-col">
-    <div class="mt-0 p-6 flex-1">
+    <div class="p-6 flex-1">
 
         <!-- Breadcrumbs -->
         <nav aria-label="Breadcrumb" class="flex mb-6 text-xs font-medium text-slate-500">
@@ -25,6 +25,50 @@
             </div>
         <?php endif; ?>
 
+        <!-- Page Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="font-h1 text-h1 text-on-surface">Manajemen Aset Desain</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Kelola aset desain seperti frame foto dan filter warna.</p>
+            </div>
+        </div>
+
+        <!-- Bento Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <!-- Total Frame -->
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">wallpaper</span>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Total Frame</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= esc($statTotalFrames ?? 0) ?></h3>
+            </div>
+            <!-- Frame Bulan Ini -->
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">event</span>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Frame Bulan Ini</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= esc($statFramesThisMonth ?? 0) ?></h3>
+            </div>
+            <!-- Total Filter -->
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">filter_b_and_w</span>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Total Filter</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= esc($statTotalFilters ?? 0) ?></h3>
+            </div>
+            <!-- Filter Aktif -->
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">check_circle</span>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Filter Aktif</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= esc($statActiveFilters ?? 0) ?></h3>
+            </div>
+        </div>
+
         <div class="grid grid-cols-12 gap-6">
 
             <!-- ============================================================
@@ -33,9 +77,9 @@
             <section class="col-span-12 xl:col-span-7">
                 <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                     <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white">
-                        <div>
-                            <h2 class="font-h2 text-h2 text-on-surface">Koleksi Frame</h2>
-                            <p class="text-body-sm text-slate-500">Kelola bingkai foto untuk sesi pemotretan.</p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-1 h-6 bg-primary rounded-full"></div>
+                            <h4 class="font-h2 text-h2 text-on-surface">Koleksi Frame</h4>
                         </div>
                         <a href="<?= base_url('admin/frames/create') ?>"
                            class="bg-primary text-white px-4 py-2 rounded-lg font-label-bold text-label-bold flex items-center gap-2 hover:bg-primary-container transition-colors">

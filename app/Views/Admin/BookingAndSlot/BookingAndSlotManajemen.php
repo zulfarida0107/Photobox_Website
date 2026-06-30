@@ -2,7 +2,7 @@
 <?php $this->section('content'); ?>
 
 <main class="pt-16 min-h-screen flex flex-col">
-    <div class="p-6 space-y-6 flex-1">
+    <div class="p-6 flex-1">
 
         <!-- Breadcrumbs -->
         <nav class="flex items-center gap-2 mb-2 text-slate-500 text-xs font-medium">
@@ -26,10 +26,11 @@
         <?php endif; ?>
 
         <!-- Header Actions -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <!-- Header Actions -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
                 <h2 class="font-h1 text-h1 text-on-surface">Manajemen Reservasi</h2>
-                <p class="font-body-base text-body-base text-slate-500">Atur jadwal operasional booth dan reservasi pelanggan.</p>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Atur jadwal operasional booth dan reservasi pelanggan.</p>
             </div>
             <div class="flex items-center gap-3">
                 <a href="<?= base_url('admin/slots/create') ?>"
