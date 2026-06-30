@@ -45,19 +45,20 @@ class AdminAccessController extends BaseController
         // --- Stats ---
         $statTotal      = $this->adminModel->countAll();
         $statSuperadmin = $this->adminModel->where('role', 'superadmin')->countAllResults();
-        $statAdmin      = $this->adminModel->where('role', 'admin')->countAllResults();
+        $statAdmin      = $this->adminModel->where('role', 'staff')->countAllResults();
 
         $data = [
-            'title'        => 'Pengaturan Akses Admin | Admin Panel',
-            'admins'       => $admins,
-            'totalAdmins'  => $totalAdmins,
-            'currentPage'  => $currentPage,
-            'totalPages'   => $totalPages,
-            'keyword'      => $keyword,
-            'filterRole'   => $filterRole,
-            'statTotal'    => $statTotal,
+            'title'          => 'Pengaturan Akses Admin | Admin Panel',
+            'admins'         => $admins,
+            'totalAdmins'    => $totalAdmins,
+            'currentPage'    => $currentPage,
+            'totalPages'     => $totalPages,
+            'keyword'        => $keyword,
+            'filterRole'     => $filterRole,
+            'statTotal'      => $statTotal,
             'statSuperadmin' => $statSuperadmin,
-            'statAdmin'    => $statAdmin,
+            'statAdmin'      => $statAdmin,
+            'loggedInId'     => session()->get('adminId'), // untuk proteksi hapus diri sendiri
         ];
 
         return view('Admin/AdminAccess/AdminAccessManajemen', $data);
@@ -83,7 +84,7 @@ class AdminAccessController extends BaseController
             'name'     => 'required|min_length[3]|max_length[100]',
             'email'    => 'required|valid_email|is_unique[admins.email]',
             'password' => 'required|min_length[8]',
-            'role'     => 'required|in_list[superadmin,admin]',
+            'role'     => 'required|in_list[superadmin,staff]',
         ];
 
         if (!$this->validate($rules)) {
@@ -91,9 +92,19 @@ class AdminAccessController extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        // Auto-generate ID: ADM-XXX
-        $count = $this->adminModel->countAll();
-        $newId = sprintf('ADM-%03d', $count + 1);
+        // Auto-generate ID: ADM-XXX — gunakan MAX untuk menghindari duplicate saat ada data dihapus
+        $lastRow = $this->adminModel->db
+            ->table('admins')
+            ->select('id')
+            ->orderBy('id', 'DESC')
+            ->limit(1)
+            ->get()->getRowArray();
+
+        $lastNum = 0;
+        if ($lastRow) {
+            $lastNum = (int) preg_replace('/\D/', '', $lastRow['id']);
+        }
+        $newId = sprintf('ADM-%03d', $lastNum + 1);
 
         $this->adminModel->insert([
             'id'       => $newId,
@@ -139,7 +150,7 @@ class AdminAccessController extends BaseController
         $rules = [
             'name'  => 'required|min_length[3]|max_length[100]',
             'email' => "required|valid_email|is_unique[admins.email,id,{$id}]",
-            'role'  => 'required|in_list[superadmin,admin]',
+            'role'  => 'required|in_list[superadmin,staff]',
         ];
 
         $newPassword = $this->request->getPost('password');
@@ -177,6 +188,12 @@ class AdminAccessController extends BaseController
         if (!$admin) {
             return redirect()->to(base_url('admin/settings'))
                 ->with('error', 'Admin tidak ditemukan.');
+        }
+
+        // Proteksi: admin tidak boleh menghapus dirinya sendiri
+        if ($id === session()->get('adminId')) {
+            return redirect()->to(base_url('admin/settings'))
+                ->with('error', 'Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif.');
         }
 
         // Pastikan masih ada minimal 1 superadmin

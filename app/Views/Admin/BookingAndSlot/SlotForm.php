@@ -25,14 +25,6 @@
             <p class="font-body-sm text-body-sm text-on-surface-variant">Tambahkan jadwal operasional booth baru ke dalam basis data.</p>
         </div>
 
-        <style>
-            /* Sembunyikan ikon kalender/jam bawaan browser pada input date & time */
-            input[type="date"]::-webkit-calendar-picker-indicator,
-            input[type="time"]::-webkit-calendar-picker-indicator {
-                display: none;
-                -webkit-appearance: none;
-            }
-        </style>
 
         <!-- Form Card -->
         <div class="bg-white border border-outline-variant rounded-xl shadow-sm w-full overflow-hidden">
@@ -69,7 +61,16 @@
                 <!-- Date -->
                 <div>
                     <label for="slot_date" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tanggal Slot *</label>
-                    <input type="date" name="slot_date" id="slot_date" value="<?= old('slot_date') ?>" required class="w-full bg-white border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                    <div class="relative">
+                        <input type="date" name="slot_date" id="slot_date" value="<?= old('slot_date') ?>" required
+                               class="w-full bg-white border border-slate-200 rounded-lg pl-4 pr-12 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                        <button type="button"
+                                onclick="document.getElementById('slot_date').showPicker()"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors"
+                                title="Pilih Tanggal">
+                            <span class="material-symbols-outlined text-[22px]">calendar_month</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Time -->
