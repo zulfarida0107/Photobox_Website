@@ -128,12 +128,12 @@
                         <table class="w-full text-left">
                             <thead class="bg-slate-50/50 border-b border-slate-200">
                                 <tr>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600">ID Frame</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 text-center">Nama Frame</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 text-center">Kategori</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 text-center">Preview</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 text-center">Status</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 text-center">Aksi</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase">ID Frame</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Nama Frame</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Kategori</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Preview</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Status</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">

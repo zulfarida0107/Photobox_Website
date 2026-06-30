@@ -66,9 +66,9 @@
                         <table class="w-full text-left">
                             <thead class="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Slot &amp; Booth</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Waktu</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 text-center">Status</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Slot &amp; Booth</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Waktu</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
