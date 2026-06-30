@@ -68,6 +68,15 @@
                 </div>
 
                 <div>
+                    <label for="photo_count" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jumlah Foto *</label>
+                    <input type="number" name="photo_count" id="photo_count" required min="1" max="10"
+                           value="<?= esc(old('photo_count', $frame['photo_count'] ?? 6)) ?>"
+                           placeholder="Contoh: 1 atau 6"
+                           class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
+                    <p class="text-[11px] text-slate-400 mt-1">Jumlah slot foto yang harus dipilih/dimasukkan oleh pengguna untuk frame ini (contoh: 1 untuk layout koran, 6 untuk layout strip standar).</p>
+                </div>
+
+                <div>
                     <label for="is_active" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Status Aktif *</label>
                     <select name="is_active" id="is_active" required
                             class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white">

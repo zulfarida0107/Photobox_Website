@@ -63,8 +63,8 @@
                         </div>
                         <div>
                             <span class="block text-xs text-slate-500">Status Pembayaran</span>
-                            <span class="font-bold <?= $booking['payment_status'] == 'paid' ? 'text-green-600' : 'text-amber-600' ?> uppercase">
-                                <?= esc($booking['payment_status']) ?>
+                            <span class="font-bold <?= in_array($booking['status'], ['paid', 'completed']) ? 'text-green-600' : 'text-amber-600' ?> uppercase">
+                                <?= esc(in_array($booking['status'], ['paid', 'completed']) ? 'PAID' : ($booking['status'] === 'cancelled' ? 'CANCELLED' : 'PENDING')) ?>
                             </span>
                         </div>
                     </div>

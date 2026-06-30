@@ -107,6 +107,7 @@ class FrameAndFilterController extends BaseController
         $rules = [
             'name'        => 'required|min_length[3]|max_length[100]',
             'category_id' => 'permit_empty|max_length[20]',
+            'photo_count' => 'required|integer|greater_than_equal_to[1]|less_than_equal_to[10]',
             'frame_file'  => 'uploaded[frame_file]|max_size[frame_file,2048]|ext_in[frame_file,png,jpg,jpeg]',
         ];
 
@@ -131,6 +132,7 @@ class FrameAndFilterController extends BaseController
             'id'          => $newId,
             'name'        => $this->request->getPost('name'),
             'category_id' => $this->request->getPost('category_id') ?: null,
+            'photo_count' => (int) $this->request->getPost('photo_count'),
             'file_path'   => 'uploads/frames/' . $newName,
         ]);
 
@@ -183,9 +185,21 @@ class FrameAndFilterController extends BaseController
                 ->with('error', 'Frame tidak ditemukan.');
         }
 
+        $rules = [
+            'name'        => 'required|min_length[3]|max_length[100]',
+            'category_id' => 'permit_empty|max_length[20]',
+            'photo_count' => 'required|integer|greater_than_equal_to[1]|less_than_equal_to[10]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()
+                ->with('error', implode(' ', $this->validator->getErrors()));
+        }
+
         $updateData = [
             'name'        => $this->request->getPost('name'),
             'category_id' => $this->request->getPost('category_id') ?: null,
+            'photo_count' => (int) $this->request->getPost('photo_count'),
         ];
 
         // Ganti file jika ada upload baru
