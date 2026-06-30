@@ -56,7 +56,7 @@
                     <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">Informasi Pembayaran</h4>
                     <div class="space-y-1">
                         <p class="text-sm"><span class="text-slate-500 w-24 inline-block">Tanggal</span>: <span class="font-bold"><?= date('d F Y', strtotime($payment['created_at'])) ?></span></p>
-                        <p class="text-sm"><span class="text-slate-500 w-24 inline-block">Metode</span>: <span class="font-bold uppercase"><?= esc($payment['payment_method']) ?></span></p>
+                        <p class="text-sm"><span class="text-slate-500 w-24 inline-block">Metode</span>: <span class="font-bold uppercase"><?= esc($payment['payment_method'] ?? 'QRIS') ?></span></p>
                         <p class="text-sm"><span class="text-slate-500 w-24 inline-block">Status</span>: <span class="font-bold text-green-600 uppercase">LUNAS (PAID)</span></p>
                     </div>
                 </div>

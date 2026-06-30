@@ -141,7 +141,12 @@
                                     <?php foreach ($frames as $frame): ?>
                                         <tr class="hover:bg-blue-50/30 transition-colors">
                                             <td class="px-6 py-4 font-data-tabular text-data-tabular"><?= esc($frame['id']) ?></td>
-                                            <td class="px-6 py-4 font-body-base text-body-base text-on-surface text-center"><?= esc($frame['name']) ?></td>
+                                            <td class="px-6 py-4 text-center">
+                                                <div class="font-body-base text-body-base text-on-surface font-semibold"><?= esc($frame['name']) ?></div>
+                                                <span class="inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
+                                                    <?= esc($frame['photo_count'] ?? 6) ?> Foto
+                                                </span>
+                                            </td>
                                             <td class="px-6 py-4 font-body-sm text-body-sm text-slate-600 text-center">
                                                 <span class="inline-flex items-center px-2.5 py-1 rounded bg-blue-50 text-blue-700 text-xs font-semibold">
                                                     <?= esc($frame['category_name'] ?? 'Uncategorized') ?>
@@ -170,7 +175,7 @@
                                             <td class="px-6 py-4 text-center space-x-2">
                                                 <button type="button"
                                                         class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Lihat Preview"
-                                                        onclick="showPreviewModal('<?= esc($frame['id'], 'js') ?>', '<?= esc($frame['name'], 'js') ?>', '<?= esc($frame['category_name'] ?? 'Uncategorized', 'js') ?>', '<?= base_url($frame['file_path']) ?>', '<?= date('d M Y, H:i', strtotime($frame['created_at'])) ?>')">
+                                                        onclick="showPreviewModal('<?= esc($frame['id'], 'js') ?>', '<?= esc($frame['name'], 'js') ?>', '<?= esc($frame['category_name'] ?? 'Uncategorized', 'js') ?>', '<?= base_url($frame['file_path']) ?>', '<?= date('d M Y, H:i', strtotime($frame['created_at'])) ?>', '<?= esc($frame['photo_count'] ?? 6, 'js') ?>')">
                                                     <span class="material-symbols-outlined text-[20px]">visibility</span>
                                                 </button>
                                                 <a href="<?= base_url('admin/frames/' . $frame['id'] . '/edit') ?>"
@@ -393,6 +398,9 @@
                     <h4 class="font-bold text-on-surface mb-1">Seret &amp; Letakkan Frame Baru</h4>
                     <p class="text-body-sm text-slate-500 mb-4">Mendukung format PNG transparan, resolusi min. 1080px.</p>
                     <input type="text" name="name" placeholder="Nama Frame" required
+                                           class="mb-3 w-full max-w-xs px-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"/>
+                    
+                    <input type="number" name="photo_count" placeholder="Jumlah Foto (contoh: 1 atau 6)" min="1" max="10" required value="6"
                            class="mb-3 w-full max-w-xs px-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"/>
                     
                     <select name="category_id"
@@ -482,6 +490,10 @@
                     <span class="font-semibold text-slate-500">Kategori</span>
                     <span class="text-slate-800 font-semibold" id="modalFrameCategory"></span>
                 </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Jumlah Foto</span>
+                    <span class="text-slate-800 font-semibold" id="modalFramePhotoCount"></span>
+                </div>
                 <div class="flex justify-between">
                     <span class="font-semibold text-slate-500">Waktu Unggah</span>
                     <span class="text-slate-800" id="modalFrameUploaded"></span>
@@ -497,7 +509,7 @@
 </div>
 
 <script>
-    function showPreviewModal(id, name, category, filePath, uploadedAt) {
+    function showPreviewModal(id, name, category, filePath, uploadedAt, photoCount) {
         const modal = document.getElementById('previewModal');
         const content = document.getElementById('previewModalContent');
         
@@ -505,6 +517,7 @@
         document.getElementById('modalFrameName').textContent = name;
         document.getElementById('modalFrameCategory').textContent = category;
         document.getElementById('modalFrameUploaded').textContent = uploadedAt;
+        document.getElementById('modalFramePhotoCount').textContent = photoCount + " Foto";
         document.getElementById('modalFrameImage').src = filePath;
 
         // Show Modal
