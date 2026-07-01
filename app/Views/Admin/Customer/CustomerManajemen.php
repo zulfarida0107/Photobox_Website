@@ -81,10 +81,9 @@
         </div>
 
         <!-- Main Data Table Section -->
-        <div class="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden">
-
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex-1 flex flex-col mb-6">
             <!-- Table Toolbar -->
-            <div class="p-4 border-b border-outline-variant flex items-center justify-between bg-slate-50/50">
+            <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex items-center gap-2">
                     <form method="get" action="<?= base_url('admin/customers') ?>" class="flex border border-slate-200 rounded-lg overflow-hidden text-xs font-bold">
                         <button type="submit" name="status" value="all" class="px-4 py-2 <?= ($filterStatus ?? 'all') === 'all' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500 hover:bg-slate-50' ?> border-r border-slate-200 transition-colors">Semua</button>

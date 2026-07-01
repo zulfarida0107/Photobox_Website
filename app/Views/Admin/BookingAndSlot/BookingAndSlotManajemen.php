@@ -222,7 +222,7 @@
             </section>
 
             <!-- BAWAH: Quick Stats -->
-            <div class="lg:col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="lg:col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                 <div class="bg-white p-5 border border-slate-200 rounded-xl shadow-sm flex flex-col justify-between">
                     <div>
                         <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Reservasi</span>

@@ -86,7 +86,7 @@
         </div>
 
         <!-- Bento Grid -->
-        <div class="grid grid-cols-12 gap-6">
+        <div class="grid grid-cols-12 gap-6 mb-6">
 
             <!-- ============================================================
                  Tabel Sesi (8 kolom)

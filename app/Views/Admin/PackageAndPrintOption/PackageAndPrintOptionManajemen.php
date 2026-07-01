@@ -235,7 +235,7 @@
             </div>
 
             <!-- Promo & Preview Bento -->
-            <div class="col-span-12 grid grid-cols-3 gap-6">
+            <div class="col-span-12 grid grid-cols-3 gap-6 mb-6">
                 <!-- Promotion Card -->
                 <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-2xl text-white flex flex-col justify-between overflow-hidden relative">
                     <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl text-white/10">auto_awesome</span>

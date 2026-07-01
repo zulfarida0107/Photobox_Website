@@ -90,7 +90,7 @@
         </div>
 
         <!-- Table -->
-        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mb-6">
             <!-- Table Toolbar -->
             <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <h4 class="font-bold text-on-surface flex items-center gap-2">

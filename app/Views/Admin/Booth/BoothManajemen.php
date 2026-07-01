@@ -15,7 +15,7 @@
                 </li>
                 <li class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-[10px]">chevron_right</span>
-                    <span class="text-blue-700 font-bold">Daftar Mesin Booth</span>
+                    <span class="text-blue-700 font-bold">Manajemen Mesin Booth</span>
                 </li>
             </ol>
         </nav>
@@ -24,14 +24,14 @@
         <!-- Header Section -->
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
             <div>
-                <h2 class="font-h1 text-h1 text-on-surface">Daftar Mesin Booth</h2>
+                <h2 class="font-h1 text-h1 text-on-surface">Manajemen Mesin Booth</h2>
                 <p class="font-body-sm text-body-sm text-on-surface-variant">Kelola status operasional dan inventaris perangkat keras Anda.</p>
             </div>
             <div class="mt-4 md:mt-0">
-                <a href="<?= base_url('admin/booths/create') ?>"
-                   class="bg-primary text-on-primary px-4 py-2.5 rounded-lg font-label-bold text-label-bold flex items-center hover:bg-primary-container transition-colors shadow-sm">
-                    <span class="material-symbols-outlined mr-2">add_circle</span>
-                    Tambah Booth Baru
+                <a href="<?= base_url('admin/booths/export') ?>"
+                   class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2.5 rounded-lg font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm whitespace-nowrap">
+                    <span class="material-symbols-outlined text-[18px]">cloud_download</span>
+                    Ekspor Laporan
                 </a>
             </div>
         </div>
@@ -101,44 +101,63 @@
         </div>
 
         <!-- Table Section -->
-        <div class="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden">
-            <!-- Table Toolbar -->
-            <div class="px-6 py-4 border-b border-outline-variant flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <form method="get" action="<?= base_url('admin/booths') ?>" class="flex items-center gap-3 w-full md:w-auto">
-                    <div class="relative w-full md:w-96">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-                        <input name="q" value="<?= esc($keyword ?? '') ?>"
-                               class="w-full pl-10 pr-4 py-2 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-body-sm font-body-sm"
-                               placeholder="Cari ID atau Nama Booth..."/>
+        <!-- Table Section -->
+        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            
+            <!-- Table Header -->
+            <div class="p-5 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center bg-white gap-4">
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <div class="w-1 h-6 bg-primary rounded-full"></div>
+                    <h4 class="font-h2 text-h2 text-on-surface">Daftar Mesin Booth</h4>
+                </div>
+                <a href="<?= base_url('admin/booths/create') ?>"
+                   class="bg-primary text-white px-4 py-2 rounded-lg font-label-bold text-label-bold flex items-center gap-2 hover:bg-primary-container transition-colors shadow-sm whitespace-nowrap w-full md:w-auto justify-center">
+                    <span class="material-symbols-outlined text-[18px]">devices</span>
+                    Tambah Booth Baru
+                </a>
+            </div>
+
+            <!-- Search & Filter Bar -->
+            <div class="p-4 bg-slate-50/50 border-b border-slate-200 flex flex-col sm:flex-row gap-3">
+                <form method="get" action="<?= base_url('admin/booths') ?>" class="flex flex-col md:flex-row flex-1 gap-3 w-full">
+                    <!-- Search Input -->
+                    <div class="relative flex-1">
+                        <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">search</span>
+                        <input type="text" name="q" value="<?= esc($keyword ?? '') ?>" placeholder="Cari ID atau Nama Booth..."
+                               class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all"/>
                     </div>
+                    
+                    <!-- Status Filter -->
                     <select name="status" onchange="this.form.submit()"
-                            class="w-48 px-3 py-2 border border-outline-variant rounded-lg text-body-sm text-secondary hover:bg-slate-50 transition-colors">
+                            class="w-full md:w-48 px-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all text-slate-600">
                         <option value="" <?= ($filterStatus ?? '') === '' ? 'selected' : '' ?>>Semua Status</option>
                         <option value="active"      <?= ($filterStatus ?? '') === 'active'      ? 'selected' : '' ?>>Aktif</option>
                         <option value="maintenance" <?= ($filterStatus ?? '') === 'maintenance' ? 'selected' : '' ?>>Maintenance</option>
                         <option value="inactive"    <?= ($filterStatus ?? '') === 'inactive'    ? 'selected' : '' ?>>Nonaktif</option>
                     </select>
+
+                    <!-- Reset button if search or filter is active -->
+                    <?php if (!empty($keyword) || !empty($filterStatus)): ?>
+                        <a href="<?= base_url('admin/booths') ?>" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-semibold rounded-lg flex items-center justify-center transition-colors">
+                            Reset
+                        </a>
+                    <?php endif; ?>
                 </form>
-                <a href="<?= base_url('admin/booths/export') ?>"
-                   class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2 rounded font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm whitespace-nowrap">
-                    <span class="material-symbols-outlined text-[18px]">cloud_download</span>
-                    Ekspor Laporan
-                </a>
             </div>
 
             <!-- Data Table -->
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
-                    <thead>
-                        <tr class="bg-surface-container-low border-b border-outline-variant">
-                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider text-center">ID Booth</th>
-                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider">Nama Mesin</th>
-                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider text-center">Alamat IP</th>
-                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider">Sesi Aktif</th>
-                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider text-center">Antrean</th>
-                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider text-center">Status</th>
-                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider text-center">Waktu Daftar</th>
-                            <th class="p-4 font-label-bold text-label-bold text-on-surface uppercase tracking-wider text-center">Aksi</th>
+                    <thead class="bg-slate-50/50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">ID Booth</th>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Nama Mesin</th>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Alamat IP</th>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Sesi Aktif</th>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Antrean</th>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Status</th>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Waktu Daftar</th>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-outline-variant">
@@ -260,7 +279,7 @@
         </div>
 
         <!-- Map Preview + Alert Section -->
-        <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="mt-8 mb-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Map Preview -->
             <div class="lg:col-span-2 bg-white border border-outline-variant rounded-xl shadow-sm p-6">
                 <h3 class="font-h2 text-h2 mb-4">Sebaran Geografis Mesin</h3>
@@ -299,8 +318,8 @@
             </div>
         </div>
 
-        <?= $this->include('Admin/layouts/footer') ?>
     </div>
+    <?= $this->include('Admin/layouts/footer') ?>
 </main>
 
 <!-- QR Code Modal -->
