@@ -41,11 +41,7 @@
                     <span class="material-symbols-outlined text-[18px]">cloud_download</span>
                     Ekspor Laporan
                 </a>
-                <a href="<?= base_url('admin/sessions/resend-all') ?>"
-                   class="bg-primary text-on-primary px-4 py-2 rounded font-label-bold text-label-bold flex items-center gap-2 hover:bg-blue-800 transition-colors">
-                    <span class="material-symbols-outlined">mail</span>
-                    Kirim Ulang Email
-                </a>
+
             </div>
         </div>
 
@@ -91,78 +87,96 @@
             <!-- ============================================================
                  Tabel Sesi (8 kolom)
             ============================================================ -->
-            <div class="col-span-12 lg:col-span-8 bg-white border border-slate-200 rounded shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
-                    <h3 class="font-h2 text-h2 text-on-surface">Riwayat Sesi Terkini</h3>
-                    <div class="flex gap-2 items-center">
-                        <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-[10px] font-bold border border-blue-100">
-                            Total: <?= $totalSessions ?? 0 ?> Sesi
-                        </span>
-                        <form method="get" action="<?= base_url('admin/sessions') ?>" class="flex gap-2">
-                            <input name="q" value="<?= esc($keyword ?? '') ?>"
-                                   class="pl-3 pr-4 py-1.5 border border-slate-200 rounded text-sm focus:ring-2 focus:ring-blue-500 bg-slate-50 w-44"
-                                   placeholder="Cari ID sesi / booking..."/>
-                        </form>
+            <div class="col-span-12 lg:col-span-8 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
+                <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white">
+                    <div class="flex items-center gap-3">
+                        <div class="w-1 h-6 bg-primary rounded-full"></div>
+                        <h4 class="font-h2 text-h2 text-on-surface">Riwayat Sesi Terkini</h4>
                     </div>
+                    <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-[10px] font-bold border border-blue-100">
+                        Total: <?= $totalSessions ?? 0 ?> Sesi
+                    </span>
                 </div>
-                <div class="overflow-x-auto">
+                
+                <div class="p-4 bg-slate-50/50 border-b border-slate-200 flex flex-col sm:flex-row gap-3">
+                    <form method="get" action="<?= base_url('admin/sessions') ?>" class="flex flex-1 gap-3">
+                        <div class="relative flex-1">
+                            <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">search</span>
+                            <input type="text" name="q" value="<?= esc($keyword ?? '') ?>" placeholder="Cari ID sesi / booking..."
+                                   class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all"/>
+                        </div>
+                        <?php if (!empty($keyword)): ?>
+                            <a href="<?= base_url('admin/sessions') ?>" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-semibold rounded-lg flex items-center transition-colors">
+                                Reset
+                            </a>
+                        <?php endif; ?>
+                    </form>
+                </div>
+
+                <div class="overflow-x-auto flex-1">
                     <table class="w-full text-left">
-                        <thead class="bg-slate-50 text-slate-600 uppercase text-[11px] font-bold tracking-wider">
+                        <thead class="bg-slate-50/50 border-b border-slate-200">
                             <tr>
-                                <th class="px-6 py-3 text-center">ID Sesi</th>
-                                <th class="px-6 py-3 text-center">Kode Booking</th>
-                                <th class="px-6 py-3 text-center">Frame / Filter</th>
-                                <th class="px-6 py-3 text-center">Penerima Email</th>
-                                <th class="px-6 py-3 text-center">Waktu</th>
-                                <th class="px-6 py-3 text-center">Aksi</th>
+                                <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">ID Sesi</th>
+                                <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Kode Booking</th>
+                                <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Frame / Filter</th>
+                                <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Penerima Email</th>
+                                <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Waktu</th>
+                                <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             <?php if (!empty($sessions)): ?>
                                 <?php foreach ($sessions as $session): ?>
-                                    <tr class="hover:bg-blue-50/50 transition-colors group">
-                                        <td class="px-6 py-4 font-data-tabular text-data-tabular text-blue-700 font-bold text-center">
+                                    <tr class="hover:bg-blue-50/30 transition-colors">
+                                        <td class="px-6 py-4 font-data-tabular text-data-tabular text-center">
                                             #<?= esc($session['id']) ?>
                                         </td>
-                                        <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-900 text-center">
-                                            <?= esc($session['booking_id'] ?? '-') ?>
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="font-body-base text-body-base text-on-surface font-semibold"><?= esc($session['booking_id'] ?? '-') ?></div>
                                         </td>
                                         <td class="px-6 py-4 text-center">
-                                            <div class="flex flex-col items-center">
-                                                <span class="text-body-sm font-medium"><?= esc($session['frame_name'] ?? 'N/A') ?></span>
-                                                <span class="text-[10px] text-slate-500 uppercase"><?= esc($session['filter_name'] ?? 'N/A') ?></span>
+                                            <div class="font-body-base text-body-base text-on-surface font-semibold"><?= esc($session['frame_name'] ?? 'N/A') ?></div>
+                                            <span class="inline-flex items-center px-2.5 py-1 mt-1 rounded bg-blue-50 text-blue-700 text-xs font-semibold">
+                                                <?= esc($session['filter_name'] ?? 'N/A') ?>
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <span class="font-body-sm text-body-sm text-slate-600">
+                                                <?= esc($session['email_recipient'] ?? '-') ?>
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600">
+                                                <?= date('d M Y, H:i', strtotime($session['created_at'])) ?> WIB
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="flex flex-col items-center justify-center gap-1">
+                                                <a href="<?= base_url('admin/sessions/' . $session['id']) ?>"
+                                                   class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Lihat Detail">
+                                                    <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                                </a>
+                                                <?php if (!empty($session['email_recipient'])): ?>
+                                                    <form action="<?= base_url('admin/sessions/' . $session['id'] . '/resend') ?>" method="post">
+                                                        <?= csrf_field() ?>
+                                                        <button type="submit" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Kirim Ulang Email">
+                                                            <span class="material-symbols-outlined text-[20px]">send</span>
+                                                        </button>
+                                                    </form>
+                                                <?php endif; ?>
+                                                <button type="button"
+                                                        class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Sesi"
+                                                        onclick="openUniversalDeleteModal('<?= base_url('admin/sessions/' . $session['id'] . '/delete') ?>', 'Sesi #<?= esc($session['id'], 'js') ?>', 'Hapus Sesi Pemotretan?')">
+                                                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                                                </button>
                                             </div>
-                                        </td>
-                                        <td class="px-6 py-4 text-body-sm text-slate-600 text-center">
-                                            <?= esc($session['email_recipient'] ?? '-') ?>
-                                        </td>
-                                        <td class="px-6 py-4 text-body-sm text-slate-500 text-center">
-                                            <?= date('H:i', strtotime($session['created_at'])) ?> WIB
-                                        </td>
-                                        <td class="px-6 py-4 text-center space-x-2">
-                                            <a href="<?= base_url('admin/sessions/' . $session['id']) ?>"
-                                               class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Lihat Detail">
-                                                <span class="material-symbols-outlined text-[20px]">open_in_new</span>
-                                            </a>
-                                            <?php if (!empty($session['email_recipient'])): ?>
-                                                <form action="<?= base_url('admin/sessions/' . $session['id'] . '/resend') ?>" method="post" class="inline">
-                                                    <?= csrf_field() ?>
-                                                    <button type="submit" class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Kirim Ulang Email">
-                                                        <span class="material-symbols-outlined text-[20px]">send</span>
-                                                    </button>
-                                                </form>
-                                            <?php endif; ?>
-                                            <button type="button"
-                                                    class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Sesi"
-                                                    onclick="openUniversalDeleteModal('<?= base_url('admin/sessions/' . $session['id'] . '/delete') ?>', 'Sesi #<?= esc($session['id'], 'js') ?>', 'Hapus Sesi Pemotretan?')">
-                                                <span class="material-symbols-outlined text-[20px]">delete</span>
-                                            </button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="6" class="px-6 py-12 text-center text-sm text-slate-400">
+                                    <td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400">
                                         Belum ada sesi pemotretan.
                                     </td>
                                 </tr>
@@ -171,7 +185,7 @@
                     </table>
                 </div>
                 <!-- Pagination -->
-                <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+                <div class="px-6 py-4 bg-slate-50/50 flex items-center justify-between border-t border-slate-200">
                     <span class="text-xs text-slate-500">
                         Menampilkan <?= count($sessions ?? []) ?> dari <?= $totalSessions ?? 0 ?> sesi
                     </span>
@@ -200,31 +214,36 @@
             <div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
 
                 <!-- Storage Card -->
-                <div class="bg-white border border-slate-200 rounded shadow-sm p-6 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="font-h2 text-h2 text-on-surface">Sesi Terbaru</h3>
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col flex-1">
+                    <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-1 h-6 bg-primary rounded-full"></div>
+                            <h4 class="font-h2 text-h2 text-on-surface">Sesi Terbaru</h4>
+                        </div>
                         <span class="material-symbols-outlined text-blue-600">history</span>
                     </div>
-                    <?php if (!empty($latestSession)): ?>
-                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Terakhir Ditambahkan</label>
-                            <div class="flex items-center justify-between gap-2 overflow-hidden">
-                                <p class="text-xs truncate text-blue-700 font-medium">
-                                    #<?= esc($latestSession['id']) ?> — <?= esc($latestSession['email_recipient'] ?? 'No email') ?>
-                                </p>
-                                <?php if (!empty($latestSession['drive_folder_url'])): ?>
-                                    <a href="<?= esc($latestSession['drive_folder_url']) ?>" target="_blank"
-                                       class="shrink-0 text-slate-400 hover:text-blue-600" title="Buka Drive">
-                                        <span class="material-symbols-outlined text-sm">open_in_new</span>
-                                    </a>
-                                <?php endif; ?>
+                    <div class="p-5 flex-1 space-y-4">
+                        <?php if (!empty($latestSession)): ?>
+                            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Terakhir Ditambahkan</label>
+                                <div class="flex items-center justify-between gap-2 overflow-hidden">
+                                    <p class="text-xs truncate text-blue-700 font-medium">
+                                        #<?= esc($latestSession['id']) ?> — <?= esc($latestSession['email_recipient'] ?? 'No email') ?>
+                                    </p>
+                                    <?php if (!empty($latestSession['drive_folder_url'])): ?>
+                                        <a href="<?= esc($latestSession['drive_folder_url']) ?>" target="_blank"
+                                           class="shrink-0 text-slate-400 hover:text-blue-600" title="Buka Drive">
+                                            <span class="material-symbols-outlined text-sm">open_in_new</span>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                        </div>
-                    <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
                 </div>
 
                 <!-- Quick Action Card -->
-                <div class="bg-primary-container text-on-primary-container rounded shadow-sm p-6 relative overflow-hidden">
+                <div class="bg-primary-container text-on-primary-container rounded-xl shadow-sm p-6 relative overflow-hidden">
                     <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl text-on-primary-container opacity-10">mail</span>
                     <h4 class="font-label-bold text-label-bold text-blue-100 uppercase mb-2">Aksi Cepat</h4>
                     <p class="text-white font-h2 text-h2 mb-4 leading-tight">Gagal Mengirim Email?</p>
