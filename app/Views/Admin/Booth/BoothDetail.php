@@ -8,7 +8,7 @@
         <nav class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-4">
             <a class="hover:text-blue-700" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
             <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-            <a class="hover:text-blue-700" href="<?= base_url('admin/booths') ?>">Manajemen Booth</a>
+            <a class="hover:text-blue-700" href="<?= base_url('admin/booths') ?>">Manajemen Mesin Booth</a>
             <span class="material-symbols-outlined text-[14px]">chevron_right</span>
             <span class="text-blue-700">Detail Booth</span>
         </nav>

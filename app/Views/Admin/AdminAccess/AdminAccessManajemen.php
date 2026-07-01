@@ -125,12 +125,12 @@
                 <table class="w-full text-left">
                     <thead class="bg-slate-50/50 border-b border-slate-200">
                         <tr>
-                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap">ID Admin</th>
-                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase whitespace-nowrap">Nama / Username</th>
-                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap">Email</th>
-                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap">Role</th>
-                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap">Terdaftar</th>
-                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap">Aksi</th>
+                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap w-[10%]">ID Admin</th>
+                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap w-[30%]">Nama / Username</th>
+                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap w-[25%]">Email</th>
+                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap w-[15%]">Role</th>
+                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap w-[10%]">Terdaftar</th>
+                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap w-[10%]">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -144,8 +144,8 @@
                                 ?>
                                 <tr class="hover:bg-blue-50/30 transition-colors group">
                                     <td class="px-4 py-4 text-data-tabular font-medium text-slate-900 text-center whitespace-nowrap">#<?= esc($admin['id']) ?></td>
-                                    <td class="px-4 py-4 whitespace-nowrap">
-                                        <div class="flex items-center gap-3">
+                                    <td class="px-4 py-4 whitespace-nowrap text-center">
+                                        <div class="flex items-center justify-center gap-2">
                                             <div class="w-8 h-8 rounded-full <?= $avatarClass ?> flex items-center justify-center font-bold text-xs flex-shrink-0">
                                                 <?= esc($initials) ?>
                                             </div>
