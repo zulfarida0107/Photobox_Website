@@ -44,17 +44,15 @@ class PackageAndPrintOptionController extends BaseController
             ->orderBy('created_at', 'DESC')
             ->findAll($perPage, ($currentPage - 1) * $perPage);
 
-        // --- Query Opsi Cetak ---
+        // --- Query Opsi Cetak (dipaginasi) ---
         $optBuilder = $this->printOptionModel;
         if ($keywordOpt !== '') {
             $optBuilder = $optBuilder->like('name', $keywordOpt);
         }
-        $totalPrintOptions  = $optBuilder->countAllResults(false);
-        $totalOptPages      = max(1, (int) ceil($totalPrintOptions / $perPage));
-        
+        $totalPrintOptions = $optBuilder->countAllResults(false);
+        $totalOptPages     = max(1, (int) ceil($totalPrintOptions / $perPage));
         $optBuilder->select('*');
-
-        $printOptions       = $optBuilder
+        $printOptions = $optBuilder
             ->orderBy('extra_price', 'ASC')
             ->findAll($perPage, ($optPage - 1) * $perPage);
 
