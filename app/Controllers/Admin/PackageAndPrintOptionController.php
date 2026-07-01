@@ -22,9 +22,12 @@ class PackageAndPrintOptionController extends BaseController
     // =========================================================================
     public function index()
     {
-        $perPage       = 8;
+        $perPage       = 10;
         $currentPage   = max(1, (int) ($this->request->getGet('page') ?? 1));
         $keyword       = $this->request->getGet('q') ?? '';
+
+        $optPage       = max(1, (int) ($this->request->getGet('opt_page') ?? 1));
+        $keywordOpt    = $this->request->getGet('q_opt') ?? '';
 
         // --- Query Paket ---
         $pkgBuilder = $this->packageModel;
@@ -41,8 +44,19 @@ class PackageAndPrintOptionController extends BaseController
             ->orderBy('created_at', 'DESC')
             ->findAll($perPage, ($currentPage - 1) * $perPage);
 
-        // --- Semua opsi cetak (sidebar kanan, tidak di-paginate) ---
-        $printOptions = $this->printOptionModel->orderBy('extra_price', 'ASC')->findAll();
+        // --- Query Opsi Cetak ---
+        $optBuilder = $this->printOptionModel;
+        if ($keywordOpt !== '') {
+            $optBuilder = $optBuilder->like('name', $keywordOpt);
+        }
+        $totalPrintOptions  = $optBuilder->countAllResults(false);
+        $totalOptPages      = max(1, (int) ceil($totalPrintOptions / $perPage));
+        
+        $optBuilder->select('*');
+
+        $printOptions       = $optBuilder
+            ->orderBy('extra_price', 'ASC')
+            ->findAll($perPage, ($optPage - 1) * $perPage);
 
         // --- Stats ---
         $statTotalPackages    = $this->packageModel->countAll();
@@ -74,6 +88,10 @@ class PackageAndPrintOptionController extends BaseController
             'totalPkgPages'       => $totalPkgPages,
             'keyword'             => $keyword,
             'printOptions'        => $printOptions,
+            'totalPrintOptions'   => $totalPrintOptions,
+            'currentOptPage'      => $optPage,
+            'totalOptPages'       => $totalOptPages,
+            'keywordOpt'          => $keywordOpt,
             'statTotalPackages'   => $statTotalPackages,
             'statTotalPrintOptions' => $statTotalPrintOptions,
             'statAvgPrice'        => $statAvgPrice,
