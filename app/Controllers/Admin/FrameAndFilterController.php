@@ -112,7 +112,8 @@ class FrameAndFilterController extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->to(base_url('admin/frames'))
+            return redirect()->to(base_url('admin/frames/create'))
+                ->withInput()
                 ->with('error', implode(' ', $this->validator->getErrors()));
         }
 
@@ -120,24 +121,33 @@ class FrameAndFilterController extends BaseController
         $newName  = $file->getRandomName();
         $file->move(FCPATH . 'uploads/frames/', $newName);
 
-        // Generate ID: FRM-XXX
-        $lastRow = $this->frameModel->orderBy('id', 'DESC')->first();
+        // Generate ID: FRM-XXX — gunakan numeric sort agar tidak error (FRM-009 < FRM-010)
+        $db = $this->frameModel->db;
+        $lastRow = $db->query("SELECT id FROM frames WHERE id LIKE 'FRM-%' ORDER BY CAST(SUBSTRING(id, 5) AS UNSIGNED) DESC LIMIT 1")->getRowArray();
         $lastIdNumber = 0;
         if ($lastRow && preg_match('/FRM-(\d+)/', $lastRow['id'], $matches)) {
             $lastIdNumber = (int)$matches[1];
         }
         $newId = sprintf('FRM-%03d', $lastIdNumber + 1);
 
-        $this->frameModel->insert([
+        $insertResult = $this->frameModel->insert([
             'id'          => $newId,
             'name'        => $this->request->getPost('name'),
             'category_id' => $this->request->getPost('category_id') ?: null,
             'photo_count' => (int) $this->request->getPost('photo_count'),
+            'is_active'   => (int) ($this->request->getPost('is_active') ?? 1),
             'file_path'   => 'uploads/frames/' . $newName,
         ]);
 
+        if ($insertResult === false) {
+            // Hapus file yang sudah terlanjur di-upload jika insert gagal
+            @unlink(FCPATH . 'uploads/frames/' . $newName);
+            return redirect()->to(base_url('admin/frames/create'))
+                ->with('error', 'Gagal menyimpan data frame. Silakan coba lagi.');
+        }
+
         return redirect()->to(base_url('admin/frames'))
-            ->with('success', 'Frame baru berhasil diunggah.');
+            ->with('success', 'Frame baru "' . $this->request->getPost('name') . '" berhasil diunggah.');
     }
 
     // =========================================================================
