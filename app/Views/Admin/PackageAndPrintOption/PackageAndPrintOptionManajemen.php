@@ -111,14 +111,6 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-<<<<<<< HEAD
-                            <tr class="bg-slate-50/80 text-slate-500 font-label-bold text-label-bold uppercase tracking-wider">
-                                <th class="px-6 py-4">ID Paket</th>
-                                <th class="px-6 py-4">Nama Paket</th>
-                                <th class="px-6 py-4">Foto / Durasi</th>
-                                <th class="px-6 py-4 text-right">Harga</th>
-                                <th class="px-6 py-4 text-center">Aksi</th>
-=======
                             <tr class="bg-white border-b border-slate-100 text-slate-400 text-[11px] font-bold uppercase tracking-wider">
                                 <th class="px-6 py-4">ID PAKET</th>
                                 <th class="px-6 py-4">NAMA PAKET</th>
@@ -126,43 +118,11 @@
                                 <th class="px-6 py-4 text-center">HARGA</th>
                                 <th class="px-6 py-4 text-center">STATUS</th>
                                 <th class="px-6 py-4 text-center">AKSI</th>
->>>>>>> 86ea464 (Update layout and pagination for Paket and Cetak admin page)
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             <?php if (!empty($packages)): ?>
                                 <?php foreach ($packages as $pkg): ?>
-<<<<<<< HEAD
-                                    <tr class="hover:bg-blue-50/30 transition-colors group">
-                                        <td class="px-6 py-4 font-mono text-xs text-slate-500"><?= esc($pkg['id']) ?></td>
-                                        <td class="px-6 py-4 font-bold text-on-surface"><?= esc($pkg['name']) ?></td>
-                                        <td class="px-6 py-4 text-body-sm text-slate-500">
-                                            <span class="bg-slate-100 px-2 py-1 rounded text-xs font-medium text-slate-600">
-                                                <?= esc($pkg['photo_count']) ?> Foto
-                                            </span>
-                                            <span class="ml-1 bg-slate-100 px-2 py-1 rounded text-xs font-medium text-slate-600">
-                                                <?= esc($pkg['duration']) ?> Mnt
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 text-right font-bold text-primary">
-                                            Rp <?= number_format($pkg['base_price'], 0, ',', '.') ?>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <a href="<?= base_url('admin/packages/' . $pkg['id'] . '/edit') ?>"
-                                                   class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md" title="Edit">
-                                                    <span class="material-symbols-outlined text-[18px]">edit</span>
-                                                </a>
-                                                <form action="<?= base_url('admin/packages/' . $pkg['id'] . '/delete') ?>" method="post" class="inline">
-                                                    <?= csrf_field() ?>
-                                                    <button type="button"
-                                                            class="p-1.5 text-error hover:bg-error-container rounded-md" title="Hapus"
-                                                            onclick="Swal.fire({title: 'Hapus paket ini?', text: 'Tindakan ini mungkin mempengaruhi data lain.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Ya, hapus!', cancelButtonText: 'Batal'}).then((result) => { if (result.isConfirmed) { this.closest('form').submit(); } })">
-                                                        <span class="material-symbols-outlined text-[18px]">delete</span>
-                                                    </button>
-                                                </form>
-                                            </div>
-=======
                                     <tr class="bg-white hover:bg-slate-50 transition-colors group">
                                         <td class="px-6 py-4 text-sm text-slate-500 font-mono"><?= esc($pkg['id']) ?></td>
                                         <td class="px-6 py-4">
@@ -204,7 +164,6 @@
                                                     onclick="openUniversalDeleteModal('<?= base_url('admin/packages/' . $pkg['id'] . '/delete') ?>', '<?= esc($pkg['name'], 'js') ?>', 'Hapus Paket?')">
                                                 <span class="material-symbols-outlined text-[20px]">delete</span>
                                             </button>
->>>>>>> 86ea464 (Update layout and pagination for Paket and Cetak admin page)
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -222,15 +181,6 @@
                 <div class="p-4 bg-white text-slate-500 text-xs flex justify-between items-center border-t border-slate-100">
                     <span>Menampilkan <?= count($packages ?? []) ?> dari <?= $totalPackages ?? 0 ?> paket</span>
                     <div class="flex gap-1">
-<<<<<<< HEAD
-                        <?php for ($i = 1; $i <= ($totalPkgPages ?? 1); $i++): ?>
-                            <a href="<?= base_url('admin/packages?page=' . $i . '&q=' . ($keyword ?? '')) ?>"
-                               class="w-8 h-8 flex items-center justify-center border border-slate-200 rounded text-xs font-bold
-                                      <?= $i === ($currentPkgPage ?? 1) ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-white' ?>">
-                                <?= $i ?>
-                            </a>
-                        <?php endfor; ?>
-=======
                         <a href="<?= base_url('admin/packages?page=' . max(1, ($currentPkgPage ?? 1) - 1) . '&q=' . ($keyword ?? '') . '&opt_page=' . ($currentOptPage ?? 1) . '&q_opt=' . ($keywordOpt ?? '')) ?>"
                            class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPkgPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                             <span class="material-symbols-outlined text-sm">chevron_left</span>
@@ -245,7 +195,6 @@
                            class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPkgPage ?? 1) >= ($totalPkgPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                             <span class="material-symbols-outlined text-sm">chevron_right</span>
                         </a>
->>>>>>> 86ea464 (Update layout and pagination for Paket and Cetak admin page)
                     </div>
                 </div>
             </div>
