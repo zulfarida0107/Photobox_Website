@@ -153,10 +153,10 @@
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="flex flex-col items-center justify-center gap-1">
-                                                <a href="<?= base_url('admin/sessions/' . $session['id']) ?>"
+                                                <button type="button" onclick="showSessionPreviewModal('<?= esc($session['id'], 'js') ?>', '<?= esc($session['booking_id'] ?? '-', 'js') ?>', '<?= esc($session['frame_name'] ?? 'N/A', 'js') ?>', '<?= esc($session['filter_name'] ?? 'N/A', 'js') ?>', '<?= esc($session['email_recipient'] ?? '-', 'js') ?>', '<?= date('d M Y, H:i', strtotime($session['created_at'])) ?> WIB')"
                                                    class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Lihat Detail">
                                                     <span class="material-symbols-outlined text-[20px]">visibility</span>
-                                                </a>
+                                                </button>
                                                 <?php if (!empty($session['email_recipient'])): ?>
                                                     <form action="<?= base_url('admin/sessions/' . $session['id'] . '/resend') ?>" method="post">
                                                         <?= csrf_field() ?>
@@ -269,8 +269,8 @@
                     <?php if (!empty($gallerySession)): ?>
                         <div class="flex items-center gap-4">
                             <span class="text-xs text-slate-500"><?= count($photos ?? []) ?> foto</span>
-                            <a href="<?= base_url('admin/sessions/' . $gallerySession['id']) ?>"
-                               class="text-xs font-bold text-primary hover:underline">Lihat Detail →</a>
+                            <button type="button" onclick="showSessionPreviewModal('<?= esc($gallerySession['id'], 'js') ?>', '<?= esc($gallerySession['booking_id'] ?? '-', 'js') ?>', '<?= esc($gallerySession['frame_name'] ?? 'N/A', 'js') ?>', '<?= esc($gallerySession['filter_name'] ?? 'N/A', 'js') ?>', '<?= esc($gallerySession['email_recipient'] ?? '-', 'js') ?>', '<?= date('d M Y, H:i', strtotime($gallerySession['created_at'])) ?> WIB')"
+                               class="text-xs font-bold text-primary hover:underline">Lihat Detail &rarr;</button>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -335,5 +335,91 @@
         <?= $this->include('Admin/layouts/footer') ?>
     </div>
 </main>
+
+<!-- Session Preview Modal -->
+<div id="sessionPreviewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="sessionPreviewModalContent">
+        <!-- Modal Header -->
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-emerald-600">visibility</span>
+                Detail Sesi Pemotretan
+            </h4>
+        </div>
+        
+        <!-- Modal Body -->
+        <div class="p-6 flex flex-col items-center">
+            <!-- Icon/Avatar Wrapper -->
+            <div class="w-24 h-24 bg-blue-50 text-blue-600 border border-slate-200 rounded-full overflow-hidden flex items-center justify-center p-4 mb-5 shadow-inner">
+                <span class="material-symbols-outlined text-[48px]">photo_library</span>
+            </div>
+
+            <!-- Details List -->
+            <div class="w-full space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-left text-sm mb-6">
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">ID Sesi</span>
+                    <span class="font-mono text-primary font-bold" id="modalSessionId"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Kode Booking</span>
+                    <span class="text-slate-800 font-semibold" id="modalSessionBk"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Frame</span>
+                    <span class="text-slate-800 font-semibold" id="modalSessionFrame"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Filter</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-semibold" id="modalSessionFilter"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Penerima Email</span>
+                    <span class="text-slate-800 font-semibold" id="modalSessionEmail"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-semibold text-slate-500">Waktu Sesi</span>
+                    <span class="text-slate-800" id="modalSessionTime"></span>
+                </div>
+            </div>
+            
+            <!-- Close Button -->
+            <button type="button" onclick="closeSessionPreviewModal()" class="w-full py-2.5 bg-primary hover:bg-primary-container text-white font-semibold text-sm rounded-lg transition-colors shadow-md">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showSessionPreviewModal(id, bk, frame, filter, email, time) {
+        const modal = document.getElementById('sessionPreviewModal');
+        const content = document.getElementById('sessionPreviewModalContent');
+        
+        document.getElementById('modalSessionId').textContent = '#' + id;
+        document.getElementById('modalSessionBk').textContent = bk;
+        document.getElementById('modalSessionFrame').textContent = frame;
+        document.getElementById('modalSessionFilter').textContent = filter;
+        document.getElementById('modalSessionEmail').textContent = email;
+        document.getElementById('modalSessionTime').textContent = time;
+        
+        // Show Modal
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeSessionPreviewModal() {
+        const modal = document.getElementById('sessionPreviewModal');
+        const content = document.getElementById('sessionPreviewModalContent');
+
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+</script>
 
 <?php $this->endSection(); ?>

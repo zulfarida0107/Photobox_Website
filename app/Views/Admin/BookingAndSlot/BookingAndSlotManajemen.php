@@ -174,15 +174,15 @@
                                                             </button>
                                                         </form>
                                                     <?php elseif ($bk['status'] === 'completed'): ?>
-                                                        <a href="<?= base_url('admin/bookings/' . $bk['id']) ?>"
+                                                        <button type="button" onclick="showBookingPreviewModal('<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc($bk['package_name'] ?? '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>')"
                                                            class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Detail">
                                                             <span class="material-symbols-outlined text-[20px]">visibility</span>
-                                                        </a>
+                                                        </button>
                                                     <?php else: ?>
-                                                        <a href="<?= base_url('admin/bookings/' . $bk['id']) ?>"
+                                                        <button type="button" onclick="showBookingPreviewModal('<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc($bk['package_name'] ?? '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>')"
                                                            class="inline p-1.5 text-slate-500 hover:bg-slate-100 rounded transition-colors" title="Riwayat">
                                                             <span class="material-symbols-outlined text-[20px]">history</span>
-                                                        </a>
+                                                        </button>
                                                     <?php endif; ?>
                                                 </div>
                                             </td>
@@ -284,5 +284,94 @@
 
     <?= $this->include('Admin/layouts/footer') ?>
 </main>
+
+<!-- Booking Preview Modal -->
+<div id="bookingPreviewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="bookingPreviewModalContent">
+        <!-- Modal Header -->
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-emerald-600">visibility</span>
+                Detail &amp; Riwayat Reservasi
+            </h4>
+        </div>
+        
+        <!-- Modal Body -->
+        <div class="p-6 flex flex-col items-center">
+            <!-- Icon/Avatar Wrapper -->
+            <div class="w-24 h-24 bg-blue-50 text-blue-600 border border-slate-200 rounded-full overflow-hidden flex items-center justify-center p-4 mb-5 shadow-inner">
+                <span class="material-symbols-outlined text-[48px]">event_available</span>
+            </div>
+
+            <!-- Details List -->
+            <div class="w-full space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-left text-sm mb-6">
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Kode Booking</span>
+                    <span class="font-mono text-primary font-bold" id="modalBkCode"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Nama Pelanggan</span>
+                    <span class="text-slate-800 font-semibold" id="modalBkCust"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Slot &amp; Booth</span>
+                    <span class="text-slate-800 font-semibold" id="modalBkSlot"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Paket Terpilih</span>
+                    <span class="text-slate-800 font-semibold" id="modalBkPackage"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Nomor Antrean</span>
+                    <span class="text-slate-800 font-black" id="modalBkQueue"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-semibold text-slate-500">Status</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold" id="modalBkStatus"></span>
+                </div>
+            </div>
+            
+            <!-- Close Button -->
+            <button type="button" onclick="closeBookingPreviewModal()" class="w-full py-2.5 bg-primary hover:bg-primary-container text-white font-semibold text-sm rounded-lg transition-colors shadow-md">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showBookingPreviewModal(code, cust, slot, pkg, queue, badgeText, badgeClass) {
+        const modal = document.getElementById('bookingPreviewModal');
+        const content = document.getElementById('bookingPreviewModalContent');
+        
+        document.getElementById('modalBkCode').textContent = code;
+        document.getElementById('modalBkCust').textContent = cust;
+        document.getElementById('modalBkSlot').textContent = slot;
+        document.getElementById('modalBkPackage').textContent = pkg;
+        document.getElementById('modalBkQueue').textContent = queue;
+        
+        const statusEl = document.getElementById('modalBkStatus');
+        statusEl.textContent = badgeText;
+        statusEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ' + badgeClass;
+
+        // Show Modal
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeBookingPreviewModal() {
+        const modal = document.getElementById('bookingPreviewModal');
+        const content = document.getElementById('bookingPreviewModalContent');
+
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+</script>
 
 <?php $this->endSection(); ?>
