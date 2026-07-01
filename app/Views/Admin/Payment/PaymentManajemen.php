@@ -222,8 +222,8 @@
                 </p>
                 <div class="flex gap-1">
                     <a href="<?= base_url('admin/payments?page=' . max(1, ($currentPage ?? 1) - 1) . '&status=' . ($filterStatus ?? '') . '&period=' . ($filterPeriod ?? '7')) ?>"
-                       class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 <?= ($currentPage ?? 1) <= 1 ? 'opacity-50 pointer-events-none' : '' ?>">
-                        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                        <span class="material-symbols-outlined text-sm">chevron_left</span>
                     </a>
 
                     <?php
@@ -243,16 +243,15 @@
                                 <span class="px-1 py-1 text-slate-400 text-xs">...</span>
                             <?php endif; ?>
                             <a href="<?= base_url('admin/payments?page=' . $p . $qs) ?>"
-                               class="w-8 h-8 flex items-center justify-center rounded border text-xs font-bold
-                                      <?= $p === $cp ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
+                               class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $p === $cp ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                                 <?= $p ?>
                             </a>
                     <?php     $prev = $p;
                         endforeach; ?>
 
-                    <a href="<?= base_url('admin/payments?page=' . min($tp, ($currentPage ?? 1) + 1) . $qs) ?>"
-                       class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 <?= ($currentPage ?? 1) >= $tp ? 'opacity-50 pointer-events-none' : '' ?>">
-                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                    <a href="<?= base_url('admin/payments?page=' . min($tp, $cp + 1) . $qs) ?>"
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= $cp >= $tp ? 'opacity-40 pointer-events-none' : '' ?>">
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
                     </a>
                 </div>
             </div>

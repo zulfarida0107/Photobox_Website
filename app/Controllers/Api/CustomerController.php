@@ -79,4 +79,89 @@ class CustomerController extends BaseApiController
 
         return ['current_step' => 'ready_to_send', 'next_step' => 'complete_session'];
     }
+
+    public function createWalkin(): ResponseInterface
+    {
+        $customerModel = new \App\Models\CustomerModel();
+        $slotModel = new \App\Models\SlotModel();
+        $boothModel = new \App\Models\BoothModel();
+        $packageModel = new \App\Models\PackageModel();
+
+        try {
+            // 1. Find or create default walk-in customer
+            $customer = $customerModel->where('email', 'walkin@snapbox.com')->first();
+            if ($customer === null) {
+                $customerId = 'cust_' . bin2hex(random_bytes(5));
+                $customerModel->insert([
+                    'id' => $customerId,
+                    'name' => 'Walk-in Customer',
+                    'email' => 'walkin@snapbox.com',
+                    'phone' => '0000000000',
+                ]);
+                $customer = $customerModel->find($customerId);
+            }
+
+            // 2. Find first package
+            $package = $packageModel->first();
+            if ($package === null) {
+                return $this->response->setStatusCode(500)->setJSON([
+                    'status' => 500,
+                    'error' => 'Package tidak ditemukan di database.',
+                ]);
+            }
+
+            // 3. Find first booth
+            $booth = $boothModel->first();
+            if ($booth === null) {
+                return $this->response->setStatusCode(500)->setJSON([
+                    'status' => 500,
+                    'error' => 'Booth tidak ditemukan di database.',
+                ]);
+            }
+
+            // 4. Find or create slot for today
+            $today = date('Y-m-d');
+            $slot = $slotModel->where('slot_date', $today)->first();
+            if ($slot === null) {
+                $slotId = 'slot_' . bin2hex(random_bytes(5));
+                $slotModel->insert([
+                    'id' => $slotId,
+                    'booth_id' => $booth['id'],
+                    'slot_date' => $today,
+                    'start_time' => '08:00:00',
+                    'max_bookings' => 100,
+                    'booked_count' => 0,
+                ]);
+                $slot = $slotModel->find($slotId);
+            }
+
+            // 5. Generate booking ID & code
+            $bookingId = 'BK-' . strtoupper(bin2hex(random_bytes(5)));
+            $bookingCode = $bookingId;
+
+            $bookingData = [
+                'id' => $bookingId,
+                'booking_code' => $bookingCode,
+                'customer_id' => $customer['id'],
+                'slot_id' => $slot['id'],
+                'booth_id' => $booth['id'],
+                'package_id' => $package['id'],
+                'queue_number' => 1,
+                'status' => 'pending',
+            ];
+
+            $this->bookingModel->insert($bookingData);
+            $booking = $this->bookingModel->find($bookingId);
+
+            return $this->respondCreated([
+                'message' => 'Walk-in booking berhasil dibuat.',
+                'booking' => $booking,
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 500,
+                'error' => 'Gagal membuat walk-in booking: ' . $e->getMessage(),
+            ]);
+        }
+    }
 }

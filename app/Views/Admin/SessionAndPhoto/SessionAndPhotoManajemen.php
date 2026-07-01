@@ -152,12 +152,11 @@
                                                     </button>
                                                 </form>
                                             <?php endif; ?>
-                                            <form action="<?= base_url('admin/sessions/' . $session['id'] . '/delete') ?>" method="post" class="inline">
-                                                <?= csrf_field() ?>
-                                                <button type="submit" class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Sesi">
-                                                    <span class="material-symbols-outlined text-[20px]">delete</span>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                    class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Sesi"
+                                                    onclick="openUniversalDeleteModal('<?= base_url('admin/sessions/' . $session['id'] . '/delete') ?>', 'Sesi #<?= esc($session['id'], 'js') ?>', 'Hapus Sesi Pemotretan?')">
+                                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                                            </button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -178,17 +177,17 @@
                     </span>
                     <div class="flex gap-1">
                         <a href="<?= base_url('admin/sessions?page=' . max(1, ($currentPage ?? 1) - 1) . '&q=' . ($keyword ?? '')) ?>"
-                           class="p-1.5 border border-slate-200 rounded hover:bg-slate-50 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                             <span class="material-symbols-outlined text-sm">chevron_left</span>
                         </a>
                         <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
                             <a href="<?= base_url('admin/sessions?page=' . $i . '&q=' . ($keyword ?? '')) ?>"
-                               class="px-3 py-1 border rounded text-xs font-bold <?= $i === ($currentPage ?? 1) ? 'bg-primary text-white border-primary' : 'border-slate-200 hover:bg-white' ?>">
+                               class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                                 <?= $i ?>
                             </a>
                         <?php endfor; ?>
                         <a href="<?= base_url('admin/sessions?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&q=' . ($keyword ?? '')) ?>"
-                           class="p-1.5 border border-slate-200 rounded hover:bg-slate-50 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                             <span class="material-symbols-outlined text-sm">chevron_right</span>
                         </a>
                     </div>
@@ -278,14 +277,11 @@
                                                     <span class="material-symbols-outlined text-sm">download</span>
                                                 </a>
                                             <?php endif; ?>
-                                            <form action="<?= base_url('admin/photos/' . $photo['id'] . '/delete') ?>" method="post" class="inline">
-                                                <?= csrf_field() ?>
-                                                <button type="submit"
-                                                        class="bg-white/20 backdrop-blur-md p-2 rounded-full text-white hover:bg-error transition-colors"
-                                                        >
-                                                    <span class="material-symbols-outlined text-sm">delete</span>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                    class="bg-white/20 backdrop-blur-md p-2 rounded-full text-white hover:bg-red-500 transition-colors"
+                                                    onclick="openUniversalDeleteModal('<?= base_url('admin/photos/' . $photo['id'] . '/delete') ?>', 'Foto Shot #<?= (int)($photo['shot_number'] ?? ($index + 1)) ?>', 'Hapus Foto?')">
+                                                <span class="material-symbols-outlined text-sm">delete</span>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

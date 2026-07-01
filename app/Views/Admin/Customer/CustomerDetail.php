@@ -86,13 +86,10 @@
             </div>
 
             <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                <form action="<?= base_url('admin/customers/' . $customer['id'] . '/delete') ?>" method="post" class="inline">
-                    <?= csrf_field() ?>
-                    <button type="submit" class="px-4 py-2 border border-red-200 text-red-600 rounded-lg text-xs font-bold hover:bg-red-50 transition-colors"
-                            >
-                        Hapus Akun Pelanggan
-                    </button>
-                </form>
+                <button type="button" class="px-4 py-2 border border-red-200 text-red-600 rounded-lg text-xs font-bold hover:bg-red-50 transition-colors"
+                        onclick="openUniversalDeleteModal('<?= base_url('admin/customers/' . $customer['id'] . '/delete') ?>', '<?= esc($customer['name'], 'js') ?>', 'Hapus Akun Pelanggan?')">
+                    Hapus Akun Pelanggan
+                </button>
                 <a href="<?= base_url('admin/customers') ?>" class="text-xs font-bold text-primary hover:underline">Kembali ke Daftar</a>
             </div>
         </div>

@@ -71,12 +71,12 @@
                 <p class="text-sm font-medium text-slate-500">Superadmin</p>
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statSuperadmin ?? 0 ?></h3>
             </div>
-            <!-- Admin biasa -->
+            <!-- Staff -->
             <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-amber-600 bg-amber-50 p-2 rounded-lg material-symbols-outlined">badge</span>
                 </div>
-                <p class="text-sm font-medium text-slate-500">Admin</p>
+                <p class="text-sm font-medium text-slate-500">Staff</p>
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statAdmin ?? 0 ?></h3>
             </div>
             <!-- Status Keamanan -->
@@ -100,10 +100,10 @@
                 <div class="flex items-center gap-2">
                     <form method="get" action="<?= base_url('admin/settings') ?>" class="flex gap-2">
                         <select name="role" onchange="this.form.submit()"
-                                class="text-xs bg-white border border-slate-300 rounded px-3 py-1.5 focus:ring-primary outline-none">
+                                class="text-xs bg-white border border-slate-300 rounded px-3 py-1.5 focus:ring-primary outline-none w-32">
                             <option value="" <?= ($filterRole ?? '') === '' ? 'selected' : '' ?>>Semua Role</option>
                             <option value="superadmin" <?= ($filterRole ?? '') === 'superadmin' ? 'selected' : '' ?>>Superadmin</option>
-                            <option value="admin"      <?= ($filterRole ?? '') === 'admin'      ? 'selected' : '' ?>>Admin</option>
+                            <option value="staff"      <?= ($filterRole ?? '') === 'staff'      ? 'selected' : '' ?>>Staff</option>
                         </select>
                         <input name="q" value="<?= esc($keyword ?? '') ?>"
                                placeholder="Cari admin..."
@@ -151,7 +151,7 @@
                                     <td class="px-5 py-4 text-center">
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold <?= $badgeClass ?> uppercase tracking-wide">
                                             <span class="w-1.5 h-1.5 <?= $isSuperadmin ? 'bg-blue-500' : 'bg-slate-500' ?> rounded-full"></span>
-                                            <?= esc(ucfirst($admin['role'] ?? 'admin')) ?>
+                                            <?= $isSuperadmin ? 'SUPER ADMIN' : 'STAFF' ?>
                                         </span>
                                     </td>
                                     <td class="px-5 py-4 text-body-sm text-slate-500 text-center">
@@ -162,14 +162,17 @@
                                            class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
                                             <span class="material-symbols-outlined text-[20px]">edit</span>
                                         </a>
-                                        <form action="<?= base_url('admin/settings/' . $admin['id'] . '/delete') ?>" method="post" class="inline">
-                                            <?= csrf_field() ?>
-                                            <button type="submit"
-                                                    class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
-                                                    >
+                                        <?php if ($admin['id'] !== ($loggedInId ?? '')): ?>
+                                            <button type="button"
+                                                    class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Admin"
+                                                    onclick="openUniversalDeleteModal('<?= base_url('admin/settings/' . $admin['id'] . '/delete') ?>', '<?= esc($admin['name'], 'js') ?>', 'Hapus Akun Admin?')">
                                                 <span class="material-symbols-outlined text-[20px]">delete</span>
                                             </button>
-                                        </form>
+                                        <?php else: ?>
+                                            <span class="inline p-1.5 text-slate-300 rounded cursor-not-allowed" title="Tidak bisa menghapus akun aktif Anda">
+                                                <span class="material-symbols-outlined text-[20px]">lock</span>
+                                            </span>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -192,19 +195,18 @@
                 </p>
                 <div class="flex items-center gap-1">
                     <a href="<?= base_url('admin/settings?page=' . max(1, ($currentPage ?? 1) - 1) . '&role=' . ($filterRole ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                       class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-400 hover:bg-white hover:text-primary transition-all <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
-                        <span class="material-symbols-outlined text-lg">chevron_left</span>
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                        <span class="material-symbols-outlined text-sm">chevron_left</span>
                     </a>
                     <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
                         <a href="<?= base_url('admin/settings?page=' . $i . '&role=' . ($filterRole ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                           class="w-8 h-8 flex items-center justify-center rounded text-xs font-bold
-                                  <?= $i === ($currentPage ?? 1) ? 'bg-primary text-white' : 'border border-slate-200 text-slate-600 hover:bg-white hover:text-primary' ?>">
+                           class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                             <?= $i ?>
                         </a>
                     <?php endfor; ?>
                     <a href="<?= base_url('admin/settings?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&role=' . ($filterRole ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                       class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-400 hover:bg-white hover:text-primary transition-all <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
-                        <span class="material-symbols-outlined text-lg">chevron_right</span>
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
                     </a>
                 </div>
             </div>

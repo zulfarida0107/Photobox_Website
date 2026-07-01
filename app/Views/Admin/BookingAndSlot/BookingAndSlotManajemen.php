@@ -66,9 +66,9 @@
                         <table class="w-full text-left">
                             <thead class="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Slot &amp; Booth</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Waktu</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 text-center">Status</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Slot &amp; Booth</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Waktu</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
@@ -203,17 +203,17 @@
                         </span>
                         <div class="flex gap-1">
                             <a href="<?= base_url('admin/bookings?page=' . max(1, ($currentPage ?? 1) - 1) . '&period=' . ($period ?? 'today')) ?>"
-                               class="px-2 py-1 border border-slate-200 rounded hover:bg-white text-xs <?= ($currentPage ?? 1) <= 1 ? 'opacity-50 pointer-events-none' : '' ?>">
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_left</span>
                             </a>
                             <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
                                 <a href="<?= base_url('admin/bookings?page=' . $i . '&period=' . ($period ?? 'today')) ?>"
-                                   class="px-2 py-1 border border-slate-200 rounded text-xs font-bold <?= $i === ($currentPage ?? 1) ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-white' ?>">
+                                   class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                                     <?= $i ?>
                                 </a>
                             <?php endfor; ?>
                             <a href="<?= base_url('admin/bookings?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&period=' . ($period ?? 'today')) ?>"
-                               class="px-2 py-1 border border-slate-200 rounded hover:bg-white text-xs <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-50 pointer-events-none' : '' ?>">
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_right</span>
                             </a>
                         </div>
