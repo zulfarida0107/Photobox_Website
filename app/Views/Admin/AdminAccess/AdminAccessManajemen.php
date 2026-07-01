@@ -46,11 +46,6 @@
                 <h2 class="font-h1 text-h1 text-on-surface">Manajemen Pengaturan Akses</h2>
                 <p class="font-body-sm text-body-sm text-on-surface-variant">Kelola daftar administrator dan hak akses sistem CuitBox Studio v2.</p>
             </div>
-            <a href="<?= base_url('admin/settings/create') ?>"
-               class="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-primary-container transition-colors shadow-sm">
-                <span class="material-symbols-outlined text-lg">add_circle</span>
-                Tambah Admin
-            </a>
         </div>
 
         <!-- Stats Bento -->
@@ -90,42 +85,52 @@
         </div>
 
         <!-- Table -->
-        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mb-6">
-            <!-- Table Toolbar -->
-            <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h4 class="font-bold text-on-surface flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">table_rows</span>
-                    Daftar Administrator
-                </h4>
-                <div class="flex items-center gap-2">
-                    <form method="get" action="<?= base_url('admin/settings') ?>" class="flex gap-2">
+        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col mb-6">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-1 h-6 bg-primary rounded-full"></div>
+                    <h4 class="font-h2 text-h2 text-on-surface">Daftar Administrator</h4>
+                </div>
+                <a href="<?= base_url('admin/settings/create') ?>"
+                   class="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-primary-container transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-lg">manage_accounts</span>
+                    Tambah Admin
+                </a>
+            </div>
+
+            <div class="p-4 bg-slate-50/50 border-b border-slate-200 flex flex-col sm:flex-row gap-3">
+                <form method="get" action="<?= base_url('admin/settings') ?>" class="flex flex-1 gap-4 justify-between">
+                    <div class="relative flex-1">
+                        <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">search</span>
+                        <input type="text" name="q" value="<?= esc($keyword ?? '') ?>" placeholder="Cari admin..."
+                               class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all"/>
+                    </div>
+                    <div class="flex items-center gap-2">
                         <select name="role" onchange="this.form.submit()"
-                                class="text-xs bg-white border border-slate-300 rounded px-3 py-1.5 focus:ring-primary outline-none w-32">
+                                class="w-56 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white outline-none transition-all cursor-pointer text-slate-700">
                             <option value="" <?= ($filterRole ?? '') === '' ? 'selected' : '' ?>>Semua Role</option>
                             <option value="superadmin" <?= ($filterRole ?? '') === 'superadmin' ? 'selected' : '' ?>>Superadmin</option>
                             <option value="staff"      <?= ($filterRole ?? '') === 'staff'      ? 'selected' : '' ?>>Staff</option>
                         </select>
-                        <input name="q" value="<?= esc($keyword ?? '') ?>"
-                               placeholder="Cari admin..."
-                               class="text-xs bg-white border border-slate-300 rounded px-3 py-1.5 focus:ring-primary outline-none w-44"/>
-                        <button type="submit" class="p-1.5 text-slate-400 hover:text-primary hover:bg-white border border-transparent hover:border-slate-200 rounded transition-all">
-                            <span class="material-symbols-outlined">search</span>
-                        </button>
-                    </form>
-                </div>
+                        <?php if (!empty($keyword) || !empty($filterRole)): ?>
+                            <a href="<?= base_url('admin/settings') ?>" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-semibold rounded-lg flex items-center transition-colors">
+                                Reset
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </form>
             </div>
 
-            <!-- Data Table -->
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto flex-1">
                 <table class="w-full text-left">
-                    <thead>
-                        <tr class="bg-white border-b border-slate-100">
-                            <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider text-center">ID Admin</th>
-                            <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider">Nama / Username</th>
-                            <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider">Email</th>
-                            <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider text-center">Role</th>
-                            <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider text-center">Terdaftar</th>
-                            <th class="px-5 py-3 text-label-bold text-slate-500 uppercase tracking-wider text-center">Aksi</th>
+                    <thead class="bg-slate-50/50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap">ID Admin</th>
+                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase whitespace-nowrap">Nama / Username</th>
+                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap">Email</th>
+                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap">Role</th>
+                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap">Terdaftar</th>
+                            <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center whitespace-nowrap">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -135,11 +140,11 @@
                                     $initials = strtoupper(substr($admin['name'] ?? 'A', 0, 1) . (strpos($admin['name'] ?? '', ' ') !== false ? substr(strrchr($admin['name'], ' '), 1, 1) : substr($admin['name'] ?? 'D', 1, 1)));
                                     $isSuperadmin = strtolower($admin['role'] ?? '') === 'superadmin';
                                     $avatarClass  = $isSuperadmin ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-600';
-                                    $badgeClass   = $isSuperadmin ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600';
+                                    $badgeClass   = $isSuperadmin ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-amber-50 text-amber-700 border border-amber-200';
                                 ?>
                                 <tr class="hover:bg-blue-50/30 transition-colors group">
-                                    <td class="px-5 py-4 text-data-tabular font-medium text-slate-900 text-center">#<?= esc($admin['id']) ?></td>
-                                    <td class="px-5 py-4">
+                                    <td class="px-4 py-4 text-data-tabular font-medium text-slate-900 text-center whitespace-nowrap">#<?= esc($admin['id']) ?></td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full <?= $avatarClass ?> flex items-center justify-center font-bold text-xs flex-shrink-0">
                                                 <?= esc($initials) ?>
@@ -147,38 +152,40 @@
                                             <span class="text-body-base font-semibold text-on-surface"><?= esc($admin['name']) ?></span>
                                         </div>
                                     </td>
-                                    <td class="px-5 py-4 text-body-base text-on-surface-variant"><?= esc($admin['email']) ?></td>
-                                    <td class="px-5 py-4 text-center">
+                                    <td class="px-4 py-4 text-body-base text-slate-600 text-center whitespace-nowrap"><?= esc($admin['email']) ?></td>
+                                    <td class="px-4 py-4 text-center whitespace-nowrap">
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold <?= $badgeClass ?> uppercase tracking-wide">
-                                            <span class="w-1.5 h-1.5 <?= $isSuperadmin ? 'bg-blue-500' : 'bg-slate-500' ?> rounded-full"></span>
+                                            <span class="w-1.5 h-1.5 <?= $isSuperadmin ? 'bg-green-500' : 'bg-amber-500' ?> rounded-full"></span>
                                             <?= $isSuperadmin ? 'SUPER ADMIN' : 'STAFF' ?>
                                         </span>
                                     </td>
-                                    <td class="px-5 py-4 text-body-sm text-slate-500 text-center">
+                                    <td class="px-4 py-4 text-body-sm text-slate-500 text-center whitespace-nowrap">
                                         <?= date('d M Y, H:i', strtotime($admin['created_at'])) ?>
                                     </td>
-                                    <td class="px-5 py-4 text-center space-x-2">
-                                        <a href="<?= base_url('admin/settings/' . $admin['id'] . '/edit') ?>"
-                                           class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
-                                            <span class="material-symbols-outlined text-[20px]">edit</span>
-                                        </a>
-                                        <?php if ($admin['id'] !== ($loggedInId ?? '')): ?>
-                                            <button type="button"
-                                                    class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Admin"
-                                                    onclick="openUniversalDeleteModal('<?= base_url('admin/settings/' . $admin['id'] . '/delete') ?>', '<?= esc($admin['name'], 'js') ?>', 'Hapus Akun Admin?')">
-                                                <span class="material-symbols-outlined text-[20px]">delete</span>
-                                            </button>
-                                        <?php else: ?>
-                                            <span class="inline p-1.5 text-slate-300 rounded cursor-not-allowed" title="Tidak bisa menghapus akun aktif Anda">
-                                                <span class="material-symbols-outlined text-[20px]">lock</span>
-                                            </span>
-                                        <?php endif; ?>
+                                    <td class="px-4 py-4">
+                                        <div class="flex flex-row items-center justify-center gap-1 whitespace-nowrap">
+                                            <a href="<?= base_url('admin/settings/' . $admin['id'] . '/edit') ?>"
+                                               class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                                <span class="material-symbols-outlined text-[20px]">edit</span>
+                                            </a>
+                                            <?php if ($admin['id'] !== ($loggedInId ?? '')): ?>
+                                                <button type="button"
+                                                        class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Admin"
+                                                        onclick="openUniversalDeleteModal('<?= base_url('admin/settings/' . $admin['id'] . '/delete') ?>', '<?= esc($admin['name'], 'js') ?>', 'Hapus Akun Admin?')">
+                                                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                                                </button>
+                                            <?php else: ?>
+                                                <span class="p-1.5 text-slate-300 rounded cursor-not-allowed" title="Tidak bisa menghapus akun aktif Anda">
+                                                    <span class="material-symbols-outlined text-[20px]">lock</span>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="6" class="px-5 py-12 text-center text-sm text-slate-400">
+                                <td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400">
                                     Belum ada admin terdaftar.
                                     <a href="<?= base_url('admin/settings/create') ?>" class="text-primary font-semibold ml-1">Tambah sekarang</a>.
                                 </td>
@@ -189,7 +196,7 @@
             </div>
 
             <!-- Pagination -->
-            <div class="p-4 border-t border-slate-100 bg-slate-50/30 flex items-center justify-between">
+            <div class="p-4 bg-slate-50/50 flex items-center justify-between border-t border-slate-200">
                 <p class="text-xs text-slate-500">
                     Menampilkan <?= count($admins ?? []) ?> dari <?= $totalAdmins ?? 0 ?> admin
                 </p>
