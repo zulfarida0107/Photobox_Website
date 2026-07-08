@@ -35,6 +35,7 @@ $routes->group('api', static function ($routes) {
     $routes->post('session/(:segment)/complete', 'Api\\SessionController::complete/$1');
 
     $routes->post('photo/session/(:segment)/upload', 'Api\\PhotoController::upload/$1');
+	$routes->get('frame/(:any)', 'Api\\FrameController::show/$1');
 });
 
 // ============================================================
