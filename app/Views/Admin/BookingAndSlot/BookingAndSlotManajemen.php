@@ -66,9 +66,9 @@
                         <table class="w-full text-left">
                             <thead class="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Slot &amp; Booth</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Waktu</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Status</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Slot &amp; Booth</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Waktu</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
@@ -95,8 +95,8 @@
                                                 <div class="text-xs font-medium"><?= date('d M Y', strtotime($slot['slot_date'])) ?></div>
                                                 <div class="text-xs text-slate-500"><?= date('H:i', strtotime($slot['start_time'])) ?> - <?= $endTime ?></div>
                                             </td>
-                                            <td class="px-4 py-3">
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase <?= $sc ?>">
+                                            <td class="px-4 py-3 text-center">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase <?= $sc ?>">
                                                     <?= $sl ?>
                                                 </span>
                                             </td>
@@ -129,8 +129,8 @@
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Kode &amp; Cust</th>
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Slot / Paket</th>
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Antrean</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Status</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-right">Aksi</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Status</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
@@ -157,33 +157,32 @@
                                             <td class="px-4 py-3 text-center">
                                                 <span class="text-lg font-black text-slate-400"><?= esc($bk['queue_number']) ?></span>
                                             </td>
-                                            <td class="px-4 py-3">
-                                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold <?= $st[0] ?>"><?= $st[1] ?></span>
+                                            <td class="px-4 py-3 text-center">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold <?= $st[0] ?>"><?= $st[1] ?></span>
                                             </td>
-                                            <td class="px-4 py-3 text-right">
-                                                <div class="flex justify-end gap-2">
+                                            <td class="px-4 py-3 text-center">
+                                                <div class="flex justify-center gap-2">
                                                     <?php if (in_array($bk['status'], ['confirmed', 'pending'])): ?>
                                                         <a href="<?= base_url('admin/bookings/' . $bk['id'] . '/edit') ?>"
-                                                           class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg" title="Edit">
-                                                            <span class="material-symbols-outlined text-[18px]">edit</span>
+                                                           class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                                            <span class="material-symbols-outlined text-[20px]">edit</span>
                                                         </a>
                                                         <form action="<?= base_url('admin/bookings/' . $bk['id'] . '/cancel') ?>" method="post" class="inline">
                                                             <?= csrf_field() ?>
-                                                            <button type="submit" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg" title="Batalkan"
-                                                                    >
-                                                                <span class="material-symbols-outlined text-[18px]">cancel</span>
+                                                            <button type="submit" class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Batalkan">
+                                                                <span class="material-symbols-outlined text-[20px]">cancel</span>
                                                             </button>
                                                         </form>
                                                     <?php elseif ($bk['status'] === 'completed'): ?>
-                                                        <a href="<?= base_url('admin/bookings/' . $bk['id']) ?>"
-                                                           class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg" title="Detail">
-                                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                                        </a>
+                                                        <button type="button" onclick="showBookingPreviewModal('<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc($bk['package_name'] ?? '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>')"
+                                                           class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Detail">
+                                                            <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                                        </button>
                                                     <?php else: ?>
-                                                        <a href="<?= base_url('admin/bookings/' . $bk['id']) ?>"
-                                                           class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg" title="Riwayat">
-                                                            <span class="material-symbols-outlined text-[18px]">history</span>
-                                                        </a>
+                                                        <button type="button" onclick="showBookingPreviewModal('<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc($bk['package_name'] ?? '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>')"
+                                                           class="inline p-1.5 text-slate-500 hover:bg-slate-100 rounded transition-colors" title="Riwayat">
+                                                            <span class="material-symbols-outlined text-[20px]">history</span>
+                                                        </button>
                                                     <?php endif; ?>
                                                 </div>
                                             </td>
@@ -204,17 +203,17 @@
                         </span>
                         <div class="flex gap-1">
                             <a href="<?= base_url('admin/bookings?page=' . max(1, ($currentPage ?? 1) - 1) . '&period=' . ($period ?? 'today')) ?>"
-                               class="px-2 py-1 border border-slate-200 rounded hover:bg-white text-xs <?= ($currentPage ?? 1) <= 1 ? 'opacity-50 pointer-events-none' : '' ?>">
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_left</span>
                             </a>
                             <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
                                 <a href="<?= base_url('admin/bookings?page=' . $i . '&period=' . ($period ?? 'today')) ?>"
-                                   class="px-2 py-1 border border-slate-200 rounded text-xs font-bold <?= $i === ($currentPage ?? 1) ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-white' ?>">
+                                   class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                                     <?= $i ?>
                                 </a>
                             <?php endfor; ?>
                             <a href="<?= base_url('admin/bookings?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&period=' . ($period ?? 'today')) ?>"
-                               class="px-2 py-1 border border-slate-200 rounded hover:bg-white text-xs <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-50 pointer-events-none' : '' ?>">
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_right</span>
                             </a>
                         </div>
@@ -223,7 +222,7 @@
             </section>
 
             <!-- BAWAH: Quick Stats -->
-            <div class="lg:col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="lg:col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                 <div class="bg-white p-5 border border-slate-200 rounded-xl shadow-sm flex flex-col justify-between">
                     <div>
                         <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Reservasi</span>
@@ -285,5 +284,94 @@
 
     <?= $this->include('Admin/layouts/footer') ?>
 </main>
+
+<!-- Booking Preview Modal -->
+<div id="bookingPreviewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="bookingPreviewModalContent">
+        <!-- Modal Header -->
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-emerald-600">visibility</span>
+                Detail &amp; Riwayat Reservasi
+            </h4>
+        </div>
+        
+        <!-- Modal Body -->
+        <div class="p-6 flex flex-col items-center">
+            <!-- Icon/Avatar Wrapper -->
+            <div class="w-24 h-24 bg-blue-50 text-blue-600 border border-slate-200 rounded-full overflow-hidden flex items-center justify-center p-4 mb-5 shadow-inner">
+                <span class="material-symbols-outlined text-[48px]">event_available</span>
+            </div>
+
+            <!-- Details List -->
+            <div class="w-full space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-left text-sm mb-6">
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Kode Booking</span>
+                    <span class="font-mono text-primary font-bold" id="modalBkCode"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Nama Pelanggan</span>
+                    <span class="text-slate-800 font-semibold" id="modalBkCust"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Slot &amp; Booth</span>
+                    <span class="text-slate-800 font-semibold" id="modalBkSlot"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Paket Terpilih</span>
+                    <span class="text-slate-800 font-semibold" id="modalBkPackage"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Nomor Antrean</span>
+                    <span class="text-slate-800 font-black" id="modalBkQueue"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-semibold text-slate-500">Status</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold" id="modalBkStatus"></span>
+                </div>
+            </div>
+            
+            <!-- Close Button -->
+            <button type="button" onclick="closeBookingPreviewModal()" class="w-full py-2.5 bg-primary hover:bg-primary-container text-white font-semibold text-sm rounded-lg transition-colors shadow-md">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showBookingPreviewModal(code, cust, slot, pkg, queue, badgeText, badgeClass) {
+        const modal = document.getElementById('bookingPreviewModal');
+        const content = document.getElementById('bookingPreviewModalContent');
+        
+        document.getElementById('modalBkCode').textContent = code;
+        document.getElementById('modalBkCust').textContent = cust;
+        document.getElementById('modalBkSlot').textContent = slot;
+        document.getElementById('modalBkPackage').textContent = pkg;
+        document.getElementById('modalBkQueue').textContent = queue;
+        
+        const statusEl = document.getElementById('modalBkStatus');
+        statusEl.textContent = badgeText;
+        statusEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ' + badgeClass;
+
+        // Show Modal
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeBookingPreviewModal() {
+        const modal = document.getElementById('bookingPreviewModal');
+        const content = document.getElementById('bookingPreviewModalContent');
+
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+</script>
 
 <?php $this->endSection(); ?>

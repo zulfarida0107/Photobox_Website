@@ -35,7 +35,7 @@
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
             <!-- Total Pelanggan -->
             <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm relative overflow-hidden group">
@@ -118,11 +118,11 @@
                     <table class="w-full text-left">
                         <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold tracking-wider">
                             <tr>
-                                <th class="px-6 py-3">Kode Booking</th>
+                                <th class="px-6 py-3 text-center">Kode Booking</th>
                                 <th class="px-6 py-3">Pelanggan</th>
-                                <th class="px-6 py-3">Paket</th>
-                                <th class="px-6 py-3">Tanggal</th>
-                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3 text-center">Paket</th>
+                                <th class="px-6 py-3 text-center">Tanggal</th>
+                                <th class="px-6 py-3 text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -131,11 +131,11 @@
                                     <?php
                                         $status = strtolower($booking['status'] ?? 'pending');
                                         $spanClass = match ($status) {
-                                            'confirmed'  => 'bg-blue-50 text-blue-700 border-blue-100',
-                                            'completed'  => 'bg-green-50 text-green-700 border-green-100',
-                                            'pending'    => 'bg-amber-50 text-amber-700 border-amber-100',
-                                            'cancelled'  => 'bg-red-50 text-red-700 border-red-100',
-                                            default      => 'bg-slate-50 text-slate-600 border-slate-100',
+                                            'confirmed'  => 'bg-blue-100 text-blue-700',
+                                            'completed'  => 'bg-green-100 text-green-700',
+                                            'pending'    => 'bg-amber-100 text-amber-700',
+                                            'cancelled'  => 'bg-red-100 text-red-700',
+                                            default      => 'bg-slate-100 text-slate-500',
                                         };
                                         $statusText = match ($status) {
                                             'confirmed'  => 'Dikonfirmasi',
@@ -146,20 +146,20 @@
                                         };
                                     ?>
                                     <tr class="hover:bg-blue-50/50 transition-colors">
-                                        <td class="px-6 py-4 font-data-tabular font-bold text-blue-700">
+                                        <td class="px-6 py-4 font-data-tabular font-bold text-blue-700 text-center">
                                             #<?= esc($booking['booking_code'] ?? 'N/A') ?>
                                         </td>
                                         <td class="px-6 py-4 text-slate-600 text-sm">
                                             <?= esc($booking['customer_name'] ?? '-') ?>
                                         </td>
-                                        <td class="px-6 py-4 text-slate-600 text-sm">
+                                        <td class="px-6 py-4 text-slate-600 text-sm text-center">
                                             <?= esc($booking['package_name'] ?? '-') ?>
                                         </td>
-                                        <td class="px-6 py-4 font-data-tabular text-slate-600">
+                                        <td class="px-6 py-4 font-data-tabular text-slate-600 text-center">
                                             <?= date('d M Y, H:i', strtotime($booking['created_at'] ?? 'now')) ?>
                                         </td>
-                                        <td class="px-6 py-4">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold border <?= $spanClass ?>">
+                                        <td class="px-6 py-4 text-center">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold <?= $spanClass ?>">
                                                 <?= esc($statusText) ?>
                                             </span>
                                         </td>

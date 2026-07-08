@@ -8,7 +8,7 @@
         <nav class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-4">
             <a class="hover:text-blue-700" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
             <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-            <a class="hover:text-blue-700" href="<?= base_url('admin/booths') ?>">Manajemen Booth</a>
+            <a class="hover:text-blue-700" href="<?= base_url('admin/booths') ?>">Manajemen Mesin Booth</a>
             <span class="material-symbols-outlined text-[14px]">chevron_right</span>
             <span class="text-blue-700"><?= isset($booth) ? 'Edit Booth' : 'Tambah Booth' ?></span>
         </nav>
@@ -20,7 +20,7 @@
         </div>
 
         <!-- Form Card -->
-        <div class="bg-white border border-outline-variant rounded-xl shadow-sm max-w-2xl overflow-hidden">
+        <div class="bg-white border border-outline-variant rounded-xl shadow-sm w-full overflow-hidden">
             <div class="p-6 border-b border-outline-variant bg-slate-50/50 flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">nest_display</span>
                 <h4 class="font-bold text-on-surface">Konfigurasi Mesin Booth</h4>

@@ -111,31 +111,23 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-white border-b border-slate-100 text-slate-400 text-[11px] font-bold uppercase tracking-wider">
-                                <th class="px-6 py-4">ID PAKET</th>
-                                <th class="px-6 py-4">NAMA PAKET</th>
-                                <th class="px-6 py-4 text-center">DURASI</th>
-                                <th class="px-6 py-4 text-center">HARGA</th>
-                                <th class="px-6 py-4 text-center">STATUS</th>
-                                <th class="px-6 py-4 text-center">AKSI</th>
+                            <tr class="bg-slate-50/80 text-slate-500 font-label-bold text-label-bold uppercase tracking-wider">
+                                <th class="px-6 py-4 text-center">ID Paket</th>
+                                <th class="px-6 py-4">Nama Paket</th>
+                                <th class="px-6 py-4 text-center">Foto / Durasi</th>
+                                <th class="px-6 py-4 text-center">Harga</th>
+                                <th class="px-6 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             <?php if (!empty($packages)): ?>
                                 <?php foreach ($packages as $pkg): ?>
-                                    <tr class="bg-white hover:bg-slate-50 transition-colors group">
-                                        <td class="px-6 py-4 text-sm text-slate-500 font-mono"><?= esc($pkg['id']) ?></td>
-                                        <td class="px-6 py-4">
-                                            <div class="font-bold text-slate-800 text-sm"><?= esc($pkg['name']) ?></div>
-                                            <div class="mt-1">
-                                                <span class="inline-block bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded-full font-medium">
-                                                    <?= esc($pkg['photo_count']) ?> Foto
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 text-center">
-                                            <span class="text-sm font-medium text-slate-600">
-                                                <?= esc($pkg['duration']) ?> Menit
+                                    <tr class="hover:bg-blue-50/30 transition-colors group">
+                                        <td class="px-6 py-4 font-mono text-xs text-slate-500 text-center"><?= esc($pkg['id']) ?></td>
+                                        <td class="px-6 py-4 font-bold text-on-surface"><?= esc($pkg['name']) ?></td>
+                                        <td class="px-6 py-4 text-body-sm text-slate-500 text-center">
+                                            <span class="bg-slate-100 px-2 py-1 rounded text-xs font-medium text-slate-600">
+                                                <?= esc($pkg['photo_count']) ?> Foto
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 text-center">
@@ -143,24 +135,16 @@
                                                 Rp <?= number_format($pkg['base_price'], 0, ',', '.') ?>
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 text-center">
-                                            <span class="inline-block bg-green-100 text-green-700 text-[10px] px-3 py-1 rounded-full font-bold">
-                                                Aktif
-                                            </span>
+                                        <td class="px-6 py-4 font-bold text-primary text-center">
+                                            Rp <?= number_format($pkg['base_price'], 0, ',', '.') ?>
                                         </td>
-                                        <td class="px-6 py-4 text-center space-x-1">
-                                            <button type="button" class="inline-block text-emerald-500 hover:bg-emerald-50 p-1.5 rounded transition-colors" title="Lihat">
-                                                <span class="material-symbols-outlined text-[20px]">visibility</span>
-                                            </button>
+                                        <td class="px-6 py-4 text-center space-x-2">
                                             <a href="<?= base_url('admin/packages/' . $pkg['id'] . '/edit') ?>"
-                                               class="inline-block text-blue-600 hover:bg-blue-50 p-1.5 rounded transition-colors" title="Edit">
+                                               class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
                                                 <span class="material-symbols-outlined text-[20px]">edit</span>
                                             </a>
-                                            <button type="button" class="inline-block text-slate-400 hover:bg-slate-50 p-1.5 rounded transition-colors" title="Non-aktifkan">
-                                                <span class="material-symbols-outlined text-[20px]">toggle_on</span>
-                                            </button>
                                             <button type="button"
-                                                    class="inline-block text-red-500 hover:bg-red-50 p-1.5 rounded transition-colors" title="Hapus"
+                                                    class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
                                                     onclick="openUniversalDeleteModal('<?= base_url('admin/packages/' . $pkg['id'] . '/delete') ?>', '<?= esc($pkg['name'], 'js') ?>', 'Hapus Paket?')">
                                                 <span class="material-symbols-outlined text-[20px]">delete</span>
                                             </button>
@@ -181,17 +165,17 @@
                 <div class="p-4 bg-white text-slate-500 text-xs flex justify-between items-center border-t border-slate-100">
                     <span>Menampilkan <?= count($packages ?? []) ?> dari <?= $totalPackages ?? 0 ?> paket</span>
                     <div class="flex gap-1">
-                        <a href="<?= base_url('admin/packages?page=' . max(1, ($currentPkgPage ?? 1) - 1) . '&q=' . ($keyword ?? '') . '&opt_page=' . ($currentOptPage ?? 1) . '&q_opt=' . ($keywordOpt ?? '')) ?>"
+                        <a href="<?= base_url('admin/packages?page=' . max(1, ($currentPkgPage ?? 1) - 1) . '&q=' . ($keyword ?? '')) ?>"
                            class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPkgPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                             <span class="material-symbols-outlined text-sm">chevron_left</span>
                         </a>
                         <?php for ($i = 1; $i <= ($totalPkgPages ?? 1); $i++): ?>
-                            <a href="<?= base_url('admin/packages?page=' . $i . '&q=' . ($keyword ?? '') . '&opt_page=' . ($currentOptPage ?? 1) . '&q_opt=' . ($keywordOpt ?? '')) ?>"
-                               class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPkgPage ?? 1) ? 'border-[#0047a0] bg-[#0047a0] text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
+                            <a href="<?= base_url('admin/packages?page=' . $i . '&q=' . ($keyword ?? '')) ?>"
+                               class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPkgPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                                 <?= $i ?>
                             </a>
                         <?php endfor; ?>
-                        <a href="<?= base_url('admin/packages?page=' . min(($totalPkgPages ?? 1), ($currentPkgPage ?? 1) + 1) . '&q=' . ($keyword ?? '') . '&opt_page=' . ($currentOptPage ?? 1) . '&q_opt=' . ($keywordOpt ?? '')) ?>"
+                        <a href="<?= base_url('admin/packages?page=' . min(($totalPkgPages ?? 1), ($currentPkgPage ?? 1) + 1) . '&q=' . ($keyword ?? '')) ?>"
                            class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPkgPage ?? 1) >= ($totalPkgPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                             <span class="material-symbols-outlined text-sm">chevron_right</span>
                         </a>
@@ -238,12 +222,11 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-white border-b border-slate-100 text-slate-400 text-[11px] font-bold uppercase tracking-wider">
-                                <th class="px-6 py-4">ID OPSI</th>
-                                <th class="px-6 py-4">NAMA OPSI</th>
-                                <th class="px-6 py-4 text-center">HARGA TAMBAHAN</th>
-                                <th class="px-6 py-4 text-center">STATUS</th>
-                                <th class="px-6 py-4 text-center">AKSI</th>
+                            <tr class="bg-slate-50/80 text-slate-500 font-label-bold text-label-bold uppercase tracking-wider sticky top-0">
+                                <th class="px-5 py-4">Opsi</th>
+                                <th class="px-5 py-4 text-center">Copies</th>
+                                <th class="px-5 py-4 text-center">Harga</th>
+                                <th class="px-5 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -264,23 +247,15 @@
                                                 Rp <?= number_format(($opt['extra_price'] ?? 0), 0, ',', '.') ?>
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 text-center">
-                                            <span class="inline-block bg-green-100 text-green-700 text-[10px] px-3 py-1 rounded-full font-bold">
-                                                Aktif
-                                            </span>
+                                        <td class="px-5 py-4 font-bold text-on-surface text-center">
+                                            Rp <?= number_format(($opt['extra_price'] ?? 0) / 1000, 0) ?>k
                                         </td>
-                                        <td class="px-6 py-4 text-center space-x-1">
-                                            <button type="button" class="inline-block text-emerald-500 hover:bg-emerald-50 p-1.5 rounded transition-colors" title="Lihat">
-                                                <span class="material-symbols-outlined text-[20px]">visibility</span>
-                                            </button>
+                                        <td class="px-5 py-4 text-center space-x-2">
                                             <a href="<?= base_url('admin/print-options/' . $opt['id'] . '/edit') ?>"
-                                               class="inline-block text-blue-600 hover:bg-blue-50 p-1.5 rounded transition-colors" title="Edit">
+                                               class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
                                                 <span class="material-symbols-outlined text-[20px]">edit</span>
                                             </a>
-                                            <button type="button" class="inline-block text-slate-400 hover:bg-slate-50 p-1.5 rounded transition-colors" title="Non-aktifkan">
-                                                <span class="material-symbols-outlined text-[20px]">toggle_on</span>
-                                            </button>
-                                            <button type="button" class="inline-block text-red-500 hover:bg-red-50 p-1.5 rounded transition-colors" title="Hapus"
+                                            <button type="button" class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
                                                     onclick="openUniversalDeleteModal('<?= base_url('admin/print-options/' . $opt['id'] . '/delete') ?>', '<?= esc($opt['name'] ?? ('Opsi ' . $opt['copies'] . ' Lembar'), 'js') ?>', 'Hapus Opsi Cetak?')">
                                                 <span class="material-symbols-outlined text-[20px]">delete</span>
                                             </button>
@@ -320,7 +295,7 @@
             </div>
 
             <!-- Promo & Preview Bento -->
-            <div class="col-span-12 grid grid-cols-3 gap-6">
+            <div class="col-span-12 grid grid-cols-3 gap-6 mb-6">
                 <!-- Promotion Card -->
                 <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-2xl text-white flex flex-col justify-between overflow-hidden relative">
                     <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl text-white/10">auto_awesome</span>

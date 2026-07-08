@@ -56,7 +56,7 @@
                     <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">Informasi Pembayaran</h4>
                     <div class="space-y-1">
                         <p class="text-sm"><span class="text-slate-500 w-24 inline-block">Tanggal</span>: <span class="font-bold"><?= date('d F Y', strtotime($payment['created_at'])) ?></span></p>
-                        <p class="text-sm"><span class="text-slate-500 w-24 inline-block">Metode</span>: <span class="font-bold uppercase"><?= esc($payment['payment_method']) ?></span></p>
+                        <p class="text-sm"><span class="text-slate-500 w-24 inline-block">Metode</span>: <span class="font-bold uppercase"><?= esc($payment['payment_method'] ?? 'QRIS') ?></span></p>
                         <p class="text-sm"><span class="text-slate-500 w-24 inline-block">Status</span>: <span class="font-bold text-green-600 uppercase">LUNAS (PAID)</span></p>
                     </div>
                 </div>
@@ -118,4 +118,34 @@
         </div>
     </div>
 </main>
+
+<style>
+@media print {
+    /* Sembunyikan elemen layout admin */
+    aside, header { 
+        display: none !important; 
+    }
+    
+    /* Reset margin sidebar dan padding header */
+    .ml-\[260px\] { 
+        margin-left: 0 !important; 
+    }
+    main.pt-16 { 
+        padding-top: 0 !important; 
+    }
+    
+    /* Reset background dan padding kontainer agar pas di kertas */
+    body, html { 
+        background-color: white !important; 
+    }
+    .p-6 { 
+        padding: 0 !important; 
+    }
+    
+    /* Pastikan lebar maksimal */
+    .max-w-4xl {
+        max-width: 100% !important;
+    }
+}
+</style>
 <?php $this->endSection(); ?>
