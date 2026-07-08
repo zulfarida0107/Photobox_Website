@@ -33,7 +33,7 @@
                 </div>
             <?php endif; ?>
 
-            <?php $returnParam = $this->request->getGet('return'); ?>
+            <?php $returnParam = service('request')->getGet('return'); ?>
             <form method="post" action="<?= isset($frame) ? base_url('admin/frames/' . $frame['id'] . '/update') . ($returnParam ? '?return=' . esc($returnParam, 'url') : '') : base_url('admin/frames') ?>" enctype="multipart/form-data" class="p-6 space-y-5">
                 <?= csrf_field() ?>
 
