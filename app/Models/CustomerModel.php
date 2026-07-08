@@ -16,6 +16,7 @@ class CustomerModel extends Model
 		'name',
 		'email',
 		'phone',
+		'status',
 	];
 
 	protected $useSoftDeletes = false;

@@ -53,9 +53,28 @@ class CatalogController extends BaseApiController
 
     public function listFrames(): ResponseInterface
     {
+        $frames = $this->frameModel
+            ->select('frames.*, frame_categories.name as category')
+            ->join('frame_categories', 'frame_categories.id = frames.category_id', 'left')
+            ->where('frames.is_active', 1)
+            ->findAll();
+
+        $db = \Config\Database::connect();
+        $categoriesList = $db->table('frame_categories')
+            ->select('name')
+            ->orderBy('name', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        $categories = ['All'];
+        foreach ($categoriesList as $cat) {
+            $categories[] = $cat['name'];
+        }
+
         return $this->respondOk([
-            'frames' => $this->frameModel->findAll(),
-            'filters' => $this->filterModel->where('is_active', 1)->findAll(),
+            'frames'     => $frames,
+            'categories' => $categories,
+            'filters'    => $this->filterModel->where('is_active', 1)->findAll(),
         ]);
     }
 }

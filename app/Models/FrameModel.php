@@ -14,7 +14,10 @@ class FrameModel extends Model
 	protected $allowedFields = [
 		'id',
 		'name',
+		'category_id',
 		'file_path',
+		'is_active',
+		'photo_count',
 	];
 
 	protected $useSoftDeletes = false;

@@ -1,0 +1,719 @@
+<?php $this->extend('Admin/layouts/main'); ?>
+<?php $this->section('content'); ?>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<main class="pt-16 min-h-screen flex flex-col">
+    <div class="p-6 flex-1">
+
+        <!-- Breadcrumbs -->
+        <nav aria-label="Breadcrumb" class="flex mb-6 text-xs font-medium text-slate-500">
+            <ol class="flex items-center space-x-2">
+                <li>
+                    <a class="hover:text-blue-600 flex items-center gap-1 transition-colors" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                    <span class="text-blue-700 font-bold">Manajemen Mesin Booth</span>
+                </li>
+            </ol>
+        </nav>
+
+
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+            <div>
+                <h2 class="font-h1 text-h1 text-on-surface">Manajemen Mesin Booth</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Kelola status operasional dan inventaris perangkat keras Anda.</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <a href="<?= base_url('admin/booths/export') ?>"
+                   class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2.5 rounded-lg font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm whitespace-nowrap">
+                    <span class="material-symbols-outlined text-[18px]">cloud_download</span>
+                    Ekspor Laporan
+                </a>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <?php if (session()->getFlashdata('success')): ?>
+            <div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm font-medium">
+                <?= esc(session()->getFlashdata('success')) ?>
+            </div>
+        <?php endif; ?>
+        <?php if (session()->getFlashdata('error')): ?>
+            <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-medium">
+                <?= esc(session()->getFlashdata('error')) ?>
+            </div>
+        <?php endif; ?>
+        <?php if (!empty(session()->getFlashdata('errors'))): ?>
+            <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-medium">
+                <ul class="list-disc list-inside space-y-1">
+                    <?php foreach (session()->getFlashdata('errors') as $err): ?>
+                        <li><?= esc($err) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
+
+        <!-- Stats Bento Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <!-- Total Mesin -->
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">devices</span>
+                    <span class="text-blue-600 font-label-bold text-label-bold">Total</span>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Total Mesin</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statTotal ?? 0 ?> Unit</h3>
+            </div>
+            <!-- Aktif -->
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-emerald-600 bg-emerald-50 p-2 rounded-lg material-symbols-outlined">check_circle</span>
+                    <span class="text-emerald-600 font-label-bold text-label-bold">
+                        <?= $statTotal > 0 ? round(($statActive / $statTotal) * 100) : 0 ?>%
+                    </span>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Aktif Sekarang</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statActive ?? 0 ?> Unit</h3>
+            </div>
+            <!-- Maintenance -->
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-tertiary bg-tertiary-fixed p-2 rounded-lg material-symbols-outlined">build</span>
+                    <span class="text-tertiary font-label-bold text-label-bold">
+                        <?= ($statMaintenance ?? 0) > 0 ? 'High Priority' : 'Normal' ?>
+                    </span>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Maintenance</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statMaintenance ?? 0 ?> Unit</h3>
+            </div>
+            <!-- Antrean Aktif -->
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-secondary bg-secondary-fixed p-2 rounded-lg material-symbols-outlined">queue</span>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Total Antrean</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statTotalQueue ?? 0 ?></h3>
+            </div>
+        </div>
+
+        <!-- Table Section -->
+        <!-- Table Section -->
+        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            
+            <!-- Table Header -->
+            <div class="p-5 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center bg-white gap-4">
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <div class="w-1 h-6 bg-primary rounded-full"></div>
+                    <h4 class="font-h2 text-h2 text-on-surface">Daftar Mesin Booth</h4>
+                </div>
+                <a href="<?= base_url('admin/booths/create') ?>"
+                   class="bg-primary text-white px-4 py-2 rounded-lg font-label-bold text-label-bold flex items-center gap-2 hover:bg-primary-container transition-colors shadow-sm whitespace-nowrap w-full md:w-auto justify-center">
+                    <span class="material-symbols-outlined text-[18px]">devices</span>
+                    Tambah Booth Baru
+                </a>
+            </div>
+
+            <!-- Search & Filter Bar -->
+            <div class="p-4 bg-slate-50/50 border-b border-slate-200 flex flex-col sm:flex-row gap-3">
+                <form method="get" action="<?= base_url('admin/booths') ?>" class="flex flex-col md:flex-row flex-1 gap-3 w-full">
+                    <!-- Search Input -->
+                    <div class="relative flex-1">
+                        <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">search</span>
+                        <input type="text" name="q" value="<?= esc($keyword ?? '') ?>" placeholder="Cari ID atau Nama Booth..."
+                               class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all"/>
+                    </div>
+                    
+                    <!-- Status Filter -->
+                    <select name="status" onchange="this.form.submit()"
+                            class="w-full md:w-48 px-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all text-slate-600">
+                        <option value="" <?= ($filterStatus ?? '') === '' ? 'selected' : '' ?>>Semua Status</option>
+                        <option value="active"      <?= ($filterStatus ?? '') === 'active'      ? 'selected' : '' ?>>Aktif</option>
+                        <option value="maintenance" <?= ($filterStatus ?? '') === 'maintenance' ? 'selected' : '' ?>>Maintenance</option>
+                        <option value="inactive"    <?= ($filterStatus ?? '') === 'inactive'    ? 'selected' : '' ?>>Nonaktif</option>
+                    </select>
+
+                    <!-- Reset button if search or filter is active -->
+                    <?php if (!empty($keyword) || !empty($filterStatus)): ?>
+                        <a href="<?= base_url('admin/booths') ?>" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-semibold rounded-lg flex items-center justify-center transition-colors">
+                            Reset
+                        </a>
+                    <?php endif; ?>
+                </form>
+            </div>
+
+            <!-- Data Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50/50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">ID Booth</th>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Nama Mesin</th>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Alamat IP</th>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Sesi Aktif</th>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Antrean</th>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Status</th>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Waktu Daftar</th>
+                            <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant">
+                        <?php if (!empty($booths)): ?>
+                            <?php foreach ($booths as $booth): ?>
+                                <?php
+                                    $statusMap = [
+                                        'active'      => ['bg-emerald-50 text-emerald-600 border border-emerald-200', 'bg-emerald-500', 'Aktif'],
+                                        'maintenance' => ['bg-tertiary-fixed text-tertiary border border-tertiary/30', 'bg-tertiary', 'Maintenance'],
+                                        'inactive'    => ['bg-red-50 text-red-600 border border-red-200', 'bg-red-500', 'Non-Aktif'],
+                                    ];
+                                    $st = $statusMap[$booth['status']] ?? ['bg-slate-100 text-slate-500', 'bg-slate-400', ucfirst($booth['status'])];
+                                ?>
+                                <tr class="hover:bg-blue-50/30 transition-colors group">
+                                    <td class="p-4 font-data-tabular text-data-tabular text-primary font-semibold text-center"><?= esc($booth['id']) ?></td>
+                                    <td class="p-4 font-body-base text-body-base text-on-surface"><?= esc($booth['name']) ?></td>
+                                    <td class="p-4 font-mono text-xs text-slate-600 text-center"><?= esc($booth['ip_address'] ?? '-') ?></td>
+                                    <td class="p-4">
+                                        <?php if (!empty($booth['active_booking_id'])): ?>
+                                            <div class="flex items-center gap-2">
+                                                <span class="inline-flex items-center px-2 py-1 rounded bg-blue-50 text-blue-700 text-xs font-semibold">
+                                                    <span class="material-symbols-outlined text-[14px] mr-1">meeting_room</span>
+                                                    #<?= esc($booth['active_booking_id']) ?>
+                                                </span>
+                                                <form action="<?= base_url('admin/booths/' . $booth['id'] . '/reset-session') ?>" method="post" class="inline">
+                                                    <?= csrf_field() ?>
+                                                    <button type="submit" class="p-1 text-red-500 hover:bg-red-50 rounded transition-colors" title="Forced Reset Sesi" onclick="return confirm('Paksa keluar customer dari sesi ini dan reset layar booth?')">
+                                                        <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="text-xs text-slate-400 font-medium">Idle / Kosong</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <span class="text-lg font-black text-slate-500"><?= esc($booth['current_queue'] ?? 0) ?></span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold <?= $st[0] ?>">
+                                            <span class="w-2 h-2 <?= $st[1] ?> rounded-full flex-shrink-0"></span>
+                                            <?= $st[2] ?>
+                                        </span>
+                                    </td>
+                                    <td class="p-4 font-data-tabular text-data-tabular text-outline text-center">
+                                        <?= date('d M Y, H:i', strtotime($booth['created_at'])) ?>
+                                    </td>
+                                    <td class="p-4 text-center space-x-2">
+                                        <button type="button" onclick="showBoothDetailModal('<?= esc($booth['id'], 'js') ?>', '<?= esc($booth['name'], 'js') ?>', '<?= esc($booth['ip_address'] ?? '-', 'js') ?>', '<?= esc($booth['latitude'] ?? '', 'js') ?>', '<?= esc($booth['longitude'] ?? '', 'js') ?>', '<?= date('d M Y, H:i', strtotime($booth['created_at'])) ?>', '<?= date('d M Y, H:i', strtotime($booth['updated_at'])) ?>', '<?= $booth['status'] ?>', '<?= esc($booth['current_queue'] ?? 0, 'js') ?>', '<?= esc($booth['active_booking_id'] ?? '', 'js') ?>')"
+                                           class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Detail Booth">
+                                            <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                        </button>
+                                        <button type="button"
+                                                class="inline p-1.5 text-purple-600 hover:bg-purple-50 rounded transition-colors" title="Generate QR Code"
+                                                onclick="showQrModal('<?= esc($booth['id'], 'js') ?>', '<?= esc($booth['name'], 'js') ?>')">
+                                            <span class="material-symbols-outlined text-[20px]">qr_code</span>
+                                        </button>
+                                        <a href="<?= base_url('admin/booths/' . $booth['id'] . '/edit') ?>"
+                                           class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                            <span class="material-symbols-outlined text-[20px]">edit</span>
+                                        </a>
+                                        <?php if ($booth['status'] === 'active'): ?>
+                                            <button type="button"
+                                                    class="inline p-1.5 text-amber-600 hover:bg-amber-50 rounded transition-colors" title="Set Maintenance"
+                                                    onclick="showMaintenanceModal('<?= esc($booth['id'], 'js') ?>', '<?= esc($booth['name'], 'js') ?>', 'maintenance')">
+                                                <span class="material-symbols-outlined text-[20px]">engineering</span>
+                                            </button>
+                                        <?php else: ?>
+                                            <button type="button"
+                                                    class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Aktifkan Kembali"
+                                                    onclick="showMaintenanceModal('<?= esc($booth['id'], 'js') ?>', '<?= esc($booth['name'], 'js') ?>', 'activate')">
+                                                <span class="material-symbols-outlined text-[20px]">play_circle</span>
+                                            </button>
+                                        <?php endif; ?>
+                                        <button type="button"
+                                                class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
+                                                onclick="openUniversalDeleteModal('<?= base_url('admin/booths/' . $booth['id'] . '/delete') ?>', '<?= esc($booth['name'], 'js') ?>', 'Hapus Mesin Booth?')">
+                                            <span class="material-symbols-outlined text-[20px]">delete</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="8" class="p-10 text-center text-sm text-slate-400">
+                                    Belum ada booth terdaftar.
+                                    <a href="<?= base_url('admin/booths/create') ?>" class="text-primary font-semibold ml-1">Tambah sekarang</a>.
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="px-6 py-4 bg-surface-container-low border-t border-outline-variant flex items-center justify-between">
+                <span class="text-body-sm text-outline">
+                    Menampilkan <?= count($booths ?? []) ?> dari <?= $totalBooths ?? 0 ?> mesin
+                </span>
+                        <div class="flex gap-1">
+                            <a href="<?= base_url('admin/booths?page=' . max(1, ($currentPage ?? 1) - 1) . '&q=' . ($keyword ?? '') . '&status=' . ($filterStatus ?? '')) ?>"
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_left</span>
+                            </a>
+                            <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
+                                <a href="<?= base_url('admin/booths?page=' . $i . '&q=' . ($keyword ?? '') . '&status=' . ($filterStatus ?? '')) ?>"
+                                   class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
+                                    <?= $i ?>
+                                </a>
+                            <?php endfor; ?>
+                            <a href="<?= base_url('admin/booths?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&q=' . ($keyword ?? '') . '&status=' . ($filterStatus ?? '')) ?>"
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                            </a>
+                        </div>
+            </div>
+        </div>
+
+        <!-- Map Preview + Alert Section -->
+        <div class="mt-8 mb-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Map Preview -->
+            <div class="lg:col-span-2 bg-white border border-outline-variant rounded-xl shadow-sm p-6">
+                <h3 class="font-h2 text-h2 mb-4">Sebaran Geografis Mesin</h3>
+                <!-- Container Peta Leaflet Interaktif -->
+                <div id="map" class="h-64 bg-slate-100 rounded-lg overflow-hidden border border-outline-variant relative" style="z-index: 1;"></div>
+            </div>
+
+            <!-- Alerts Panel -->
+            <div class="bg-white border border-outline-variant rounded-xl shadow-sm p-6 flex flex-col justify-between">
+                <div>
+                    <h3 class="font-h2 text-h2 mb-2">Perlu Perhatian</h3>
+                    <?php if (!empty($maintenanceBooths)): ?>
+                        <p class="text-body-sm text-outline mb-4"><?= count($maintenanceBooths) ?> mesin dalam mode Maintenance.</p>
+                        <div class="space-y-3">
+                            <?php foreach ($maintenanceBooths as $mb): ?>
+                                <div class="flex items-center space-x-3 p-3 bg-error-container/20 border-l-4 border-error rounded">
+                                    <span class="material-symbols-outlined text-error">warning</span>
+                                    <div>
+                                        <p class="font-label-bold text-label-bold text-on-error-container"><?= esc($mb['id']) ?></p>
+                                        <p class="text-[11px] text-on-error-container"><?= esc($mb['name']) ?> — Maintenance Diperlukan</p>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="flex items-center space-x-3 p-3 bg-green-50 border-l-4 border-green-500 rounded">
+                            <span class="material-symbols-outlined text-green-600">check_circle</span>
+                            <p class="text-sm text-green-700 font-medium">Semua mesin berjalan normal.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <a href="<?= base_url('admin/booths?status=maintenance') ?>"
+                   class="mt-6 w-full py-2 text-center border border-primary text-primary hover:bg-primary-container hover:text-white transition-all rounded-lg font-label-bold text-label-bold block">
+                    Lihat Log Maintenance
+                </a>
+            </div>
+        </div>
+
+    </div>
+    <?= $this->include('Admin/layouts/footer') ?>
+</main>
+
+<!-- QR Code Modal -->
+<div id="qrModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-sm w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="qrModalContent">
+        <!-- Modal Header -->
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-purple-600">qr_code_2</span>
+                QR Code Kiosk Booth
+            </h4>
+            <button type="button" onclick="closeQrModal()" class="text-slate-400 hover:text-slate-600">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        
+        <!-- Modal Body -->
+        <div class="p-6 flex flex-col items-center text-center">
+            <p class="text-xs font-semibold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full mb-3" id="modalBoothId"></p>
+            <h3 class="font-bold text-slate-800 text-base mb-1" id="modalBoothName"></h3>
+            <p class="text-xs text-slate-400 mb-6">Scan QR untuk membuka halaman booking dengan booth ini terpilih otomatis.</p>
+            
+            <!-- QR Container -->
+            <div class="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm mb-6 flex items-center justify-center">
+                <img id="qrImageElement" src="" alt="QR Code" class="w-48 h-48" />
+            </div>
+
+            <!-- URL Input (Copy link) -->
+            <div class="w-full flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg p-2 mb-6">
+                <input type="text" id="qrUrlInput" readonly class="bg-transparent text-xs text-slate-600 w-full outline-none select-all font-mono pl-1" />
+                <button type="button" onclick="copyQrUrl()" class="px-2.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-md text-xs font-semibold flex items-center gap-1 shadow-sm transition-all" id="copyBtn">
+                    <span class="material-symbols-outlined text-[14px]">content_copy</span>
+                    <span>Copy</span>
+                </button>
+            </div>
+            
+            <!-- Action buttons -->
+            <div class="w-full flex gap-3">
+                <a id="downloadQrBtn" href="" download="qr_code.png" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-sm rounded-lg text-center shadow-md transition-colors flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined text-[18px]">download</span>
+                    Download PNG
+                </a>
+                <button type="button" onclick="closeQrModal()" class="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-lg transition-colors">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialize map centered in Indonesia
+        const map = L.map('map').setView([-2.548926, 118.0148634], 5);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        const boothsData = <?= $boothsJson ?? '[]' ?>;
+        let bounds = [];
+
+        boothsData.forEach(function(booth) {
+            if (booth.latitude && booth.longitude) {
+                const lat = parseFloat(booth.latitude);
+                const lng = parseFloat(booth.longitude);
+                bounds.push([lat, lng]);
+
+                const marker = L.marker([lat, lng]).addTo(map);
+                
+                const statusColor = booth.status === 'active' ? 'text-emerald-600' : 'text-slate-500';
+                const statusLabel = booth.status === 'active' ? 'Aktif' : 'Nonaktif/Maintenance';
+
+                marker.bindPopup(`
+                    <div class="p-1 font-sans">
+                        <h4 class="font-bold text-slate-800 text-sm mb-1">${booth.name}</h4>
+                        <p class="text-xs text-slate-500 m-0">Status: <span class="font-semibold ${statusColor}">${statusLabel}</span></p>
+                    </div>
+                `);
+            }
+        });
+
+        // Fit map bounds if there are booths with coordinates
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [30, 30] });
+        }
+    });
+
+    function showQrModal(boothId, boothName) {
+        const modal = document.getElementById('qrModal');
+        const content = document.getElementById('qrModalContent');
+        const modalBoothId = document.getElementById('modalBoothId');
+        const modalBoothName = document.getElementById('modalBoothName');
+        const qrImage = document.getElementById('qrImageElement');
+        const qrUrlInput = document.getElementById('qrUrlInput');
+        const downloadBtn = document.getElementById('downloadQrBtn');
+        const copyBtn = document.getElementById('copyBtn');
+
+        // Reset copy button state
+        copyBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">content_copy</span><span>Copy</span>';
+        copyBtn.className = 'px-2.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-md text-xs font-semibold flex items-center gap-1 shadow-sm transition-all';
+
+        const targetUrl = `<?= base_url('customer/booking') ?>?booth_id=${encodeURIComponent(boothId)}`;
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(targetUrl)}`;
+
+        modalBoothId.textContent = boothId;
+        modalBoothName.textContent = boothName;
+        qrImage.src = qrApiUrl;
+        qrUrlInput.value = targetUrl;
+        downloadBtn.href = qrApiUrl;
+
+        // Show Modal
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeQrModal() {
+        const modal = document.getElementById('qrModal');
+        const content = document.getElementById('qrModalContent');
+
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    function copyQrUrl() {
+        const urlInput = document.getElementById('qrUrlInput');
+        urlInput.select();
+        document.execCommand('copy');
+
+        const copyBtn = document.getElementById('copyBtn');
+        copyBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">done</span><span>Copied!</span>';
+        copyBtn.className = 'px-2.5 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-md text-xs font-semibold flex items-center gap-1 shadow-sm transition-all';
+    }
+
+    // =========================================================================
+    // MAINTENANCE / ACTIVATE MODAL
+    // =========================================================================
+    const maintenanceBaseUrl  = '<?= base_url("admin/booths") ?>';
+
+    function showMaintenanceModal(boothId, boothName, action) {
+        const modal   = document.getElementById('maintenanceModal');
+        const content = document.getElementById('maintenanceModalContent');
+        const form    = document.getElementById('maintenanceForm');
+
+        const isMaintenance = (action === 'maintenance');
+
+        document.getElementById('maintModalIcon').textContent    = isMaintenance ? 'engineering' : 'play_circle';
+        document.getElementById('maintModalIconWrap').className  = isMaintenance
+            ? 'w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4'
+            : 'w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4';
+        document.getElementById('maintModalIcon').className      = isMaintenance
+            ? 'material-symbols-outlined text-4xl text-amber-600'
+            : 'material-symbols-outlined text-4xl text-emerald-600';
+        document.getElementById('maintModalTitle').textContent   = isMaintenance ? 'Set ke Maintenance?' : 'Aktifkan Kembali?';
+        document.getElementById('maintModalDesc').innerHTML      = isMaintenance
+            ? `Mesin <strong>${boothName}</strong> akan dialihkan ke mode <span class="font-bold text-amber-600">Maintenance</span> dan tidak dapat menerima reservasi baru.`
+            : `Mesin <strong>${boothName}</strong> akan diaktifkan kembali ke status <span class="font-bold text-emerald-600">Aktif</span>.`;
+
+        const confirmBtn = document.getElementById('maintConfirmBtn');
+        confirmBtn.className = isMaintenance
+            ? 'flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors'
+            : 'flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors';
+        confirmBtn.textContent = isMaintenance ? 'Ya, Set Maintenance' : 'Ya, Aktifkan';
+
+        form.action = `${maintenanceBaseUrl}/${boothId}/${action === 'maintenance' ? 'maintenance' : 'activate'}`;
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeMaintenanceModal() {
+        const modal   = document.getElementById('maintenanceModal');
+        const content = document.getElementById('maintenanceModalContent');
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+</script>
+
+<!-- Maintenance / Activate Confirmation Modal -->
+<div id="maintenanceModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-sm w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="maintenanceModalContent">
+        <!-- Header -->
+        <div class="p-5 border-b border-slate-100 flex items-center bg-slate-50/50">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-amber-500">build_circle</span>
+                Konfirmasi Aksi Booth
+            </h4>
+        </div>
+        <!-- Body -->
+        <div class="p-6 text-center">
+            <div id="maintModalIconWrap" class="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
+                <span id="maintModalIcon" class="material-symbols-outlined text-4xl text-amber-600">engineering</span>
+            </div>
+            <h3 id="maintModalTitle" class="text-lg font-black text-slate-800 mb-2">Set ke Maintenance?</h3>
+            <p id="maintModalDesc" class="text-sm text-slate-500 leading-relaxed mb-6"></p>
+            <form id="maintenanceForm" method="post">
+                <?= csrf_field() ?>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeMaintenanceModal()"
+                            class="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm rounded-lg transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" id="maintConfirmBtn"
+                            class="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors">
+                        Ya, Set Maintenance
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Booth Detail Modal -->
+<div id="boothDetailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-4xl w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300 flex flex-col" id="boothDetailModalContent">
+        
+        <!-- Modal Header -->
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-emerald-600">visibility</span>
+                Detail Mesin Booth
+            </h4>
+        </div>
+        
+        <!-- Modal Body -->
+        <div class="p-6 flex flex-col items-center bg-white">
+            <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Details List 1: Informasi Perangkat -->
+                <div>
+                    <h5 class="w-full text-left font-bold text-slate-700 mb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-lg">nest_display</span>
+                        Informasi Perangkat
+                    </h5>
+                    <div class="w-full space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200 text-left text-sm shadow-sm h-full">
+                        <div class="flex justify-between border-b border-slate-200 pb-2">
+                            <span class="font-semibold text-slate-500">ID Booth</span>
+                            <span class="font-mono text-slate-800 font-bold" id="modalBdId"></span>
+                        </div>
+                        <div class="flex justify-between border-b border-slate-200 pb-2">
+                            <span class="font-semibold text-slate-500">Nama Lokasi</span>
+                            <span class="text-slate-800 font-semibold" id="modalBdName"></span>
+                        </div>
+                        <div class="flex justify-between border-b border-slate-200 pb-2">
+                            <span class="font-semibold text-slate-500">Alamat IP</span>
+                            <span class="font-mono text-slate-800 font-semibold" id="modalBdIp"></span>
+                        </div>
+                        <div class="flex justify-between border-b border-slate-200 pb-2">
+                            <span class="font-semibold text-slate-500">Koordinat Geografis</span>
+                            <span class="font-mono text-slate-800 font-semibold" id="modalBdCoord"></span>
+                        </div>
+                        <div class="flex justify-between border-b border-slate-200 pb-2">
+                            <span class="font-semibold text-slate-500">Tanggal Terdaftar</span>
+                            <span class="text-slate-800 font-semibold" id="modalBdCreated"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-semibold text-slate-500">Terakhir Diperbarui</span>
+                            <span class="text-slate-800 font-semibold" id="modalBdUpdated"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Details List 2: Status Operasional -->
+                <div>
+                    <h5 class="w-full text-left font-bold text-slate-700 mb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-lg">query_stats</span>
+                        Status Operasional
+                    </h5>
+                    <div class="w-full space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200 text-left text-sm shadow-sm h-full">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                            <span class="font-semibold text-slate-500">Status Operasional</span>
+                            <span id="modalBdStatus" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold">
+                                <span id="modalBdStatusDot" class="w-2 h-2 rounded-full mr-2"></span>
+                                <span id="modalBdStatusText"></span>
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                            <span class="font-semibold text-slate-500">Antrean Saat Ini</span>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-lg font-black text-slate-700" id="modalBdQueue"></span>
+                                <span class="text-[10px] text-slate-400 font-semibold">Pelanggan</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <span class="font-semibold text-slate-500">Sesi Aktif Kiosk</span>
+                            <div id="modalBdActiveSessionContainer" class="w-full">
+                                <!-- Dynamic content based on session -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="w-full mt-16">
+                <button type="button" onclick="closeBoothDetailModal()" class="w-full py-3 bg-primary hover:bg-primary-container text-white font-semibold text-sm rounded-xl transition-colors shadow-md">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showBoothDetailModal(id, name, ip, lat, lng, created, updated, status, queue, activeBookingId) {
+        const modal = document.getElementById('boothDetailModal');
+        const content = document.getElementById('boothDetailModalContent');
+        
+        document.getElementById('modalBdId').textContent = id;
+        document.getElementById('modalBdName').textContent = name;
+        document.getElementById('modalBdIp').textContent = ip;
+        
+        let coordText = '-';
+        if (lat && lng) {
+            coordText = 'Lat: ' + lat + ', Lng: ' + lng;
+        }
+        document.getElementById('modalBdCoord').textContent = coordText;
+        document.getElementById('modalBdCreated').textContent = created;
+        document.getElementById('modalBdUpdated').textContent = updated;
+        
+        const statusEl = document.getElementById('modalBdStatus');
+        const dotEl = document.getElementById('modalBdStatusDot');
+        const textEl = document.getElementById('modalBdStatusText');
+        
+        if (status === 'active') {
+            statusEl.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800';
+            dotEl.className = 'w-2 h-2 rounded-full mr-2 bg-emerald-500';
+            textEl.textContent = 'Aktif & Online';
+        } else if (status === 'maintenance') {
+            statusEl.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800';
+            dotEl.className = 'w-2 h-2 rounded-full mr-2 bg-amber-500';
+            textEl.textContent = 'Maintenance / Perbaikan';
+        } else {
+            statusEl.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700';
+            dotEl.className = 'w-2 h-2 rounded-full mr-2 bg-slate-500';
+            textEl.textContent = 'Nonaktif';
+        }
+        
+        document.getElementById('modalBdQueue').textContent = queue;
+        
+        const sessionContainer = document.getElementById('modalBdActiveSessionContainer');
+        if (activeBookingId && activeBookingId.trim() !== '') {
+            const baseUrl = '<?= base_url('admin/booths/') ?>';
+            const formAction = baseUrl + id + '/reset-session';
+            const csrfHtml = '<?= csrf_field() ?>';
+            
+            sessionContainer.innerHTML = `
+                <div class="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-lg p-3">
+                    <span class="material-symbols-outlined text-blue-600">meeting_room</span>
+                    <div>
+                        <p class="text-xs font-bold text-blue-800">#${activeBookingId}</p>
+                        <p class="text-[10px] text-blue-500">Sesi Kiosk Berjalan</p>
+                    </div>
+                    <form action="${formAction}" method="post" class="ml-auto">
+                        ${csrfHtml}
+                        <button type="submit" class="p-1.5 bg-white border border-blue-200 text-red-600 rounded-lg hover:bg-red-50 hover:border-red-200 transition-colors shadow-sm" title="Reset Sesi Paksa" onclick="return confirm('Paksa keluar customer dari sesi ini?')">
+                            <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                        </button>
+                    </form>
+                </div>
+            `;
+        } else {
+            sessionContainer.innerHTML = '<p class="text-xs text-slate-400 font-medium italic">Tidak ada sesi aktif (Idle)</p>';
+        }
+
+        // Show Modal
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeBoothDetailModal() {
+        const modal = document.getElementById('boothDetailModal');
+        const content = document.getElementById('boothDetailModalContent');
+
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+</script>
+
+<?php $this->endSection(); ?>
+
