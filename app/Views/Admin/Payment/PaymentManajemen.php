@@ -94,10 +94,10 @@
             </div>
         </div>
 
-        <!-- Table Container -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-
-            <!-- Filters Bar -->
+        <!-- Main Table Section -->
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex-1 flex flex-col mb-6">
+            
+            <!-- Filter Toolbar -->
             <form method="get" action="<?= base_url('admin/payments') ?>">
                 <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-wrap gap-4 items-center justify-between">
                     <div class="flex items-center gap-3">
