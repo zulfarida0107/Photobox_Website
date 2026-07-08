@@ -28,11 +28,6 @@
                     <span class="material-symbols-outlined text-[18px]">cloud_download</span>
                     Ekspor Laporan
                 </a>
-                <a href="<?= base_url('admin/packages/create') ?>"
-                   class="flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded font-label-bold text-label-bold hover:opacity-90 transition-opacity">
-                    <span class="material-symbols-outlined text-[18px]">add_circle</span>
-                    Tambah Paket Baru
-                </a>
             </div>
         </div>
 
@@ -79,22 +74,40 @@
                 </div>
             </div>
 
-            <!-- Tabel Paket Layanan (8 kolom) -->
-            <div class="col-span-8 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
-                <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <!-- Tabel Paket Layanan -->
+            <div class="col-span-7 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+                <!-- Header Card -->
+                <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-white">
                     <div class="flex items-center gap-3">
-                        <div class="w-1 h-6 bg-primary rounded-full"></div>
-                        <h4 class="font-h2 text-h2 text-on-surface">Daftar Paket Layanan</h4>
+                        <div class="w-1 h-6 bg-[#0047a0] rounded-full"></div>
+                        <h4 class="font-h2 text-h2 text-slate-800">Daftar Paket Layanan</h4>
                     </div>
-                    <form method="get" action="<?= base_url('admin/packages') ?>">
+                    <a href="<?= base_url('admin/packages/create') ?>"
+                       class="flex items-center gap-2 bg-[#0047a0] text-white px-4 py-2 rounded font-label-bold text-sm hover:opacity-90 transition-opacity shadow-sm">
+                        <span class="material-symbols-outlined text-[18px]">inventory_2</span>
+                        Tambah Paket Baru
+                    </a>
+                </div>
+                <!-- Action Bar -->
+                <div class="p-4 border-b border-slate-100 flex gap-4 bg-white">
+                    <form method="get" action="<?= base_url('admin/packages') ?>" class="flex-1">
+                        <input type="hidden" name="opt_page" value="<?= esc($currentOptPage ?? 1) ?>">
+                        <input type="hidden" name="q_opt" value="<?= esc($keywordOpt ?? '') ?>">
                         <div class="relative">
-                            <span class="material-symbols-outlined absolute left-3 top-2 text-[18px] text-slate-400">search</span>
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">search</span>
                             <input name="q" value="<?= esc($keyword ?? '') ?>"
-                                   class="pl-9 pr-4 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                                   placeholder="Cari paket..." type="text"/>
+                                   class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                   placeholder="Cari nama paket..." type="text"/>
                         </div>
                     </form>
+                    <div class="w-48 relative">
+                        <select class="w-full appearance-none bg-white border border-slate-200 text-slate-600 py-2 pl-4 pr-10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            <option>Semua Kategori</option>
+                        </select>
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400 pointer-events-none">expand_more</span>
+                    </div>
                 </div>
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
@@ -116,8 +129,10 @@
                                             <span class="bg-slate-100 px-2 py-1 rounded text-xs font-medium text-slate-600">
                                                 <?= esc($pkg['photo_count']) ?> Foto
                                             </span>
-                                            <span class="ml-1 bg-slate-100 px-2 py-1 rounded text-xs font-medium text-slate-600">
-                                                <?= esc($pkg['duration']) ?> Mnt
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <span class="font-bold text-slate-800 text-sm">
+                                                Rp <?= number_format($pkg['base_price'], 0, ',', '.') ?>
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 font-bold text-primary text-center">
@@ -138,7 +153,7 @@
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="5" class="px-6 py-10 text-center text-sm text-slate-400">
+                                    <td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400">
                                         Belum ada paket. <a href="<?= base_url('admin/packages/create') ?>" class="text-primary font-semibold">Tambah sekarang</a>.
                                     </td>
                                 </tr>
@@ -147,7 +162,7 @@
                     </table>
                 </div>
                 <!-- Pagination Paket -->
-                <div class="p-4 bg-slate-50 text-slate-500 text-xs flex justify-between items-center border-t border-slate-100">
+                <div class="p-4 bg-white text-slate-500 text-xs flex justify-between items-center border-t border-slate-100">
                     <span>Menampilkan <?= count($packages ?? []) ?> dari <?= $totalPackages ?? 0 ?> paket</span>
                     <div class="flex gap-1">
                         <a href="<?= base_url('admin/packages?page=' . max(1, ($currentPkgPage ?? 1) - 1) . '&q=' . ($keyword ?? '')) ?>"
@@ -168,19 +183,43 @@
                 </div>
             </div>
 
-            <!-- Tabel Opsi Cetak (4 kolom) -->
-            <div class="col-span-4 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
-                <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <!-- Tabel Opsi Cetak -->
+            <div class="col-span-5 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+                <!-- Header Card -->
+                <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-white">
                     <div class="flex items-center gap-3">
-                        <div class="w-1 h-6 bg-tertiary rounded-full"></div>
-                        <h4 class="font-h2 text-h2 text-on-surface">Opsi Cetak</h4>
+                        <div class="w-1 h-6 bg-[#0047a0] rounded-full"></div>
+                        <h4 class="font-h2 text-h2 text-slate-800">Opsi Cetak</h4>
                     </div>
                     <a href="<?= base_url('admin/print-options/create') ?>"
-                       class="text-primary hover:bg-blue-50 p-1 rounded transition-colors" title="Tambah Opsi Cetak">
-                        <span class="material-symbols-outlined">add</span>
+                       class="flex items-center gap-2 bg-[#0047a0] text-white px-4 py-2 rounded font-label-bold text-sm hover:opacity-90 transition-opacity shadow-sm">
+                        <span class="material-symbols-outlined text-[18px]">print</span>
+                        Tambah Opsi
                     </a>
                 </div>
-                <div class="flex-1 overflow-y-auto max-h-[440px]">
+                <!-- Action Bar -->
+                <div class="p-4 border-b border-slate-100 flex gap-4 bg-white">
+                    <form method="get" action="<?= base_url('admin/packages') ?>" class="flex-1">
+                        <input type="hidden" name="page" value="<?= esc($currentPkgPage ?? 1) ?>">
+                        <input type="hidden" name="q" value="<?= esc($keyword ?? '') ?>">
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">search</span>
+                            <input name="q_opt" value="<?= esc($keywordOpt ?? '') ?>"
+                                   class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                   placeholder="Cari opsi cetak..." type="text"/>
+                        </div>
+                    </form>
+                    <div class="w-48 relative">
+                        <select class="w-full appearance-none bg-white border border-slate-200 text-slate-600 py-2 pl-4 pr-10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            <option>Semua Status</option>
+                            <option>Aktif</option>
+                            <option>Non-Aktif</option>
+                        </select>
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400 pointer-events-none">expand_more</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50/80 text-slate-500 font-label-bold text-label-bold uppercase tracking-wider sticky top-0">
@@ -193,14 +232,19 @@
                         <tbody class="divide-y divide-slate-100">
                             <?php if (!empty($printOptions)): ?>
                                 <?php foreach ($printOptions as $opt): ?>
-                                    <tr class="hover:bg-slate-50 transition-colors group">
-                                        <td class="px-5 py-4">
-                                            <p class="font-bold text-on-surface text-sm"><?= esc($opt['name'] ?? 'Opsi Cetak') ?></p>
-                                            <p class="text-[10px] text-slate-400 font-mono"><?= esc($opt['id']) ?></p>
+                                    <tr class="bg-white hover:bg-slate-50 transition-colors group">
+                                        <td class="px-6 py-4 text-sm text-slate-500 font-mono"><?= esc($opt['id']) ?></td>
+                                        <td class="px-6 py-4">
+                                            <div class="font-bold text-slate-800 text-sm"><?= esc($opt['name'] ?? 'Opsi Cetak') ?></div>
+                                            <div class="mt-1">
+                                                <span class="inline-block bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded-full font-medium">
+                                                    <?= esc($opt['copies']) ?> Lembar
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td class="px-5 py-4 text-center">
-                                            <span class="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
-                                                <?= esc($opt['copies']) ?> Lbr
+                                        <td class="px-6 py-4 text-center">
+                                            <span class="font-bold text-slate-800 text-sm">
+                                                Rp <?= number_format(($opt['extra_price'] ?? 0), 0, ',', '.') ?>
                                             </span>
                                         </td>
                                         <td class="px-5 py-4 font-bold text-on-surface text-center">
@@ -220,7 +264,7 @@
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="4" class="px-5 py-8 text-center text-sm text-slate-400">
+                                    <td colspan="5" class="px-6 py-8 text-center text-sm text-slate-400">
                                         Belum ada opsi cetak.
                                     </td>
                                 </tr>
@@ -228,11 +272,26 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- <div class="p-4 text-center bg-blue-50 border-t border-slate-100">
-                    <a href="<?= base_url('admin/print-options') ?>" class="text-xs font-bold text-primary hover:underline">
-                        Kelola Detail Opsi
-                    </a>
-                </div> -->
+                <!-- Pagination Opsi Cetak -->
+                <div class="p-4 bg-white text-slate-500 text-xs flex justify-between items-center border-t border-slate-100">
+                    <span>Menampilkan <?= count($printOptions ?? []) ?> dari <?= $totalPrintOptions ?? 0 ?> opsi cetak</span>
+                    <div class="flex gap-1">
+                        <a href="<?= base_url('admin/packages?opt_page=' . max(1, ($currentOptPage ?? 1) - 1) . '&q_opt=' . ($keywordOpt ?? '') . '&page=' . ($currentPkgPage ?? 1) . '&q=' . ($keyword ?? '')) ?>"
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentOptPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                            <span class="material-symbols-outlined text-sm">chevron_left</span>
+                        </a>
+                        <?php for ($i = 1; $i <= ($totalOptPages ?? 1); $i++): ?>
+                            <a href="<?= base_url('admin/packages?opt_page=' . $i . '&q_opt=' . ($keywordOpt ?? '') . '&page=' . ($currentPkgPage ?? 1) . '&q=' . ($keyword ?? '')) ?>"
+                               class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentOptPage ?? 1) ? 'border-[#0047a0] bg-[#0047a0] text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
+                                <?= $i ?>
+                            </a>
+                        <?php endfor; ?>
+                        <a href="<?= base_url('admin/packages?opt_page=' . min(($totalOptPages ?? 1), ($currentOptPage ?? 1) + 1) . '&q_opt=' . ($keywordOpt ?? '') . '&page=' . ($currentPkgPage ?? 1) . '&q=' . ($keyword ?? '')) ?>"
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentOptPage ?? 1) >= ($totalOptPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <!-- Promo & Preview Bento -->
@@ -251,10 +310,10 @@
                 </div>
                 <!-- Layout Preview -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm col-span-2 flex items-center gap-6">
-                    <div class="w-32 h-32 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100">
+                    <div class="w-32 h-32 rounded-xl overflow-hidden flex-shrink-0 bg-white border border-slate-100 flex items-center justify-center p-2">
                         <img alt="Package Visual Preview"
-                             class="w-full h-full object-cover"
-                             src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsRc_XVNFoiEw0proeJDaYkr962949lBPH5XsK9c-9yDI_rkXV4HcYQNPcjCMsesLXR1FPqzuFDvmNGKNo9esVfOc41VSWOsAkUI5uIMbo-uUtpax_Jx3-1Buz1cZwCY2H356MamH3dIdB4NhMgkxLtd2VKFjV4nHJLMqLewtz07FPzOLL3zGBHZtt9sJCqOTTqtjnVb9EoCWQk8N8gkZwm4bsl6P8lGQrK0zfO1Yz91UIdKP_TFviduQSIbJuRskh6izc6oH1iiNV"/>
+                             class="w-full h-full object-contain"
+                             src="<?= base_url('assets/images/blank_photo_strip_white.png') ?>"/>
                     </div>
                     <div class="flex-1">
                         <h4 class="font-h2 text-h2 text-on-surface">Visualisasi Layout Paket</h4>
