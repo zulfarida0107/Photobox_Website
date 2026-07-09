@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Api;
 
+use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class FrameController extends BaseController
