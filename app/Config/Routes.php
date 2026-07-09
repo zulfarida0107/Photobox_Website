@@ -23,7 +23,7 @@ $routes->group('api', static function ($routes) {
     $routes->get('customer/print-options', 'Api\\CatalogController::listPrintOptions');
     $routes->get('customer/frames', 'Api\\CatalogController::listFrames');
     $routes->get('customer/frame', 'Api\\CatalogController::listFrames');
-    $routes->get('booths/(:segment)/session-check', 'Api\\BoothApiController::sessionCheck/$1');
+    $routes->get('booths/(:segment)/session-check', 'Api\\BoothApiController::sessionCheck/$1'); 
 
     $routes->post('payment/qr', 'Api\\PaymentController::createQr');
     $routes->get('payment', 'Api\\PaymentController::statusByQuery');
@@ -199,3 +199,48 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->post('settings/(:segment)/update',   'Admin\AdminAccessController::update/$1');
 	$routes->post('settings/(:segment)/delete',   'Admin\AdminAccessController::delete/$1');
 });
+
+
+
+
+
+// Routes User Booking //** 
+//////////////////////////////
+
+$routes->get('/', 'User_Booking\LandingPageController::index');
+
+// Landing Page Route
+$routes->get('preview', function() {
+    return view('User_Booking/landing_page');
+});
+
+// Register routes
+$routes->get('register', 'User_Booking\RegisterController::index');
+$routes->post('register/store', 'User_Booking\RegisterController::store');
+
+// Booth Routes
+$routes->get('booth', 'User_Booking\BoothController::index');
+$routes->post('booth/store', 'User_Booking\BoothController::store');
+
+// Status Booking Routes
+$routes->get('StatusBooking', 'User_Booking\StatusBookingController::index');
+$routes->post('StatusBooking/store', 'User_Booking\StatusBookingController::store');
+$routes->get('StatusBooking/clearSession', 'User_Booking\StatusBookingController::clearSession');
+$routes->get('booking/success', 'User_Booking\BookingController::success');
+
+// Schedule Routes - perbaiki namespace
+$routes->get('schedule', 'User_Booking\ScheduleController::index');
+$routes->get('schedule/getSlots', 'User_Booking\ScheduleController::getSlots');
+$routes->post('schedule/book', 'User_Booking\ScheduleController::book');
+
+// Barcode/QR Code Routes
+$routes->get('barcode', 'User_Booking\BarcodeController::index');
+$routes->get('barcode/generate/(:any)', 'User_Booking\BarcodeController::generate/$1');
+$routes->get('barcode/scan', 'User_Booking\BarcodeController::scan');
+$routes->post('barcode/verify', 'User_Booking\BarcodeController::verify');
+
+// Payment Routes
+$routes->get('payment', 'User_Booking\PaymentMethodController::index');
+$routes->get('payment/detail/(:any)', 'User_Booking\PaymentMethodController::detail/$1');
+$routes->post('payment/confirm', 'User_Booking\PaymentMethodController::confirm');
+$routes->get('payment/success/(:any)', 'User_Booking\PaymentMethodController::success/$1');
