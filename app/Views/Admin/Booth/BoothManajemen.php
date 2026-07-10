@@ -29,8 +29,8 @@
             </div>
             <div class="mt-4 md:mt-0">
                 <a href="<?= base_url('admin/booths/export') ?>"
-                   class="flex items-center gap-2 px-4 py-2.5 border border-primary text-primary rounded-lg font-label-bold text-label-bold hover:bg-blue-50 transition-colors">
-                    <span class="material-symbols-outlined text-[20px]">description</span>
+                   class="flex items-center gap-2 px-4 py-2.5 border border-primary text-primary rounded-lg text-xs font-semibold hover:bg-blue-50/50 transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">cloud_download</span>
                     Ekspor Laporan
                 </a>
             </div>

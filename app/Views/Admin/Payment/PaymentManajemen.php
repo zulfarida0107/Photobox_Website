@@ -26,7 +26,7 @@
             </div>
             <div class="flex gap-3">
                 <a href="<?= base_url('admin/payments/export') ?>"
-                   class="flex items-center gap-2 px-4 py-2 border border-primary text-primary rounded font-semibold text-sm hover:bg-blue-50 transition-colors">
+                   class="flex items-center gap-2 px-4 py-2 border border-primary text-primary rounded-lg text-xs font-semibold hover:bg-blue-50/50 transition-colors shadow-sm">
                     <span class="material-symbols-outlined text-[18px]">cloud_download</span>
                     Ekspor Laporan
                 </a>

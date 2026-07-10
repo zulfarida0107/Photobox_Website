@@ -24,8 +24,8 @@
             </div>
             <div class="flex gap-3">
                 <a href="<?= base_url('admin/packages/export') ?>"
-                   class="flex items-center gap-2 bg-white border border-outline-variant text-on-surface px-4 py-2 rounded font-label-bold text-label-bold hover:bg-slate-50 transition-colors">
-                    <span class="material-symbols-outlined text-[18px]">download</span>
+                   class="flex items-center gap-2 px-4 py-2 border border-primary text-primary rounded-lg text-xs font-semibold hover:bg-blue-50/50 transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">cloud_download</span>
                     Ekspor Laporan
                 </a>
                 <a href="<?= base_url('admin/packages/create') ?>"
