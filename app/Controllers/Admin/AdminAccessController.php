@@ -45,7 +45,7 @@ class AdminAccessController extends BaseController
         // --- Stats ---
         $statTotal      = $this->adminModel->countAll();
         $statSuperadmin = $this->adminModel->where('role', 'superadmin')->countAllResults();
-        $statAdmin      = $this->adminModel->where('role', 'admin')->countAllResults();
+        $statAdmin      = $this->adminModel->where('role', 'staff')->countAllResults();
 
         $data = [
             'title'        => 'Pengaturan Akses Admin | Admin Panel',
@@ -83,7 +83,7 @@ class AdminAccessController extends BaseController
             'name'     => 'required|min_length[3]|max_length[100]',
             'email'    => 'required|valid_email|is_unique[admins.email]',
             'password' => 'required|min_length[8]',
-            'role'     => 'required|in_list[superadmin,admin]',
+            'role'     => 'required|in_list[superadmin,staff]',
         ];
 
         if (!$this->validate($rules)) {
@@ -139,7 +139,7 @@ class AdminAccessController extends BaseController
         $rules = [
             'name'  => 'required|min_length[3]|max_length[100]',
             'email' => "required|valid_email|is_unique[admins.email,id,{$id}]",
-            'role'  => 'required|in_list[superadmin,admin]',
+            'role'  => 'required|in_list[superadmin,staff]',
         ];
 
         $newPassword = $this->request->getPost('password');

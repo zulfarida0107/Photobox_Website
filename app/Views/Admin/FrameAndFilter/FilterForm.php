@@ -20,10 +20,10 @@
         </div>
 
         <!-- Form Card -->
-        <div class="bg-white border border-outline-variant rounded-xl shadow-sm max-w-2xl overflow-hidden">
+        <div class="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden">
             <div class="p-6 border-b border-outline-variant bg-slate-50/50 flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary">tune</span>
-                <h4 class="font-bold text-on-surface">Konfigurasi Preset Filter</h4>
+                <span class="material-symbols-outlined text-primary">filter_b_and_w</span>
+                <h4 class="font-bold text-on-surface">Konfigurasi Filter</h4>
             </div>
 
             <!-- Error Alerts -->

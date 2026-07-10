@@ -118,6 +118,7 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 
 	// ---- Tab 3: Manajemen Reservasi & Slot ----
 	$routes->get('bookings',                     'Admin\BookingAndSlotController::index');
+	$routes->get('bookings/export',              'Admin\BookingAndSlotController::export');
 	$routes->get('bookings/(:segment)',          'Admin\BookingAndSlotController::show/$1');
 	$routes->get('bookings/(:segment)/edit',     'Admin\BookingAndSlotController::edit/$1');
 	$routes->post('bookings/(:segment)/update',  'Admin\BookingAndSlotController::update/$1');

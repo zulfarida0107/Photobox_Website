@@ -99,8 +99,7 @@ function sidebarClass(string $key, string $activeKey, string $clsActive, string 
         </a>
 
     </nav>
-
-    <div class="pt-4 border-t border-slate-150">
+    <div class="pt-4 border-t border-slate-100">
         <a class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 rounded-lg"
            href="<?= base_url('admin/logout') ?>">
             <span class="material-symbols-outlined">logout</span>

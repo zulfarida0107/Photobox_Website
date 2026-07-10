@@ -8,9 +8,9 @@
         <nav class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-4">
             <a class="hover:text-blue-700" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
             <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-            <a class="hover:text-blue-700" href="<?= base_url('admin/settings') ?>">Pengaturan Akses</a>
+            <a class="hover:text-blue-700" href="<?= base_url('admin/settings') ?>">Manajemen Pengaturan Akses</a>
             <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span class="text-blue-700"><?= isset($admin) ? 'Edit Admin' : 'Tambah Admin' ?></span>
+            <span class="text-blue-700"><?= isset($admin) ? 'Edit Administrator' : 'Tambah Administrator' ?></span>
         </nav>
 
         <!-- Page Header -->
@@ -20,7 +20,7 @@
         </div>
 
         <!-- Form Card -->
-        <div class="bg-white border border-outline-variant rounded-xl shadow-sm max-w-2xl overflow-hidden">
+        <div class="bg-white border border-outline-variant rounded-xl shadow-sm w-full overflow-hidden">
             <div class="p-6 border-b border-outline-variant bg-slate-50/50 flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">manage_accounts</span>
                 <h4 class="font-bold text-on-surface">Data Kredensial Administrator</h4>
@@ -75,7 +75,7 @@
                     <select name="role" id="role" required
                             class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white">
                         <option value="superadmin" <?= old('role', $admin['role'] ?? '') === 'superadmin' ? 'selected' : '' ?>>Superadmin</option>
-                        <option value="admin" <?= old('role', $admin['role'] ?? '') === 'admin' ? 'selected' : '' ?>>Admin</option>
+                        <option value="staff" <?= old('role', $admin['role'] ?? '') === 'staff' ? 'selected' : '' ?>>Admin</option>
                     </select>
                 </div>
 

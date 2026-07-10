@@ -265,12 +265,42 @@ class BoothController extends BaseController
     {
         $booths = $this->boothModel->orderBy('created_at', 'DESC')->findAll();
 
-        $filename = 'booths_export_' . date('Ymd_His') . '.csv';
-        header('Content-Type: text/csv');
+        $filename = 'Laporan_Mesin_Booth_' . date('Ymd_His') . '.csv';
+        header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
 
         $output = fopen('php://output', 'w');
-        fputcsv($output, ['ID Booth', 'Nama Mesin', 'Status', 'Antrean Sekarang', 'Terdaftar']);
+        fputs($output, $bom =(chr(0xEF) . chr(0xBB) . chr(0xBF)));
+        fputs($output, "sep=;\n");
+
+        $adminName = session('adminName') ?? session('admin_name') ?? 'Admin';
+        $adminRole = session('adminRole') ?? session('admin_role') ?? 'Unknown Role';
+        $adminEmail = session('adminEmail');
+        
+        if (!$adminEmail && session('adminId')) {
+            $adminModel = new \App\Models\AdminModel();
+            $adminData = $adminModel->find(session('adminId'));
+            if ($adminData) {
+                $adminEmail = $adminData['email'];
+                $adminName = $adminData['name'];
+            }
+        }
+        $adminEmail = $adminEmail ?? 'No Email';
+        
+        $penanggungJawab = $adminName . ' (' . $adminRole . ') - ' . $adminEmail;
+
+        $currentTime = date('d M Y, H:i:s');
+        $currentDate = date('d F Y');
+
+        fputcsv($output, ['LAPORAN MESIN BOOTH'], ';');
+        fputcsv($output, [], ';');
+        fputcsv($output, ['Penanggung Jawab: ' . $penanggungJawab], ';');
+        fputcsv($output, ['Waktu Realtime: ' . $currentTime . ' WIB'], ';');
+        fputcsv($output, ['Keterangan Tanggal: Diekspor pada ' . $currentDate], ';');
+        fputcsv($output, [], ';');
+
+        fputcsv($output, ['ID Booth', 'Nama Mesin', 'Status', 'Antrean Sekarang', 'Terdaftar'], ';');
         foreach ($booths as $b) {
             fputcsv($output, [
                 $b['id'],
@@ -278,9 +308,10 @@ class BoothController extends BaseController
                 $b['status'],
                 $b['current_queue'],
                 $b['created_at'],
-            ]);
+            ], ';');
         }
         fclose($output);
+        exit;
     }
 
     // =========================================================================

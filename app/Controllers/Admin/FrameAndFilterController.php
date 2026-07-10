@@ -22,11 +22,20 @@ class FrameAndFilterController extends BaseController
     // =========================================================================
     public function index()
     {
-        $perPage          = 8;
+        $framePerPage     = 10;
         $currentFramePage = max(1, (int) ($this->request->getGet('page') ?? 1));
+
+        $catPerPage       = 10;
+        $currentCatPage   = max(1, (int) ($this->request->getGet('cat_page') ?? 1));
+
+        $filterPerPage    = 5; // limit to match Panduan Aset
+        $currentFilterPage= max(1, (int) ($this->request->getGet('filter_page') ?? 1));
 
         $search   = $this->request->getGet('search') ?? '';
         $category = $this->request->getGet('category') ?? '';
+        $catSearch = $this->request->getGet('cat_search') ?? '';
+        $filterSearch = $this->request->getGet('filter_search') ?? '';
+        $filterStatus = $this->request->getGet('filter_status') ?? '';
 
         // --- Frame query builder + Join category name ---
         $frameQuery = $this->frameModel
@@ -42,15 +51,34 @@ class FrameAndFilterController extends BaseController
         }
 
         $totalFrames      = $frameQuery->countAllResults(false);
-        $totalFramePages  = max(1, (int) ceil($totalFrames / $perPage));
+        $totalFramePages  = max(1, (int) ceil($totalFrames / $framePerPage));
         $frames           = $frameQuery
             ->orderBy('frames.created_at', 'DESC')
-            ->findAll($perPage, ($currentFramePage - 1) * $perPage);
+            ->findAll($framePerPage, ($currentFramePage - 1) * $framePerPage);
 
-        // --- Semua filter (tidak di-paginate) ---
-        $filters = $this->filterModel->orderBy('name', 'ASC')->findAll();
+        // --- Semua filter (Paginated) ---
+        $filterQuery = $this->filterModel;
+        if (!empty($filterSearch)) {
+            $filterQuery->like('name', $filterSearch);
+        }
+        if ($filterStatus === '1' || $filterStatus === '0') {
+            $filterQuery->where('is_active', (int)$filterStatus);
+        }
 
-        // --- Semua kategori frame ---
+        $totalFilters      = $filterQuery->countAllResults(false);
+        $totalFilterPages  = max(1, (int) ceil($totalFilters / $filterPerPage));
+        $filters = $filterQuery->orderBy('name', 'ASC')->findAll($filterPerPage, ($currentFilterPage - 1) * $filterPerPage);
+
+        // --- Semua kategori frame (Paginated) ---
+        $catBuilder = $this->frameModel->db->table('frame_categories');
+        if (!empty($catSearch)) {
+            $catBuilder->like('name', $catSearch);
+        }
+        $totalCategories = $catBuilder->countAllResults(false);
+        $totalCategoryPages = max(1, (int) ceil($totalCategories / $catPerPage));
+        $categoriesPaginated = $catBuilder->orderBy('name', 'ASC')->limit($catPerPage, ($currentCatPage - 1) * $catPerPage)->get()->getResultArray();
+
+        // Kategori untuk dropdown filter/upload
         $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
 
         // --- Stats ---
@@ -68,13 +96,23 @@ class FrameAndFilterController extends BaseController
             'currentFramePage'  => $currentFramePage,
             'totalFramePages'   => $totalFramePages,
             'filters'           => $filters,
+            'totalFilters'      => $totalFilters,
+            'currentFilterPage' => $currentFilterPage,
+            'totalFilterPages'  => $totalFilterPages,
             'categories'        => $categories,
+            'categoriesPaginated' => $categoriesPaginated,
+            'totalCategories'   => $totalCategories,
+            'currentCatPage'    => $currentCatPage,
+            'totalCategoryPages'=> $totalCategoryPages,
             'search'            => $search,
             'selectedCategory'  => $category,
             'statTotalFrames'   => $statTotalFrames,
             'statTotalFilters'  => $statTotalFilters,
             'statActiveFilters' => $statActiveFilters,
             'statFramesThisMonth' => $statFramesThisMonth,
+            'catSearch'         => $catSearch,
+            'filterSearch'      => $filterSearch,
+            'filterStatus'      => $filterStatus,
         ];
 
         return view('Admin/FrameAndFilter/FrameAndFilterManajemen', $data);

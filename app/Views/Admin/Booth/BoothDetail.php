@@ -91,12 +91,12 @@
                             <?php if ($booth['status'] === 'active'): ?>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
                                     <span class="w-2 h-2 bg-emerald-500 rounded-full mr-2"></span>
-                                    Aktif & Online
+                                    Aktif
                                 </span>
                             <?php elseif ($booth['status'] === 'maintenance'): ?>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
                                     <span class="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
-                                    Maintenance / Perbaikan
+                                    Maintenance
                                 </span>
                             <?php else: ?>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">

@@ -23,15 +23,22 @@ class PaymentController extends BaseController
         $currentPage   = max(1, (int) ($this->request->getGet('page')   ?? 1));
         $filterStatus  = $this->request->getGet('status') ?? '';
         $filterPeriod  = $this->request->getGet('period') ?? '7'; // hari
+        $paymentDate   = $this->request->getGet('payment_date') ?? '';
+        $keyword       = $this->request->getGet('q') ?? '';
 
         // --- Rentang tanggal ---
-        if ($filterPeriod === 'month') {
-            $dateFrom = date('Y-m-01 00:00:00');
-            $dateTo   = date('Y-m-t 23:59:59');
+        if ($paymentDate !== '') {
+            $dateFrom = $paymentDate . ' 00:00:00';
+            $dateTo   = $paymentDate . ' 23:59:59';
         } else {
-            $days     = (int) $filterPeriod ?: 7;
-            $dateFrom = date('Y-m-d 00:00:00', strtotime("-{$days} days"));
-            $dateTo   = date('Y-m-d 23:59:59');
+            if ($filterPeriod === 'month') {
+                $dateFrom = date('Y-m-01 00:00:00');
+                $dateTo   = date('Y-m-t 23:59:59');
+            } else {
+                $days     = (int) $filterPeriod ?: 7;
+                $dateFrom = date('Y-m-d 00:00:00', strtotime("-{$days} days"));
+                $dateTo   = date('Y-m-d 23:59:59');
+            }
         }
 
         // --- Query utama dengan JOIN ---
@@ -44,6 +51,14 @@ class PaymentController extends BaseController
 
         if ($filterStatus !== '') {
             $builder->where('payments.status', $filterStatus);
+        }
+
+        if ($keyword !== '') {
+            $builder->groupStart()
+                ->like('payments.id', $keyword)
+                ->orLike('bookings.booking_code', $keyword)
+                ->orLike('payments.gateway_ref', $keyword)
+                ->groupEnd();
         }
 
         $totalPayments = $builder->countAllResults(false);
@@ -114,6 +129,8 @@ class PaymentController extends BaseController
             'totalPages'        => $totalPages,
             'filterStatus'      => $filterStatus,
             'filterPeriod'      => $filterPeriod,
+            'paymentDate'       => $paymentDate,
+            'keyword'           => $keyword,
             'statTotalRevenue'  => $statTotalRevenue,
             'statPaid'          => $statPaid,
             'statFailedPending' => $statFailedPending,
@@ -211,12 +228,52 @@ class PaymentController extends BaseController
         $data = $builder->orderBy('payments.created_at', 'DESC')->findAll();
 
         // Buat CSV
-        $filename = 'payments_export_' . date('Ymd_His') . '.csv';
-        header('Content-Type: text/csv');
+        $filename = 'Laporan_Pembayaran_' . date('Ymd_His') . '.csv';
+        header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
 
         $output = fopen('php://output', 'w');
-        fputcsv($output, ['ID Pembayaran', 'Kode Booking', 'Opsi Cetak (Copy)', 'Harga Extra Cetak', 'Nominal', 'Gateway Ref', 'Status', 'Waktu']);
+        fputs($output, $bom =(chr(0xEF) . chr(0xBB) . chr(0xBF)));
+        fputs($output, "sep=;\n");
+
+        $adminName = session('adminName') ?? session('admin_name') ?? 'Admin';
+        $adminRole = session('adminRole') ?? session('admin_role') ?? 'Unknown Role';
+        $adminEmail = session('adminEmail');
+        
+        if (!$adminEmail && session('adminId')) {
+            $adminModel = new \App\Models\AdminModel();
+            $adminData = $adminModel->find(session('adminId'));
+            if ($adminData) {
+                $adminEmail = $adminData['email'];
+                $adminName = $adminData['name'];
+            }
+        }
+        $adminEmail = $adminEmail ?? 'No Email';
+        
+        $penanggungJawab = $adminName . ' (' . $adminRole . ') - ' . $adminEmail;
+
+        $currentTime = date('d M Y, H:i:s');
+        $currentDate = date('d F Y');
+
+        fputcsv($output, ['LAPORAN PEMBAYARAN'], ';');
+        fputcsv($output, [], ';');
+        fputcsv($output, ['Penanggung Jawab: ' . $penanggungJawab], ';');
+        fputcsv($output, ['Waktu Realtime: ' . $currentTime . ' WIB'], ';');
+        fputcsv($output, ['Keterangan Tanggal: Diekspor pada ' . $currentDate], ';');
+        fputcsv($output, [], ';');
+
+        fputcsv($output, [
+            'ID Pembayaran', 
+            'Kode Booking', 
+            'Opsi Cetak (Copy)', 
+            'Harga Extra Cetak', 
+            'Nominal', 
+            'Gateway Ref', 
+            'Status', 
+            'Waktu'
+        ], ';');
+
         foreach ($data as $row) {
             fputcsv($output, [
                 $row['id'],
@@ -227,7 +284,7 @@ class PaymentController extends BaseController
                 $row['gateway_ref'] ?? '',
                 $row['status'],
                 $row['created_at'],
-            ]);
+            ], ';');
         }
         fclose($output);
         exit;

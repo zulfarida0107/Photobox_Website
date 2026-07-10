@@ -20,7 +20,7 @@
         </div>
 
         <!-- Form Card -->
-        <div class="bg-white border border-outline-variant rounded-xl shadow-sm max-w-2xl overflow-hidden">
+        <div class="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden">
             <div class="p-6 border-b border-outline-variant bg-slate-50/50 flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">add_photo_alternate</span>
                 <h4 class="font-bold text-on-surface">Konfigurasi File Frame</h4>

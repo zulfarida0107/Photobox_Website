@@ -1,7 +1,5 @@
 <header class="fixed top-0 right-0 w-[calc(100%-260px)] z-40 bg-white border-b border-slate-200 shadow-sm flex items-center justify-between px-6 h-16">
-    <div class="flex items-center gap-4 flex-1">
-        <!-- Search bar removed -->
-    </div>
+    <div class="flex-grow"></div>
     <div class="flex items-center gap-5">
         <!-- Ikon Waktu / Timer -->
         <button onclick="openModal('modalClock')" class="text-slate-500 hover:bg-slate-50 p-2 rounded-lg transition-colors">
@@ -171,22 +169,26 @@
                     Sistem
                     <span class="indicator absolute -bottom-3 left-0 w-full h-0.5 bg-blue-600 hidden"></span>
                 </button>
+                <button data-filter="laporan" class="notif-filter-btn text-slate-500 font-label-bold text-label-bold hover:text-blue-600 transition-colors relative">
+                    Laporan
+                    <span class="indicator absolute -bottom-3 left-0 w-full h-0.5 bg-blue-600 hidden"></span>
+                </button>
             </div>
             
-            <div class="relative inline-block">
-                <label class="absolute left-3 top-1/2 -translate-y-1/2 cursor-pointer z-10 text-slate-400">
-                    <input type="date" id="notif-date-picker" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer" title="Pilih Tanggal Spesifik" />
-                    <span class="material-symbols-outlined text-[18px]">calendar_today</span>
-                </label>
-                <select id="notif-time-filter" class="pl-10 pr-8 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent cursor-pointer hover:bg-slate-50 transition-colors shadow-sm">
-                    <option value="semua">Semua Waktu</option>
-                    <option value="satu-tahun">Satu Tahun</option>
-                    <option value="satu-bulan">Satu Bulan</option>
-                    <option value="satu-minggu">Satu Minggu</option>
-                    <option value="kemarin">Kemarin</option>
-                    <option value="hari-ini" selected>Hari ini</option>
-                </select>
-                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">arrow_drop_down</span>
+            <div class="flex items-center gap-3">
+                <input type="date" id="notif-date-picker" class="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent cursor-pointer hover:bg-slate-50 transition-colors shadow-sm" title="Pilih Tanggal" />
+                
+                <div class="relative inline-block">
+                    <select id="notif-time-filter" class="pl-4 pr-8 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent cursor-pointer hover:bg-slate-50 transition-colors shadow-sm">
+                        <option value="semua">Semua Waktu</option>
+                        <option value="satu-tahun">Satu Tahun</option>
+                        <option value="satu-bulan">Satu Bulan</option>
+                        <option value="satu-minggu">Satu Minggu</option>
+                        <option value="kemarin">Kemarin</option>
+                        <option value="hari-ini" selected>Hari ini</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">arrow_drop_down</span>
+                </div>
             </div>
         </div>
 
@@ -197,7 +199,18 @@
                     <span class="font-label-bold text-slate-500 uppercase tracking-widest text-xs">HARI INI</span>
                     <div class="h-px flex-1 bg-slate-100"></div>
                 </div>
-                <div class="space-y-3">
+                <div class="space-y-3" id="notif-hari-ini-list">
+                    <div class="notif-item flex items-start gap-4 p-4 bg-white border border-slate-100 shadow-sm transition-all rounded-xl relative" data-label="laporan">
+                        <div class="absolute right-4 top-4 text-xs text-slate-400">Baru saja</div>
+                        <div class="p-3 bg-blue-100 text-blue-600 rounded-xl"><span class="material-symbols-outlined">cloud_download</span></div>
+                        <div class="flex-1 pr-24">
+                            <h3 class="font-bold text-slate-900 flex items-center gap-2 mb-1">
+                                Laporan Berhasil Diekspor
+                                <span class="px-2 py-0.5 bg-blue-600 text-white text-[10px] font-bold rounded uppercase">Laporan</span>
+                            </h3>
+                            <p class="text-sm text-slate-500">Laporan Galeri Sesi telah diunduh dalam format Excel (CSV).</p>
+                        </div>
+                    </div>
                     <div class="notif-item flex items-start gap-4 p-4 bg-white border border-slate-100 shadow-sm transition-all rounded-xl relative" data-label="mendesak">
                         <div class="absolute right-4 top-4 text-xs text-slate-400">2 menit yang lalu</div>
                         <div class="p-3 bg-red-100 text-red-600 rounded-xl"><span class="material-symbols-outlined">error</span></div>
@@ -267,13 +280,6 @@
                 </div>
             </section>
         </div>
-        
-        <div class="mt-10 border-t border-slate-100 pt-8 text-center" id="btn-lihat-lebih-banyak-container">
-            <button id="btn-lihat-lebih-banyak" class="inline-flex items-center justify-center gap-2 px-8 py-3 bg-[#003d9b] text-white rounded-lg font-bold hover:bg-blue-800 transition-colors shadow-md">
-                Lihat Lebih Banyak
-                <span class="material-symbols-outlined text-xl">expand_more</span>
-            </button>
-        </div>
     </div>
 </div>
 
@@ -285,7 +291,6 @@
                 <h2 class="font-h1 text-h1 text-[#001848] mb-1">Informasi Profil</h2>
                 <p class="text-slate-500 text-sm">Kelola preferensi akun dan konfigurasi profil CuitBox Studio Anda.</p>
             </div>
-            <button onclick="forceClose('modalProfile')" class="text-slate-400 hover:bg-slate-100 p-2 rounded-full"><span class="material-symbols-outlined">close</span></button>
         </div>
 
         <div class="space-y-6">
@@ -654,23 +659,61 @@
             });
         }
         
+        // ── Export Notifications Handler ──────────────────────────
+        window.renderExportNotifications = function() {
+            const container = document.getElementById('notif-hari-ini-list');
+            if (!container) return;
+            
+            // Remove previously rendered dynamic export items
+            document.querySelectorAll('.dynamic-export-item').forEach(el => el.remove());
+            
+            let exports = JSON.parse(localStorage.getItem('export_reports') || '[]');
+            exports.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'dynamic-export-item notif-item flex items-start gap-4 p-4 bg-white border border-slate-100 shadow-sm transition-all rounded-xl relative';
+                itemDiv.setAttribute('data-label', 'laporan');
+                
+                const timeDiff = Math.round((Date.now() - new Date(item.time).getTime()) / 60000);
+                let timeStr = 'Baru saja';
+                if (timeDiff >= 1 && timeDiff < 60) {
+                    timeStr = timeDiff + ' menit yang lalu';
+                } else if (timeDiff >= 60) {
+                    timeStr = Math.round(timeDiff/60) + ' jam yang lalu';
+                }
+                
+                itemDiv.innerHTML = `
+                    <div class="absolute right-4 top-4 text-xs text-slate-400">${timeStr}</div>
+                    <div class="p-3 bg-blue-100 text-blue-600 rounded-xl"><span class="material-symbols-outlined">cloud_download</span></div>
+                    <div class="flex-grow pr-24 text-left">
+                        <h3 class="font-bold text-slate-900 flex items-center gap-2 mb-1">
+                            Laporan Berhasil Diekspor
+                            <span class="px-2 py-0.5 bg-blue-600 text-white text-[10px] font-bold rounded uppercase">Laporan</span>
+                        </h3>
+                        <p class="text-sm text-slate-500">Laporan ${item.name} telah diunduh dalam format Excel (CSV).</p>
+                    </div>
+                `;
+                container.insertBefore(itemDiv, container.firstChild);
+            });
+        }
+        
+        renderExportNotifications();
+
         // Notif Badge Logic
         const notifBadge = document.getElementById('notif-badge');
         const btnNotifIcon = document.getElementById('btn-notif-icon');
         const notifItems = document.querySelectorAll('.notif-item');
         
         if (notifBadge && btnNotifIcon) {
-            if (notifItems.length > 0) {
+            const hasNotifs = notifItems.length > 0 || JSON.parse(localStorage.getItem('export_reports') || '[]').length > 0;
+            if (hasNotifs) {
                 if (localStorage.getItem('notifsRead') !== 'true') {
                     notifBadge.classList.remove('hidden');
                 }
             }
             
             btnNotifIcon.addEventListener('click', () => {
-                if (notifItems.length > 0) {
-                    notifBadge.classList.add('hidden');
-                    localStorage.setItem('notifsRead', 'true');
-                }
+                notifBadge.classList.add('hidden');
+                localStorage.setItem('notifsRead', 'true');
             });
         }
     });

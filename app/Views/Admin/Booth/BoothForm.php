@@ -20,7 +20,7 @@
         </div>
 
         <!-- Form Card -->
-        <div class="bg-white border border-outline-variant rounded-xl shadow-sm max-w-2xl overflow-hidden">
+        <div class="bg-white border border-outline-variant rounded-xl shadow-sm w-full overflow-hidden">
             <div class="p-6 border-b border-outline-variant bg-slate-50/50 flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">nest_display</span>
                 <h4 class="font-bold text-on-surface">Konfigurasi Mesin Booth</h4>
