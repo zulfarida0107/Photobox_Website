@@ -1,11 +1,6 @@
 <header class="fixed top-0 right-0 w-[calc(100%-260px)] z-40 bg-white border-b border-slate-200 shadow-sm flex items-center justify-between px-6 h-16">
     <div class="flex items-center gap-4 flex-1">
-        <div class="relative w-full max-w-md">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
-            <input
-                class="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-blue-600 transition-all"
-                placeholder="Cari data, reservasi, atau pelanggan..." type="text" />
-        </div>
+        <!-- Search bar removed -->
     </div>
     <div class="flex items-center gap-5">
         <!-- Ikon Waktu / Timer -->
