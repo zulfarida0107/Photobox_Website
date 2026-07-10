@@ -65,8 +65,25 @@ class BookingAndSlotController extends BaseController
             ->where('slots.slot_date >=', $dateStart)
             ->where('slots.slot_date <=', $dateEnd);
 
+        $filterStatus = $this->request->getGet('status') ?? '';
+        $filterQuery  = $this->request->getGet('q') ?? '';
+
+        if ($filterStatus !== '') {
+            $bookingBuilder->where('bookings.status', $filterStatus);
+        }
+
+        if ($filterQuery !== '') {
+            $bookingBuilder->groupStart()
+                ->like('bookings.booking_code', $filterQuery)
+                ->orLike('customers.name', $filterQuery)
+                ->groupEnd();
+        }
+
         $totalBookings = $bookingBuilder->countAllResults(false);
         $totalPages    = max(1, (int) ceil($totalBookings / $perPage));
+
+        // Re-set select clause because countAllResults resets it
+        $bookingBuilder->select('bookings.*, customers.name AS customer_name, booths.name AS booth_name, packages.name AS package_name');
 
         $bookings = $bookingBuilder
             ->orderBy('bookings.created_at', 'DESC')
@@ -178,7 +195,7 @@ class BookingAndSlotController extends BaseController
         $rules = [
             'slot_id'      => 'required',
             'queue_number' => 'required|max_length[10]',
-            'status'       => 'required|in_list[pending,confirmed,completed,cancelled]',
+            'status'       => 'required|in_list[pending,paid,completed,cancelled]',
         ];
 
         if (!$this->validate($rules)) {
