@@ -247,19 +247,19 @@
                 <span class="text-body-sm text-outline">
                     Menampilkan <?= count($booths ?? []) ?> dari <?= $totalBooths ?? 0 ?> mesin
                 </span>
-                <div class="flex space-x-1">
+                <div class="flex gap-1">
                     <a href="<?= base_url('admin/booths?page=' . max(1, ($currentPage ?? 1) - 1) . '&q=' . ($keyword ?? '') . '&status=' . ($filterStatus ?? '')) ?>"
-                       class="p-2 border border-outline-variant rounded hover:bg-white transition-colors <?= ($currentPage ?? 1) <= 1 ? 'opacity-50 pointer-events-none' : '' ?>">
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded text-slate-400 hover:bg-slate-50 transition-colors <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                         <span class="material-symbols-outlined text-sm">chevron_left</span>
                     </a>
                     <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
                         <a href="<?= base_url('admin/booths?page=' . $i . '&q=' . ($keyword ?? '') . '&status=' . ($filterStatus ?? '')) ?>"
-                           class="px-3 py-1 border rounded font-label-bold text-label-bold <?= $i === ($currentPage ?? 1) ? 'bg-primary text-on-primary border-primary' : 'border-outline-variant hover:bg-white' ?>">
+                           class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                             <?= $i ?>
                         </a>
                     <?php endfor; ?>
                     <a href="<?= base_url('admin/booths?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&q=' . ($keyword ?? '') . '&status=' . ($filterStatus ?? '')) ?>"
-                       class="p-2 border border-outline-variant rounded hover:bg-white transition-colors <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-50 pointer-events-none' : '' ?>">
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded text-slate-400 hover:bg-slate-50 transition-colors <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                         <span class="material-symbols-outlined text-sm">chevron_right</span>
                     </a>
                 </div>

@@ -179,17 +179,17 @@
                     </span>
                     <div class="flex gap-1">
                         <a href="<?= base_url('admin/sessions?page=' . max(1, ($currentPage ?? 1) - 1) . '&q=' . ($keyword ?? '')) ?>"
-                           class="p-1.5 border border-slate-200 rounded hover:bg-slate-50 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded text-slate-400 hover:bg-slate-50 transition-colors <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                             <span class="material-symbols-outlined text-sm">chevron_left</span>
                         </a>
                         <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
                             <a href="<?= base_url('admin/sessions?page=' . $i . '&q=' . ($keyword ?? '')) ?>"
-                               class="px-3 py-1 border rounded text-xs font-bold <?= $i === ($currentPage ?? 1) ? 'bg-primary text-white border-primary' : 'border-slate-200 hover:bg-white' ?>">
+                               class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                                 <?= $i ?>
                             </a>
                         <?php endfor; ?>
                         <a href="<?= base_url('admin/sessions?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&q=' . ($keyword ?? '')) ?>"
-                           class="p-1.5 border border-slate-200 rounded hover:bg-slate-50 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded text-slate-400 hover:bg-slate-50 transition-colors <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                             <span class="material-symbols-outlined text-sm">chevron_right</span>
                         </a>
                     </div>

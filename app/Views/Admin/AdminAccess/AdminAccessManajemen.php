@@ -191,21 +191,20 @@
                 <p class="text-xs text-slate-500">
                     Menampilkan <?= count($admins ?? []) ?> dari <?= $totalAdmins ?? 0 ?> admin
                 </p>
-                <div class="flex items-center gap-1">
+                <div class="flex gap-1">
                     <a href="<?= base_url('admin/settings?page=' . max(1, ($currentPage ?? 1) - 1) . '&role=' . ($filterRole ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                       class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-400 hover:bg-white hover:text-primary transition-all <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
-                        <span class="material-symbols-outlined text-lg">chevron_left</span>
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded text-slate-400 hover:bg-slate-50 transition-colors <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                        <span class="material-symbols-outlined text-sm">chevron_left</span>
                     </a>
                     <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
                         <a href="<?= base_url('admin/settings?page=' . $i . '&role=' . ($filterRole ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                           class="w-8 h-8 flex items-center justify-center rounded text-xs font-bold
-                                  <?= $i === ($currentPage ?? 1) ? 'bg-primary text-white' : 'border border-slate-200 text-slate-600 hover:bg-white hover:text-primary' ?>">
+                           class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                             <?= $i ?>
                         </a>
                     <?php endfor; ?>
                     <a href="<?= base_url('admin/settings?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&role=' . ($filterRole ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                       class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-400 hover:bg-white hover:text-primary transition-all <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
-                        <span class="material-symbols-outlined text-lg">chevron_right</span>
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded text-slate-400 hover:bg-slate-50 transition-colors <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
                     </a>
                 </div>
             </div>
