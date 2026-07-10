@@ -19,6 +19,7 @@ $routes->options('(:any)', function() {});
 // ============================================================
 $routes->group('api', static function ($routes) {
     $routes->post('customer/booking/verify', 'Api\\CustomerController::verifyBooking');
+    $routes->post('customer/booking/create-walkin', 'Api\\CustomerController::createWalkin');
     $routes->get('customer/print-options', 'Api\\CatalogController::listPrintOptions');
     $routes->get('customer/frames', 'Api\\CatalogController::listFrames');
     $routes->get('customer/frame', 'Api\\CatalogController::listFrames');

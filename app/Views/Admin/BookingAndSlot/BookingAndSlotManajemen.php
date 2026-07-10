@@ -125,8 +125,8 @@
                         <table class="w-full text-center">
                             <thead class="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Slot &amp; Booth</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Waktu</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Slot &amp; Booth</th>
+                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Waktu</th>
                                     <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Status</th>
                                 </tr>
                             </thead>
@@ -294,17 +294,17 @@
                             $qs = '&period=' . ($period ?? 'today') . '&q=' . urlencode($_GET['q'] ?? '') . '&status=' . urlencode($_GET['status'] ?? '');
                         ?>
                         <div class="flex gap-1">
-                            <a href="<?= base_url('admin/bookings?page=' . max(1, ($currentPage ?? 1) - 1) . $qs) ?>"
+                            <a href="<?= base_url('admin/bookings?page=' . max(1, ($currentPage ?? 1) - 1) . '&period=' . ($period ?? 'today')) ?>"
                                class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_left</span>
                             </a>
                             <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
-                                <a href="<?= base_url('admin/bookings?page=' . $i . $qs) ?>"
+                                <a href="<?= base_url('admin/bookings?page=' . $i . '&period=' . ($period ?? 'today')) ?>"
                                    class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                                     <?= $i ?>
                                 </a>
                             <?php endfor; ?>
-                            <a href="<?= base_url('admin/bookings?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . $qs) ?>"
+                            <a href="<?= base_url('admin/bookings?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&period=' . ($period ?? 'today')) ?>"
                                class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_right</span>
                             </a>
@@ -313,11 +313,86 @@
                 </div>
             </section>
 
+            <!-- BAWAH: Quick Stats -->
+            <div class="lg:col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                <div class="bg-white p-5 border border-slate-200 rounded-xl shadow-sm flex flex-col justify-between">
+                    <div>
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Reservasi</span>
+                        <div class="text-2xl font-black text-slate-900 mt-1"><?= $statTotalReservasi ?? 0 ?></div>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between">
+                        <span class="text-[10px] text-green-600 font-bold flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">trending_up</span> +12%
+                        </span>
+                        <svg class="w-16 h-8 stroke-green-500 fill-none stroke-2" viewBox="0 0 100 40">
+                            <path d="M0,35 Q20,30 40,20 T80,15 T100,5"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Nama Pelanggan</span>
+                    <span class="text-slate-800 font-semibold" id="modalBkCust"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Slot &amp; Booth</span>
+                    <span class="text-slate-800 font-semibold" id="modalBkSlot"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Paket Terpilih</span>
+                    <span class="text-slate-800 font-semibold" id="modalBkPackage"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Nomor Antrean</span>
+                    <span class="text-slate-800 font-black" id="modalBkQueue"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-semibold text-slate-500">Status</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold" id="modalBkStatus"></span>
+                </div>
+            </div>
+            
+            <!-- Close Button -->
+            <button type="button" onclick="closeBookingPreviewModal()" class="w-full py-2.5 bg-primary hover:bg-primary-container text-white font-semibold text-sm rounded-lg transition-colors shadow-md">
+                Tutup
+            </button>
         </div>
     </div>
+</div>
 
-    <?= $this->include('Admin/layouts/footer') ?>
-</main>
+<script>
+    function showBookingPreviewModal(code, cust, slot, pkg, queue, badgeText, badgeClass) {
+        const modal = document.getElementById('bookingPreviewModal');
+        const content = document.getElementById('bookingPreviewModalContent');
+        
+        document.getElementById('modalBkCode').textContent = code;
+        document.getElementById('modalBkCust').textContent = cust;
+        document.getElementById('modalBkSlot').textContent = slot;
+        document.getElementById('modalBkPackage').textContent = pkg;
+        document.getElementById('modalBkQueue').textContent = queue;
+        
+        const statusEl = document.getElementById('modalBkStatus');
+        statusEl.textContent = badgeText;
+        statusEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ' + badgeClass;
+
+        // Show Modal
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeBookingPreviewModal() {
+        const modal = document.getElementById('bookingPreviewModal');
+        const content = document.getElementById('bookingPreviewModalContent');
+
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+</script>
 
 <!-- Booking Preview Modal -->
 <div id="bookingPreviewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">

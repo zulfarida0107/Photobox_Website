@@ -48,16 +48,17 @@ class AdminAccessController extends BaseController
         $statAdmin      = $this->adminModel->where('role', 'staff')->countAllResults();
 
         $data = [
-            'title'        => 'Pengaturan Akses Admin | Admin Panel',
-            'admins'       => $admins,
-            'totalAdmins'  => $totalAdmins,
-            'currentPage'  => $currentPage,
-            'totalPages'   => $totalPages,
-            'keyword'      => $keyword,
-            'filterRole'   => $filterRole,
-            'statTotal'    => $statTotal,
+            'title'          => 'Pengaturan Akses Admin | Admin Panel',
+            'admins'         => $admins,
+            'totalAdmins'    => $totalAdmins,
+            'currentPage'    => $currentPage,
+            'totalPages'     => $totalPages,
+            'keyword'        => $keyword,
+            'filterRole'     => $filterRole,
+            'statTotal'      => $statTotal,
             'statSuperadmin' => $statSuperadmin,
-            'statAdmin'    => $statAdmin,
+            'statAdmin'      => $statAdmin,
+            'loggedInId'     => session()->get('adminId'), // untuk proteksi hapus diri sendiri
         ];
 
         return view('Admin/AdminAccess/AdminAccessManajemen', $data);
@@ -91,9 +92,19 @@ class AdminAccessController extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        // Auto-generate ID: ADM-XXX
-        $count = $this->adminModel->countAll();
-        $newId = sprintf('ADM-%03d', $count + 1);
+        // Auto-generate ID: ADM-XXX — gunakan MAX untuk menghindari duplicate saat ada data dihapus
+        $lastRow = $this->adminModel->db
+            ->table('admins')
+            ->select('id')
+            ->orderBy('id', 'DESC')
+            ->limit(1)
+            ->get()->getRowArray();
+
+        $lastNum = 0;
+        if ($lastRow) {
+            $lastNum = (int) preg_replace('/\D/', '', $lastRow['id']);
+        }
+        $newId = sprintf('ADM-%03d', $lastNum + 1);
 
         $this->adminModel->insert([
             'id'       => $newId,
@@ -177,6 +188,12 @@ class AdminAccessController extends BaseController
         if (!$admin) {
             return redirect()->to(base_url('admin/settings'))
                 ->with('error', 'Admin tidak ditemukan.');
+        }
+
+        // Proteksi: admin tidak boleh menghapus dirinya sendiri
+        if ($id === session()->get('adminId')) {
+            return redirect()->to(base_url('admin/settings'))
+                ->with('error', 'Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif.');
         }
 
         // Pastikan masih ada minimal 1 superadmin
