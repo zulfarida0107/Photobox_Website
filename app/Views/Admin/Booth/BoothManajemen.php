@@ -110,7 +110,7 @@
                 </div>
                 <a href="<?= base_url('admin/booths/create') ?>"
                    class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 hover:bg-primary-container transition-colors shadow-sm whitespace-nowrap">
-                    <span class="material-symbols-outlined text-[16px]">add</span>
+                    <span class="material-symbols-outlined text-[16px]">devices</span>
                     Tambah Booth Baru
                 </a>
             </div>
