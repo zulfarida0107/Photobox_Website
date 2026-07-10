@@ -22,8 +22,13 @@ class FrameAndFilterController extends BaseController
     // =========================================================================
     public function index()
     {
-        $perPage          = 8;
+        $perPageFrame     = 10;
+        $perPageCat       = 5;
+        $perPageFilter    = 5;
+
         $currentFramePage = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $currentCatPage   = max(1, (int) ($this->request->getGet('cat_page') ?? 1));
+        $currentFilterPage= max(1, (int) ($this->request->getGet('filter_page') ?? 1));
 
         $search   = $this->request->getGet('search') ?? '';
         $category = $this->request->getGet('category') ?? '';
@@ -42,16 +47,23 @@ class FrameAndFilterController extends BaseController
         }
 
         $totalFrames      = $frameQuery->countAllResults(false);
-        $totalFramePages  = max(1, (int) ceil($totalFrames / $perPage));
+        $totalFramePages  = max(1, (int) ceil($totalFrames / $perPageFrame));
         $frames           = $frameQuery
-            ->orderBy('frames.created_at', 'DESC')
-            ->findAll($perPage, ($currentFramePage - 1) * $perPage);
+            ->orderBy('frames.id', 'ASC')
+            ->findAll($perPageFrame, ($currentFramePage - 1) * $perPageFrame);
 
-        // --- Semua filter (tidak di-paginate) ---
-        $filters = $this->filterModel->orderBy('name', 'ASC')->findAll();
+        // --- Filter (Paginated) ---
+        $totalFiltersTable      = $this->filterModel->countAllResults(false);
+        $totalFilterPages       = max(1, (int) ceil($totalFiltersTable / $perPageFilter));
+        $filters = $this->filterModel->orderBy('name', 'ASC')->findAll($perPageFilter, ($currentFilterPage - 1) * $perPageFilter);
 
-        // --- Semua kategori frame ---
-        $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
+        // --- Kategori Frame (Paginated) ---
+        $allCategories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
+        
+        $catBuilder = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC');
+        $totalCats = $catBuilder->countAllResults(false);
+        $totalCatPages = max(1, (int) ceil($totalCats / $perPageCat));
+        $categories = $catBuilder->get($perPageCat, ($currentCatPage - 1) * $perPageCat)->getResultArray();
 
         // --- Stats ---
         $statTotalFrames      = $this->frameModel->countAll();
@@ -68,7 +80,14 @@ class FrameAndFilterController extends BaseController
             'currentFramePage'  => $currentFramePage,
             'totalFramePages'   => $totalFramePages,
             'filters'           => $filters,
+            'totalFiltersTable' => $totalFiltersTable,
+            'currentFilterPage' => $currentFilterPage,
+            'totalFilterPages'  => $totalFilterPages,
             'categories'        => $categories,
+            'allCategories'     => $allCategories,
+            'totalCats'         => $totalCats,
+            'currentCatPage'    => $currentCatPage,
+            'totalCatPages'     => $totalCatPages,
             'search'            => $search,
             'selectedCategory'  => $category,
             'statTotalFrames'   => $statTotalFrames,
@@ -88,11 +107,13 @@ class FrameAndFilterController extends BaseController
         $rules = [
             'name'        => 'required|min_length[3]|max_length[100]',
             'category_id' => 'permit_empty|max_length[20]',
+            'photo_count' => 'required|integer|greater_than_equal_to[1]|less_than_equal_to[10]',
             'frame_file'  => 'uploaded[frame_file]|max_size[frame_file,2048]|ext_in[frame_file,png,jpg,jpeg]',
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->to(base_url('admin/frames'))
+            return redirect()->to(base_url('admin/frames/create'))
+                ->withInput()
                 ->with('error', implode(' ', $this->validator->getErrors()));
         }
 
@@ -100,19 +121,33 @@ class FrameAndFilterController extends BaseController
         $newName  = $file->getRandomName();
         $file->move(FCPATH . 'uploads/frames/', $newName);
 
-        // Generate ID: FRM-XXX
-        $count = $this->frameModel->countAll();
-        $newId = sprintf('FRM-%03d', $count + 1);
+        // Generate ID: FRM-XXX — gunakan numeric sort agar tidak error (FRM-009 < FRM-010)
+        $db = $this->frameModel->db;
+        $lastRow = $db->query("SELECT id FROM frames WHERE id LIKE 'FRM-%' ORDER BY CAST(SUBSTRING(id, 5) AS UNSIGNED) DESC LIMIT 1")->getRowArray();
+        $lastIdNumber = 0;
+        if ($lastRow && preg_match('/FRM-(\d+)/', $lastRow['id'], $matches)) {
+            $lastIdNumber = (int)$matches[1];
+        }
+        $newId = sprintf('FRM-%03d', $lastIdNumber + 1);
 
-        $this->frameModel->insert([
+        $insertResult = $this->frameModel->insert([
             'id'          => $newId,
             'name'        => $this->request->getPost('name'),
             'category_id' => $this->request->getPost('category_id') ?: null,
+            'photo_count' => (int) $this->request->getPost('photo_count'),
+            'is_active'   => (int) ($this->request->getPost('is_active') ?? 1),
             'file_path'   => 'uploads/frames/' . $newName,
         ]);
 
+        if ($insertResult === false) {
+            // Hapus file yang sudah terlanjur di-upload jika insert gagal
+            @unlink(FCPATH . 'uploads/frames/' . $newName);
+            return redirect()->to(base_url('admin/frames/create'))
+                ->with('error', 'Gagal menyimpan data frame. Silakan coba lagi.');
+        }
+
         return redirect()->to(base_url('admin/frames'))
-            ->with('success', 'Frame baru berhasil diunggah.');
+            ->with('success', 'Frame baru "' . $this->request->getPost('name') . '" berhasil diunggah.');
     }
 
     // =========================================================================
@@ -160,9 +195,21 @@ class FrameAndFilterController extends BaseController
                 ->with('error', 'Frame tidak ditemukan.');
         }
 
+        $rules = [
+            'name'        => 'required|min_length[3]|max_length[100]',
+            'category_id' => 'permit_empty|max_length[20]',
+            'photo_count' => 'required|integer|greater_than_equal_to[1]|less_than_equal_to[10]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()
+                ->with('error', implode(' ', $this->validator->getErrors()));
+        }
+
         $updateData = [
             'name'        => $this->request->getPost('name'),
             'category_id' => $this->request->getPost('category_id') ?: null,
+            'photo_count' => (int) $this->request->getPost('photo_count'),
         ];
 
         // Ganti file jika ada upload baru
@@ -183,6 +230,11 @@ class FrameAndFilterController extends BaseController
         }
 
         $this->frameModel->update($id, $updateData);
+
+        $returnUrl = $this->request->getGet('return');
+        if ($returnUrl) {
+            return redirect()->to($returnUrl)->with('success', 'Frame berhasil diperbarui.');
+        }
 
         return redirect()->to(base_url('admin/frames'))
             ->with('success', 'Frame berhasil diperbarui.');
@@ -206,8 +258,14 @@ class FrameAndFilterController extends BaseController
 
         $this->frameModel->delete($id);
 
-        return redirect()->to(base_url('admin/frames'))
-            ->with('success', 'Frame berhasil dihapus.');
+        $returnUrl = base_url('admin/frames?' . http_build_query([
+            'page'        => $this->request->getGet('page') ?? 1,
+            'cat_page'    => $this->request->getGet('cat_page') ?? 1,
+            'filter_page' => $this->request->getGet('filter_page') ?? 1,
+            'search'      => $this->request->getGet('search') ?? '',
+            'category'    => $this->request->getGet('category') ?? '',
+        ]));
+        return redirect()->to($returnUrl)->with('success', 'Frame berhasil dihapus.');
     }
 
     // =========================================================================
@@ -236,8 +294,12 @@ class FrameAndFilterController extends BaseController
                 ->with('error', implode(' ', $this->validator->getErrors()));
         }
 
-        $count = $this->filterModel->countAll();
-        $newId = sprintf('FLT-%02d', $count + 1);
+        $lastRow = $this->filterModel->orderBy('id', 'DESC')->first();
+        $lastIdNumber = 0;
+        if ($lastRow && preg_match('/FLT-(\d+)/', $lastRow['id'], $matches)) {
+            $lastIdNumber = (int)$matches[1];
+        }
+        $newId = sprintf('FLT-%02d', $lastIdNumber + 1);
 
         $this->filterModel->insert([
             'id'        => $newId,
@@ -310,11 +372,18 @@ class FrameAndFilterController extends BaseController
                 ->with('error', 'Filter tidak ditemukan.');
         }
 
-        $this->filterModel->update($id, ['is_active' => !$filter['is_active']]);
+        $this->filterModel->update($id, [
+            'is_active' => !$filter['is_active'],
+        ]);
 
-        $status = !$filter['is_active'] ? 'diaktifkan' : 'dinonaktifkan';
-        return redirect()->to(base_url('admin/frames'))
-            ->with('success', "Filter {$filter['name']} berhasil {$status}.");
+        $returnUrl = base_url('admin/frames?' . http_build_query([
+            'page'        => $this->request->getPost('_return_page') ?? 1,
+            'cat_page'    => $this->request->getPost('_cat_page') ?? 1,
+            'filter_page' => $this->request->getPost('_filter_page') ?? 1,
+            'search'      => $this->request->getPost('_search') ?? '',
+            'category'    => $this->request->getPost('_category') ?? '',
+        ]));
+        return redirect()->to($returnUrl)->with('success', 'Status filter berhasil diubah.');
     }
 
     // =========================================================================
@@ -330,8 +399,14 @@ class FrameAndFilterController extends BaseController
 
         $this->filterModel->delete($id);
 
-        return redirect()->to(base_url('admin/frames'))
-            ->with('success', 'Filter berhasil dihapus.');
+        $returnUrl = base_url('admin/frames?' . http_build_query([
+            'page'        => $this->request->getGet('page') ?? 1,
+            'cat_page'    => $this->request->getGet('cat_page') ?? 1,
+            'filter_page' => $this->request->getGet('filter_page') ?? 1,
+            'search'      => $this->request->getGet('search') ?? '',
+            'category'    => $this->request->getGet('category') ?? '',
+        ]));
+        return redirect()->to($returnUrl)->with('success', 'Filter berhasil dihapus.');
     }
 
     // =========================================================================
@@ -349,8 +424,17 @@ class FrameAndFilterController extends BaseController
         }
 
         $db    = $this->frameModel->db;
-        $count = $db->table('frame_categories')->countAllResults();
-        $newId = sprintf('cat_custom_%02d', $count + 1);
+        $customCategories = $db->table('frame_categories')
+            ->like('id', 'cat_custom_')
+            ->get()->getResultArray();
+        $maxNum = 0;
+        foreach ($customCategories as $cat) {
+            if (preg_match('/cat_custom_(\d+)/', $cat['id'], $matches)) {
+                $num = (int)$matches[1];
+                if ($num > $maxNum) $maxNum = $num;
+            }
+        }
+        $newId = sprintf('cat_custom_%02d', $maxNum + 1);
 
         $db->table('frame_categories')->insert([
             'id'         => $newId,
@@ -383,8 +467,7 @@ class FrameAndFilterController extends BaseController
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
-        return redirect()->to(base_url('admin/frames'))
-            ->with('success', 'Kategori berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Kategori berhasil diperbarui.');
     }
 
     // =========================================================================
@@ -396,11 +479,16 @@ class FrameAndFilterController extends BaseController
         
         // Nullify the category_id on any frames belonging to this category
         $db->table('frames')->where('category_id', $id)->update(['category_id' => null]);
-
         $db->table('frame_categories')->where('id', $id)->delete();
 
-        return redirect()->to(base_url('admin/frames'))
-            ->with('success', 'Kategori berhasil dihapus.');
+        $returnUrl = base_url('admin/frames?' . http_build_query([
+            'page'        => $this->request->getGet('page') ?? 1,
+            'cat_page'    => $this->request->getGet('cat_page') ?? 1,
+            'filter_page' => $this->request->getGet('filter_page') ?? 1,
+            'search'      => $this->request->getGet('search') ?? '',
+            'category'    => $this->request->getGet('category') ?? '',
+        ]));
+        return redirect()->to($returnUrl)->with('success', 'Kategori berhasil dihapus.');
     }
 
     // =========================================================================
@@ -416,8 +504,14 @@ class FrameAndFilterController extends BaseController
 
         $this->frameModel->update($id, ['is_active' => !$frame['is_active']]);
 
-        $status = !$frame['is_active'] ? 'diaktifkan (siap digunakan)' : 'dinonaktifkan (disembunyikan)';
-        return redirect()->to(base_url('admin/frames'))
-            ->with('success', "Frame {$frame['name']} berhasil {$status}.");
+        $status = !$frame['is_active'] ? 'diaktifkan' : 'dinonaktifkan';
+        $returnUrl = base_url('admin/frames?' . http_build_query([
+            'page'        => $this->request->getPost('_return_page') ?? 1,
+            'cat_page'    => $this->request->getPost('_cat_page') ?? 1,
+            'filter_page' => $this->request->getPost('_filter_page') ?? 1,
+            'search'      => $this->request->getPost('_search') ?? '',
+            'category'    => $this->request->getPost('_category') ?? '',
+        ]));
+        return redirect()->to($returnUrl)->with('success', "Frame {$frame['name']} berhasil {$status}.");
     }
 }

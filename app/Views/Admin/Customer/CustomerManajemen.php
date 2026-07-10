@@ -81,10 +81,9 @@
         </div>
 
         <!-- Main Data Table Section -->
-        <div class="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden">
-
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex-1 flex flex-col mb-6">
             <!-- Table Toolbar -->
-            <div class="p-4 border-b border-outline-variant flex items-center justify-between bg-slate-50/50">
+            <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex items-center gap-2">
                     <form method="get" action="<?= base_url('admin/customers') ?>" class="flex border border-slate-200 rounded-lg overflow-hidden text-xs font-bold">
                         <button type="submit" name="status" value="all" class="px-4 py-2 <?= ($filterStatus ?? 'all') === 'all' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500 hover:bg-slate-50' ?> border-r border-slate-200 transition-colors">Semua</button>
@@ -120,13 +119,13 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50 text-[11px] font-black uppercase tracking-wider text-slate-500 border-b border-outline-variant">
-                            <th class="px-6 py-4">ID Customer</th>
+                            <th class="px-6 py-4 text-center">ID Customer</th>
                             <th class="px-6 py-4">Nama Pelanggan</th>
-                            <th class="px-6 py-4">Email</th>
-                            <th class="px-6 py-4">Nomor Telepon</th>
-                            <th class="px-6 py-4">Tanggal Registrasi</th>
+                            <th class="px-6 py-4 text-center">Email</th>
+                            <th class="px-6 py-4 text-center">Nomor Telepon</th>
+                            <th class="px-6 py-4 text-center">Tanggal Registrasi</th>
                             <th class="px-6 py-4 text-center">Status</th>
-                            <th class="px-6 py-4 text-right">Aksi</th>
+                            <th class="px-6 py-4 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -143,35 +142,32 @@
                                     $badgeText  = $isActive ? 'Aktif' : 'Non-Aktif';
                                 ?>
                                 <tr class="hover:bg-blue-50/30 transition-colors group">
-                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-900 font-bold">#<?= esc($cust['id']) ?></td>
+                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-900 font-bold text-center">#<?= esc($cust['id']) ?></td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full bg-<?= $color ?>-100 flex items-center justify-center text-<?= $color ?>-700 font-bold text-xs"><?= esc($initials) ?></div>
                                             <span class="font-bold text-slate-900"><?= esc($cust['name']) ?></span>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-600"><?= esc($cust['email']) ?></td>
-                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-600"><?= esc($cust['phone'] ?? '-') ?></td>
-                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-600"><?= date('d M Y', strtotime($cust['created_at'])) ?></td>
+                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-600 text-center"><?= esc($cust['email']) ?></td>
+                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-600 text-center"><?= esc($cust['phone'] ?? '-') ?></td>
+                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-600 text-center"><?= date('d M Y', strtotime($cust['created_at'])) ?></td>
                                     <td class="px-6 py-4 text-center">
-                                        <span class="px-2 py-1 rounded <?= $badgeClass ?> text-[10px] font-black uppercase"><?= $badgeText ?></span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold <?= $badgeClass ?>"><?= $badgeText ?></span>
                                     </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <a href="<?= base_url('admin/customers/' . $cust['id']) ?>" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-all" title="Detail">
-                                                <span class="material-symbols-outlined text-lg">visibility</span>
-                                            </a>
-                                            <a href="<?= base_url('admin/customers/' . $cust['id'] . '/edit') ?>" class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded transition-all" title="Edit">
-                                                <span class="material-symbols-outlined text-lg">edit</span>
-                                            </a>
-                                            <form action="<?= base_url('admin/customers/' . $cust['id'] . '/delete') ?>" method="post" class="inline">
-                                                <?= csrf_field() ?>
-                                                <button type="submit" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-all" title="Hapus"
-                                                        onclick="return confirm('Hapus pelanggan ini?')">
-                                                    <span class="material-symbols-outlined text-lg">delete</span>
-                                                </button>
-                                            </form>
-                                        </div>
+                                    <td class="px-6 py-4 text-center space-x-2">
+                                        <button type="button" 
+                                                onclick="showCustomerPreviewModal('<?= esc($cust['id'], 'js') ?>', '<?= esc($cust['name'], 'js') ?>', '<?= esc($cust['email'], 'js') ?>', '<?= esc($cust['phone'] ?? '-', 'js') ?>', '<?= date('d M Y', strtotime($cust['created_at'])) ?>', '<?= $badgeText ?>', '<?= $badgeClass ?>')" 
+                                                class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Detail">
+                                            <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                        </button>
+                                        <a href="<?= base_url('admin/customers/' . $cust['id'] . '/edit') ?>" class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                            <span class="material-symbols-outlined text-[20px]">edit</span>
+                                        </a>
+                                        <button type="button" class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
+                                                onclick="openUniversalDeleteModal('<?= base_url('admin/customers/' . $cust['id'] . '/delete') ?>', '<?= esc($cust['name'], 'js') ?>', 'Hapus Pelanggan?')">
+                                            <span class="material-symbols-outlined text-[20px]">delete</span>
+                                        </button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -191,19 +187,19 @@
             <!-- Pagination -->
             <div class="p-4 border-t border-outline-variant bg-white flex items-center justify-between">
                 <p class="text-xs font-medium text-slate-500">Menampilkan <?= count($customers ?? []) ?> dari <?= $totalCustomers ?? 0 ?> pelanggan</p>
-                <div class="flex items-center gap-1">
+                <div class="flex gap-1">
                     <a href="<?= base_url('admin/customers?page=' . max(1, ($currentPage ?? 1) - 1) . '&status=' . ($filterStatus ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                       class="p-2 rounded hover:bg-slate-50 text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                         <span class="material-symbols-outlined text-sm">chevron_left</span>
                     </a>
                     <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
                         <a href="<?= base_url('admin/customers?page=' . $i . '&status=' . ($filterStatus ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                           class="w-8 h-8 rounded <?= $i === ($currentPage ?? 1) ? 'bg-blue-600 text-white' : 'hover:bg-slate-50 text-slate-600' ?> text-xs font-bold flex items-center justify-center">
+                           class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                             <?= $i ?>
                         </a>
                     <?php endfor; ?>
                     <a href="<?= base_url('admin/customers?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&status=' . ($filterStatus ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                       class="p-2 rounded hover:bg-slate-50 text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                         <span class="material-symbols-outlined text-sm">chevron_right</span>
                     </a>
                 </div>
@@ -212,8 +208,96 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <?= $this->include('Admin/layouts/footer') ?>
 </main>
+
+<!-- Customer Preview Modal -->
+<div id="customerPreviewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="customerPreviewModalContent">
+        <!-- Modal Header -->
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-emerald-600">visibility</span>
+                Detail Pelanggan
+            </h4>
+        </div>
+        
+        <!-- Modal Body -->
+        <div class="p-6 flex flex-col items-center">
+            <!-- Icon/Avatar Wrapper -->
+            <div class="w-24 h-24 bg-blue-50 text-blue-600 border border-slate-200 rounded-full overflow-hidden flex items-center justify-center p-4 mb-5 shadow-inner">
+                <span class="material-symbols-outlined text-[48px]">person</span>
+            </div>
+
+            <!-- Details List -->
+            <div class="w-full space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-left text-sm mb-6">
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">ID Pelanggan</span>
+                    <span class="font-mono text-slate-800 font-bold" id="modalCustId"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Nama Pelanggan</span>
+                    <span class="text-slate-800 font-semibold" id="modalCustName"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Email</span>
+                    <span class="text-slate-800 font-semibold" id="modalCustEmail"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Telepon</span>
+                    <span class="text-slate-800 font-semibold" id="modalCustPhone"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Tanggal Registrasi</span>
+                    <span class="text-slate-800" id="modalCustRegistered"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-semibold text-slate-500">Status</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold" id="modalCustStatus"></span>
+                </div>
+            </div>
+            
+            <!-- Close Button -->
+            <button type="button" onclick="closeCustomerPreviewModal()" class="w-full py-2.5 bg-primary hover:bg-primary-container text-white font-semibold text-sm rounded-lg transition-colors shadow-md">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showCustomerPreviewModal(id, name, email, phone, registeredAt, badgeText, badgeClass) {
+        const modal = document.getElementById('customerPreviewModal');
+        const content = document.getElementById('customerPreviewModalContent');
+        
+        document.getElementById('modalCustId').textContent = '#' + id;
+        document.getElementById('modalCustName').textContent = name;
+        document.getElementById('modalCustEmail').textContent = email;
+        document.getElementById('modalCustPhone').textContent = phone;
+        document.getElementById('modalCustRegistered').textContent = registeredAt;
+        
+        const statusEl = document.getElementById('modalCustStatus');
+        statusEl.textContent = badgeText;
+        statusEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ' + badgeClass;
+
+        // Show Modal
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeCustomerPreviewModal() {
+        const modal = document.getElementById('customerPreviewModal');
+        const content = document.getElementById('customerPreviewModalContent');
+
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+</script>
 
 <?php $this->endSection(); ?>

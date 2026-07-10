@@ -24,29 +24,14 @@
             </div>
             <div class="flex gap-3">
                 <a href="<?= base_url('admin/packages/export') ?>"
-                   class="flex items-center gap-2 bg-white border border-outline-variant text-on-surface px-4 py-2 rounded font-label-bold text-label-bold hover:bg-slate-50 transition-colors">
-                    <span class="material-symbols-outlined text-[18px]">download</span>
+                   class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2 rounded font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">cloud_download</span>
                     Ekspor Laporan
-                </a>
-                <a href="<?= base_url('admin/packages/create') ?>"
-                   class="flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded font-label-bold text-label-bold hover:opacity-90 transition-opacity">
-                    <span class="material-symbols-outlined text-[18px]">add_circle</span>
-                    Tambah Paket Baru
                 </a>
             </div>
         </div>
 
-        <!-- Flash messages -->
-        <?php if (session()->getFlashdata('success')): ?>
-            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm font-medium">
-                <?= esc(session()->getFlashdata('success')) ?>
-            </div>
-        <?php endif; ?>
-        <?php if (session()->getFlashdata('error')): ?>
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-medium">
-                <?= esc(session()->getFlashdata('error')) ?>
-            </div>
-        <?php endif; ?>
+        <!-- Flash messages (handled globally in main.php) -->
 
         <div class="grid grid-cols-12 gap-6">
 
@@ -73,7 +58,7 @@
                     <div class="flex items-center justify-between mb-3">
                         <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">payments</span>
                     </div>
-                    <p class="text-sm font-medium text-slate-500">Rata-rata Harga</p>
+                    <p class="text-sm font-medium text-slate-500">Rata-rata Harga Paket</p>
                     <h3 class="text-2xl font-black text-slate-900 mt-1">
                         Rp <?= number_format(($statAvgPrice ?? 0) / 1000, 0) ?>k
                     </h3>
@@ -89,30 +74,48 @@
                 </div>
             </div>
 
-            <!-- Tabel Paket Layanan (8 kolom) -->
-            <div class="col-span-8 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
-                <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <!-- Tabel Paket Layanan -->
+            <div class="col-span-7 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+                <!-- Header Card -->
+                <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-white">
                     <div class="flex items-center gap-3">
-                        <div class="w-1 h-6 bg-primary rounded-full"></div>
-                        <h4 class="font-h2 text-h2 text-on-surface">Daftar Paket Layanan</h4>
+                        <div class="w-1 h-6 bg-[#0047a0] rounded-full"></div>
+                        <h4 class="font-h2 text-h2 text-slate-800">Daftar Paket Layanan</h4>
                     </div>
-                    <form method="get" action="<?= base_url('admin/packages') ?>">
+                    <a href="<?= base_url('admin/packages/create') ?>"
+                       class="flex items-center gap-2 bg-[#0047a0] text-white px-4 py-2 rounded font-label-bold text-sm hover:opacity-90 transition-opacity shadow-sm">
+                        <span class="material-symbols-outlined text-[18px]">inventory_2</span>
+                        Tambah Paket Baru
+                    </a>
+                </div>
+                <!-- Action Bar -->
+                <div class="p-4 border-b border-slate-100 flex gap-4 bg-white">
+                    <form method="get" action="<?= base_url('admin/packages') ?>" class="flex-1">
+                        <input type="hidden" name="opt_page" value="<?= esc($currentOptPage ?? 1) ?>">
+                        <input type="hidden" name="q_opt" value="<?= esc($keywordOpt ?? '') ?>">
                         <div class="relative">
-                            <span class="material-symbols-outlined absolute left-3 top-2 text-[18px] text-slate-400">search</span>
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">search</span>
                             <input name="q" value="<?= esc($keyword ?? '') ?>"
-                                   class="pl-9 pr-4 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                                   placeholder="Cari paket..." type="text"/>
+                                   class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                   placeholder="Cari nama paket..." type="text"/>
                         </div>
                     </form>
+                    <div class="w-48 relative">
+                        <select class="w-full appearance-none bg-white border border-slate-200 text-slate-600 py-2 pl-4 pr-10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            <option>Semua Kategori</option>
+                        </select>
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400 pointer-events-none">expand_more</span>
+                    </div>
                 </div>
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50/80 text-slate-500 font-label-bold text-label-bold uppercase tracking-wider">
-                                <th class="px-6 py-4">ID Paket</th>
+                                <th class="px-6 py-4 text-center">ID Paket</th>
                                 <th class="px-6 py-4">Nama Paket</th>
-                                <th class="px-6 py-4">Foto / Durasi</th>
-                                <th class="px-6 py-4 text-right">Harga</th>
+                                <th class="px-6 py-4 text-center">Foto / Durasi</th>
+                                <th class="px-6 py-4 text-center">Harga</th>
                                 <th class="px-6 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -120,40 +123,37 @@
                             <?php if (!empty($packages)): ?>
                                 <?php foreach ($packages as $pkg): ?>
                                     <tr class="hover:bg-blue-50/30 transition-colors group">
-                                        <td class="px-6 py-4 font-mono text-xs text-slate-500"><?= esc($pkg['id']) ?></td>
+                                        <td class="px-6 py-4 font-mono text-xs text-slate-500 text-center"><?= esc($pkg['id']) ?></td>
                                         <td class="px-6 py-4 font-bold text-on-surface"><?= esc($pkg['name']) ?></td>
-                                        <td class="px-6 py-4 text-body-sm text-slate-500">
+                                        <td class="px-6 py-4 text-body-sm text-slate-500 text-center">
                                             <span class="bg-slate-100 px-2 py-1 rounded text-xs font-medium text-slate-600">
                                                 <?= esc($pkg['photo_count']) ?> Foto
                                             </span>
-                                            <span class="ml-1 bg-slate-100 px-2 py-1 rounded text-xs font-medium text-slate-600">
-                                                <?= esc($pkg['duration']) ?> Mnt
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <span class="font-bold text-slate-800 text-sm">
+                                                Rp <?= number_format($pkg['base_price'], 0, ',', '.') ?>
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 text-right font-bold text-primary">
+                                        <td class="px-6 py-4 font-bold text-primary text-center">
                                             Rp <?= number_format($pkg['base_price'], 0, ',', '.') ?>
                                         </td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <a href="<?= base_url('admin/packages/' . $pkg['id'] . '/edit') ?>"
-                                                   class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md" title="Edit">
-                                                    <span class="material-symbols-outlined text-[18px]">edit</span>
-                                                </a>
-                                                <form action="<?= base_url('admin/packages/' . $pkg['id'] . '/delete') ?>" method="post" class="inline">
-                                                    <?= csrf_field() ?>
-                                                    <button type="submit"
-                                                            class="p-1.5 text-error hover:bg-error-container rounded-md" title="Hapus"
-                                                            onclick="return confirm('Hapus paket ini?')">
-                                                        <span class="material-symbols-outlined text-[18px]">delete</span>
-                                                    </button>
-                                                </form>
-                                            </div>
+                                        <td class="px-6 py-4 text-center space-x-2">
+                                            <a href="<?= base_url('admin/packages/' . $pkg['id'] . '/edit') ?>"
+                                               class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                                <span class="material-symbols-outlined text-[20px]">edit</span>
+                                            </a>
+                                            <button type="button"
+                                                    class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
+                                                    onclick="openUniversalDeleteModal('<?= base_url('admin/packages/' . $pkg['id'] . '/delete') ?>', '<?= esc($pkg['name'], 'js') ?>', 'Hapus Paket?')">
+                                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                                            </button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="5" class="px-6 py-10 text-center text-sm text-slate-400">
+                                    <td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400">
                                         Belum ada paket. <a href="<?= base_url('admin/packages/create') ?>" class="text-primary font-semibold">Tambah sekarang</a>.
                                     </td>
                                 </tr>
@@ -162,78 +162,109 @@
                     </table>
                 </div>
                 <!-- Pagination Paket -->
-                <div class="p-4 bg-slate-50 text-slate-500 text-xs flex justify-between items-center border-t border-slate-100">
+                <div class="p-4 bg-white text-slate-500 text-xs flex justify-between items-center border-t border-slate-100">
                     <span>Menampilkan <?= count($packages ?? []) ?> dari <?= $totalPackages ?? 0 ?> paket</span>
                     <div class="flex gap-1">
+                        <a href="<?= base_url('admin/packages?page=' . max(1, ($currentPkgPage ?? 1) - 1) . '&q=' . ($keyword ?? '')) ?>"
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPkgPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                            <span class="material-symbols-outlined text-sm">chevron_left</span>
+                        </a>
                         <?php for ($i = 1; $i <= ($totalPkgPages ?? 1); $i++): ?>
                             <a href="<?= base_url('admin/packages?page=' . $i . '&q=' . ($keyword ?? '')) ?>"
-                               class="w-8 h-8 flex items-center justify-center border border-slate-200 rounded text-xs font-bold
-                                      <?= $i === ($currentPkgPage ?? 1) ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-white' ?>">
+                               class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPkgPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                                 <?= $i ?>
                             </a>
                         <?php endfor; ?>
+                        <a href="<?= base_url('admin/packages?page=' . min(($totalPkgPages ?? 1), ($currentPkgPage ?? 1) + 1) . '&q=' . ($keyword ?? '')) ?>"
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPkgPage ?? 1) >= ($totalPkgPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Tabel Opsi Cetak (4 kolom) -->
-            <div class="col-span-4 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
-                <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <!-- Tabel Opsi Cetak -->
+            <div class="col-span-5 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+                <!-- Header Card -->
+                <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-white">
                     <div class="flex items-center gap-3">
-                        <div class="w-1 h-6 bg-tertiary rounded-full"></div>
-                        <h4 class="font-h2 text-h2 text-on-surface">Opsi Cetak</h4>
+                        <div class="w-1 h-6 bg-[#0047a0] rounded-full"></div>
+                        <h4 class="font-h2 text-h2 text-slate-800">Opsi Cetak</h4>
                     </div>
                     <a href="<?= base_url('admin/print-options/create') ?>"
-                       class="text-primary hover:bg-blue-50 p-1 rounded transition-colors" title="Tambah Opsi Cetak">
-                        <span class="material-symbols-outlined">add</span>
+                       class="flex items-center gap-2 bg-[#0047a0] text-white px-4 py-2 rounded font-label-bold text-sm hover:opacity-90 transition-opacity shadow-sm">
+                        <span class="material-symbols-outlined text-[18px]">print</span>
+                        Tambah Opsi
                     </a>
                 </div>
-                <div class="flex-1 overflow-y-auto max-h-[440px]">
+                <!-- Action Bar -->
+                <div class="p-4 border-b border-slate-100 flex gap-4 bg-white">
+                    <form method="get" action="<?= base_url('admin/packages') ?>" class="flex-1">
+                        <input type="hidden" name="page" value="<?= esc($currentPkgPage ?? 1) ?>">
+                        <input type="hidden" name="q" value="<?= esc($keyword ?? '') ?>">
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">search</span>
+                            <input name="q_opt" value="<?= esc($keywordOpt ?? '') ?>"
+                                   class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                   placeholder="Cari opsi cetak..." type="text"/>
+                        </div>
+                    </form>
+                    <div class="w-48 relative">
+                        <select class="w-full appearance-none bg-white border border-slate-200 text-slate-600 py-2 pl-4 pr-10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            <option>Semua Status</option>
+                            <option>Aktif</option>
+                            <option>Non-Aktif</option>
+                        </select>
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400 pointer-events-none">expand_more</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50/80 text-slate-500 font-label-bold text-label-bold uppercase tracking-wider sticky top-0">
                                 <th class="px-5 py-4">Opsi</th>
                                 <th class="px-5 py-4 text-center">Copies</th>
-                                <th class="px-5 py-4 text-right">Harga</th>
+                                <th class="px-5 py-4 text-center">Harga</th>
                                 <th class="px-5 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             <?php if (!empty($printOptions)): ?>
                                 <?php foreach ($printOptions as $opt): ?>
-                                    <tr class="hover:bg-slate-50 transition-colors group">
-                                        <td class="px-5 py-4">
-                                            <p class="font-bold text-on-surface text-sm"><?= esc($opt['name'] ?? 'Opsi Cetak') ?></p>
-                                            <p class="text-[10px] text-slate-400 font-mono"><?= esc($opt['id']) ?></p>
+                                    <tr class="bg-white hover:bg-slate-50 transition-colors group">
+                                        <td class="px-6 py-4 text-sm text-slate-500 font-mono"><?= esc($opt['id']) ?></td>
+                                        <td class="px-6 py-4">
+                                            <div class="font-bold text-slate-800 text-sm"><?= esc($opt['name'] ?? 'Opsi Cetak') ?></div>
+                                            <div class="mt-1">
+                                                <span class="inline-block bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded-full font-medium">
+                                                    <?= esc($opt['copies']) ?> Lembar
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td class="px-5 py-4 text-center">
-                                            <span class="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
-                                                <?= esc($opt['copies']) ?> Lbr
+                                        <td class="px-6 py-4 text-center">
+                                            <span class="font-bold text-slate-800 text-sm">
+                                                Rp <?= number_format(($opt['extra_price'] ?? 0), 0, ',', '.') ?>
                                             </span>
                                         </td>
-                                        <td class="px-5 py-4 text-right font-bold text-on-surface">
+                                        <td class="px-5 py-4 font-bold text-on-surface text-center">
                                             Rp <?= number_format(($opt['extra_price'] ?? 0) / 1000, 0) ?>k
                                         </td>
-                                        <td class="px-5 py-4 text-center">
-                                            <div class="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <a href="<?= base_url('admin/print-options/' . $opt['id'] . '/edit') ?>"
-                                                   class="p-1 text-blue-600 hover:bg-blue-100 rounded" title="Edit">
-                                                    <span class="material-symbols-outlined text-[16px]">edit</span>
-                                                </a>
-                                                <form action="<?= base_url('admin/print-options/' . $opt['id'] . '/delete') ?>" method="post" class="inline">
-                                                    <?= csrf_field() ?>
-                                                    <button type="submit" class="p-1 text-error hover:bg-error-container rounded" title="Hapus"
-                                                            onclick="return confirm('Hapus opsi cetak ini?')">
-                                                        <span class="material-symbols-outlined text-[16px]">delete</span>
-                                                    </button>
-                                                </form>
-                                            </div>
+                                        <td class="px-5 py-4 text-center space-x-2">
+                                            <a href="<?= base_url('admin/print-options/' . $opt['id'] . '/edit') ?>"
+                                               class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                                <span class="material-symbols-outlined text-[20px]">edit</span>
+                                            </a>
+                                            <button type="button" class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
+                                                    onclick="openUniversalDeleteModal('<?= base_url('admin/print-options/' . $opt['id'] . '/delete') ?>', '<?= esc($opt['name'] ?? ('Opsi ' . $opt['copies'] . ' Lembar'), 'js') ?>', 'Hapus Opsi Cetak?')">
+                                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                                            </button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="4" class="px-5 py-8 text-center text-sm text-slate-400">
+                                    <td colspan="5" class="px-6 py-8 text-center text-sm text-slate-400">
                                         Belum ada opsi cetak.
                                     </td>
                                 </tr>
@@ -241,15 +272,30 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="p-4 text-center bg-blue-50 border-t border-slate-100">
-                    <a href="<?= base_url('admin/print-options') ?>" class="text-xs font-bold text-primary hover:underline">
-                        Kelola Detail Opsi
-                    </a>
+                <!-- Pagination Opsi Cetak -->
+                <div class="p-4 bg-white text-slate-500 text-xs flex justify-between items-center border-t border-slate-100">
+                    <span>Menampilkan <?= count($printOptions ?? []) ?> dari <?= $totalPrintOptions ?? 0 ?> opsi cetak</span>
+                    <div class="flex gap-1">
+                        <a href="<?= base_url('admin/packages?opt_page=' . max(1, ($currentOptPage ?? 1) - 1) . '&q_opt=' . ($keywordOpt ?? '') . '&page=' . ($currentPkgPage ?? 1) . '&q=' . ($keyword ?? '')) ?>"
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentOptPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                            <span class="material-symbols-outlined text-sm">chevron_left</span>
+                        </a>
+                        <?php for ($i = 1; $i <= ($totalOptPages ?? 1); $i++): ?>
+                            <a href="<?= base_url('admin/packages?opt_page=' . $i . '&q_opt=' . ($keywordOpt ?? '') . '&page=' . ($currentPkgPage ?? 1) . '&q=' . ($keyword ?? '')) ?>"
+                               class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentOptPage ?? 1) ? 'border-[#0047a0] bg-[#0047a0] text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
+                                <?= $i ?>
+                            </a>
+                        <?php endfor; ?>
+                        <a href="<?= base_url('admin/packages?opt_page=' . min(($totalOptPages ?? 1), ($currentOptPage ?? 1) + 1) . '&q_opt=' . ($keywordOpt ?? '') . '&page=' . ($currentPkgPage ?? 1) . '&q=' . ($keyword ?? '')) ?>"
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentOptPage ?? 1) >= ($totalOptPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                        </a>
+                    </div>
                 </div>
             </div>
 
             <!-- Promo & Preview Bento -->
-            <div class="col-span-12 grid grid-cols-3 gap-6">
+            <div class="col-span-12 grid grid-cols-3 gap-6 mb-6">
                 <!-- Promotion Card -->
                 <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-2xl text-white flex flex-col justify-between overflow-hidden relative">
                     <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl text-white/10">auto_awesome</span>
@@ -258,16 +304,16 @@
                         <h4 class="mt-4 text-xl font-bold">Bundling Hemat!</h4>
                         <p class="text-sm text-blue-100 mt-2">Paket dengan durasi &gt; 30 menit cenderung meningkatkan konversi cetak tambahan hingga 25%.</p>
                     </div>
-                    <button class="mt-8 bg-white text-blue-700 font-label-bold text-label-bold py-2 rounded shadow-lg hover:bg-slate-50 transition-colors">
+                    <button type="button" onclick="Swal.fire('Fitur Mendatang', 'Fitur pembuatan campaign promosi sedang dalam tahap pengembangan.', 'info')" class="mt-8 bg-white text-blue-700 font-label-bold text-label-bold py-2 rounded shadow-lg hover:bg-slate-50 transition-colors">
                         Buat Campaign
                     </button>
                 </div>
                 <!-- Layout Preview -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm col-span-2 flex items-center gap-6">
-                    <div class="w-32 h-32 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100">
+                    <div class="w-32 h-32 rounded-xl overflow-hidden flex-shrink-0 bg-white border border-slate-100 flex items-center justify-center p-2">
                         <img alt="Package Visual Preview"
-                             class="w-full h-full object-cover"
-                             src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsRc_XVNFoiEw0proeJDaYkr962949lBPH5XsK9c-9yDI_rkXV4HcYQNPcjCMsesLXR1FPqzuFDvmNGKNo9esVfOc41VSWOsAkUI5uIMbo-uUtpax_Jx3-1Buz1cZwCY2H356MamH3dIdB4NhMgkxLtd2VKFjV4nHJLMqLewtz07FPzOLL3zGBHZtt9sJCqOTTqtjnVb9EoCWQk8N8gkZwm4bsl6P8lGQrK0zfO1Yz91UIdKP_TFviduQSIbJuRskh6izc6oH1iiNV"/>
+                             class="w-full h-full object-contain"
+                             src="<?= base_url('assets/images/blank_photo_strip_white.png') ?>"/>
                     </div>
                     <div class="flex-1">
                         <h4 class="font-h2 text-h2 text-on-surface">Visualisasi Layout Paket</h4>
@@ -287,13 +333,9 @@
     <?= $this->include('Admin/layouts/footer') ?>
 </main>
 
-<!-- FAB -->
-<div class="fixed bottom-8 right-8 z-[60]">
-    <a href="<?= base_url('admin/packages/create') ?>"
-       class="bg-primary-container text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center hover:scale-105 transition-transform active:scale-95 group relative">
-        <span class="material-symbols-outlined text-3xl">add</span>
-        <span class="absolute right-full mr-4 bg-slate-800 text-white text-[10px] py-1 px-3 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Paket Cepat</span>
-    </a>
-</div>
+
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <?php $this->endSection(); ?>

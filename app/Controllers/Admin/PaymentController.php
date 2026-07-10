@@ -49,6 +49,9 @@ class PaymentController extends BaseController
         $totalPayments = $builder->countAllResults(false);
         $totalPages    = max(1, (int) ceil($totalPayments / $perPage));
 
+        // PENTING: countAllResults() mengubah SELECT menjadi COUNT(*), jadi kita harus set ulang SELECT-nya
+        $builder->select('payments.*, bookings.booking_code, print_options.copies AS print_option_copies, print_options.extra_price AS print_option_extra');
+        
         $payments = $builder
             ->orderBy('payments.created_at', 'DESC')
             ->findAll($perPage, ($currentPage - 1) * $perPage);
@@ -210,12 +213,27 @@ class PaymentController extends BaseController
 
         $data = $builder->orderBy('payments.created_at', 'DESC')->findAll();
 
-        // Buat CSV
-        $filename = 'payments_export_' . date('Ymd_His') . '.csv';
+        // Nama file dinamis dengan format Hari, Tanggal Bulan Tahun, Jam-Menit-Detik
+        $hariIndo = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        $hari = $hariIndo[date('w')];
+        $tanggal = date('d');
+        $bulan = $bulanIndo[date('n')];
+        $tahun = date('Y');
+        $waktu = date('H-i-s');
+        $filename = "Laporan Pembayaran {$hari}, {$tanggal} {$bulan} {$tahun}, {$waktu}.csv";
+        
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
 
         $output = fopen('php://output', 'w');
+        
+        // Tambahkan UTF-8 BOM agar karakter khusus terbaca dengan benar di Excel
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        // Tambahkan deklarasi separator khusus agar Excel otomatis memisahkan kolom
+        fputs($output, "sep=,\n");
+        
         fputcsv($output, ['ID Pembayaran', 'Kode Booking', 'Opsi Cetak (Copy)', 'Harga Extra Cetak', 'Nominal', 'Gateway Ref', 'Status', 'Waktu']);
         foreach ($data as $row) {
             fputcsv($output, [
@@ -229,6 +247,15 @@ class PaymentController extends BaseController
                 $row['created_at'],
             ]);
         }
+        
+        // Tanda Tangan Pertanggungjawaban
+        fputcsv($output, []); // Baris kosong
+        fputcsv($output, []); // Baris kosong
+        fputcsv($output, ['--- RIWAYAT PERTANGGUNGJAWABAN EKSPOR ---']);
+        fputcsv($output, ['Dihasilkan Oleh:', session()->get('adminName') ?? 'Admin (Sistem)']);
+        fputcsv($output, ['Waktu Unduh:', date('Y-m-d H:i:s')]);
+        fputcsv($output, ['Catatan Khusus:', 'Laporan ini dihasilkan secara otomatis oleh sistem CuitBox Studio dan sah sebagai bukti audit operasional.']);
+
         fclose($output);
         exit;
     }

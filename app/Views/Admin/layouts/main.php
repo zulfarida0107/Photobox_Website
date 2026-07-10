@@ -157,5 +157,80 @@
 
     </div>
 
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Global SweetAlert Logic -->
+    <?php if (session()->getFlashdata('success')): ?>
+        <?php 
+            $msg = session()->getFlashdata('success'); 
+            // Cek apakah pesannya mengandung kata "hapus" atau "batal" untuk memicu popup merah
+            $isDelete = (stripos($msg, 'hapus') !== false || stripos($msg, 'batal') !== false);
+        ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Sembunyikan notifikasi bawaan (kotak hijau) jika ada agar tidak double
+                const oldFlashes = document.querySelectorAll('.bg-green-50, .bg-red-50');
+                oldFlashes.forEach(el => el.style.display = 'none');
+
+                Swal.fire({
+                    icon: '<?= $isDelete ? "success" : "success" ?>',
+                    title: '<?= $isDelete ? "Berhasil Dihapus!" : "Berhasil!" ?>',
+                    text: '<?= esc($msg) ?>',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    iconColor: '<?= $isDelete ? "#dc2626" : "#16a34a" ?>',
+                    color: '<?= $isDelete ? "#991b1b" : "#166534" ?>',
+                    background: '#ffffff',
+                    customClass: {
+                        popup: 'border <?= $isDelete ? "border-red-200" : "border-green-200" ?>'
+                    }
+                });
+            });
+        </script>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')): ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const oldFlashes = document.querySelectorAll('.bg-green-50, .bg-red-50');
+                oldFlashes.forEach(el => el.style.display = 'none');
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '<?= esc(session()->getFlashdata('error')) ?>',
+                    showConfirmButton: true,
+                    confirmButtonColor: '#2563eb'
+                });
+            });
+        </script>
+    <?php endif; ?>
+
+    <!-- Hidden form for Universal Delete -->
+    <form id="universalDeleteForm" method="post" class="hidden">
+        <?= csrf_field() ?>
+    </form>
+
+    <script>
+        function openUniversalDeleteModal(actionUrl, itemName, title = 'Hapus Data?') {
+            Swal.fire({
+                title: title,
+                text: `Tindakan ini mungkin mempengaruhi data lain.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#2563eb',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('universalDeleteForm');
+                    form.action = actionUrl;
+                    form.submit();
+                }
+            });
+        }
+    </script>
 </body>
 </html>
