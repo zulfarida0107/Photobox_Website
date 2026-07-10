@@ -609,9 +609,9 @@
                         </div>
                         <div class="flex items-center justify-between border-b border-slate-200 pb-2">
                             <span class="font-semibold text-slate-500">Antrean Saat Ini</span>
-                            <div class="flex items-baseline gap-1">
-                                <span class="text-lg font-black text-slate-700" id="modalBdQueue"></span>
-                                <span class="text-[10px] text-slate-400 font-semibold">Pelanggan</span>
+                            <div class="flex items-center gap-1">
+                                <span class="text-lg font-black text-slate-700 leading-none" id="modalBdQueue"></span>
+                                <span class="text-sm text-slate-500 font-semibold leading-none">Pelanggan</span>
                             </div>
                         </div>
                         <div class="flex flex-col gap-2">

@@ -18,24 +18,23 @@
         </nav>
 
         <!-- Header Section -->
-        <!-- Header Section -->
         <div class="flex justify-between items-end mb-6">
             <div>
                 <h2 class="font-h1 text-h1 text-on-surface mb-1">Manajemen Pembayaran</h2>
                 <p class="font-body-sm text-body-sm text-on-surface-variant">Pantau dan kelola semua transaksi masuk secara real-time.</p>
             </div>
             <div class="flex gap-3">
-                <a href="<?= base_url('admin/payments/export') ?>"
-                   class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2 rounded font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm">
-                    <span class="material-symbols-outlined text-[18px]">cloud_download</span>
-                    Ekspor Laporan
-                </a>
                 <form action="<?= base_url('admin/payments/verify-bulk') ?>" method="post" class="inline">
                     <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded font-semibold text-sm hover:bg-primary-container transition-colors shadow-sm">
                         <span class="material-symbols-outlined text-[18px]">verified_user</span>
                         Verifikasi Massal
                     </button>
                 </form>
+                <a href="<?= base_url('admin/payments/export') ?>"
+                   class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2 rounded font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">cloud_download</span>
+                    Ekspor Laporan
+                </a>
             </div>
         </div>
 
@@ -95,39 +94,44 @@
         </div>
 
         <!-- Main Table Section -->
-        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex-1 flex flex-col mb-6">
+        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex-1 flex flex-col mb-6">
             
-            <!-- Filter Toolbar -->
-            <form method="get" action="<?= base_url('admin/payments') ?>">
-                <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-wrap gap-4 items-center justify-between">
-                    <div class="flex items-center gap-3">
+            <!-- Table Header -->
+            <div class="p-5 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center bg-white gap-4">
+                <!-- Title "Daftar Pembayaran" on the left with vertical blue line -->
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <div class="w-1 h-6 bg-primary rounded-full"></div>
+                    <h4 class="font-h2 text-h2 text-on-surface">Daftar Pembayaran</h4>
+                </div>
+            </div>
+            
+            <!-- Search & Filter Bar -->
+            <div class="p-4 bg-slate-50/50 border-b border-slate-200">
+                <form method="get" action="<?= base_url('admin/payments') ?>">
+                    <div class="flex flex-wrap sm:flex-nowrap gap-3 items-center justify-end">
                         <!-- Filter Status -->
-                        <div class="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded text-sm">
+                        <div class="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-sm shadow-sm w-full sm:w-44">
                             <span class="material-symbols-outlined text-slate-400 text-sm">filter_list</span>
-                            <span class="text-slate-600 font-medium">Status:</span>
-                            <select name="status" class="border-none bg-transparent p-0 focus:ring-0 text-sm font-bold text-primary" onchange="this.form.submit()">
+                            <select name="status" class="border-none bg-transparent p-0 focus:ring-0 text-sm font-semibold text-slate-700 outline-none flex-1" onchange="this.form.submit()">
                                 <option value="" <?= ($filterStatus ?? '') === '' ? 'selected' : '' ?>>Semua Status</option>
                                 <option value="paid"    <?= ($filterStatus ?? '') === 'paid'    ? 'selected' : '' ?>>Paid</option>
                                 <option value="failed"  <?= ($filterStatus ?? '') === 'failed'  ? 'selected' : '' ?>>Failed</option>
                                 <option value="pending" <?= ($filterStatus ?? '') === 'pending' ? 'selected' : '' ?>>Pending</option>
                             </select>
                         </div>
+                        
                         <!-- Filter Periode -->
-                        <div class="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded text-sm">
+                        <div class="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-sm shadow-sm w-full sm:w-44">
                             <span class="material-symbols-outlined text-slate-400 text-sm">calendar_month</span>
-                            <span class="text-slate-600 font-medium">Waktu:</span>
-                            <select name="period" class="border-none bg-transparent p-0 focus:ring-0 text-sm font-bold text-primary" onchange="this.form.submit()">
+                            <select name="period" class="border-none bg-transparent p-0 focus:ring-0 text-sm font-semibold text-slate-700 outline-none flex-1" onchange="this.form.submit()">
                                 <option value="7"  <?= ($filterPeriod ?? '7')  === '7'  ? 'selected' : '' ?>>7 Hari Terakhir</option>
                                 <option value="30" <?= ($filterPeriod ?? '')   === '30' ? 'selected' : '' ?>>30 Hari Terakhir</option>
                                 <option value="month" <?= ($filterPeriod ?? '') === 'month' ? 'selected' : '' ?>>Bulan Ini</option>
                             </select>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-500">
-                        Menampilkan <?= count($payments ?? []) ?> dari <?= number_format($totalPayments ?? 0) ?> data
-                    </p>
-                </div>
-            </form>
+                </form>
+            </div>
 
             <!-- Data Table -->
             <div class="overflow-x-auto">
@@ -182,26 +186,40 @@
                                     <td class="px-6 py-4 text-xs text-slate-500 text-center">
                                         <?= date('d M Y, H:i', strtotime($pay['created_at'])) ?>
                                     </td>
-                                    <td class="px-6 py-4 text-center space-x-2">
-                                        <?php if ($isPaid): ?>
-                                            <a href="<?= base_url('admin/payments/' . $pay['id'] . '/invoice') ?>"
-                                               class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Cetak Invoice PDF">
-                                                <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
-                                            </a>
-                                        <?php else: ?>
-                                            <span class="inline p-1.5 text-slate-300 cursor-not-allowed" title="Invoice hanya tersedia untuk pembayaran sukses">
-                                                <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
-                                            </span>
-                                        <?php endif; ?>
-                                        <form action="<?= base_url('admin/payments/' . $pay['id'] . '/verify') ?>" method="post" class="inline">
-                                            <?= csrf_field() ?>
-                                            <button type="submit"
-                                                    class="inline p-1.5 <?= $isPaid ? 'text-slate-400 hover:text-blue-600 hover:bg-blue-50' : 'text-emerald-600 hover:bg-emerald-50' ?> rounded transition-colors"
-                                                    title="Verifikasi Manual">
-                                                <span class="material-symbols-outlined text-[20px]">verified</span>
-                                            </button>
-                                        </form>
-                                    </td>
+                                     <td class="px-6 py-4 text-center space-x-2">
+                                         <!-- Detail (Mata Hijau) -->
+                                         <?php 
+                                             $printOptionText = !empty($pay['print_option_copies']) ? $pay['print_option_copies'] . ' copy (+Rp ' . number_format($pay['print_option_extra'] ?? 0, 0, ',', '.') . ')' : '-';
+                                             $formattedAmount = 'Rp ' . number_format($pay['amount'] ?? 0, 0, ',', '.');
+                                             $formattedTime = date('d M Y, H:i', strtotime($pay['created_at']));
+                                             $statusClass = $st[0];
+                                             $statusLabel = $st[2];
+                                         ?>
+                                         <button type="button" 
+                                                 onclick="showPaymentPreviewModal('<?= esc($pay['id'], 'js') ?>', '<?= esc($pay['booking_code'] ?? $pay['booking_id'], 'js') ?>', '<?= esc($printOptionText, 'js') ?>', '<?= esc($formattedAmount, 'js') ?>', '<?= esc($pay['gateway_ref'] ?? '-', 'js') ?>', '<?= esc($statusLabel, 'js') ?>', '<?= esc($statusClass, 'js') ?>', '<?= esc($formattedTime, 'js') ?>')"
+                                                 class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" 
+                                                 title="Detail Pembayaran">
+                                             <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                         </button>
+                                         <?php if ($isPaid): ?>
+                                             <a href="<?= base_url('admin/payments/' . $pay['id'] . '/invoice') ?>"
+                                                class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Cetak Invoice PDF">
+                                                 <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+                                             </a>
+                                         <?php else: ?>
+                                             <span class="inline p-1.5 text-slate-300 cursor-not-allowed" title="Invoice hanya tersedia untuk pembayaran sukses">
+                                                 <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+                                             </span>
+                                         <?php endif; ?>
+                                         <form action="<?= base_url('admin/payments/' . $pay['id'] . '/verify') ?>" method="post" class="inline">
+                                             <?= csrf_field() ?>
+                                             <button type="submit"
+                                                     class="inline p-1.5 <?= $isPaid ? 'text-slate-400 hover:text-blue-600 hover:bg-blue-50' : 'text-emerald-600 hover:bg-emerald-50' ?> rounded transition-colors"
+                                                     title="Verifikasi Manual">
+                                                 <span class="material-symbols-outlined text-[20px]">verified</span>
+                                             </button>
+                                         </form>
+                                     </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -218,7 +236,7 @@
             <!-- Pagination -->
             <div class="px-6 py-4 bg-slate-50/50 flex items-center justify-between">
                 <p class="text-xs text-slate-500 font-medium">
-                    Halaman <?= $currentPage ?? 1 ?> dari <?= $totalPages ?? 1 ?>
+                    Menampilkan <?= count($payments ?? []) ?> dari <?= number_format($totalPayments ?? 0) ?> data
                 </p>
                 <div class="flex gap-1">
                     <a href="<?= base_url('admin/payments?page=' . max(1, ($currentPage ?? 1) - 1) . '&status=' . ($filterStatus ?? '') . '&period=' . ($filterPeriod ?? '7')) ?>"
@@ -257,6 +275,95 @@
             </div>
         </div>
     </div>
+
+    <!-- Payment Preview Modal -->
+    <div id="paymentPreviewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="paymentPreviewModalContent">
+            <!-- Modal Header -->
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">receipt_long</span>
+                    Detail Pembayaran
+                </h3>
+                <button onclick="closePaymentPreviewModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <!-- Modal Body -->
+            <div class="p-6 space-y-4 text-sm text-left">
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">ID Pembayaran</span>
+                    <span class="font-mono text-slate-800 font-bold" id="modalPayId"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Kode Booking</span>
+                    <span class="text-slate-800 font-semibold" id="modalPayBookingCode"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Opsi Cetak</span>
+                    <span class="text-slate-800 font-semibold" id="modalPayPrintOption"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Nominal</span>
+                    <span class="text-slate-800 font-bold" id="modalPayAmount"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Gateway Ref</span>
+                    <span class="text-slate-800 font-mono" id="modalPayGatewayRef"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Waktu Transaksi</span>
+                    <span class="text-slate-800" id="modalPayTime"></span>
+                </div>
+                <div class="flex justify-between items-center pb-2">
+                    <span class="font-semibold text-slate-500">Status</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold" id="modalPayStatus"></span>
+                </div>
+            </div>
+            <!-- Modal Footer -->
+            <div class="p-5 border-t border-slate-100 bg-slate-50/50">
+                <button type="button" onclick="closePaymentPreviewModal()" class="w-full py-2.5 bg-primary hover:bg-primary-container text-white font-semibold text-sm rounded-lg transition-colors shadow-md">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showPaymentPreviewModal(id, bookingCode, printOption, amount, gatewayRef, statusText, statusClass, time) {
+            const modal = document.getElementById('paymentPreviewModal');
+            const content = document.getElementById('paymentPreviewModalContent');
+            
+            document.getElementById('modalPayId').textContent = '#' + id;
+            document.getElementById('modalPayBookingCode').textContent = bookingCode;
+            document.getElementById('modalPayPrintOption').textContent = printOption;
+            document.getElementById('modalPayAmount').textContent = amount;
+            document.getElementById('modalPayGatewayRef').textContent = gatewayRef;
+            document.getElementById('modalPayTime').textContent = time;
+            
+            const statusEl = document.getElementById('modalPayStatus');
+            statusEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ' + statusClass;
+            statusEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-current mr-1.5"></span>' + statusText;
+            
+            // Show Modal
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 50);
+        }
+        
+        function closePaymentPreviewModal() {
+            const modal = document.getElementById('paymentPreviewModal');
+            const content = document.getElementById('paymentPreviewModalContent');
+            
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+    </script>
 
     <?= $this->include('Admin/layouts/footer') ?>
 </main>
