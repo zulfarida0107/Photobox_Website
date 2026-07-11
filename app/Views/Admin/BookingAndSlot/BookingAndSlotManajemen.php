@@ -101,11 +101,11 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
 
             <!-- KIRI: Tabel Slot Operasional -->
-            <section class="lg:col-span-4 space-y-4">
-                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <section class="lg:col-span-4 flex flex-col h-full">
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex-1 flex flex-col h-full">
                     <!-- Table Header -->
                     <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-white">
                         <div class="flex items-center gap-2">
@@ -121,7 +121,7 @@
                             Tambah Slot Baru
                         </a>
                     </div>
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto flex-1">
                         <table class="w-full text-center">
                             <thead class="bg-slate-50 border-b border-slate-200">
                                 <tr>
@@ -176,8 +176,8 @@
             </section>
 
             <!-- KANAN: Tabel Booking Masuk -->
-            <section class="lg:col-span-8 space-y-4">
-                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <section class="lg:col-span-8 flex flex-col h-full">
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex-1 flex flex-col h-full">
                     <!-- Table Header -->
                     <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-white">
                         <div class="flex items-center gap-2">
@@ -211,7 +211,7 @@
                             </div>
                         </form>
                     </div>
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto flex-1">
                         <table class="w-full text-center">
                             <thead class="bg-slate-50 border-b border-slate-200">
                                 <tr>
@@ -236,7 +236,9 @@
                                         ?>
                                         <tr class="hover:bg-blue-50/50 transition-colors">
                                             <td class="px-4 py-3 text-center">
-                                                <div class="text-sm font-bold text-primary"><?= esc($bk['booking_code']) ?></div>
+                                                <div class="text-sm font-bold text-primary hover:underline cursor-pointer" onclick="showBookingPreviewModal('<?= esc($bk['id'], 'js') ?>', '<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc($bk['package_name'] ?? '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>', '<?= $bk['status'] ?>', <?= $bk['edit_count'] ?? 0 ?>)">
+                                                    <?= esc($bk['booking_code']) ?>
+                                                </div>
                                                 <div class="text-xs text-on-surface font-medium"><?= esc($bk['customer_name'] ?? '-') ?></div>
                                             </td>
                                             <td class="px-4 py-3 text-center">
@@ -256,20 +258,18 @@
                                                            class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
                                                             <span class="material-symbols-outlined text-[20px]">edit</span>
                                                         </a>
-                                                        <form action="<?= base_url('admin/bookings/' . $bk['id'] . '/cancel') ?>" method="post" class="inline">
-                                                            <?= csrf_field() ?>
-                                                            <button type="submit" class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Batalkan">
-                                                                <span class="material-symbols-outlined text-[20px]">cancel</span>
-                                                            </button>
-                                                        </form>
+                                                        <button type="button" onclick="showCancelBookingModal('<?= base_url('admin/bookings/' . $bk['id'] . '/cancel') ?>')"
+                                                                class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Batalkan">
+                                                            <span class="material-symbols-outlined text-[20px]">cancel</span>
+                                                        </button>
                                                     <?php elseif ($bk['status'] === 'completed'): ?>
-                                                        <button type="button" onclick="showBookingPreviewModal('<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc($bk['package_name'] ?? '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>')"
-                                                           class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Detail">
+                                                        <button type="button" onclick="showBookingPreviewModal('<?= esc($bk['id'], 'js') ?>', '<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc($bk['package_name'] ?? '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>', '<?= $bk['status'] ?>', <?= $bk['edit_count'] ?? 0 ?>)"
+                                                            class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Detail">
                                                             <span class="material-symbols-outlined text-[20px]">visibility</span>
                                                         </button>
                                                     <?php else: ?>
-                                                        <button type="button" onclick="showBookingPreviewModal('<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc($bk['package_name'] ?? '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>')"
-                                                           class="inline p-1.5 text-slate-500 hover:bg-slate-100 rounded transition-colors" title="Riwayat">
+                                                        <button type="button" onclick="showBookingPreviewModal('<?= esc($bk['id'], 'js') ?>', '<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc($bk['package_name'] ?? '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>', '<?= $bk['status'] ?>', <?= $bk['edit_count'] ?? 0 ?>)"
+                                                            class="inline p-1.5 text-slate-500 hover:bg-slate-100 rounded transition-colors" title="Riwayat">
                                                             <span class="material-symbols-outlined text-[20px]">history</span>
                                                         </button>
                                                     <?php endif; ?>
@@ -440,16 +440,68 @@
                 </div>
             </div>
             
+            <!-- Warning/Note Text -->
+            <div id="modalBkEditWarning" class="flex items-center gap-1.5 text-xs text-primary font-bold mb-3 text-center justify-center hidden">
+                <span class="material-symbols-outlined text-sm">info</span>
+                <span>ini perlu konfirmasi Pelanggan</span>
+            </div>
+
+            <!-- Edit Booking Button -->
+            <a id="modalBkEditBtn" href="#" class="w-full py-2.5 bg-primary hover:bg-primary-container text-white font-bold text-center text-sm rounded-lg transition-colors shadow-md mb-2 flex items-center justify-center gap-1.5 hidden">
+                <span class="material-symbols-outlined text-[18px]">edit</span>
+                Ubah Booking
+            </a>
+
             <!-- Close Button -->
-            <button type="button" onclick="closeBookingPreviewModal()" class="w-full py-2.5 bg-primary hover:bg-primary-container text-white font-semibold text-sm rounded-lg transition-colors shadow-md">
+            <button type="button" onclick="closeBookingPreviewModal()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-lg transition-colors shadow-sm">
                 Tutup
             </button>
         </div>
     </div>
 </div>
 
+<!-- Cancel Booking Confirmation Modal -->
+<div id="cancelBookingModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-2xl w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="cancelBookingModalContent">
+        <!-- Modal Body -->
+        <div class="p-6 flex flex-col items-center text-center">
+            <!-- Warning Alert Icon -->
+            <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center p-4 mb-4">
+                <span class="material-symbols-outlined text-[32px]">warning</span>
+            </div>
+
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Konfirmasi Pembatalan</h3>
+            <p class="text-sm text-slate-500 mb-4 leading-relaxed">
+                Apakah Anda yakin ingin membatalkan booking ini?<br>Tindakan ini tidak dapat dibatalkan.
+            </p>
+            
+            <!-- Info Banner inside Modal -->
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 text-left mb-6 w-full flex items-start gap-2">
+                <span class="material-symbols-outlined text-blue-500 text-sm mt-0.5">info</span>
+                <div>
+                    <h5 class="text-xs font-bold text-blue-900">Informasi Penting</h5>
+                    <p class="text-[10px] text-blue-700 mt-0.5 leading-normal">
+                        Mengubah slot atau membatalkan booking akan menggeser antrean pelanggan. Pastikan pelanggan sudah menyetujui sebelum melakukan pembatalan.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Form & Actions -->
+            <form id="cancelBookingForm" method="POST" class="w-full flex gap-3">
+                <?= csrf_field() ?>
+                <button type="button" onclick="closeCancelBookingModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-lg transition-colors">
+                    Batal
+                </button>
+                <button type="submit" class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm rounded-lg transition-colors shadow-md">
+                    Batalkan Booking
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-    function showBookingPreviewModal(code, cust, slot, pkg, queue, badgeText, badgeClass) {
+    function showBookingPreviewModal(id, code, cust, slot, pkg, queue, badgeText, badgeClass, rawStatus, editCount) {
         const modal = document.getElementById('bookingPreviewModal');
         const content = document.getElementById('bookingPreviewModalContent');
         
@@ -463,6 +515,19 @@
         statusEl.textContent = badgeText;
         statusEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ' + badgeClass;
 
+        const editBtn = document.getElementById('modalBkEditBtn');
+        const warningEl = document.getElementById('modalBkEditWarning');
+
+        // Allow Ubah Booking only once
+        if (parseInt(editCount || 0) >= 1) {
+            editBtn.classList.add('hidden');
+            if (warningEl) warningEl.classList.add('hidden');
+        } else {
+            editBtn.href = '<?= base_url('admin/bookings/') ?>/' + id + '/edit';
+            editBtn.classList.remove('hidden');
+            if (warningEl) warningEl.classList.remove('hidden');
+        }
+
         // Show Modal
         modal.classList.remove('hidden');
         setTimeout(() => {
@@ -474,6 +539,32 @@
     function closeBookingPreviewModal() {
         const modal = document.getElementById('bookingPreviewModal');
         const content = document.getElementById('bookingPreviewModalContent');
+
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    function showCancelBookingModal(actionUrl) {
+        const modal = document.getElementById('cancelBookingModal');
+        const content = document.getElementById('cancelBookingModalContent');
+        const form = document.getElementById('cancelBookingForm');
+        
+        form.action = actionUrl;
+
+        // Show Modal
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeCancelBookingModal() {
+        const modal = document.getElementById('cancelBookingModal');
+        const content = document.getElementById('cancelBookingModalContent');
 
         content.classList.remove('scale-100', 'opacity-100');
         content.classList.add('scale-95', 'opacity-0');

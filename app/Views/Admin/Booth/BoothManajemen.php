@@ -28,8 +28,8 @@
                 <p class="font-body-sm text-body-sm text-on-surface-variant">Kelola status operasional dan inventaris perangkat keras Anda.</p>
             </div>
             <div class="mt-4 md:mt-0">
-                <a href="<?= base_url('admin/booths/export') ?>"
-                   class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2.5 rounded-lg font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm whitespace-nowrap">
+                <a href="<?= base_url('admin/booths/export') ?>" onclick="showExportNotif()"
+                   class="bg-white border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg font-label-bold text-label-bold flex items-center gap-2 hover:bg-blue-50 hover:border-blue-700 hover:text-blue-700 transition-colors shadow-sm whitespace-nowrap">
                     <span class="material-symbols-outlined text-[18px]">cloud_download</span>
                     Ekspor Laporan
                 </a>
@@ -38,15 +38,27 @@
 
         <!-- Flash Messages -->
         <?php if (session()->getFlashdata('success')): ?>
-            <div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm font-medium">
+            <div id="flash-message-success" class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2">
+                <span class="material-symbols-outlined text-green-500">check_circle</span>
                 <?= esc(session()->getFlashdata('success')) ?>
             </div>
         <?php endif; ?>
         <?php if (session()->getFlashdata('error')): ?>
-            <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-medium">
+            <div id="flash-message-error" class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2">
+                <span class="material-symbols-outlined text-red-500">error</span>
                 <?= esc(session()->getFlashdata('error')) ?>
             </div>
         <?php endif; ?>
+
+        <script>
+            setTimeout(() => {
+                const ids = ['flash-message-success', 'flash-message-error'];
+                ids.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.remove();
+                });
+            }, 1000);
+        </script>
         <?php if (!empty(session()->getFlashdata('errors'))): ?>
             <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-medium">
                 <ul class="list-disc list-inside space-y-1">
@@ -58,9 +70,9 @@
         <?php endif; ?>
 
         <!-- Stats Bento Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <!-- Total Mesin -->
-            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">devices</span>
                     <span class="text-blue-600 font-label-bold text-label-bold">Total</span>
@@ -69,7 +81,7 @@
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statTotal ?? 0 ?> Unit</h3>
             </div>
             <!-- Aktif -->
-            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-emerald-600 bg-emerald-50 p-2 rounded-lg material-symbols-outlined">check_circle</span>
                     <span class="text-emerald-600 font-label-bold text-label-bold">
@@ -80,7 +92,7 @@
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statActive ?? 0 ?> Unit</h3>
             </div>
             <!-- Maintenance -->
-            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-tertiary bg-tertiary-fixed p-2 rounded-lg material-symbols-outlined">build</span>
                     <span class="text-tertiary font-label-bold text-label-bold">
@@ -91,7 +103,7 @@
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statMaintenance ?? 0 ?> Unit</h3>
             </div>
             <!-- Antrean Aktif -->
-            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-secondary bg-secondary-fixed p-2 rounded-lg material-symbols-outlined">queue</span>
                 </div>
@@ -105,7 +117,7 @@
         <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
             
             <!-- Table Header -->
-            <div class="p-5 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center bg-white gap-4">
+            <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center bg-white gap-4">
                 <div class="flex items-center gap-3 w-full md:w-auto">
                     <div class="w-1 h-6 bg-primary rounded-full"></div>
                     <h4 class="font-h2 text-h2 text-on-surface">Daftar Mesin Booth</h4>
@@ -113,12 +125,12 @@
                 <a href="<?= base_url('admin/booths/create') ?>"
                    class="bg-primary text-white px-4 py-2 rounded-lg font-label-bold text-label-bold flex items-center gap-2 hover:bg-primary-container transition-colors shadow-sm whitespace-nowrap w-full md:w-auto justify-center">
                     <span class="material-symbols-outlined text-[18px]">devices</span>
-                    Tambah Booth Baru
+                    Tambah Booth
                 </a>
             </div>
 
             <!-- Search & Filter Bar -->
-            <div class="p-4 bg-slate-50/50 border-b border-slate-200 flex flex-col sm:flex-row gap-3">
+            <div class="p-6 bg-white flex flex-col sm:flex-row gap-3">
                 <form method="get" action="<?= base_url('admin/booths') ?>" class="flex flex-col md:flex-row flex-1 gap-3 w-full">
                     <!-- Search Input -->
                     <div class="relative flex-1">
@@ -148,7 +160,7 @@
             <!-- Data Table -->
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
-                    <thead class="bg-slate-50/50 border-b border-slate-200">
+                    <thead class="border-y border-slate-100 bg-white">
                         <tr>
                             <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">ID Booth</th>
                             <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Nama Mesin</th>
@@ -160,7 +172,7 @@
                             <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-outline-variant">
+                    <tbody class="divide-y divide-slate-50 bg-white">
                         <?php if (!empty($booths)): ?>
                             <?php foreach ($booths as $booth): ?>
                                 <?php
@@ -205,7 +217,7 @@
                                     <td class="p-4 font-data-tabular text-data-tabular text-outline text-center">
                                         <?= date('d M Y, H:i', strtotime($booth['created_at'])) ?>
                                     </td>
-                                    <td class="p-4 text-center space-x-2">
+                                    <td class="p-4 text-center flex justify-center gap-2">
                                         <button type="button" onclick="showBoothDetailModal('<?= esc($booth['id'], 'js') ?>', '<?= esc($booth['name'], 'js') ?>', '<?= esc($booth['ip_address'] ?? '-', 'js') ?>', '<?= esc($booth['latitude'] ?? '', 'js') ?>', '<?= esc($booth['longitude'] ?? '', 'js') ?>', '<?= date('d M Y, H:i', strtotime($booth['created_at'])) ?>', '<?= date('d M Y, H:i', strtotime($booth['updated_at'])) ?>', '<?= $booth['status'] ?>', '<?= esc($booth['current_queue'] ?? 0, 'js') ?>', '<?= esc($booth['active_booking_id'] ?? '', 'js') ?>')"
                                            class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Detail Booth">
                                             <span class="material-symbols-outlined text-[20px]">visibility</span>
@@ -221,7 +233,7 @@
                                         </a>
                                         <?php if ($booth['status'] === 'active'): ?>
                                             <button type="button"
-                                                    class="inline p-1.5 text-amber-600 hover:bg-amber-50 rounded transition-colors" title="Set Maintenance"
+                                                    class="inline p-1.5 text-tertiary hover:bg-tertiary-fixed rounded transition-colors" title="Set Maintenance"
                                                     onclick="showMaintenanceModal('<?= esc($booth['id'], 'js') ?>', '<?= esc($booth['name'], 'js') ?>', 'maintenance')">
                                                 <span class="material-symbols-outlined text-[20px]">engineering</span>
                                             </button>
@@ -253,23 +265,23 @@
             </div>
 
             <!-- Pagination -->
-            <div class="px-6 py-4 bg-surface-container-low border-t border-outline-variant flex items-center justify-between">
+            <div class="mt-auto p-6 bg-white border-t border-slate-100 flex items-center justify-between">
                 <span class="text-body-sm text-outline">
                     Menampilkan <?= count($booths ?? []) ?> dari <?= $totalBooths ?? 0 ?> mesin
                 </span>
-                        <div class="flex gap-1">
+                        <div class="flex gap-2">
                             <a href="<?= base_url('admin/booths?page=' . max(1, ($currentPage ?? 1) - 1) . '&q=' . ($keyword ?? '') . '&status=' . ($filterStatus ?? '')) ?>"
-                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_left</span>
                             </a>
                             <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
                                 <a href="<?= base_url('admin/booths?page=' . $i . '&q=' . ($keyword ?? '') . '&status=' . ($filterStatus ?? '')) ?>"
-                                   class="w-8 h-8 flex items-center justify-center border rounded text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
+                                   class="w-8 h-8 flex items-center justify-center border rounded-lg text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                                     <?= $i ?>
                                 </a>
                             <?php endfor; ?>
                             <a href="<?= base_url('admin/booths?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&q=' . ($keyword ?? '') . '&status=' . ($filterStatus ?? '')) ?>"
-                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_right</span>
                             </a>
                         </div>
@@ -324,14 +336,11 @@
 <div id="qrModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-sm w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="qrModalContent">
         <!-- Modal Header -->
-        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
             <h4 class="font-bold text-slate-800 flex items-center gap-2">
                 <span class="material-symbols-outlined text-purple-600">qr_code_2</span>
                 QR Code Kiosk Booth
             </h4>
-            <button type="button" onclick="closeQrModal()" class="text-slate-400 hover:text-slate-600">
-                <span class="material-symbols-outlined text-[20px]">close</span>
-            </button>
         </div>
         
         <!-- Modal Body -->
@@ -476,19 +485,19 @@
 
         document.getElementById('maintModalIcon').textContent    = isMaintenance ? 'engineering' : 'play_circle';
         document.getElementById('maintModalIconWrap').className  = isMaintenance
-            ? 'w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4'
+            ? 'w-14 h-14 rounded-full bg-tertiary-fixed flex items-center justify-center mx-auto mb-4'
             : 'w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4';
         document.getElementById('maintModalIcon').className      = isMaintenance
-            ? 'material-symbols-outlined text-4xl text-amber-600'
+            ? 'material-symbols-outlined text-4xl text-tertiary'
             : 'material-symbols-outlined text-4xl text-emerald-600';
         document.getElementById('maintModalTitle').textContent   = isMaintenance ? 'Set ke Maintenance?' : 'Aktifkan Kembali?';
         document.getElementById('maintModalDesc').innerHTML      = isMaintenance
-            ? `Mesin <strong>${boothName}</strong> akan dialihkan ke mode <span class="font-bold text-amber-600">Maintenance</span> dan tidak dapat menerima reservasi baru.`
+            ? `Mesin <strong>${boothName}</strong> akan dialihkan ke mode <span class="font-bold text-tertiary">Maintenance</span> dan tidak dapat menerima reservasi baru.`
             : `Mesin <strong>${boothName}</strong> akan diaktifkan kembali ke status <span class="font-bold text-emerald-600">Aktif</span>.`;
 
         const confirmBtn = document.getElementById('maintConfirmBtn');
         confirmBtn.className = isMaintenance
-            ? 'flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors'
+            ? 'flex-1 py-2.5 bg-tertiary hover:opacity-90 text-white font-bold text-sm rounded-lg shadow-md transition-all'
             : 'flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors';
         confirmBtn.textContent = isMaintenance ? 'Ya, Set Maintenance' : 'Ya, Aktifkan';
 
@@ -512,18 +521,17 @@
 
 <!-- Maintenance / Activate Confirmation Modal -->
 <div id="maintenanceModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-sm w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="maintenanceModalContent">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="maintenanceModalContent">
         <!-- Header -->
-        <div class="p-5 border-b border-slate-100 flex items-center bg-slate-50/50">
+        <div class="p-5 border-b border-slate-100 flex items-center bg-white">
             <h4 class="font-bold text-slate-800 flex items-center gap-2">
-                <span class="material-symbols-outlined text-amber-500">build_circle</span>
                 Konfirmasi Aksi Booth
             </h4>
         </div>
         <!-- Body -->
         <div class="p-6 text-center">
-            <div id="maintModalIconWrap" class="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
-                <span id="maintModalIcon" class="material-symbols-outlined text-4xl text-amber-600">engineering</span>
+            <div id="maintModalIconWrap" class="w-14 h-14 rounded-full bg-tertiary-fixed flex items-center justify-center mx-auto mb-4">
+                <span id="maintModalIcon" class="material-symbols-outlined text-4xl text-tertiary">engineering</span>
             </div>
             <h3 id="maintModalTitle" class="text-lg font-black text-slate-800 mb-2">Set ke Maintenance?</h3>
             <p id="maintModalDesc" class="text-sm text-slate-500 leading-relaxed mb-6"></p>
@@ -535,7 +543,7 @@
                         Batal
                     </button>
                     <button type="submit" id="maintConfirmBtn"
-                            class="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors">
+                            class="flex-1 py-2.5 bg-tertiary hover:opacity-90 text-white font-bold text-sm rounded-lg shadow-md transition-all">
                         Ya, Set Maintenance
                     </button>
                 </div>
@@ -549,7 +557,7 @@
     <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-4xl w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300 flex flex-col" id="boothDetailModalContent">
         
         <!-- Modal Header -->
-        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
             <h4 class="font-bold text-slate-800 flex items-center gap-2">
                 <span class="material-symbols-outlined text-emerald-600">visibility</span>
                 Detail Mesin Booth
@@ -609,9 +617,9 @@
                         </div>
                         <div class="flex items-center justify-between border-b border-slate-200 pb-2">
                             <span class="font-semibold text-slate-500">Antrean Saat Ini</span>
-                            <div class="flex items-center gap-1">
-                                <span class="text-lg font-black text-slate-700 leading-none" id="modalBdQueue"></span>
-                                <span class="text-sm text-slate-500 font-semibold leading-none">Pelanggan</span>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-lg font-black text-slate-700" id="modalBdQueue"></span>
+                                <span class="text-[10px] text-slate-400 font-semibold">Pelanggan</span>
                             </div>
                         </div>
                         <div class="flex flex-col gap-2">
@@ -657,11 +665,11 @@
         if (status === 'active') {
             statusEl.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800';
             dotEl.className = 'w-2 h-2 rounded-full mr-2 bg-emerald-500';
-            textEl.textContent = 'Aktif & Online';
+            textEl.textContent = 'Aktif';
         } else if (status === 'maintenance') {
             statusEl.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800';
             dotEl.className = 'w-2 h-2 rounded-full mr-2 bg-amber-500';
-            textEl.textContent = 'Maintenance / Perbaikan';
+            textEl.textContent = 'Maintenance';
         } else {
             statusEl.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700';
             dotEl.className = 'w-2 h-2 rounded-full mr-2 bg-slate-500';
@@ -711,6 +719,62 @@
         content.classList.add('scale-95', 'opacity-0');
         setTimeout(() => {
             modal.classList.add('hidden');
+        }, 300);
+    }
+</script>
+
+<!-- Delete Confirmation Modal (Premium) -->
+<div id="deleteConfirmModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/40 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+    <div id="deleteConfirmModalContent" class="bg-white rounded-3xl p-10 max-w-lg w-full mx-4 border border-slate-100 transform scale-95 opacity-0 transition-all duration-300 flex flex-col items-center text-center">
+        
+        <div class="w-20 h-20 rounded-2xl bg-red-50/70 flex items-center justify-center mb-6">
+            <span class="material-symbols-outlined text-[32px] text-red-500">delete</span>
+        </div>
+        
+        <h3 class="text-2xl font-black text-slate-900 mb-3">Konfirmasi Hapus</h3>
+        <p class="text-[16px] text-slate-500 leading-relaxed mb-8">
+            Apakah Anda yakin ingin menghapus mesin booth ini?<br>Tindakan ini tidak dapat dibatalkan.
+        </p>
+        
+        <div class="flex gap-4 w-full">
+            <button onclick="closeUniversalDeleteModal()" class="flex-1 py-3.5 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold text-base rounded-2xl transition-all">Batal</button>
+            <form id="deleteForm" method="post" action="" class="flex-1">
+                <?= csrf_field() ?>
+                <button type="submit" class="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-bold text-base rounded-2xl transition-all">Hapus</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openUniversalDeleteModal(url, name, titleText) {
+        const modal = document.getElementById('deleteConfirmModal');
+        const content = document.getElementById('deleteConfirmModalContent');
+        
+        document.getElementById('deleteForm').action = url;
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        // Trigger animation
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeUniversalDeleteModal() {
+        const modal = document.getElementById('deleteConfirmModal');
+        const content = document.getElementById('deleteConfirmModalContent');
+        
+        modal.classList.add('opacity-0');
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }, 300);
     }
 </script>

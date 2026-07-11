@@ -214,7 +214,7 @@ class SessionAndPhotoController extends BaseController
     }
 
     // =========================================================================
-    // EXPORT — Download CSV semua sesi
+    // EXPORT — Download Excel semua sesi
     // =========================================================================
     public function export()
     {
@@ -226,40 +226,72 @@ class SessionAndPhotoController extends BaseController
             ->orderBy('s.created_at', 'DESC')
             ->get()->getResultArray();
 
-        // Nama file dinamis dengan format Hari, Tanggal Bulan Tahun, Jam-Menit-Detik
-        $hariIndo = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        $hari = $hariIndo[date('w')];
-        $tanggal = date('d');
-        $bulan = $bulanIndo[date('n')];
-        $tahun = date('Y');
-        $waktu = date('H-i-s');
-        $filename = "Laporan Sesi Foto {$hari}, {$tanggal} {$bulan} {$tahun}, {$waktu}.csv";
-
-        header('Content-Type: text/csv');
+        $filename = 'Laporan_Galeri_Sesi_' . date('Ymd_His') . '.csv';
+        
+        // Header untuk file CSV
+        header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
-
+        header('Cache-Control: max-age=0');
+        
+        // Buka stream ke output
         $output = fopen('php://output', 'w');
         
-        // Tambahkan UTF-8 BOM dan deklarasi separator khusus agar rapi di Excel
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-        fputs($output, "sep=,\n");
+        // Tambahkan BOM agar karakter terbaca benar di Excel
+        fputs($output, $bom =(chr(0xEF) . chr(0xBB) . chr(0xBF)));
         
-        fputcsv($output, ['ID Sesi', 'Booking ID', 'Frame', 'Filter', 'Email Penerima', 'Drive URL', 'Waktu']);
+        // Force Excel to use semicolon separator (optional but helps some regions)
+        fputs($output, "sep=;\n");
+
+        $adminName = session('adminName') ?? session('admin_name') ?? 'Admin';
+        $adminRole = session('adminRole') ?? session('admin_role') ?? 'Unknown Role';
+        $adminEmail = session('adminEmail');
+        
+        if (!$adminEmail && session('adminId')) {
+            $adminModel = new \App\Models\AdminModel();
+            $adminData = $adminModel->find(session('adminId'));
+            if ($adminData) {
+                $adminEmail = $adminData['email'];
+                $adminName = $adminData['name'];
+            }
+        }
+        $adminEmail = $adminEmail ?? 'No Email';
+        
+        $penanggungJawab = $adminName . ' (' . $adminRole . ') - ' . $adminEmail;
+
+        $currentTime = date('d M Y, H:i:s');
+        $currentDate = date('d F Y');
+
+        // Header Metadata
+        fputcsv($output, ['LAPORAN DAFTAR RIWAYAT SESI TERKINI'], ';');
+        fputcsv($output, [], ';');
+        fputcsv($output, ['Penanggung Jawab: ' . $penanggungJawab], ';');
+        fputcsv($output, ['Waktu Realtime: ' . $currentTime . ' WIB'], ';');
+        fputcsv($output, ['Keterangan Tanggal: Diekspor pada ' . $currentDate], ';');
+        fputcsv($output, [], ';');
+
+        // Header Tabel Kolom
+        fputcsv($output, [
+            'ID Sesi',
+            'Kode Booking',
+            'Frame',
+            'Filter',
+            'Email Penerima',
+            'Drive URL',
+            'Waktu Dibuat'
+        ], ';');
+
+        // Isi Data Sesi
         foreach ($sessions as $s) {
             fputcsv($output, [
-                $s['id'], $s['booking_id'], $s['frame_name'], $s['filter_name'],
-                $s['email_recipient'], $s['drive_folder_url'], $s['created_at'],
-            ]);
+                '#' . $s['id'],
+                $s['booking_id'] ?? '-',
+                $s['frame_name'] ?? 'N/A',
+                $s['filter_name'] ?? 'N/A',
+                $s['email_recipient'] ?? '-',
+                $s['drive_folder_url'] ?? '-',
+                $s['created_at']
+            ], ';');
         }
-        
-        // Tanda Tangan Pertanggungjawaban
-        fputcsv($output, []); // Baris kosong
-        fputcsv($output, []); // Baris kosong
-        fputcsv($output, ['--- RIWAYAT PERTANGGUNGJAWABAN EKSPOR ---']);
-        fputcsv($output, ['Dihasilkan Oleh:', session()->get('adminName') ?? 'Admin (Sistem)']);
-        fputcsv($output, ['Waktu Unduh:', date('Y-m-d H:i:s')]);
-        fputcsv($output, ['Catatan Khusus:', 'Laporan ini dihasilkan secara otomatis oleh sistem CuitBox Studio dan sah sebagai bukti audit operasional.']);
 
         fclose($output);
         exit;

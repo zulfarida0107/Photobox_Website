@@ -116,20 +116,9 @@ class BoothController extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        // Auto-generate ID: PBX-XXXXX — gunakan MAX untuk menghindari duplicate saat ada data dihapus
-        $lastRow = $this->boothModel->db
-            ->table('booths')
-            ->select('id')
-            ->orderBy('id', 'DESC')
-            ->limit(1)
-            ->get()->getRowArray();
-
-        $lastNum = 0;
-        if ($lastRow) {
-            // Ambil angka di belakang prefix "PBX-"
-            $lastNum = (int) preg_replace('/\D/', '', $lastRow['id']);
-        }
-        $newId = sprintf('PBX-%05d', $lastNum + 1);
+        // Auto-generate ID: PBX-XXXXX
+        $count = $this->boothModel->countAll();
+        $newId = sprintf('PBX-%05d', $count + 1);
 
         $this->boothModel->insert([
             'id'            => $newId,
@@ -276,26 +265,42 @@ class BoothController extends BaseController
     {
         $booths = $this->boothModel->orderBy('created_at', 'DESC')->findAll();
 
-        // Nama file dinamis dengan format Hari, Tanggal Bulan Tahun, Jam-Menit-Detik
-        $hariIndo = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        $hari = $hariIndo[date('w')];
-        $tanggal = date('d');
-        $bulan = $bulanIndo[date('n')];
-        $tahun = date('Y');
-        $waktu = date('H-i-s');
-        $filename = "Laporan Booth {$hari}, {$tanggal} {$bulan} {$tahun}, {$waktu}.csv";
-
-        header('Content-Type: text/csv');
+        $filename = 'Laporan_Mesin_Booth_' . date('Ymd_His') . '.csv';
+        header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
 
         $output = fopen('php://output', 'w');
+        fputs($output, $bom =(chr(0xEF) . chr(0xBB) . chr(0xBF)));
+        fputs($output, "sep=;\n");
+
+        $adminName = session('adminName') ?? session('admin_name') ?? 'Admin';
+        $adminRole = session('adminRole') ?? session('admin_role') ?? 'Unknown Role';
+        $adminEmail = session('adminEmail');
         
-        // Tambahkan UTF-8 BOM dan deklarasi separator khusus agar rapi di Excel
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-        fputs($output, "sep=,\n");
+        if (!$adminEmail && session('adminId')) {
+            $adminModel = new \App\Models\AdminModel();
+            $adminData = $adminModel->find(session('adminId'));
+            if ($adminData) {
+                $adminEmail = $adminData['email'];
+                $adminName = $adminData['name'];
+            }
+        }
+        $adminEmail = $adminEmail ?? 'No Email';
         
-        fputcsv($output, ['ID Booth', 'Nama Mesin', 'Status', 'Antrean Sekarang', 'Terdaftar']);
+        $penanggungJawab = $adminName . ' (' . $adminRole . ') - ' . $adminEmail;
+
+        $currentTime = date('d M Y, H:i:s');
+        $currentDate = date('d F Y');
+
+        fputcsv($output, ['LAPORAN MESIN BOOTH'], ';');
+        fputcsv($output, [], ';');
+        fputcsv($output, ['Penanggung Jawab: ' . $penanggungJawab], ';');
+        fputcsv($output, ['Waktu Realtime: ' . $currentTime . ' WIB'], ';');
+        fputcsv($output, ['Keterangan Tanggal: Diekspor pada ' . $currentDate], ';');
+        fputcsv($output, [], ';');
+
+        fputcsv($output, ['ID Booth', 'Nama Mesin', 'Status', 'Antrean Sekarang', 'Terdaftar'], ';');
         foreach ($booths as $b) {
             fputcsv($output, [
                 $b['id'],
@@ -303,17 +308,8 @@ class BoothController extends BaseController
                 $b['status'],
                 $b['current_queue'],
                 $b['created_at'],
-            ]);
+            ], ';');
         }
-        
-        // Tanda Tangan Pertanggungjawaban
-        fputcsv($output, []); // Baris kosong
-        fputcsv($output, []); // Baris kosong
-        fputcsv($output, ['--- RIWAYAT PERTANGGUNGJAWABAN EKSPOR ---']);
-        fputcsv($output, ['Dihasilkan Oleh:', session()->get('adminName') ?? 'Admin (Sistem)']);
-        fputcsv($output, ['Waktu Unduh:', date('Y-m-d H:i:s')]);
-        fputcsv($output, ['Catatan Khusus:', 'Laporan ini dihasilkan secara otomatis oleh sistem CuitBox Studio dan sah sebagai bukti audit operasional.']);
-
         fclose($output);
         exit;
     }

@@ -5,7 +5,7 @@
     <div class="p-6 flex-1">
 
         <!-- Breadcrumbs -->
-        <nav class="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 mb-4">
+        <nav class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-4">
             <a class="hover:text-blue-700" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
             <span class="material-symbols-outlined text-[14px]">chevron_right</span>
             <a class="hover:text-blue-700" href="<?= base_url('admin/frames') ?>">Manajemen Aset Desain</a>
@@ -20,10 +20,10 @@
         </div>
 
         <!-- Form Card -->
-        <div class="bg-white border border-outline-variant rounded-xl shadow-sm w-full overflow-hidden">
+        <div class="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden">
             <div class="p-6 border-b border-outline-variant bg-slate-50/50 flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary">tune</span>
-                <h4 class="font-bold text-on-surface">Konfigurasi Preset Filter</h4>
+                <span class="material-symbols-outlined text-primary">filter_b_and_w</span>
+                <h4 class="font-bold text-on-surface">Konfigurasi Filter</h4>
             </div>
 
             <!-- Error Alerts -->
@@ -69,9 +69,9 @@
                     </select>
                 </div>
 
-                <div class="flex flex-col-reverse sm:flex-row sm:items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                    <a href="<?= base_url('admin/frames') ?>" class="w-full sm:w-auto text-center px-5 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors">Batal</a>
-                    <button type="submit" class="w-full sm:w-auto justify-center px-5 py-2.5 bg-primary text-white font-semibold text-sm rounded-lg shadow-md hover:bg-blue-800 transition-all flex items-center gap-2">
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                    <a href="<?= base_url('admin/frames') ?>" class="px-5 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors">Batal</a>
+                    <button type="submit" class="px-5 py-2.5 bg-primary text-white font-semibold text-sm rounded-lg shadow-md hover:bg-blue-800 transition-all flex items-center gap-2">
                         <span class="material-symbols-outlined text-[18px]">save</span>
                         <?= isset($filter) ? 'Perbarui Filter' : 'Simpan Filter' ?>
                     </button>
