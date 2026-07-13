@@ -4,12 +4,15 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>CuitBox Studio - Booking Session</title>
+    
     <!-- Tailwind CSS v3 CDN -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com" rel="preconnect">
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <script>
         tailwind.config = {
             theme: {
@@ -28,16 +31,20 @@
             }
         }
     </script>
+    
     <style>
+        /* ===== LAYOUT & BACKGROUND ===== */
         .gradient-bg {
             background: linear-gradient(135deg, #B8E4FF 0%, #FCD2E8 100%);
             background-attachment: fixed;
         }
+        
         .main-container-rounded {
             border-radius: 24px;
             overflow: hidden;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
+        
         .page-wrapper {
             background-color: #e5e7eb;
             min-height: 100vh;
@@ -46,63 +53,30 @@
             justify-content: center;
             padding: 20px;
         }
+        
         @media (min-width: 640px) {
             .page-wrapper {
                 padding: 40px;
             }
         }
+        
         .header-bg {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(20px);
         }
+        
         .footer-bg {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(20px);
         }
-        .time-slot {
-            border: 2px solid #e2e8f0;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            background: white;
-        }
-        .time-slot:hover:not(.full) {
-            border-color: #bef264;
-            box-shadow: 0 4px 12px rgba(190, 242, 100, 0.2);
-        }
-        .time-slot.selected {
-            background: #bef264;
-            border-color: #bef264;
-            box-shadow: 0 4px 12px rgba(190, 242, 100, 0.3);
-        }
-        .time-slot.selected .time-text {
-            color: #1e293b;
-        }
-        .time-slot.selected .status-text {
-            color: #1e293b;
-            font-weight: bold;
-        }
-        .time-slot.available {
-            border-color: #bef264;
-        }
-        .time-slot.full {
-            background-color: #f8fafc;
-            border-color: #e2e8f0;
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .time-slot.full .time-text {
-            color: #94a3b8;
-        }
+        
+        /* ===== CALENDAR ===== */
         .calendar-card {
             background: rgba(255, 255, 255, 0.9);
             border-radius: 16px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
         }
-        .session-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-        }
+        
         .date-cell {
             cursor: pointer;
             transition: all 0.2s ease;
@@ -111,9 +85,11 @@
             font-size: 14px;
             color: #1e293b;
         }
-        .date-cell:hover {
+        
+        .date-cell:hover:not(.empty) {
             background: rgba(190, 242, 100, 0.3);
         }
+        
         .date-cell.selected-date {
             background: #000;
             color: white;
@@ -122,20 +98,75 @@
             border-radius: 8px;
             padding: 4px 0;
         }
+        
         .date-cell.empty {
             cursor: default;
         }
+        
         .date-cell.empty:hover {
             background: transparent;
         }
+        
         .day-header {
             color: #1e293b;
             font-weight: 600;
         }
+        
+        /* ===== TIME SLOTS ===== */
+        .session-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+        }
+        
         .session-label {
             color: #1e293b;
             font-weight: 700;
         }
+        
+        .time-slot {
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: white;
+        }
+        
+        .time-slot:hover:not(.full) {
+            border-color: #bef264;
+            box-shadow: 0 4px 12px rgba(190, 242, 100, 0.2);
+        }
+        
+        .time-slot.selected {
+            background: #bef264;
+            border-color: #bef264;
+            box-shadow: 0 4px 12px rgba(190, 242, 100, 0.3);
+        }
+        
+        .time-slot.selected .time-text {
+            color: #1e293b;
+        }
+        
+        .time-slot.selected .status-text {
+            color: #1e293b;
+            font-weight: bold;
+        }
+        
+        .time-slot.available {
+            border-color: #bef264;
+        }
+        
+        .time-slot.full {
+            background-color: #f8fafc;
+            border-color: #e2e8f0;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .time-slot.full .time-text {
+            color: #94a3b8;
+        }
+        
+        /* ===== BUTTONS ===== */
         .btn-primary {
             background: #bef264;
             box-shadow: 0 10px 15px -3px rgba(190, 242, 100, 0.4);
@@ -152,34 +183,22 @@
             border: none;
             cursor: pointer;
         }
+        
         .btn-primary:hover {
             transform: scale(1.02);
             box-shadow: 0 15px 25px -5px rgba(190, 242, 100, 0.5);
         }
+        
         .btn-primary:active {
             transform: scale(0.98);
         }
-        .confirmation-box {
-            background: #bef264;
-            border: none;
-            border-radius: 16px;
-            padding: 16px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(190, 242, 100, 0.2);
+        
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
         }
-        .confirmation-box .label {
-            font-size: 10px;
-            font-weight: 700;
-            color: #1e293b;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .confirmation-box .value {
-            font-size: 14px;
-            font-weight: 700;
-            color: #1e293b;
-            margin-top: 2px;
-        }
+        
         .btn-back {
             background: #1e293b;
             color: white;
@@ -193,31 +212,53 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
+        
         .btn-back:hover {
             background: #334155;
             transform: scale(1.02);
         }
+        
         .btn-back:active {
             background: #bef264;
             color: #1e293b;
             transform: scale(0.98);
             box-shadow: 0 4px 12px rgba(190, 242, 100, 0.3);
         }
-        .btn-back.clicked {
+        
+        /* ===== CONFIRMATION BOX ===== */
+        .confirmation-box {
             background: #bef264;
+            border: none;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(190, 242, 100, 0.2);
+        }
+        
+        .confirmation-box .label {
+            font-size: 10px;
+            font-weight: 700;
             color: #1e293b;
-            box-shadow: 0 4px 12px rgba(190, 242, 100, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .confirmation-box .value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-top: 2px;
         }
     </style>
 </head>
 <body>
-    <!-- BEGIN: Page Wrapper with Gray Background -->
+    <!-- BEGIN: Page Wrapper -->
     <div class="page-wrapper">
-        <!-- BEGIN: MainContainer with Gradient #B8E4FF to #FCD2E8 -->
+        <!-- BEGIN: MainContainer -->
         <div class="max-w-[1200px] w-full main-container-rounded gradient-bg">
 
-            <!-- BEGIN: MainHeader -->
-            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">
+            <!-- BEGIN: Header -->
+            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100">
                 <div class="flex items-center">
                     <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
                 </div>
@@ -234,10 +275,10 @@
                     </button>
                 </div>
             </header>
-            <!-- END: MainHeader -->
+            <!-- END: Header -->
 
             <!-- BEGIN: HeroSection -->
-            <main class="relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm" data-purpose="hero-content">
+            <main class="relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm">
                 <div class="text-center mb-8">
                     <h2 class="text-2xl font-extrabold mb-1 text-slate-800">Booking Session</h2>
                     <p class="text-[10px] text-slate-600 font-medium">Pilih Tanggal &amp; Waktu Sesi Fotobox</p>
@@ -246,7 +287,7 @@
                 <!-- Content Layout: Calendar & Session -->
                 <div class="flex flex-col md:flex-row gap-6">
                     <!-- Left Column: Calendar -->
-                    <section class="flex-1" data-purpose="calendar-section">
+                    <section class="flex-1">
                         <div class="calendar-card p-6">
                             <div class="flex items-center justify-between mb-6">
                                 <h2 class="text-lg font-bold" id="month-year-label">Oktober 2024</h2>
@@ -279,7 +320,7 @@
                     </section>
 
                     <!-- Right Column: Sesi Tersedia -->
-                    <section class="flex-1" data-purpose="session-selection">
+                    <section class="flex-1">
                         <div class="session-card p-6 flex flex-col h-full">
                             <div class="flex items-center space-x-3 mb-4">
                                 <div class="bg-brand-lime p-2 rounded-full" style="background:#d9f99d;">
@@ -355,17 +396,26 @@
                                     <p class="value" id="confirmation-display">Pilih tanggal &amp; waktu</p>
                                 </div>
                                 
-                                <!-- Button Lanjutkan Pembayaran -->
-                                <button class="btn-primary">
-                                    <span>Lanjutkan Pembayaran</span>
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                                    </svg>
-                                </button>
+                                <!-- Form untuk Submit Schedule -->
+                                <form action="<?= base_url('schedule/submit') ?>" method="POST" id="scheduleForm">
+                                    <?= csrf_field() ?>
+                                    
+                                    <!-- Hidden fields -->
+                                    <input type="hidden" name="selected_date" id="selected_date" value="">
+                                    <input type="hidden" name="selected_time" id="selected_time" value="">
+                                    
+                                    <!-- Button Lanjutkan ke Booth -->
+                                    <button type="submit" class="btn-primary" id="submitScheduleBtn">
+                                        <span>Lanjutkan ke Pemilihan Booth</span>
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                        </svg>
+                                    </button>
+                                </form>
                                 
-                                <!-- Button Kembali ke Pemilihan Booth -->
+                                <!-- Button Kembali ke Register -->
                                 <button class="btn-back" id="btn-back">
-                                    Kembali ke Pemilihan Booth
+                                    Kembali ke Registrasi
                                 </button>
                             </div>
                         </div>
@@ -375,7 +425,7 @@
             <!-- END: HeroSection -->
 
             <!-- BEGIN: Footer -->
-            <footer class="flex flex-col sm:flex-row items-center justify-between px-6 sm:px-8 py-4 footer-bg border-t border-gray-100 text-slate-500 text-xs font-medium gap-2 sm:gap-0" data-purpose="site-footer">
+            <footer class="flex flex-col sm:flex-row items-center justify-between px-6 sm:px-8 py-4 footer-bg border-t border-gray-100 text-slate-500 text-xs font-medium gap-2 sm:gap-0">
                 <div class="flex items-center gap-2">
                     <svg class="h-3 w-3 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
@@ -391,24 +441,56 @@
     </div>
     <!-- END: Page Wrapper -->
 
+    <!-- ===== JAVASCRIPT ===== -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ===== CALENDAR LOGIC =====
+            // ===== VARIABLES =====
             let currentDate = new Date(2024, 9, 9);
             let selectedDate = new Date(2024, 9, 9);
             let selectedTime = '13:00 - 15:00';
             
             const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
             
+            // ===== DOM ELEMENTS =====
             const calendarGrid = document.getElementById('calendar-grid');
             const monthYearLabel = document.getElementById('month-year-label');
             const selectedDateDisplay = document.getElementById('selected-date-display');
             const confirmationDisplay = document.getElementById('confirmation-display');
+            const selectedDateInput = document.getElementById('selected_date');
+            const selectedTimeInput = document.getElementById('selected_time');
+            const submitBtn = document.getElementById('submitScheduleBtn');
+            const scheduleForm = document.getElementById('scheduleForm');
+            const btnBack = document.getElementById('btn-back');
             
+            // ===== HELPER FUNCTIONS =====
             function formatDate(date) {
                 return date.getDate() + ' ' + monthNames[date.getMonth()] + ' ' + date.getFullYear();
             }
             
+            function updateHiddenFields() {
+                const dateStr = formatDate(selectedDate);
+                const timeStr = selectedTime;
+                
+                if (selectedDateInput) {
+                    selectedDateInput.value = dateStr;
+                }
+                if (selectedTimeInput) {
+                    selectedTimeInput.value = timeStr;
+                }
+                
+                // Update confirmation display
+                if (selectedTime && confirmationDisplay) {
+                    confirmationDisplay.textContent = dateStr + ' | ' + selectedTime + ' WIB';
+                } else if (confirmationDisplay) {
+                    confirmationDisplay.textContent = dateStr + ' | Pilih waktu';
+                }
+            }
+            
+            function updateConfirmation() {
+                updateHiddenFields();
+            }
+            
+            // ===== CALENDAR LOGIC =====
             function renderCalendar() {
                 const year = currentDate.getFullYear();
                 const month = currentDate.getMonth();
@@ -420,10 +502,12 @@
                 
                 let html = '';
                 
+                // Empty cells before first day
                 for (let i = 0; i < firstDay; i++) {
                     html += '<div class="date-cell empty py-1"></div>';
                 }
                 
+                // Date cells
                 for (let day = 1; day <= daysInMonth; day++) {
                     const dateObj = new Date(year, month, day);
                     const isSelected = (dateObj.getDate() === selectedDate.getDate() && 
@@ -438,6 +522,7 @@
                 
                 calendarGrid.innerHTML = html;
                 
+                // Add click event to date cells
                 document.querySelectorAll('.date-cell:not(.empty)').forEach(cell => {
                     cell.addEventListener('click', function() {
                         const day = parseInt(this.dataset.day);
@@ -452,15 +537,7 @@
                 });
             }
             
-            function updateConfirmation() {
-                const dateStr = formatDate(selectedDate);
-                if (selectedTime) {
-                    confirmationDisplay.textContent = dateStr + ' | ' + selectedTime + ' WIB';
-                } else {
-                    confirmationDisplay.textContent = dateStr + ' | Pilih waktu';
-                }
-            }
-            
+            // Month navigation
             document.getElementById('prev-month').addEventListener('click', function() {
                 currentDate.setMonth(currentDate.getMonth() - 1);
                 renderCalendar();
@@ -476,6 +553,7 @@
             
             timeSlots.forEach(slot => {
                 slot.addEventListener('click', function() {
+                    // Reset all time slots
                     timeSlots.forEach(s => {
                         s.classList.remove('selected');
                         s.style.background = 'white';
@@ -492,6 +570,7 @@
                         }
                     });
                     
+                    // Select current slot
                     this.classList.add('selected');
                     this.style.background = '#bef264';
                     this.style.borderColor = '#bef264';
@@ -517,29 +596,41 @@
                 });
             });
             
-            // ===== BUTTON BACK LOGIC =====
-            const btnBack = document.getElementById('btn-back');
-            btnBack.addEventListener('mousedown', function() {
-                this.classList.add('clicked');
-            });
-            btnBack.addEventListener('mouseup', function() {
-                setTimeout(() => {
-                    this.classList.remove('clicked');
-                }, 300);
-            });
-            btnBack.addEventListener('mouseleave', function() {
-                this.classList.remove('clicked');
-            });
-            btnBack.addEventListener('click', function() {
-                console.log('Kembali ke Pemilihan Booth');
-                alert('Kembali ke halaman pemilihan booth');
-            });
+            // ===== BACK BUTTON LOGIC =====
+            if (btnBack) {
+                btnBack.addEventListener('click', function() {
+                    window.location.href = '<?= base_url('register') ?>';
+                });
+            }
+            
+            // ===== FORM SUBMIT VALIDATION =====
+            if (scheduleForm) {
+                scheduleForm.addEventListener('submit', function(e) {
+                    const dateVal = selectedDateInput ? selectedDateInput.value : '';
+                    const timeVal = selectedTimeInput ? selectedTimeInput.value : '';
+                    
+                    if (!dateVal || !timeVal) {
+                        e.preventDefault();
+                        alert('Silakan pilih tanggal dan waktu sesi terlebih dahulu!');
+                        return false;
+                    }
+                    
+                    // Loading state
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<span>Memproses...</span>';
+                        submitBtn.disabled = true;
+                    }
+                    
+                    return true;
+                });
+            }
             
             // ===== INITIAL RENDER =====
             renderCalendar();
             selectedDateDisplay.textContent = formatDate(selectedDate);
             updateConfirmation();
             
+            // Set default selected time slot
             const defaultSlot = document.querySelector('.time-slot[data-time="13:00 - 15:00"]');
             if (defaultSlot) {
                 defaultSlot.click();
