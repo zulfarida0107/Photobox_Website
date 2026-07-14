@@ -9,7 +9,7 @@ use CodeIgniter\Router\RouteCollection;
 // ============================================================
 // HOME / DEFAULT ROUTE
 // ============================================================
-$routes->get('/', 'Home::index');
+// $routes->get('/', 'Home::index');
 
 // Handle global OPTIONS requests for CORS preflight
 $routes->options('(:any)', function() {});
@@ -23,7 +23,8 @@ $routes->group('api', static function ($routes) {
     $routes->get('customer/print-options', 'Api\\CatalogController::listPrintOptions');
     $routes->get('customer/frames', 'Api\\CatalogController::listFrames');
     $routes->get('customer/frame', 'Api\\CatalogController::listFrames');
-    $routes->get('booths/(:segment)/session-check', 'Api\\BoothApiController::sessionCheck/$1'); 
+    $routes->get('customer/frame/media', 'Api\\CatalogController::serveFrameFile');
+    $routes->get('booths/(:segment)/session-check', 'Api\\BoothApiController::sessionCheck/$1');
 
     $routes->post('payment/qr', 'Api\\PaymentController::createQr');
     $routes->get('payment', 'Api\\PaymentController::statusByQuery');
@@ -208,9 +209,9 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 // Routes User Booking //** 
 //////////////////////////////
 
-// ===== LANDING PAGE =====
+// ===== INDEX PAGE =====
 $routes->get('/', 'User_Booking\LandingPageController::index');
-$routes->get('landing', 'User_Booking\LandingPageController::index');
+$routes->get('index', 'User_Booking\LandingPageController::index');
 
 // Routes untuk Register
 $routes->get('register', 'User_Booking\RegisterController::index');

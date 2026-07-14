@@ -37,6 +37,7 @@
                 <h2 class="font-h1 text-h1 text-on-surface">Manajemen Reservasi</h2>
                 <p class="font-body-sm text-body-sm text-on-surface-variant">Atur jadwal operasional booth dan reservasi pelanggan.</p>
             </div>
+<<<<<<< Updated upstream
         </div>
 
         <!-- Bento Stats Grid -->
@@ -98,6 +99,26 @@
                         <div class="bg-blue-300 h-1.5 rounded-full" style="width: <?= $statTopBoothPct ?? 0 ?>%"></div>
                     </div>
                 </div>
+=======
+            <div class="flex items-center gap-3">
+                <a href="<?= base_url('admin/slots/create') ?>"
+                   class="flex items-center gap-2 px-4 py-2.5 bg-primary text-on-primary rounded-lg font-label-bold text-label-bold hover:bg-primary-container transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">add</span>
+                    Buat Slot Baru
+                </a>
+                <form method="get" action="<?= base_url('admin/bookings') ?>" class="inline-block">
+                    <div class="flex items-center gap-2 bg-white border border-slate-200 px-3 py-2 rounded-lg text-sm shadow-sm">
+                        <span class="material-symbols-outlined text-slate-400 text-sm">calendar_month</span>
+                        <span class="text-slate-600 font-medium">Periode:</span>
+                        <select name="period" class="border-none bg-transparent p-0 focus:ring-0 text-sm font-bold text-primary" onchange="this.form.submit()">
+                            <option value="all"   <?= ($period ?? 'all') === 'all'   ? 'selected' : '' ?>>Semua Waktu</option>
+                            <option value="today" <?= ($period ?? '')    === 'today' ? 'selected' : '' ?>>Hari Ini</option>
+                            <option value="week"  <?= ($period ?? '')    === 'week'  ? 'selected' : '' ?>>Minggu Ini</option>
+                            <option value="month" <?= ($period ?? '')    === 'month' ? 'selected' : '' ?>>Bulan Ini</option>
+                        </select>
+                    </div>
+                </form>
+>>>>>>> Stashed changes
             </div>
         </div>
 

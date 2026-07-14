@@ -22,7 +22,7 @@ class BookingAndSlotController extends BaseController
     // =========================================================================
     public function index()
     {
-        $period      = $this->request->getGet('period') ?? 'today';
+        $period      = $this->request->getGet('period') ?? 'all';
         $currentPage = max(1, (int) ($this->request->getGet('page') ?? 1));
         $keyword     = $this->request->getGet('q') ?? '';
         $slotKeyword = $this->request->getGet('slot_q') ?? '';
@@ -31,16 +31,16 @@ class BookingAndSlotController extends BaseController
         $today       = date('Y-m-d');
         
         // Menentukan rentang tanggal berdasarkan filter period
-        $dateStart = $today;
-        $dateEnd   = $today;
-        
-        if ($period === 'week') {
+        if ($period === 'today') {
+            $dateStart = $today;
+            $dateEnd   = $today;
+        } elseif ($period === 'week') {
             $dateStart = date('Y-m-d', strtotime('monday this week'));
             $dateEnd   = date('Y-m-d', strtotime('sunday this week'));
         } elseif ($period === 'month') {
             $dateStart = date('Y-m-01');
             $dateEnd   = date('Y-m-t');
-        } elseif ($period === 'all') {
+        } else { // 'all' atau default
             $dateStart = '2000-01-01'; // Masa lalu
             $dateEnd   = '2099-12-31'; // Masa depan
         }
