@@ -9,7 +9,7 @@ use CodeIgniter\Router\RouteCollection;
 // ============================================================
 // HOME / DEFAULT ROUTE
 // ============================================================
-$routes->get('/', 'Home::index');
+// $routes->get('/', 'Home::index');
 
 // Handle global OPTIONS requests for CORS preflight
 $routes->options('(:any)', function() {});
@@ -209,9 +209,9 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 // Routes User Booking //** 
 //////////////////////////////
 
-// ===== LANDING PAGE =====
+// ===== INDEX PAGE =====
 $routes->get('/', 'User_Booking\LandingPageController::index');
-$routes->get('landing', 'User_Booking\LandingPageController::index');
+$routes->get('index', 'User_Booking\LandingPageController::index');
 
 // Routes untuk Register
 $routes->get('register', 'User_Booking\RegisterController::index');

@@ -12,6 +12,6 @@ class LandingPageController extends BaseController
             'title' => 'CuitBox Studio - Premium Photobox Experience'
         ];
 
-        return view('User_Booking/landing_page', $data);
+        return view('User_Booking/index', $data);
     }
 }
