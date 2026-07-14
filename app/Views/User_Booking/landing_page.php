@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>CuitBox Studio - Pilih Tema Background</title>
+    <title><?= $title ?? 'CuitBox Studio' ?></title>
     <!-- Tailwind CSS v3 CDN -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <!-- Google Fonts for Typography -->
@@ -125,6 +125,26 @@
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
             vertical-align: middle;
         }
+        .start-booking-btn {
+            transition: all 0.3s ease;
+            border-radius: 9999px;
+            cursor: pointer;
+            background: #d9f99d;
+            color: #1e293b;
+            font-weight: 700;
+            padding: 12px 32px;
+            border: none;
+            box-shadow: 0 10px 15px -3px rgba(190, 242, 100, 0.4);
+            display: inline-block;
+            text-decoration: none;
+        }
+        .start-booking-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 25px -5px rgba(190, 242, 100, 0.5);
+        }
+        .start-booking-btn:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
@@ -169,10 +189,17 @@
                         <p class="text-slate-500 text-sm max-w-sm mb-8 leading-relaxed">
                             <span class="moment-highlight">Premium </span> Photobox Experience
                         </p>
-                        <button class="bg-brand-lightGreen hover:bg-lime-400 text-slate-900 font-bold py-3 px-8 rounded-full text-sm transition-colors mb-12 shadow-sm" style="background:#d9f99d;">
-                            Start Booking
-                        </button>
-                        <div class="flex gap-12 border-t border-slate-300 pt-8">
+                        
+<!-- ===== START BOOKING BUTTON - FORM TO REGISTER ===== -->
+<form action="<?= base_url('register/from-landing') ?>" method="POST" class="inline-block">
+    <?= csrf_field() ?>
+    <input type="hidden" name="from_landing" value="true">
+    <button type="submit" class="start-booking-btn">
+        Start Booking
+    </button>
+</form>
+
+                        <div class="flex gap-12 border-t border-slate-300 pt-8 mt-8">
                             <div>
                                 <div class="text-2xl font-extrabold">15k+</div>
                                 <div class="text-[10px] text-slate-400 uppercase tracking-widest">Moments</div>
@@ -331,23 +358,34 @@
     </div>
     <!-- END: Page Wrapper -->
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Card click/select functionality
-            const cards = document.querySelectorAll('.theme-card');
-            
-            cards.forEach(card => {
-                card.addEventListener('click', function(e) {
-                    // Remove selected class from all cards
-                    cards.forEach(c => {
-                        c.classList.remove('selected');
-                    });
-                    
-                    // Add selected class to clicked card
-                    this.classList.add('selected');
+<script>
+    // ===== START BOOKING BUTTON - WITH JS =====
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tombol Start Booking
+        const startBtn = document.getElementById('startBookingBtn');
+        if (startBtn) {
+            startBtn.addEventListener('click', function(e) {
+                e.preventDefault(); // Mencegah default action jika ada
+                // Redirect ke halaman register
+                window.location.href = '<?= base_url('register') ?>';
+                // Atau jika mau kirim data tambahan:
+                // window.location.href = '<?= base_url('register') ?>?source=landing';
+            });
+        }
+
+        // Theme Card click/select functionality
+        const cards = document.querySelectorAll('.theme-card');
+        
+        cards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Remove selected class from all cards
+                cards.forEach(c => {
+                    c.classList.remove('selected');
                 });
+                
+                // Add selected class to clicked card
+                this.classList.add('selected');
             });
         });
-    </script>
-</body>
-</html>
+    });
+</script>
