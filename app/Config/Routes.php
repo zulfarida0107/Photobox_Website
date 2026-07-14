@@ -209,31 +209,31 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 // Routes User Booking //** 
 //////////////////////////////
 
+// ===== LANDING PAGE =====
 $routes->get('/', 'User_Booking\LandingPageController::index');
+$routes->get('landing', 'User_Booking\LandingPageController::index');
 
-// Landing Page Route
-$routes->get('preview', function() {
-    return view('User_Booking/landing_page');
-});
-
-// Register routes
+// Routes untuk Register
 $routes->get('register', 'User_Booking\RegisterController::index');
 $routes->post('register/store', 'User_Booking\RegisterController::store');
+$routes->post('register/from-landing', 'User_Booking\RegisterController::fromLanding');
+
+// ===== SCHEDULE =====
+$routes->get('schedule', 'User_Booking\ScheduleController::index');
+$routes->post('schedule', 'User_Booking\ScheduleController::store'); // <- Ubah dari 'schedule/store' ke 'schedule'
+$routes->get('schedule/getSlots', 'User_Booking\ScheduleController::getSlots');
+$routes->post('schedule/book', 'User_Booking\ScheduleController::book');
+$routes->post('schedule/submit', 'User_Booking\ScheduleController::submitSchedule'); // ✅ TAMBAHKAN INI untuk submit pilihan schedule
 
 // Booth Routes
 $routes->get('booth', 'User_Booking\BoothController::index');
 $routes->post('booth/store', 'User_Booking\BoothController::store');
 
-// Status Booking Routes
+// Status Booking Routes 
 $routes->get('StatusBooking', 'User_Booking\StatusBookingController::index');
 $routes->post('StatusBooking/store', 'User_Booking\StatusBookingController::store');
 $routes->get('StatusBooking/clearSession', 'User_Booking\StatusBookingController::clearSession');
 $routes->get('booking/success', 'User_Booking\BookingController::success');
-
-// Schedule Routes - perbaiki namespace
-$routes->get('schedule', 'User_Booking\ScheduleController::index');
-$routes->get('schedule/getSlots', 'User_Booking\ScheduleController::getSlots');
-$routes->post('schedule/book', 'User_Booking\ScheduleController::book');
 
 // Barcode/QR Code Routes
 $routes->get('barcode', 'User_Booking\BarcodeController::index');
