@@ -22,6 +22,7 @@ class PaymentController extends BaseController
         $perPage       = 10;
         $currentPage   = max(1, (int) ($this->request->getGet('page')   ?? 1));
         $filterStatus  = $this->request->getGet('status') ?? '';
+<<<<<<< Updated upstream
         $filterPeriod  = $this->request->getGet('period') ?? '7'; // hari
         $paymentDate   = $this->request->getGet('payment_date') ?? '';
         $keyword       = $this->request->getGet('q') ?? '';
@@ -39,15 +40,33 @@ class PaymentController extends BaseController
                 $dateFrom = date('Y-m-d 00:00:00', strtotime("-{$days} days"));
                 $dateTo   = date('Y-m-d 23:59:59');
             }
+=======
+        $filterPeriod  = $this->request->getGet('period') ?? 'all'; // Default to all time so data is visible on load
+
+        // --- Rentang tanggal ---
+        $hasDateFilter = false;
+        if ($filterPeriod === 'month') {
+            $dateFrom = date('Y-m-01 00:00:00');
+            $dateTo   = date('Y-m-t 23:59:59');
+            $hasDateFilter = true;
+        } elseif ($filterPeriod !== 'all') {
+            $days     = (int) $filterPeriod ?: 7;
+            $dateFrom = date('Y-m-d 00:00:00', strtotime("-{$days} days"));
+            $dateTo   = date('Y-m-d 23:59:59');
+            $hasDateFilter = true;
+>>>>>>> Stashed changes
         }
 
         // --- Query utama dengan JOIN ---
         $builder = $this->paymentModel
             ->select('payments.*, bookings.booking_code, print_options.copies AS print_option_copies, print_options.extra_price AS print_option_extra')
             ->join('bookings',     'bookings.id = payments.booking_id',           'left')
-            ->join('print_options','print_options.id = payments.print_option_id', 'left')
-            ->where('payments.created_at >=', $dateFrom)
-            ->where('payments.created_at <=', $dateTo);
+            ->join('print_options','print_options.id = payments.print_option_id', 'left');
+
+        if ($hasDateFilter) {
+            $builder->where('payments.created_at >=', $dateFrom)
+                    ->where('payments.created_at <=', $dateTo);
+        }
 
         if ($filterStatus !== '') {
             $builder->where('payments.status', $filterStatus);
@@ -69,34 +88,35 @@ class PaymentController extends BaseController
             ->findAll($perPage, ($currentPage - 1) * $perPage);
 
         // --- Statistik ---
-        $statPaid = $this->paymentModel
-            ->where('status', 'paid')
-            ->where('created_at >=', $dateFrom)
-            ->where('created_at <=', $dateTo)
-            ->countAllResults();
+        $statPaidQuery = $this->paymentModel->where('status', 'paid');
+        if ($hasDateFilter) {
+            $statPaidQuery->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+        }
+        $statPaid = $statPaidQuery->countAllResults();
 
-        $statFailed = $this->paymentModel
-            ->where('status', 'failed')
-            ->where('created_at >=', $dateFrom)
-            ->where('created_at <=', $dateTo)
-            ->countAllResults();
+        $statFailedQuery = $this->paymentModel->where('status', 'failed');
+        if ($hasDateFilter) {
+            $statFailedQuery->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+        }
+        $statFailed = $statFailedQuery->countAllResults();
 
-        $statPending = $this->paymentModel
-            ->where('status', 'pending')
-            ->where('created_at >=', $dateFrom)
-            ->where('created_at <=', $dateTo)
-            ->countAllResults();
+        $statPendingQuery = $this->paymentModel->where('status', 'pending');
+        if ($hasDateFilter) {
+            $statPendingQuery->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+        }
+        $statPending = $statPendingQuery->countAllResults();
 
         $statFailedPending = $statFailed + $statPending;
 
         // Total pendapatan (paid saja)
-        $revenueRow = $this->paymentModel->db
+        $revenueBuilder = $this->paymentModel->db
             ->table('payments')
             ->select('SUM(amount) AS total')
-            ->where('status', 'paid')
-            ->where('created_at >=', $dateFrom)
-            ->where('created_at <=', $dateTo)
-            ->get()->getRowArray();
+            ->where('status', 'paid');
+        if ($hasDateFilter) {
+            $revenueBuilder->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+        }
+        $revenueRow = $revenueBuilder->get()->getRowArray();
         $statTotalRevenue = $revenueRow['total'] ?? 0;
 
         // Konversi rate
@@ -104,21 +124,23 @@ class PaymentController extends BaseController
         $statConversion = $statTotal > 0 ? round(($statPaid / $statTotal) * 100, 1) : 0;
 
         // Add-on cetak
-        $statPrintAddon  = $this->paymentModel
+        $printAddonBuilder = $this->paymentModel
             ->where('print_option_id IS NOT NULL', null, false)
-            ->where('status', 'paid')
-            ->where('created_at >=', $dateFrom)
-            ->where('created_at <=', $dateTo)
-            ->countAllResults();
+            ->where('status', 'paid');
+        if ($hasDateFilter) {
+            $printAddonBuilder->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+        }
+        $statPrintAddon = $printAddonBuilder->countAllResults();
 
-        $printProfitRow = $this->paymentModel->db
+        $printProfitBuilder = $this->paymentModel->db
             ->table('payments')
             ->select('SUM(amount) AS total')
             ->where('print_option_id IS NOT NULL', null, false)
-            ->where('status', 'paid')
-            ->where('created_at >=', $dateFrom)
-            ->where('created_at <=', $dateTo)
-            ->get()->getRowArray();
+            ->where('status', 'paid');
+        if ($hasDateFilter) {
+            $printProfitBuilder->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+        }
+        $printProfitRow = $printProfitBuilder->get()->getRowArray();
         $statPrintProfit = $printProfitRow['total'] ?? 0;
 
         $data = [
@@ -203,23 +225,29 @@ class PaymentController extends BaseController
     public function export()
     {
         $filterStatus = $this->request->getGet('status') ?? '';
-        $filterPeriod = $this->request->getGet('period') ?? '7';
+        $filterPeriod = $this->request->getGet('period') ?? 'all'; // Default to all time so data is visible on load
 
+        $hasDateFilter = false;
         if ($filterPeriod === 'month') {
             $dateFrom = date('Y-m-01 00:00:00');
             $dateTo   = date('Y-m-t 23:59:59');
-        } else {
+            $hasDateFilter = true;
+        } elseif ($filterPeriod !== 'all') {
             $days     = (int) $filterPeriod ?: 7;
             $dateFrom = date('Y-m-d 00:00:00', strtotime("-{$days} days"));
             $dateTo   = date('Y-m-d 23:59:59');
+            $hasDateFilter = true;
         }
 
         $builder = $this->paymentModel
             ->select('payments.id, bookings.booking_code, print_options.copies AS print_option_copies, print_options.extra_price AS print_option_extra, payments.amount, payments.gateway_ref, payments.status, payments.created_at')
             ->join('bookings',     'bookings.id = payments.booking_id',           'left')
-            ->join('print_options','print_options.id = payments.print_option_id', 'left')
-            ->where('payments.created_at >=', $dateFrom)
-            ->where('payments.created_at <=', $dateTo);
+            ->join('print_options','print_options.id = payments.print_option_id', 'left');
+
+        if ($hasDateFilter) {
+            $builder->where('payments.created_at >=', $dateFrom)
+                    ->where('payments.created_at <=', $dateTo);
+        }
 
         if ($filterStatus !== '') {
             $builder->where('payments.status', $filterStatus);

@@ -25,6 +25,14 @@
                 <p class="font-body-sm text-body-sm text-on-surface-variant">Pantau dan kelola semua transaksi masuk secara real-time.</p>
             </div>
             <div class="flex gap-3">
+<<<<<<< Updated upstream
+=======
+                <a href="<?= base_url('admin/payments/export?status=' . ($filterStatus ?? '') . '&period=' . ($filterPeriod ?? 'all')) ?>"
+                   class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2 rounded font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">cloud_download</span>
+                    Ekspor Laporan
+                </a>
+>>>>>>> Stashed changes
                 <form action="<?= base_url('admin/payments/verify-bulk') ?>" method="post" class="inline">
                     <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded font-semibold text-sm hover:bg-primary-container transition-colors shadow-sm">
                         <span class="material-symbols-outlined text-[18px]">verified_user</span>
@@ -129,11 +137,22 @@
                             </select>
                         </div>
                         <!-- Filter Periode -->
+<<<<<<< Updated upstream
                         <div class="relative bg-white border border-slate-200 rounded-lg text-sm">
                             <select name="period" class="px-4 py-2 border-none bg-transparent focus:ring-0 text-sm font-bold text-slate-700 cursor-pointer outline-none animate-none pr-8" onchange="document.getElementsByName('payment_date')[0].value=''; this.form.submit()">
                                 <option value="7"  <?= ($filterPeriod ?? '7')  === '7'  ? 'selected' : '' ?>>7 Hari Terakhir</option>
                                 <option value="30" <?= ($filterPeriod ?? '')   === '30' ? 'selected' : '' ?>>30 Hari Terakhir</option>
                                 <option value="month" <?= ($filterPeriod ?? '') === 'month' ? 'selected' : '' ?>>Bulan Ini</option>
+=======
+                        <div class="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded text-sm">
+                            <span class="material-symbols-outlined text-slate-400 text-sm">calendar_month</span>
+                            <span class="text-slate-600 font-medium">Waktu:</span>
+                            <select name="period" class="border-none bg-transparent p-0 focus:ring-0 text-sm font-bold text-primary" onchange="this.form.submit()">
+                                <option value="all"   <?= ($filterPeriod ?? 'all') === 'all'   ? 'selected' : '' ?>>Semua Waktu</option>
+                                <option value="7"     <?= ($filterPeriod ?? '')    === '7'     ? 'selected' : '' ?>>7 Hari Terakhir</option>
+                                <option value="30"    <?= ($filterPeriod ?? '')    === '30'    ? 'selected' : '' ?>>30 Hari Terakhir</option>
+                                <option value="month" <?= ($filterPeriod ?? '')    === 'month' ? 'selected' : '' ?>>Bulan Ini</option>
+>>>>>>> Stashed changes
                             </select>
                         </div>
                         <!-- Pilih Tanggal Langsung -->

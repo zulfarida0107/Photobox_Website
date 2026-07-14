@@ -23,6 +23,7 @@ $routes->group('api', static function ($routes) {
     $routes->get('customer/print-options', 'Api\\CatalogController::listPrintOptions');
     $routes->get('customer/frames', 'Api\\CatalogController::listFrames');
     $routes->get('customer/frame', 'Api\\CatalogController::listFrames');
+    $routes->get('customer/frame/media', 'Api\\CatalogController::serveFrameFile');
     $routes->get('booths/(:segment)/session-check', 'Api\\BoothApiController::sessionCheck/$1');
 
     $routes->post('payment/qr', 'Api\\PaymentController::createQr');
