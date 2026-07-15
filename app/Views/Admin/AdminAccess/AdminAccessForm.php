@@ -10,7 +10,7 @@
             <span class="material-symbols-outlined text-[14px]">chevron_right</span>
             <a class="hover:text-blue-700" href="<?= base_url('admin/settings') ?>">Manajemen Pengaturan Akses</a>
             <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span class="text-blue-700"><?= isset($admin) ? 'Edit Admin' : 'Tambah Admin' ?></span>
+            <span class="text-blue-700"><?= isset($admin) ? 'Edit Administrator' : 'Tambah Administrator' ?></span>
         </nav>
 
         <!-- Page Header -->
@@ -74,8 +74,8 @@
                     <label for="role" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Hak Akses / Role *</label>
                     <select name="role" id="role" required
                             class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white">
-                        <option value="superadmin" <?= old('role', $admin['role'] ?? '') === 'superadmin' ? 'selected' : '' ?>>SUPER ADMIN</option>
-                        <option value="staff" <?= old('role', $admin['role'] ?? '') === 'staff' ? 'selected' : '' ?>>STAFF</option>
+                        <option value="superadmin" <?= old('role', $admin['role'] ?? '') === 'superadmin' ? 'selected' : '' ?>>Superadmin</option>
+                        <option value="staff" <?= old('role', $admin['role'] ?? '') === 'staff' ? 'selected' : '' ?>>Admin</option>
                     </select>
                 </div>
 

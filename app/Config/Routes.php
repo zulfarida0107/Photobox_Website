@@ -9,7 +9,7 @@ use CodeIgniter\Router\RouteCollection;
 // ============================================================
 // HOME / DEFAULT ROUTE
 // ============================================================
-$routes->get('/', 'Home::index');
+// $routes->get('/', 'Home::index');
 
 // Handle global OPTIONS requests for CORS preflight
 $routes->options('(:any)', function() {});
@@ -23,6 +23,7 @@ $routes->group('api', static function ($routes) {
     $routes->get('customer/print-options', 'Api\\CatalogController::listPrintOptions');
     $routes->get('customer/frames', 'Api\\CatalogController::listFrames');
     $routes->get('customer/frame', 'Api\\CatalogController::listFrames');
+    $routes->get('customer/frame/media', 'Api\\CatalogController::serveFrameFile');
     $routes->get('booths/(:segment)/session-check', 'Api\\BoothApiController::sessionCheck/$1');
 
     $routes->post('payment/qr', 'Api\\PaymentController::createQr');
@@ -120,6 +121,7 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 
 	// ---- Tab 3: Manajemen Reservasi & Slot ----
 	$routes->get('bookings',                     'Admin\BookingAndSlotController::index');
+	$routes->get('bookings/export',              'Admin\BookingAndSlotController::export');
 	$routes->get('bookings/(:segment)',          'Admin\BookingAndSlotController::show/$1');
 	$routes->get('bookings/(:segment)/edit',     'Admin\BookingAndSlotController::edit/$1');
 	$routes->post('bookings/(:segment)/update',  'Admin\BookingAndSlotController::update/$1');
@@ -200,3 +202,48 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->post('settings/(:segment)/update',   'Admin\AdminAccessController::update/$1');
 	$routes->post('settings/(:segment)/delete',   'Admin\AdminAccessController::delete/$1');
 });
+
+
+
+
+
+// Routes User Booking //** 
+//////////////////////////////
+
+// ===== INDEX PAGE =====
+$routes->get('/', 'User_Booking\LandingPageController::index');
+$routes->get('index', 'User_Booking\LandingPageController::index');
+
+// Routes untuk Register
+$routes->get('register', 'User_Booking\RegisterController::index');
+$routes->post('register/store', 'User_Booking\RegisterController::store');
+$routes->post('register/from-landing', 'User_Booking\RegisterController::fromLanding');
+
+// ===== SCHEDULE =====
+$routes->get('schedule', 'User_Booking\ScheduleController::index');
+$routes->post('schedule', 'User_Booking\ScheduleController::store'); // <- Ubah dari 'schedule/store' ke 'schedule'
+$routes->get('schedule/getSlots', 'User_Booking\ScheduleController::getSlots');
+$routes->post('schedule/book', 'User_Booking\ScheduleController::book');
+$routes->post('schedule/submit', 'User_Booking\ScheduleController::submitSchedule'); // ✅ TAMBAHKAN INI untuk submit pilihan schedule
+
+// Booth Routes
+$routes->get('booth', 'User_Booking\BoothController::index');
+$routes->post('booth/store', 'User_Booking\BoothController::store');
+
+// Status Booking Routes 
+$routes->get('StatusBooking', 'User_Booking\StatusBookingController::index');
+$routes->post('StatusBooking/store', 'User_Booking\StatusBookingController::store');
+$routes->get('StatusBooking/clearSession', 'User_Booking\StatusBookingController::clearSession');
+$routes->get('booking/success', 'User_Booking\BookingController::success');
+
+// Barcode/QR Code Routes
+$routes->get('barcode', 'User_Booking\BarcodeController::index');
+$routes->get('barcode/generate/(:any)', 'User_Booking\BarcodeController::generate/$1');
+$routes->get('barcode/scan', 'User_Booking\BarcodeController::scan');
+$routes->post('barcode/verify', 'User_Booking\BarcodeController::verify');
+
+// Payment Routes
+$routes->get('payment', 'User_Booking\PaymentMethodController::index');
+$routes->get('payment/detail/(:any)', 'User_Booking\PaymentMethodController::detail/$1');
+$routes->post('payment/confirm', 'User_Booking\PaymentMethodController::confirm');
+$routes->get('payment/success/(:any)', 'User_Booking\PaymentMethodController::success/$1');
