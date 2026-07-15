@@ -27,8 +27,8 @@
             <div class="flex items-center gap-3">
                 <a href="<?= base_url('admin/slots/create') ?>"
                    class="flex items-center gap-2 px-4 py-2.5 bg-primary text-on-primary rounded-lg font-label-bold text-label-bold hover:bg-primary-container transition-colors">
-                    <span class="material-symbols-outlined text-[20px]">add</span>
-                    Buat Slot Baru
+                    <span class="material-symbols-outlined text-[20px]">event_available</span>
+                    Tambah Slot
                 </a>
             </div>
         </div>
@@ -84,6 +84,28 @@
                         <?php endif; ?>
                     </tbody>
                 </table>
+            </div>
+            <!-- Pagination -->
+            <div class="p-6 bg-white border-t border-slate-200 flex items-center justify-between">
+                <span class="text-xs text-slate-500">
+                    Menampilkan <?= count($slots ?? []) ?> dari <?= $totalSlots ?? 0 ?> slot
+                </span>
+                <div class="flex gap-2">
+                    <a href="<?= base_url('admin/slots?page=' . max(1, ($currentPage ?? 1) - 1)) ?>"
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                        <span class="material-symbols-outlined text-sm">chevron_left</span>
+                    </a>
+                    <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
+                        <a href="<?= base_url('admin/slots?page=' . $i) ?>"
+                           class="w-8 h-8 flex items-center justify-center border rounded-lg text-sm font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
+                            <?= $i ?>
+                        </a>
+                    <?php endfor; ?>
+                    <a href="<?= base_url('admin/slots?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1)) ?>"
+                       class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </a>
+                </div>
             </div>
         </div>
 

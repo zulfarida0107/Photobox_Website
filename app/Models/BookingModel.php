@@ -20,6 +20,7 @@ class BookingModel extends Model
 		'package_id',
 		'queue_number',
 		'status',
+		'edit_count',
 	];
 
 	protected $useSoftDeletes = false;
