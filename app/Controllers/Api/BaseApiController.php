@@ -37,4 +37,12 @@ abstract class BaseApiController extends BaseController
     {
         return $this->response->setStatusCode(201)->setJSON($data);
     }
+
+    protected function failServerError(string $message): ResponseInterface
+    {
+        return $this->response->setStatusCode(500)->setJSON([
+            'status' => 500,
+            'error'  => $message,
+        ]);
+    }
 }

@@ -34,8 +34,12 @@ $routes->group('api', static function ($routes) {
 	$routes->post('session/(:segment)/email', 'Api\\SessionController::submitEmail/$1');
 	$routes->post('session/(:segment)/complete', 'Api\\SessionController::complete/$1');
 
-	$routes->post('session/(:segment)/upload','Api\\SessionController::upload/$1');
+	$routes->post('session/(:segment)/upload', 'Api\\SessionController::upload/$1');
 	$routes->get('frame/(:any)', 'Api\\FrameController::show/$1');
+	$routes->get('drive/test', 'GoogleDriveController::test');
+	$routes->get('drive/upload/(:segment)', 'GoogleDriveController::upload/$1');
+	$routes->get('google/auth', 'GoogleAuthController::auth');
+	$routes->get('google/callback', 'GoogleAuthController::callback');
 });
 
 // ============================================================

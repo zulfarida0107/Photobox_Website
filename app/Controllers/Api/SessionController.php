@@ -4,17 +4,22 @@ namespace App\Controllers\Api;
 
 use App\Models\BookingModel;
 use App\Models\SessionModel;
+use App\Models\PhotoModel;
+use App\Services\GoogleDriveService;
+use App\Services\EmailService;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class SessionController extends BaseApiController
 {
     private BookingModel $bookingModel;
     private SessionModel $sessionModel;
+    private PhotoModel $photoModel;
 
     public function __construct()
     {
         $this->bookingModel = new BookingModel();
         $this->sessionModel = new SessionModel();
+        $this->photoModel = new PhotoModel();
     }
 
     public function start(): ResponseInterface
@@ -57,7 +62,6 @@ class SessionController extends BaseApiController
             $this->sessionModel->insert($session);
 
             $session = $this->sessionModel->find($session['id']);
-
         } else {
 
             $this->sessionModel->update($session['id'], [
@@ -86,6 +90,10 @@ class SessionController extends BaseApiController
         if ($session === null) {
             return $this->failNotFound('Session tidak ditemukan.');
         }
+        // Hapus metadata foto lama jika user upload ulang
+        $this->photoModel
+            ->where('session_id', $sessionId)
+            ->delete();
 
         // photostrip final
         $finalImage = $this->request->getFile('final_image');
@@ -115,6 +123,14 @@ class SessionController extends BaseApiController
             true
         );
 
+        $this->photoModel->insert([
+            'id'            => $this->makeId('pho_'),
+            'session_id'    => $sessionId,
+            'file_path'     => 'uploads/sessions/' . $sessionId . '/final.png',
+            'drive_file_id' => null,
+            'shot_number'   => 0,
+        ]);
+
         $savedCaptures = [];
 
         foreach ($capturedPhotos as $index => $photo) {
@@ -134,6 +150,14 @@ class SessionController extends BaseApiController
                 true
             );
 
+            $this->photoModel->insert([
+                'id'            => $this->makeId('pho_'),
+                'session_id'    => $sessionId,
+                'file_path'     => 'uploads/sessions/' . $sessionId . '/' . $filename,
+                'drive_file_id' => null,
+                'shot_number'   => $index + 1,
+            ]);
+
             $savedCaptures[] = $filename;
         }
 
@@ -144,11 +168,14 @@ class SessionController extends BaseApiController
         log_message('debug', 'Capture : ' . count($savedCaptures));
 
         return $this->respondOk([
-            'message' => 'Upload berhasil.',
-            'session_id' => $sessionId,
-            'final_image' => 'final.png',
-            'captured_count' => count($savedCaptures),
-            'captured_files' => $savedCaptures,
+            'message'         => 'Upload berhasil.',
+            'session_id'      => $sessionId,
+            'final_image'     => 'final.png',
+            'captured_count'  => count($savedCaptures),
+            'captured_files'  => $savedCaptures,
+            'photos_saved'    => $this->photoModel
+                ->where('session_id', $sessionId)
+                ->countAllResults(),
         ]);
     }
 
@@ -201,15 +228,43 @@ class SessionController extends BaseApiController
             return $this->failValidation('Booking belum paid.');
         }
 
-        $this->bookingModel->update($booking['id'], [
-            'status' => 'completed',
-        ]);
+        try {
 
-        return $this->respondOk([
-            'message' => 'Flow selesai.',
-            'booking_id' => $booking['id'],
-            'session_id' => $sessionId,
-            'next_step' => 'reset',
-        ]);
+            $driveService = new GoogleDriveService();
+
+            $driveLink = $driveService->uploadSessionPhotos($sessionId);
+
+            $emailService = new EmailService();
+
+            $sent = $emailService->sendDriveLink(
+                $session['email_recipient'],
+                $driveLink
+            );
+
+            if (! $sent) {
+                throw new \RuntimeException(
+                    'Gagal mengirim email.'
+                );
+            }
+
+            $this->bookingModel->update($booking['id'], [
+                'status' => 'completed',
+            ]);
+
+            return $this->respondOk([
+                'message' => 'Flow selesai.',
+                'booking_id' => $booking['id'],
+                'session_id' => $sessionId,
+                'drive_link' => $driveLink,
+                'next_step' => 'reset',
+            ]);
+        } catch (\Throwable $e) {
+
+            log_message('error', $e->getMessage());
+
+            return $this->failServerError(
+                $e->getMessage()
+            );
+        }
     }
 }
