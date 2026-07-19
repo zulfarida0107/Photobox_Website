@@ -39,8 +39,9 @@ class FrameAndFilterController extends BaseController
 
         // --- Frame query builder + Join category name ---
         $frameQuery = $this->frameModel
-            ->select('frames.*, frame_categories.name as category_name')
-            ->join('frame_categories', 'frame_categories.id = frames.category_id', 'left');
+            ->select('frames.*, frame_categories.name as category_name, frame_layouts.name as layout_name')
+            ->join('frame_categories', 'frame_categories.id = frames.category_id', 'left')
+            ->join('frame_layouts', 'frame_layouts.id = frames.layout_id', 'left');
 
         if (!empty($search)) {
             $frameQuery->like('frames.name', $search);
@@ -126,6 +127,7 @@ class FrameAndFilterController extends BaseController
         $rules = [
             'name'        => 'required|min_length[3]|max_length[100]',
             'category_id' => 'permit_empty|max_length[20]',
+            'layout_id'   => 'permit_empty|max_length[20]',
             'frame_file'  => 'uploaded[frame_file]|max_size[frame_file,2048]|ext_in[frame_file,png,jpg,jpeg]',
         ];
 
@@ -146,6 +148,7 @@ class FrameAndFilterController extends BaseController
             'id'          => $newId,
             'name'        => $this->request->getPost('name'),
             'category_id' => $this->request->getPost('category_id') ?: null,
+            'layout_id'   => $this->request->getPost('layout_id') ?: null,
             'file_path'   => 'uploads/frames/' . $newName,
         ]);
 
@@ -159,9 +162,11 @@ class FrameAndFilterController extends BaseController
     public function createFrame()
     {
         $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
+        $layouts    = $this->frameModel->db->table('frame_layouts')->orderBy('name', 'ASC')->get()->getResultArray();
         return view('Admin/FrameAndFilter/FrameForm', [
             'title'      => 'Unggah Frame Baru | Admin Panel',
             'categories' => $categories,
+            'layouts'    => $layouts,
             'validation' => \Config\Services::validation(),
         ]);
     }
@@ -178,11 +183,13 @@ class FrameAndFilterController extends BaseController
         }
 
         $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
+        $layouts    = $this->frameModel->db->table('frame_layouts')->orderBy('name', 'ASC')->get()->getResultArray();
 
         return view('Admin/FrameAndFilter/FrameForm', [
             'title'      => 'Edit Frame | Admin Panel',
             'frame'      => $frame,
             'categories' => $categories,
+            'layouts'    => $layouts,
             'validation' => \Config\Services::validation(),
         ]);
     }
@@ -201,6 +208,7 @@ class FrameAndFilterController extends BaseController
         $updateData = [
             'name'        => $this->request->getPost('name'),
             'category_id' => $this->request->getPost('category_id') ?: null,
+            'layout_id'   => $this->request->getPost('layout_id') ?: null,
         ];
 
         // Ganti file jika ada upload baru

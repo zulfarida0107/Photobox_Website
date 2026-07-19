@@ -388,6 +388,7 @@
                                 <tr>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">ID Frame</th>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Nama Frame</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Layout</th>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Kategori</th>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Preview</th>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Status</th>
@@ -400,6 +401,9 @@
                                         <tr class="hover:bg-slate-50 transition-colors group">
                                             <td class="px-6 py-4 font-mono text-xs font-semibold text-slate-900">#<?= esc($frame['id']) ?></td>
                                             <td class="px-6 py-4 text-sm font-semibold text-slate-700"><?= esc($frame['name']) ?></td>
+                                            <td class="px-6 py-4 text-xs font-medium text-slate-600">
+                                                <?= esc($frame['layout_name'] ?? 'Tanpa Layout') ?>
+                                            </td>
                                             <td class="px-6 py-4">
                                                 <span class="inline-flex items-center px-2 py-1 rounded bg-blue-50 text-blue-700 text-[10px] font-bold tracking-wide uppercase">
                                                     <?= esc($frame['category_name'] ?? 'Uncategorized') ?>
