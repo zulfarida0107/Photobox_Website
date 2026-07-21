@@ -22,69 +22,101 @@ class PaymentController extends BaseController
         $perPage       = 10;
         $currentPage   = max(1, (int) ($this->request->getGet('page')   ?? 1));
         $filterStatus  = $this->request->getGet('status') ?? '';
+<<<<<<< Updated upstream
         $filterPeriod  = $this->request->getGet('period') ?? '7'; // hari
+        $paymentDate   = $this->request->getGet('payment_date') ?? '';
+        $keyword       = $this->request->getGet('q') ?? '';
 
         // --- Rentang tanggal ---
+        if ($paymentDate !== '') {
+            $dateFrom = $paymentDate . ' 00:00:00';
+            $dateTo   = $paymentDate . ' 23:59:59';
+        } else {
+            if ($filterPeriod === 'month') {
+                $dateFrom = date('Y-m-01 00:00:00');
+                $dateTo   = date('Y-m-t 23:59:59');
+            } else {
+                $days     = (int) $filterPeriod ?: 7;
+                $dateFrom = date('Y-m-d 00:00:00', strtotime("-{$days} days"));
+                $dateTo   = date('Y-m-d 23:59:59');
+            }
+=======
+        $filterPeriod  = $this->request->getGet('period') ?? 'all'; // Default to all time so data is visible on load
+
+        // --- Rentang tanggal ---
+        $hasDateFilter = false;
         if ($filterPeriod === 'month') {
             $dateFrom = date('Y-m-01 00:00:00');
             $dateTo   = date('Y-m-t 23:59:59');
-        } else {
+            $hasDateFilter = true;
+        } elseif ($filterPeriod !== 'all') {
             $days     = (int) $filterPeriod ?: 7;
             $dateFrom = date('Y-m-d 00:00:00', strtotime("-{$days} days"));
             $dateTo   = date('Y-m-d 23:59:59');
+            $hasDateFilter = true;
+>>>>>>> Stashed changes
         }
 
         // --- Query utama dengan JOIN ---
         $builder = $this->paymentModel
             ->select('payments.*, bookings.booking_code, print_options.copies AS print_option_copies, print_options.extra_price AS print_option_extra')
             ->join('bookings',     'bookings.id = payments.booking_id',           'left')
-            ->join('print_options','print_options.id = payments.print_option_id', 'left')
-            ->where('payments.created_at >=', $dateFrom)
-            ->where('payments.created_at <=', $dateTo);
+            ->join('print_options','print_options.id = payments.print_option_id', 'left');
+
+        if ($hasDateFilter) {
+            $builder->where('payments.created_at >=', $dateFrom)
+                    ->where('payments.created_at <=', $dateTo);
+        }
 
         if ($filterStatus !== '') {
             $builder->where('payments.status', $filterStatus);
         }
 
+        if ($keyword !== '') {
+            $builder->groupStart()
+                ->like('payments.id', $keyword)
+                ->orLike('bookings.booking_code', $keyword)
+                ->orLike('payments.gateway_ref', $keyword)
+                ->groupEnd();
+        }
+
         $totalPayments = $builder->countAllResults(false);
         $totalPages    = max(1, (int) ceil($totalPayments / $perPage));
 
-        // PENTING: countAllResults() mengubah SELECT menjadi COUNT(*), jadi kita harus set ulang SELECT-nya
-        $builder->select('payments.*, bookings.booking_code, print_options.copies AS print_option_copies, print_options.extra_price AS print_option_extra');
-        
         $payments = $builder
             ->orderBy('payments.created_at', 'DESC')
             ->findAll($perPage, ($currentPage - 1) * $perPage);
 
         // --- Statistik ---
-        $statPaid = $this->paymentModel
-            ->where('status', 'paid')
-            ->where('created_at >=', $dateFrom)
-            ->where('created_at <=', $dateTo)
-            ->countAllResults();
+        $statPaidQuery = $this->paymentModel->where('status', 'paid');
+        if ($hasDateFilter) {
+            $statPaidQuery->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+        }
+        $statPaid = $statPaidQuery->countAllResults();
 
-        $statFailed = $this->paymentModel
-            ->where('status', 'failed')
-            ->where('created_at >=', $dateFrom)
-            ->where('created_at <=', $dateTo)
-            ->countAllResults();
+        $statFailedQuery = $this->paymentModel->where('status', 'failed');
+        if ($hasDateFilter) {
+            $statFailedQuery->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+        }
+        $statFailed = $statFailedQuery->countAllResults();
 
-        $statPending = $this->paymentModel
-            ->where('status', 'pending')
-            ->where('created_at >=', $dateFrom)
-            ->where('created_at <=', $dateTo)
-            ->countAllResults();
+        $statPendingQuery = $this->paymentModel->where('status', 'pending');
+        if ($hasDateFilter) {
+            $statPendingQuery->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+        }
+        $statPending = $statPendingQuery->countAllResults();
 
         $statFailedPending = $statFailed + $statPending;
 
         // Total pendapatan (paid saja)
-        $revenueRow = $this->paymentModel->db
+        $revenueBuilder = $this->paymentModel->db
             ->table('payments')
             ->select('SUM(amount) AS total')
-            ->where('status', 'paid')
-            ->where('created_at >=', $dateFrom)
-            ->where('created_at <=', $dateTo)
-            ->get()->getRowArray();
+            ->where('status', 'paid');
+        if ($hasDateFilter) {
+            $revenueBuilder->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+        }
+        $revenueRow = $revenueBuilder->get()->getRowArray();
         $statTotalRevenue = $revenueRow['total'] ?? 0;
 
         // Konversi rate
@@ -92,21 +124,23 @@ class PaymentController extends BaseController
         $statConversion = $statTotal > 0 ? round(($statPaid / $statTotal) * 100, 1) : 0;
 
         // Add-on cetak
-        $statPrintAddon  = $this->paymentModel
+        $printAddonBuilder = $this->paymentModel
             ->where('print_option_id IS NOT NULL', null, false)
-            ->where('status', 'paid')
-            ->where('created_at >=', $dateFrom)
-            ->where('created_at <=', $dateTo)
-            ->countAllResults();
+            ->where('status', 'paid');
+        if ($hasDateFilter) {
+            $printAddonBuilder->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+        }
+        $statPrintAddon = $printAddonBuilder->countAllResults();
 
-        $printProfitRow = $this->paymentModel->db
+        $printProfitBuilder = $this->paymentModel->db
             ->table('payments')
             ->select('SUM(amount) AS total')
             ->where('print_option_id IS NOT NULL', null, false)
-            ->where('status', 'paid')
-            ->where('created_at >=', $dateFrom)
-            ->where('created_at <=', $dateTo)
-            ->get()->getRowArray();
+            ->where('status', 'paid');
+        if ($hasDateFilter) {
+            $printProfitBuilder->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+        }
+        $printProfitRow = $printProfitBuilder->get()->getRowArray();
         $statPrintProfit = $printProfitRow['total'] ?? 0;
 
         $data = [
@@ -117,6 +151,8 @@ class PaymentController extends BaseController
             'totalPages'        => $totalPages,
             'filterStatus'      => $filterStatus,
             'filterPeriod'      => $filterPeriod,
+            'paymentDate'       => $paymentDate,
+            'keyword'           => $keyword,
             'statTotalRevenue'  => $statTotalRevenue,
             'statPaid'          => $statPaid,
             'statFailedPending' => $statFailedPending,
@@ -189,23 +225,29 @@ class PaymentController extends BaseController
     public function export()
     {
         $filterStatus = $this->request->getGet('status') ?? '';
-        $filterPeriod = $this->request->getGet('period') ?? '7';
+        $filterPeriod = $this->request->getGet('period') ?? 'all'; // Default to all time so data is visible on load
 
+        $hasDateFilter = false;
         if ($filterPeriod === 'month') {
             $dateFrom = date('Y-m-01 00:00:00');
             $dateTo   = date('Y-m-t 23:59:59');
-        } else {
+            $hasDateFilter = true;
+        } elseif ($filterPeriod !== 'all') {
             $days     = (int) $filterPeriod ?: 7;
             $dateFrom = date('Y-m-d 00:00:00', strtotime("-{$days} days"));
             $dateTo   = date('Y-m-d 23:59:59');
+            $hasDateFilter = true;
         }
 
         $builder = $this->paymentModel
             ->select('payments.id, bookings.booking_code, print_options.copies AS print_option_copies, print_options.extra_price AS print_option_extra, payments.amount, payments.gateway_ref, payments.status, payments.created_at')
             ->join('bookings',     'bookings.id = payments.booking_id',           'left')
-            ->join('print_options','print_options.id = payments.print_option_id', 'left')
-            ->where('payments.created_at >=', $dateFrom)
-            ->where('payments.created_at <=', $dateTo);
+            ->join('print_options','print_options.id = payments.print_option_id', 'left');
+
+        if ($hasDateFilter) {
+            $builder->where('payments.created_at >=', $dateFrom)
+                    ->where('payments.created_at <=', $dateTo);
+        }
 
         if ($filterStatus !== '') {
             $builder->where('payments.status', $filterStatus);
@@ -213,28 +255,53 @@ class PaymentController extends BaseController
 
         $data = $builder->orderBy('payments.created_at', 'DESC')->findAll();
 
-        // Nama file dinamis dengan format Hari, Tanggal Bulan Tahun, Jam-Menit-Detik
-        $hariIndo = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        $hari = $hariIndo[date('w')];
-        $tanggal = date('d');
-        $bulan = $bulanIndo[date('n')];
-        $tahun = date('Y');
-        $waktu = date('H-i-s');
-        $filename = "Laporan Pembayaran {$hari}, {$tanggal} {$bulan} {$tahun}, {$waktu}.csv";
-        
-        header('Content-Type: text/csv');
+        // Buat CSV
+        $filename = 'Laporan_Pembayaran_' . date('Ymd_His') . '.csv';
+        header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
 
         $output = fopen('php://output', 'w');
+        fputs($output, $bom =(chr(0xEF) . chr(0xBB) . chr(0xBF)));
+        fputs($output, "sep=;\n");
+
+        $adminName = session('adminName') ?? session('admin_name') ?? 'Admin';
+        $adminRole = session('adminRole') ?? session('admin_role') ?? 'Unknown Role';
+        $adminEmail = session('adminEmail');
         
-        // Tambahkan UTF-8 BOM agar karakter khusus terbaca dengan benar di Excel
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        if (!$adminEmail && session('adminId')) {
+            $adminModel = new \App\Models\AdminModel();
+            $adminData = $adminModel->find(session('adminId'));
+            if ($adminData) {
+                $adminEmail = $adminData['email'];
+                $adminName = $adminData['name'];
+            }
+        }
+        $adminEmail = $adminEmail ?? 'No Email';
         
-        // Tambahkan deklarasi separator khusus agar Excel otomatis memisahkan kolom
-        fputs($output, "sep=,\n");
-        
-        fputcsv($output, ['ID Pembayaran', 'Kode Booking', 'Opsi Cetak (Copy)', 'Harga Extra Cetak', 'Nominal', 'Gateway Ref', 'Status', 'Waktu']);
+        $penanggungJawab = $adminName . ' (' . $adminRole . ') - ' . $adminEmail;
+
+        $currentTime = date('d M Y, H:i:s');
+        $currentDate = date('d F Y');
+
+        fputcsv($output, ['LAPORAN PEMBAYARAN'], ';');
+        fputcsv($output, [], ';');
+        fputcsv($output, ['Penanggung Jawab: ' . $penanggungJawab], ';');
+        fputcsv($output, ['Waktu Realtime: ' . $currentTime . ' WIB'], ';');
+        fputcsv($output, ['Keterangan Tanggal: Diekspor pada ' . $currentDate], ';');
+        fputcsv($output, [], ';');
+
+        fputcsv($output, [
+            'ID Pembayaran', 
+            'Kode Booking', 
+            'Opsi Cetak (Copy)', 
+            'Harga Extra Cetak', 
+            'Nominal', 
+            'Gateway Ref', 
+            'Status', 
+            'Waktu'
+        ], ';');
+
         foreach ($data as $row) {
             fputcsv($output, [
                 $row['id'],
@@ -245,17 +312,8 @@ class PaymentController extends BaseController
                 $row['gateway_ref'] ?? '',
                 $row['status'],
                 $row['created_at'],
-            ]);
+            ], ';');
         }
-        
-        // Tanda Tangan Pertanggungjawaban
-        fputcsv($output, []); // Baris kosong
-        fputcsv($output, []); // Baris kosong
-        fputcsv($output, ['--- RIWAYAT PERTANGGUNGJAWABAN EKSPOR ---']);
-        fputcsv($output, ['Dihasilkan Oleh:', session()->get('adminName') ?? 'Admin (Sistem)']);
-        fputcsv($output, ['Waktu Unduh:', date('Y-m-d H:i:s')]);
-        fputcsv($output, ['Catatan Khusus:', 'Laporan ini dihasilkan secara otomatis oleh sistem CuitBox Studio dan sah sebagai bukti audit operasional.']);
-
         fclose($output);
         exit;
     }

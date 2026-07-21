@@ -77,4 +77,27 @@ class CatalogController extends BaseApiController
             'filters'    => $this->filterModel->where('is_active', 1)->findAll(),
         ]);
     }
+
+    public function serveFrameFile(): ResponseInterface
+    {
+        $path = $this->request->getGet('path');
+        if (empty($path)) {
+            return $this->respondError('Path is required', 400);
+        }
+        
+        $filePath = FCPATH . str_replace(['../', '..\\'], '', $path);
+        if (!file_exists($filePath) || !is_file($filePath)) {
+            return $this->respondError('File not found', 404);
+        }
+        
+        $mime = mime_content_type($filePath) ?: 'image/png';
+        
+        $this->response->setHeader('Access-Control-Allow-Origin', '*');
+        $this->response->setHeader('Access-Control-Allow-Headers', '*');
+        $this->response->setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        
+        return $this->response
+            ->setContentType($mime)
+            ->setBody(file_get_contents($filePath));
+    }
 }

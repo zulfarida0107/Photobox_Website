@@ -19,15 +19,27 @@
 
         <!-- Flash Messages -->
         <?php if (session()->getFlashdata('success')): ?>
-            <div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm font-medium">
+            <div id="flash-message-success" class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2">
+                <span class="material-symbols-outlined text-green-500">check_circle</span>
                 <?= esc(session()->getFlashdata('success')) ?>
             </div>
         <?php endif; ?>
         <?php if (session()->getFlashdata('error')): ?>
-            <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-medium">
+            <div id="flash-message-error" class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2">
+                <span class="material-symbols-outlined text-red-500">error</span>
                 <?= esc(session()->getFlashdata('error')) ?>
             </div>
         <?php endif; ?>
+        
+        <script>
+            setTimeout(() => {
+                const ids = ['flash-message-success', 'flash-message-error'];
+                ids.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.remove();
+                });
+            }, 1000);
+        </script>
 
         <!-- Page Header -->
         <div class="flex items-center justify-between mb-6">
@@ -38,9 +50,9 @@
         </div>
 
         <!-- Bento Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <!-- Total Frame -->
-            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">wallpaper</span>
                 </div>
@@ -48,7 +60,7 @@
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= esc($statTotalFrames ?? 0) ?></h3>
             </div>
             <!-- Frame Bulan Ini -->
-            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">event</span>
                 </div>
@@ -56,7 +68,7 @@
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= esc($statFramesThisMonth ?? 0) ?></h3>
             </div>
             <!-- Total Filter -->
-            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">filter_b_and_w</span>
                 </div>
@@ -64,7 +76,7 @@
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= esc($statTotalFilters ?? 0) ?></h3>
             </div>
             <!-- Filter Aktif -->
-            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">check_circle</span>
                 </div>
@@ -73,223 +85,138 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-12 gap-6">
-
-            <!-- ============================================================
-                 KIRI: Tabel Frame (7 kolom)
-            ============================================================ -->
-            <section class="col-span-12 xl:col-span-7">
-                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white">
+                                <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+ 
+            <div class="xl:col-span-4 flex flex-col h-full">
+<!-- Panduan Aset -->
+                <div class="p-6 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-sm overflow-hidden relative group h-full flex flex-col justify-between">
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-black mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined">menu_book</span>
+                            Panduan Aset
+                        </h3>
+                        <ul class="grid grid-cols-1 gap-3.5 mt-4">
+                            <li class="flex items-start gap-3 bg-white/10 p-3.5 rounded-xl backdrop-blur-sm border border-white/10">
+                                <span class="material-symbols-outlined text-blue-200 mt-0.5 text-[18px]">aspect_ratio</span>
+                                <div>
+                                    <p class="text-sm font-bold text-white">Aspek Rasio</p>
+                                    <p class="text-xs text-blue-100 mt-0.5">Pastikan frame memiliki rasio 4:6 atau 1:1.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 bg-white/10 p-3.5 rounded-xl backdrop-blur-sm border border-white/10">
+                                <span class="material-symbols-outlined text-blue-200 mt-0.5 text-[18px]">layers_clear</span>
+                                <div>
+                                    <p class="text-sm font-bold text-white">Transparansi</p>
+                                    <p class="text-xs text-blue-100 mt-0.5">Area tengah harus transparan (Alpha Channel).</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 bg-white/10 p-3.5 rounded-xl backdrop-blur-sm border border-white/10">
+                                <span class="material-symbols-outlined text-blue-200 mt-0.5 text-[18px]">compress</span>
+                                <div>
+                                    <p class="text-sm font-bold text-white">Optimasi</p>
+                                    <p class="text-xs text-blue-100 mt-0.5">Ukuran file maksimal 2MB per frame.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 bg-white/10 p-3.5 rounded-xl backdrop-blur-sm border border-white/10">
+                                <span class="material-symbols-outlined text-blue-200 mt-0.5 text-[18px]">imagesmode</span>
+                                <div>
+                                    <p class="text-sm font-bold text-white">Format File</p>
+                                    <p class="text-xs text-blue-100 mt-0.5">Wajib menggunakan format PNG transparan berkualitas tinggi.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 bg-white/10 p-3.5 rounded-xl backdrop-blur-sm border border-white/10">
+                                <span class="material-symbols-outlined text-blue-200 mt-0.5 text-[18px]">category</span>
+                                <div>
+                                    <p class="text-sm font-bold text-white">Kategorisasi</p>
+                                    <p class="text-xs text-blue-100 mt-0.5">Selalu tentukan kategori untuk mempermudah pencarian.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-700"></div>
+                </div>
+            </div>
+ 
+            <div class="xl:col-span-8 flex flex-col h-full">
+<!-- Tabel Filter Warna -->
+                <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm flex flex-col h-full">
+                    <div class="p-6 flex justify-between items-center bg-white border-b border-slate-100">
                         <div class="flex items-center gap-3">
                             <div class="w-1 h-6 bg-primary rounded-full"></div>
-                            <h4 class="font-h2 text-h2 text-on-surface">Koleksi Frame</h4>
+                            <h4 class="font-bold text-lg text-slate-800">Daftar Filter Warna</h4>
                         </div>
-                        <a href="<?= base_url('admin/frames/create') ?>"
-                           class="bg-primary text-white px-4 py-2 rounded-lg font-label-bold text-label-bold flex items-center gap-2 hover:bg-primary-container transition-colors">
-                            <span class="material-symbols-outlined text-[18px]">add_photo_alternate</span>
-                            Unggah Frame
+                        <a href="<?= base_url('admin/filters/create') ?>"
+                           class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-blue-800 transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">filter_b_and_w</span>
+                            Tambah Filter
                         </a>
                     </div>
-                    
-                    <!-- Search & Filter Bar -->
-                    <div class="p-4 bg-slate-50/50 border-b border-slate-200 flex flex-col sm:flex-row gap-3">
-                        <form method="get" action="<?= base_url('admin/frames') ?>" class="flex flex-1 gap-3">
-                            <!-- Search Input -->
+                    <div class="p-6 bg-white flex flex-col sm:flex-row gap-3">
+                        <form method="get" action="<?= base_url('admin/frames') ?>" class="flex flex-col sm:flex-row flex-1 gap-3">
                             <div class="relative flex-1">
                                 <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">search</span>
-                                <input type="text" name="search" value="<?= esc($search ?? '') ?>" placeholder="Cari nama frame..."
-                                       class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all"/>
+                                <input type="text" name="filter_search" value="<?= esc($filterSearch ?? '') ?>" placeholder="Cari filter..."
+                                       class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all"/>
                             </div>
-                            
-                            <!-- Category Filter -->
-                            <select name="category" onchange="this.form.submit()"
-                                    class="px-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all text-slate-600">
-                                <option value="">Semua Kategori</option>
-                                <?php if (!empty($categories)): ?>
-                                    <?php foreach ($categories as $cat): ?>
-                                        <option value="<?= esc($cat['id']) ?>" <?= ($selectedCategory ?? '') === $cat['id'] ? 'selected' : '' ?>>
-                                            <?= esc($cat['name']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
+                            <select name="filter_status" onchange="this.form.submit()"
+                                    class="px-4 py-2 w-full sm:w-64 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all text-slate-600 font-medium cursor-pointer">
+                                <option value="">Semua Status</option>
+                                <option value="1" <?= ($filterStatus ?? '') === '1' ? 'selected' : '' ?>>Aktif</option>
+                                <option value="0" <?= ($filterStatus ?? '') === '0' ? 'selected' : '' ?>>Nonaktif</option>
                             </select>
-                            
-                            <!-- Reset button if search or category is active -->
-                            <?php if (!empty($search) || !empty($selectedCategory)): ?>
-                                <a href="<?= base_url('admin/frames') ?>" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-semibold rounded-lg flex items-center transition-colors">
+                            <?php if (!empty($filterSearch) || ($filterStatus ?? '') !== ''): ?>
+                                <a href="<?= base_url('admin/frames') ?>" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-lg flex items-center transition-colors">
                                     Reset
                                 </a>
                             <?php endif; ?>
                         </form>
                     </div>
-
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead class="bg-slate-50/50 border-b border-slate-200">
+                        <table class="w-full text-center">
+                            <thead class="border-y border-slate-100 bg-white">
                                 <tr>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase">ID Frame</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Nama Frame</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Kategori</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Preview</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Status</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Aksi</th>
+                                    <th class="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">ID</th>
+                                    <th class="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Nama</th>
+                                    <th class="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">CSS Value</th>
+                                    <th class="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Status</th>
+                                    <th class="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                <?php if (!empty($frames)): ?>
-                                    <?php foreach ($frames as $frame): ?>
-                                        <tr class="hover:bg-blue-50/30 transition-colors">
-                                            <td class="px-6 py-4 font-data-tabular text-data-tabular"><?= esc($frame['id']) ?></td>
-                                            <td class="px-6 py-4 text-center">
-                                                <div class="font-body-base text-body-base text-on-surface font-semibold"><?= esc($frame['name']) ?></div>
-                                                <span class="inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
-                                                    <?= esc($frame['photo_count'] ?? 6) ?> Foto
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 font-body-sm text-body-sm text-slate-600 text-center">
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded bg-blue-50 text-blue-700 text-xs font-semibold">
-                                                    <?= esc($frame['category_name'] ?? 'Uncategorized') ?>
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                <div class="w-16 h-10 rounded border border-slate-200 bg-slate-100 overflow-hidden mx-auto">
-                                                    <?php if (!empty($frame['file_path'])): ?>
-                                                        <img alt="<?= esc($frame['name']) ?> preview"
-                                                             class="w-full h-full object-cover"
-                                                             src="<?= base_url($frame['file_path']) ?>"/>
-                                                    <?php else: ?>
-                                                        <div class="w-full h-full flex items-center justify-center text-slate-300">
-                                                            <span class="material-symbols-outlined text-sm">image</span>
-                                                        </div>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 text-center">
-                                                <?php if ($frame['is_active']): ?>
-                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Aktif</span>
-                                                <?php else: ?>
-                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">Non-Aktif</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="px-6 py-4 text-center space-x-2">
-                                                <button type="button"
-                                                        class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Lihat Preview"
-                                                        onclick="showPreviewModal('<?= esc($frame['id'], 'js') ?>', '<?= esc($frame['name'], 'js') ?>', '<?= esc($frame['category_name'] ?? 'Uncategorized', 'js') ?>', '<?= base_url($frame['file_path']) ?>', '<?= date('d M Y, H:i', strtotime($frame['created_at'])) ?>', '<?= esc($frame['photo_count'] ?? 6, 'js') ?>')">
-                                                    <span class="material-symbols-outlined text-[20px]">visibility</span>
-                                                </button>
-                                                <a href="<?= base_url('admin/frames/' . $frame['id'] . '/edit') ?>"
-                                                   class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
-                                                    <span class="material-symbols-outlined text-[20px]">edit</span>
-                                                </a>
-                                                <form action="<?= base_url('admin/frames/' . $frame['id'] . '/toggle') ?>" method="post" class="inline">
-                                                    <?= csrf_field() ?>
-                                                    <button type="submit" class="p-1.5 text-slate-400 hover:text-green-600 rounded transition-colors" title="Toggle Status Aktif">
-                                                        <span class="material-symbols-outlined text-[20px]">
-                                                            <?= $frame['is_active'] ? 'toggle_on' : 'toggle_off' ?>
-                                                        </span>
-                                                    </button>
-                                                </form>
-                                                <form action="<?= base_url('admin/frames/' . $frame['id'] . '/delete') ?>" method="post" class="inline">
-                                                    <?= csrf_field() ?>
-                                                    <button type="submit"
-                                                            class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
-                                                            >
-                                                        <span class="material-symbols-outlined text-[20px]">delete</span>
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <tr>
-                                        <td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400">
-                                            Belum ada frame. <a href="<?= base_url('admin/frames/create') ?>" class="text-primary font-semibold">Unggah sekarang</a>.
-                                        </td>
-                                    </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    <!-- Pagination Frame -->
-                    <div class="px-6 py-4 bg-slate-50/50 flex items-center justify-between">
-                        <span class="text-xs text-slate-500">
-                            Menampilkan <?= count($frames ?? []) ?> dari <?= $totalFrames ?? 0 ?> frame
-                        </span>
-                        <div class="flex gap-1">
-                            <a href="<?= base_url('admin/frames?page=' . max(1, ($currentFramePage ?? 1) - 1) . '&search=' . urlencode($search ?? '') . '&category=' . urlencode($selectedCategory ?? '')) ?>"
-                               class="p-1 border border-slate-300 rounded hover:bg-white transition-colors <?= ($currentFramePage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
-                                <span class="material-symbols-outlined text-sm">chevron_left</span>
-                            </a>
-                            <a href="<?= base_url('admin/frames?page=' . min(($totalFramePages ?? 1), ($currentFramePage ?? 1) + 1) . '&search=' . urlencode($search ?? '') . '&category=' . urlencode($selectedCategory ?? '')) ?>"
-                               class="p-1 border border-slate-300 rounded hover:bg-white transition-colors <?= ($currentFramePage ?? 1) >= ($totalFramePages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
-                                <span class="material-symbols-outlined text-sm">chevron_right</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ============================================================
-                 KANAN: Tabel Filter + Stats (5 kolom)
-            ============================================================ -->
-            <section class="col-span-12 xl:col-span-5 flex flex-col gap-6">
-
-                <!-- Tabel Filter Warna -->
-                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white">
-                        <div>
-                            <h2 class="font-h2 text-h2 text-on-surface">Filter Warna</h2>
-                            <p class="text-body-sm text-slate-500">Preset CSS untuk efek visual.</p>
-                        </div>
-                        <a href="<?= base_url('admin/filters/create') ?>"
-                           class="border border-primary text-primary px-4 py-2 rounded-lg font-label-bold text-label-bold flex items-center gap-2 hover:bg-blue-50 transition-colors">
-                            <span class="material-symbols-outlined text-[18px]">tune</span>
-                            Tambah Filter
-                        </a>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead class="bg-slate-50/50 border-b border-slate-200">
-                                <tr>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">ID</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Nama Filter</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">CSS Value</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600">Status</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
+                            <tbody class="divide-y divide-slate-50 bg-white">
                                 <?php if (!empty($filters)): ?>
                                     <?php foreach ($filters as $filter): ?>
-                                        <tr class="hover:bg-blue-50/30 transition-colors">
-                                            <td class="px-4 py-4 font-data-tabular text-data-tabular"><?= esc($filter['id']) ?></td>
-                                            <td class="px-4 py-4 font-body-base text-body-base"><?= esc($filter['name']) ?></td>
+                                        <tr class="hover:bg-slate-50 transition-colors group">
+                                            <td class="px-4 py-4 font-mono text-xs font-semibold text-slate-900">#<?= esc($filter['id']) ?></td>
+                                            <td class="px-4 py-4 text-sm font-semibold text-slate-700"><?= esc($filter['name']) ?></td>
                                             <td class="px-4 py-4">
-                                                <code class="bg-slate-100 px-2 py-1 rounded text-[11px] text-slate-600">
+                                                <code class="bg-slate-100 px-2 py-1 rounded text-[11px] text-slate-600 font-mono border border-slate-200">
                                                     <?= esc($filter['css_value']) ?>
                                                 </code>
                                             </td>
                                             <td class="px-4 py-4">
                                                 <?php if ($filter['is_active']): ?>
-                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Aktif</span>
+                                                    <span class="inline-flex items-center px-2 py-1 rounded bg-green-100 text-green-700 text-[10px] font-bold tracking-wide">AKTIF</span>
                                                 <?php else: ?>
-                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">Non-Aktif</span>
+                                                    <span class="inline-flex items-center px-2 py-1 rounded bg-slate-100 text-slate-500 text-[10px] font-bold tracking-wide">NONAKTIF</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td class="px-4 py-4 text-center flex justify-center gap-1">
+                                            <td class="px-4 py-4 flex justify-center items-center gap-2">
                                                 <a href="<?= base_url('admin/filters/' . $filter['id'] . '/edit') ?>"
-                                                   class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
-                                                    <span class="material-symbols-outlined text-[20px]">settings</span>
+                                                   class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                                    <span class="material-symbols-outlined text-[18px]">edit</span>
                                                 </a>
                                                 <form action="<?= base_url('admin/filters/' . $filter['id'] . '/toggle') ?>" method="post" class="inline">
                                                     <?= csrf_field() ?>
-                                                    <button type="submit" class="inline p-1.5 text-slate-400 hover:bg-slate-100 hover:text-green-600 rounded transition-colors" title="Toggle Aktif">
-                                                        <span class="material-symbols-outlined text-[20px]">
+                                                    <button type="submit" class="transition-transform hover:scale-110" title="Toggle Aktif">
+                                                        <span class="material-symbols-outlined text-[24px] <?= $filter['is_active'] ? 'text-green-500' : 'text-slate-300' ?>">
                                                             <?= $filter['is_active'] ? 'toggle_on' : 'toggle_off' ?>
                                                         </span>
                                                     </button>
                                                 </form>
+                                                <button type="button" class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Filter"
+                                                        onclick="openUniversalDeleteModal('<?= base_url('admin/filters/' . $filter['id'] . '/delete') ?>', 'Apakah Anda yakin ingin menghapus filter ini?<br>Tindakan ini tidak dapat dibatalkan.')">
+                                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                </button>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -303,77 +230,82 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
-
-                <!-- Stats Bento -->
-                <div class="p-6 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-lg overflow-hidden relative group">
-                    <div class="relative z-10">
-                        <h3 class="text-h2 font-h2 mb-2">Statistik Aset</h3>
-                        <div class="grid grid-cols-2 gap-4 mt-6">
-                            <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
-                                <p class="text-xs text-blue-100">Total Frame</p>
-                                <p class="text-2xl font-bold"><?= number_format($statTotalFrames ?? 0) ?></p>
+                    <!-- Pagination Filter -->
+                    <div class="mt-auto p-6 bg-white border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs text-slate-500 font-medium">
+                            Menampilkan <?= count($filters ?? []) ?> dari <?= $totalFilters ?? 0 ?> filter
+                        </span>
+                        <div class="flex gap-2">
+                            <a href="<?= base_url('admin/frames?filter_page=' . max(1, ($currentFilterPage ?? 1) - 1)) ?>"
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentFilterPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_left</span>
+                            </a>
+                            <div class="w-8 h-8 flex items-center justify-center bg-primary text-white font-bold text-xs rounded-lg shadow-sm">
+                                <?= $currentFilterPage ?? 1 ?>
                             </div>
-                            <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
-                                <p class="text-xs text-blue-100">Filter Aktif</p>
-                                <p class="text-2xl font-bold"><?= number_format($statActiveFilters ?? 0) ?></p>
-                            </div>
-                        </div>
-                        <div class="mt-6 flex items-center gap-2 text-xs text-blue-100">
-                            <span class="material-symbols-outlined text-sm">info</span>
-                            <span>Total Filter: <?= $statTotalFilters ?? 0 ?> | Frame bulan ini: <?= $statFramesThisMonth ?? 0 ?></span>
+                            <a href="<?= base_url('admin/frames?filter_page=' . min(($totalFilterPages ?? 1), ($currentFilterPage ?? 1) + 1)) ?>"
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentFilterPage ?? 1) >= ($totalFilterPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                            </a>
                         </div>
                     </div>
-                    <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-700"></div>
                 </div>
+            </div>
 
-                <!-- Tabel Kategori Frame -->
-                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white">
-                        <div>
-                            <h2 class="font-h2 text-h2 text-on-surface">Kategori Frame</h2>
-                            <p class="text-body-sm text-slate-500">Kelola kelompok &amp; tema bingkai foto.</p>
+            <div class="xl:col-span-4 flex flex-col h-full">
+<!-- Tabel Kategori Frame -->
+                <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm flex flex-col h-full">
+                    <div class="p-6 flex justify-between items-center bg-white border-b border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-1 h-6 bg-primary rounded-full"></div>
+                            <h4 class="font-bold text-lg text-slate-800">Daftar Kategori</h4>
                         </div>
                         <button type="button" onclick="openAddCategoryModal()"
-                                class="border border-primary text-primary px-4 py-2 rounded-lg font-label-bold text-label-bold flex items-center gap-2 hover:bg-blue-50 transition-colors">
-                            <span class="material-symbols-outlined text-[18px]">category</span>
-                            Tambah Kategori
+                                class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-blue-800 transition-colors whitespace-nowrap">
+                            <span class="material-symbols-outlined text-[16px]">category</span>
+                            Tambah
                         </button>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead class="bg-slate-50/50 border-b border-slate-200">
+                    <div class="p-4 bg-white border-b border-slate-100">
+                        <form method="get" action="<?= base_url('admin/frames') ?>" class="w-full">
+                            <div class="relative w-full">
+                                <span class="material-symbols-outlined absolute left-3 top-2 text-slate-400 text-[18px]">search</span>
+                                <input type="text" name="cat_search" value="<?= esc($catSearch ?? '') ?>" placeholder="Cari kategori..."
+                                       class="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all"/>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="overflow-x-auto flex-grow">
+                        <table class="w-full text-center">
+                            <thead class="border-y border-slate-100 bg-white">
                                 <tr>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 text-center">ID</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 text-center">Nama Kategori</th>
-                                    <th class="px-4 py-3 font-label-bold text-label-bold text-slate-600 text-center">Aksi</th>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">ID</th>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Nama Kategori</th>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                <?php if (!empty($categories)): ?>
-                                    <?php foreach ($categories as $cat): ?>
-                                        <tr class="hover:bg-blue-50/30 transition-colors">
-                                            <td class="px-4 py-4 font-data-tabular text-data-tabular text-center"><?= esc($cat['id']) ?></td>
-                                            <td class="px-4 py-4 font-body-base text-body-base text-on-surface text-center"><?= esc($cat['name']) ?></td>
-                                            <td class="px-4 py-4 text-center flex justify-center gap-2">
+                            <tbody class="divide-y divide-slate-50 bg-white">
+                                <?php if (!empty($categoriesPaginated)): ?>
+                                    <?php foreach ($categoriesPaginated as $cat): ?>
+                                        <tr class="hover:bg-slate-50 transition-colors group">
+                                            <td class="px-4 py-3.5 font-mono text-xs font-semibold text-slate-900 text-center">#<?= esc($cat['id']) ?></td>
+                                            <td class="px-4 py-3.5 text-xs font-semibold text-slate-700 text-center"><?= esc($cat['name']) ?></td>
+                                            <td class="px-4 py-3.5 flex justify-center items-center gap-2">
                                                 <button type="button" 
                                                         onclick="openEditCategoryModal('<?= esc($cat['id'], 'js') ?>', '<?= esc($cat['name'], 'js') ?>')"
-                                                        class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
-                                                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                                                        class="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                                    <span class="material-symbols-outlined text-[16px]">edit</span>
                                                 </button>
-                                                <form action="<?= base_url('admin/categories/' . $cat['id'] . '/delete') ?>" method="post" class="inline">
-                                                    <?= csrf_field() ?>
-                                                    <button type="submit" class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Kategori"
-                                                            onclick="return confirm('Hapus kategori ini? Semua frame dalam kategori ini akan diubah menjadi uncategorized.')">
-                                                        <span class="material-symbols-outlined text-[20px]">delete</span>
-                                                    </button>
-                                                </form>
+                                                <button type="button" class="p-1 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Kategori"
+                                                        onclick="openUniversalDeleteModal('<?= base_url('admin/categories/' . $cat['id'] . '/delete') ?>', 'Apakah Anda yakin ingin menghapus kategori ini?<br>Semua frame dalam kategori ini akan diubah menjadi uncategorized.')">
+                                                    <span class="material-symbols-outlined text-[16px]">delete</span>
+                                                </button>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="3" class="px-4 py-8 text-center text-sm text-slate-400">
+                                        <td colspan="3" class="px-4 py-8 text-center text-xs text-slate-400">
                                             Belum ada kategori.
                                         </td>
                                     </tr>
@@ -381,79 +313,235 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
-            </section>
-
-            <!-- ============================================================
-                 BAWAH: Upload Zone + Panduan
-            ============================================================ -->
-            <div class="col-span-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Upload Zone -->
-                <form action="<?= base_url('admin/frames') ?>" method="post" enctype="multipart/form-data"
-                      class="md:col-span-2 bg-white border border-dashed border-slate-300 rounded-xl p-10 flex flex-col items-center justify-center text-center group hover:border-blue-400 transition-colors">
-                    <?= csrf_field() ?>
-                    <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined text-3xl">cloud_upload</span>
+                    <!-- Pagination Kategori -->
+                    <div class="mt-auto p-4 bg-white border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">
+                            <?= count($categoriesPaginated ?? []) ?>/<?= $totalCategories ?? 0 ?> Cat
+                        </span>
+                        <div class="flex gap-1.5">
+                            <a href="<?= base_url('admin/frames?cat_page=' . max(1, ($currentCatPage ?? 1) - 1)) ?>"
+                               class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentCatPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_left</span>
+                            </a>
+                            <div class="w-7 h-7 flex items-center justify-center bg-primary text-white font-bold text-[10px] rounded-lg shadow-sm">
+                                <?= $currentCatPage ?? 1 ?>
+                            </div>
+                            <a href="<?= base_url('admin/frames?cat_page=' . min(($totalCategoryPages ?? 1), ($currentCatPage ?? 1) + 1)) ?>"
+                               class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentCatPage ?? 1) >= ($totalCategoryPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                            </a>
+                        </div>
                     </div>
-                    <h4 class="font-bold text-on-surface mb-1">Seret &amp; Letakkan Frame Baru</h4>
-                    <p class="text-body-sm text-slate-500 mb-4">Mendukung format PNG transparan, resolusi min. 1080px.</p>
-                    <input type="text" name="name" placeholder="Nama Frame" required
-                                           class="mb-3 w-full max-w-xs px-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"/>
+                </div>
+            </div>
+ 
+            <div class="xl:col-span-8 flex flex-col h-full">
+<!-- Koleksi Frame -->
+                <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm flex flex-col h-full">
+                    <div class="p-6 flex justify-between items-center bg-white border-b border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-1 h-6 bg-primary rounded-full"></div>
+                            <h4 class="font-bold text-lg text-slate-800">Daftar Koleksi Frame</h4>
+                        </div>
+                        <a href="<?= base_url('admin/frames/create') ?>"
+                           class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-blue-800 transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">add_photo_alternate</span>
+                            Tambah Frame
+                        </a>
+                    </div>
                     
-                    <input type="number" name="photo_count" placeholder="Jumlah Foto (contoh: 1 atau 6)" min="1" max="10" required value="6"
-                           class="mb-3 w-full max-w-xs px-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"/>
-                    
-                    <select name="category_id"
-                            class="mb-4 w-full max-w-xs px-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white text-slate-600">
-                        <option value="">-- Pilih Kategori (Opsional) --</option>
-                        <?php if (!empty($categories)): ?>
-                            <?php foreach ($categories as $cat): ?>
-                                <option value="<?= esc($cat['id']) ?>"><?= esc($cat['name']) ?></option>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </select>
+                    <!-- Search & Filter Bar -->
+                    <div class="p-6 bg-white flex flex-col sm:flex-row gap-3">
+                        <form method="get" action="<?= base_url('admin/frames') ?>" class="flex flex-col sm:flex-row flex-1 gap-3">
+                            <!-- Search Input -->
+                            <div class="relative flex-1">
+                                <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">search</span>
+                                <input type="text" name="search" value="<?= esc($search ?? '') ?>" placeholder="Cari nama frame..."
+                                       class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all"/>
+                            </div>
+                            
+                            <!-- Category Filter -->
+                            <select name="category" onchange="this.form.submit()"
+                                    class="px-4 py-2 w-full sm:w-64 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all text-slate-600 font-medium cursor-pointer">
+                                <option value="">Semua Kategori</option>
+                                <?php if (!empty($categories)): ?>
+                                    <?php foreach ($categories as $cat): ?>
+                                        <option value="<?= esc($cat['id']) ?>" <?= ($selectedCategory ?? '') === $cat['id'] ? 'selected' : '' ?>>
+                                            <?= esc($cat['name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                            
+                            <!-- Reset button -->
+                            <?php if (!empty($search) || !empty($selectedCategory)): ?>
+                                <a href="<?= base_url('admin/frames') ?>" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-lg flex items-center transition-colors">
+                                    Reset
+                                </a>
+                            <?php endif; ?>
+                        </form>
+                    </div>
 
-                    <label class="cursor-pointer bg-slate-100 text-slate-700 px-6 py-2 rounded-full text-xs font-bold hover:bg-slate-200 transition-colors">
-                        Pilih File
-                        <input type="file" name="frame_file" accept="image/png,image/jpeg" class="hidden"/>
-                    </label>
-                    <button type="submit" class="mt-4 bg-primary text-white px-6 py-2 rounded-full text-xs font-bold hover:opacity-90 transition-opacity">
-                        Upload Frame
-                    </button>
-                </form>
-
-                <!-- Panduan Aset -->
-                <div class="bg-white border border-slate-200 rounded-xl p-6">
-                    <h4 class="font-h2 text-body-base font-bold mb-4">Panduan Aset</h4>
-                    <ul class="space-y-4">
-                        <li class="flex items-start gap-3">
-                            <span class="material-symbols-outlined text-blue-500 text-[18px]">check_circle</span>
-                            <div>
-                                <p class="text-xs font-bold text-on-surface">Aspek Rasio</p>
-                                <p class="text-[11px] text-slate-500">Pastikan frame memiliki rasio 4:6 atau 1:1.</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-center">
+                            <thead class="border-y border-slate-100 bg-white">
+                                <tr>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">ID Frame</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Nama Frame</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Kategori</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Preview</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Status</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50 bg-white">
+                                <?php if (!empty($frames)): ?>
+                                    <?php foreach ($frames as $frame): ?>
+                                        <tr class="hover:bg-slate-50 transition-colors group">
+                                            <td class="px-6 py-4 font-mono text-xs font-semibold text-slate-900">#<?= esc($frame['id']) ?></td>
+                                            <td class="px-6 py-4 text-sm font-semibold text-slate-700"><?= esc($frame['name']) ?></td>
+                                            <td class="px-6 py-4">
+                                                <span class="inline-flex items-center px-2 py-1 rounded bg-blue-50 text-blue-700 text-[10px] font-bold tracking-wide uppercase">
+                                                    <?= esc($frame['category_name'] ?? 'Uncategorized') ?>
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 flex justify-center">
+                                                <div class="w-14 h-9 rounded border border-slate-200 bg-slate-100 overflow-hidden shadow-sm">
+                                                    <?php if (!empty($frame['file_path'])): ?>
+                                                        <img alt="<?= esc($frame['name']) ?> preview"
+                                                             class="w-full h-full object-cover"
+                                                             src="<?= base_url($frame['file_path']) ?>"/>
+                                                    <?php else: ?>
+                                                        <div class="w-full h-full flex items-center justify-center text-slate-300">
+                                                            <span class="material-symbols-outlined text-sm">image</span>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <?php if ($frame['is_active']): ?>
+                                                    <span class="inline-flex items-center px-2 py-1 rounded bg-green-100 text-green-700 text-[10px] font-bold tracking-wide">AKTIF</span>
+                                                <?php else: ?>
+                                                    <span class="inline-flex items-center px-2 py-1 rounded bg-slate-100 text-slate-500 text-[10px] font-bold tracking-wide">NONAKTIF</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="px-6 py-4 flex justify-center items-center gap-2">
+                                                <button type="button"
+                                                        class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Lihat Preview"
+                                                        onclick="showPreviewModal('<?= esc($frame['id'], 'js') ?>', '<?= esc($frame['name'], 'js') ?>', '<?= esc($frame['category_name'] ?? 'Uncategorized', 'js') ?>', '<?= base_url($frame['file_path']) ?>', '<?= date('d M Y, H:i', strtotime($frame['created_at'])) ?>')">
+                                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                </button>
+                                                <a href="<?= base_url('admin/frames/' . $frame['id'] . '/edit') ?>"
+                                                   class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                                </a>
+                                                <form action="<?= base_url('admin/frames/' . $frame['id'] . '/toggle') ?>" method="post" class="inline">
+                                                    <?= csrf_field() ?>
+                                                    <button type="submit" class="transition-transform hover:scale-110" title="Toggle Status Aktif">
+                                                        <span class="material-symbols-outlined text-[24px] <?= $frame['is_active'] ? 'text-green-500' : 'text-slate-300' ?>">
+                                                            <?= $frame['is_active'] ? 'toggle_on' : 'toggle_off' ?>
+                                                        </span>
+                                                    </button>
+                                                </form>
+                                                <button type="button"
+                                                        class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
+                                                        onclick="openUniversalDeleteModal('<?= base_url('admin/frames/' . $frame['id'] . '/delete') ?>', 'Apakah Anda yakin ingin menghapus frame ini?<br>Tindakan ini tidak dapat dibatalkan.')">
+                                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400">
+                                            Belum ada frame. <a href="<?= base_url('admin/frames/create') ?>" class="text-primary font-bold">Unggah sekarang</a>.
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination Frame -->
+                    <div class="mt-auto p-6 bg-white border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs text-slate-500 font-medium">
+                            Menampilkan <?= count($frames ?? []) ?> dari <?= $totalFrames ?? 0 ?> frame
+                        </span>
+                        <div class="flex gap-2">
+                            <a href="<?= base_url('admin/frames?page=' . max(1, ($currentFramePage ?? 1) - 1) . '&search=' . urlencode($search ?? '') . '&category=' . urlencode($selectedCategory ?? '')) ?>"
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentFramePage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_left</span>
+                            </a>
+                            <div class="w-8 h-8 flex items-center justify-center bg-primary text-white font-bold text-xs rounded-lg shadow-sm">
+                                <?= $currentFramePage ?? 1 ?>
                             </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="material-symbols-outlined text-blue-500 text-[18px]">check_circle</span>
-                            <div>
-                                <p class="text-xs font-bold text-on-surface">Transparansi</p>
-                                <p class="text-[11px] text-slate-500">Area tengah harus transparan (Alpha Channel).</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="material-symbols-outlined text-blue-500 text-[18px]">check_circle</span>
-                            <div>
-                                <p class="text-xs font-bold text-on-surface">Optimasi</p>
-                                <p class="text-[11px] text-slate-500">Ukuran file maksimal 2MB per frame.</p>
-                            </div>
-                        </li>
-                    </ul>
+                            <a href="<?= base_url('admin/frames?page=' . min(($totalFramePages ?? 1), ($currentFramePage ?? 1) + 1) . '&search=' . urlencode($search ?? '') . '&category=' . urlencode($selectedCategory ?? '')) ?>"
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentFramePage ?? 1) >= ($totalFramePages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
         </div>
     </div>
 
+    <!-- Modal Konfirmasi Hapus Custom -->
+    <div id="deleteConfirmModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/40 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div id="deleteConfirmModalContent" class="bg-white rounded-3xl p-10 max-w-lg w-full mx-4 border border-slate-100 transform scale-95 opacity-0 transition-all duration-300 flex flex-col items-center text-center">
+            
+            <div class="w-20 h-20 rounded-2xl bg-red-50/70 flex items-center justify-center mb-6">
+                <span class="material-symbols-outlined text-[32px] text-red-500">delete</span>
+            </div>
+            
+            <h3 class="text-2xl font-black text-slate-900 mb-3">Konfirmasi Hapus</h3>
+            <p class="text-[16px] text-slate-500 leading-relaxed mb-8" id="deleteConfirmText">
+                Apakah Anda yakin ingin menghapus data ini?<br>Tindakan ini tidak dapat dibatalkan.
+            </p>
+            
+            <div class="flex gap-4 w-full">
+                <button onclick="closeDeleteModal()" class="flex-1 py-3.5 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold text-base rounded-2xl transition-all">Batal</button>
+                <form id="deleteForm" method="post" action="" class="flex-1">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-bold text-base rounded-2xl transition-all shadow-none">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        function openUniversalDeleteModal(actionUrl, message = 'Apakah Anda yakin ingin menghapus data ini?<br>Tindakan ini tidak dapat dibatalkan.') {
+            const modal = document.getElementById('deleteConfirmModal');
+            const content = document.getElementById('deleteConfirmModalContent');
+            const form = document.getElementById('deleteForm');
+            const textEl = document.getElementById('deleteConfirmText');
+            
+            form.action = actionUrl;
+            textEl.innerHTML = message;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeDeleteModal() {
+            const modal = document.getElementById('deleteConfirmModal');
+            const content = document.getElementById('deleteConfirmModalContent');
+            
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+    </script>
     <?= $this->include('Admin/layouts/footer') ?>
 </main>
 
@@ -461,12 +549,11 @@
 <div id="previewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="previewModalContent">
         <!-- Modal Header -->
-        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
             <h4 class="font-bold text-slate-800 flex items-center gap-2">
                 <span class="material-symbols-outlined text-emerald-600">visibility</span>
                 Detail &amp; Preview Frame
             </h4>
-
         </div>
         
         <!-- Modal Body -->
@@ -490,10 +577,6 @@
                     <span class="font-semibold text-slate-500">Kategori</span>
                     <span class="text-slate-800 font-semibold" id="modalFrameCategory"></span>
                 </div>
-                <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <span class="font-semibold text-slate-500">Jumlah Foto</span>
-                    <span class="text-slate-800 font-semibold" id="modalFramePhotoCount"></span>
-                </div>
                 <div class="flex justify-between">
                     <span class="font-semibold text-slate-500">Waktu Unggah</span>
                     <span class="text-slate-800" id="modalFrameUploaded"></span>
@@ -509,7 +592,7 @@
 </div>
 
 <script>
-    function showPreviewModal(id, name, category, filePath, uploadedAt, photoCount) {
+    function showPreviewModal(id, name, category, filePath, uploadedAt) {
         const modal = document.getElementById('previewModal');
         const content = document.getElementById('previewModalContent');
         
@@ -517,7 +600,6 @@
         document.getElementById('modalFrameName').textContent = name;
         document.getElementById('modalFrameCategory').textContent = category;
         document.getElementById('modalFrameUploaded').textContent = uploadedAt;
-        document.getElementById('modalFramePhotoCount').textContent = photoCount + " Foto";
         document.getElementById('modalFrameImage').src = filePath;
 
         // Show Modal
@@ -543,7 +625,7 @@
 <!-- Add Category Modal -->
 <div id="addCategoryModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-sm w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="addCategoryModalContent">
-        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
             <h4 class="font-bold text-slate-800 flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">category</span>
                 Tambah Kategori
@@ -574,7 +656,7 @@
 <!-- Edit Category Modal -->
 <div id="editCategoryModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-sm w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="editCategoryModalContent">
-        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
             <h4 class="font-bold text-slate-800 flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">edit</span>
                 Edit Kategori

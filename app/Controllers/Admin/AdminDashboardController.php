@@ -35,7 +35,7 @@ class AdminDashboardController extends BaseController
             ->join('customers', 'customers.id = bookings.customer_id', 'left')
             ->join('packages',  'packages.id = bookings.package_id',  'left')
             ->orderBy('bookings.created_at', 'DESC')
-            ->findAll(5);
+            ->findAll(10);
 
         // Total pendapatan bulan ini
         $revenueRow = $paymentModel->db

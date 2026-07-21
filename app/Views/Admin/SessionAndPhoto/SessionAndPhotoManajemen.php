@@ -12,47 +12,54 @@
                 </li>
                 <li class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-[10px]">chevron_right</span>
-                    <span class="text-blue-700 font-bold">Manajemen Sesi</span>
+                    <span class="text-blue-700 font-bold">Manajemen Galeri Sesi</span>
                 </li>
             </ol>
         </nav>
 
         <!-- Flash Messages -->
         <?php if (session()->getFlashdata('success')): ?>
-            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm font-medium">
+            <div id="flash-message-success" class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2">
+                <span class="material-symbols-outlined text-green-500">check_circle</span>
                 <?= esc(session()->getFlashdata('success')) ?>
             </div>
         <?php endif; ?>
         <?php if (session()->getFlashdata('error')): ?>
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-medium">
+            <div id="flash-message-error" class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2">
+                <span class="material-symbols-outlined text-red-500">error</span>
                 <?= esc(session()->getFlashdata('error')) ?>
             </div>
         <?php endif; ?>
 
+        <script>
+            setTimeout(() => {
+                const ids = ['flash-message-success', 'flash-message-error'];
+                ids.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.remove();
+                });
+            }, 1000);
+        </script>
+
         <!-- Page Title & Actions -->
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h2 class="font-h1 text-h1 text-on-surface">Manajemen Sesi</h2>
-                <p class="font-body-sm text-body-sm text-on-surface-variant">Kelola arsip sesi pemotretan dan kirim ulang galeri digital.</p>
+                <h2 class="font-h1 text-h1 text-on-surface">Manajemen Galeri Sesi</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Kelola seluruh riwayat sesi foto dan pengiriman email.</p>
             </div>
             <div class="flex gap-2">
-                <a href="<?= base_url('admin/sessions/export') ?>"
-                   class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2 rounded font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm">
+                <a href="<?= base_url('admin/sessions/export') ?>" onclick="showExportNotif()"
+                   class="bg-white border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg font-label-bold text-label-bold flex items-center gap-2 hover:bg-blue-50 hover:border-blue-700 hover:text-blue-700 transition-colors shadow-sm">
                     <span class="material-symbols-outlined text-[18px]">cloud_download</span>
                     Ekspor Laporan
-                </a>
-                <a href="<?= base_url('admin/sessions/resend-all') ?>"
-                   class="bg-primary text-on-primary px-4 py-2 rounded font-label-bold text-label-bold flex items-center gap-2 hover:bg-blue-800 transition-colors">
-                    <span class="material-symbols-outlined">mail</span>
-                    Kirim Ulang Email
                 </a>
             </div>
         </div>
 
         <!-- Bento Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <!-- Total Sesi -->
-            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">camera</span>
                 </div>
@@ -60,7 +67,7 @@
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $totalSessions ?? 0 ?></h3>
             </div>
             <!-- Sesi Hari Ini -->
-            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">today</span>
                 </div>
@@ -68,7 +75,7 @@
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statToday ?? 0 ?></h3>
             </div>
             <!-- Sesi Bulan Ini -->
-            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">calendar_month</span>
                 </div>
@@ -76,7 +83,7 @@
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statThisMonth ?? 0 ?></h3>
             </div>
             <!-- Total Foto -->
-            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">collections</span>
                 </div>
@@ -91,72 +98,89 @@
             <!-- ============================================================
                  Tabel Sesi (8 kolom)
             ============================================================ -->
-            <div class="col-span-12 lg:col-span-8 bg-white border border-slate-200 rounded shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
-                    <h3 class="font-h2 text-h2 text-on-surface">Riwayat Sesi Terkini</h3>
-                    <div class="flex gap-2 items-center">
-                        <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-[10px] font-bold border border-blue-100">
+            <div class="col-span-12 lg:col-span-8 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col">
+                <!-- Table Header -->
+                <div class="p-6 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center bg-white gap-4 rounded-t-xl">
+                    <div class="flex items-center gap-3 w-full md:w-auto">
+                        <div class="w-1 h-6 bg-primary rounded-full"></div>
+                        <h4 class="font-h2 text-h2 text-on-surface">Daftar Riwayat Sesi Terkini</h4>
+                        <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-[10px] font-bold border border-blue-100 ml-2">
                             Total: <?= $totalSessions ?? 0 ?> Sesi
                         </span>
-                        <form method="get" action="<?= base_url('admin/sessions') ?>" class="flex gap-2">
-                            <input name="q" value="<?= esc($keyword ?? '') ?>"
-                                   class="pl-3 pr-4 py-1.5 border border-slate-200 rounded text-sm focus:ring-2 focus:ring-blue-500 bg-slate-50 w-44"
-                                   placeholder="Cari ID sesi / booking..."/>
-                        </form>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-50 text-slate-600 uppercase text-[11px] font-bold tracking-wider">
-                            <tr>
-                                <th class="px-6 py-3 text-center">ID Sesi</th>
-                                <th class="px-6 py-3 text-center">Kode Booking</th>
-                                <th class="px-6 py-3 text-center">Frame / Filter</th>
-                                <th class="px-6 py-3 text-center">Penerima Email</th>
-                                <th class="px-6 py-3 text-center">Waktu</th>
-                                <th class="px-6 py-3 text-center">Aksi</th>
+
+                <!-- Search & Filter Bar -->
+                <div class="p-6 bg-white border-b border-slate-200 flex flex-col sm:flex-row gap-3">
+                    <form method="get" action="<?= base_url('admin/sessions') ?>" class="flex flex-col sm:flex-row flex-1 gap-3 w-full">
+                        <div class="relative flex-1">
+                            <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">search</span>
+                            <input type="text" name="q" value="<?= esc($keyword ?? '') ?>" placeholder="Cari ID sesi / booking / email..."
+                                   class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all"/>
+                        </div>
+                        <?php if (!empty($keyword)): ?>
+                            <a href="<?= base_url('admin/sessions') ?>" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-lg flex items-center justify-center transition-colors">
+                                Reset
+                            </a>
+                        <?php endif; ?>
+                    </form>
+                </div>
+                <div class="overflow-x-auto flex-1">
+                    <table class="w-full text-center">
+                        <thead>
+                            <tr class="bg-white border-b border-slate-100">
+                                <th class="px-6 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center">ID Sesi</th>
+                                <th class="px-6 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center">Kode Booking</th>
+                                <th class="px-6 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center">Frame / Filter</th>
+                                <th class="px-6 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center">Penerima Email</th>
+                                <th class="px-6 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center">Waktu</th>
+                                <th class="px-6 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
+                        <tbody class="divide-y divide-slate-50 bg-white">
                             <?php if (!empty($sessions)): ?>
                                 <?php foreach ($sessions as $session): ?>
-                                    <tr class="hover:bg-blue-50/50 transition-colors group">
-                                        <td class="px-6 py-4 font-data-tabular text-data-tabular text-blue-700 font-bold text-center">
+                                    <tr class="hover:bg-blue-50/30 transition-colors group">
+                                        <td class="px-6 py-4 font-medium text-slate-900 text-sm">
                                             #<?= esc($session['id']) ?>
                                         </td>
-                                        <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-900 text-center">
+                                        <td class="px-6 py-4 text-sm text-slate-600">
                                             <?= esc($session['booking_id'] ?? '-') ?>
                                         </td>
-                                        <td class="px-6 py-4 text-center">
+                                        <td class="px-6 py-4 text-sm">
                                             <div class="flex flex-col items-center">
-                                                <span class="text-body-sm font-medium"><?= esc($session['frame_name'] ?? 'N/A') ?></span>
-                                                <span class="text-[10px] text-slate-500 uppercase"><?= esc($session['filter_name'] ?? 'N/A') ?></span>
+                                                <span class="font-semibold text-slate-900"><?= esc($session['frame_name'] ?? 'N/A') ?></span>
+                                                <span class="text-[11px] text-slate-500 uppercase tracking-wide"><?= esc($session['filter_name'] ?? 'N/A') ?></span>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 text-body-sm text-slate-600 text-center">
+                                        <td class="px-6 py-4 text-sm text-slate-600">
                                             <?= esc($session['email_recipient'] ?? '-') ?>
                                         </td>
-                                        <td class="px-6 py-4 text-body-sm text-slate-500 text-center">
+                                        <td class="px-6 py-4 text-sm text-slate-500">
                                             <?= date('H:i', strtotime($session['created_at'])) ?> WIB
                                         </td>
-                                        <td class="px-6 py-4 text-center space-x-2">
-                                            <a href="<?= base_url('admin/sessions/' . $session['id']) ?>"
-                                               class="inline p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Lihat Detail">
-                                                <span class="material-symbols-outlined text-[20px]">open_in_new</span>
-                                            </a>
-                                            <?php if (!empty($session['email_recipient'])): ?>
-                                                <form action="<?= base_url('admin/sessions/' . $session['id'] . '/resend') ?>" method="post" class="inline">
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <a href="<?= base_url('admin/sessions/' . $session['id']) ?>"
+                                                   class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Lihat Detail">
+                                                    <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+                                                </a>
+                                                <?php if (!empty($session['email_recipient'])): ?>
+                                                    <form action="<?= base_url('admin/sessions/' . $session['id'] . '/resend') ?>" method="post" class="inline">
+                                                        <?= csrf_field() ?>
+                                                        <button type="submit" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Kirim Ulang Email">
+                                                            <span class="material-symbols-outlined text-[18px]">send</span>
+                                                        </button>
+                                                    </form>
+                                                <?php endif; ?>
+                                                <form action="<?= base_url('admin/sessions/' . $session['id'] . '/delete') ?>" method="post" class="inline">
                                                     <?= csrf_field() ?>
-                                                    <button type="submit" class="inline p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Kirim Ulang Email">
-                                                        <span class="material-symbols-outlined text-[20px]">send</span>
+                                                    <button type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus Sesi"
+                                                            onclick="return confirm('Hapus sesi ini beserta seluruh fotonya?')">
+                                                        <span class="material-symbols-outlined text-[18px]">delete</span>
                                                     </button>
                                                 </form>
-                                            <?php endif; ?>
-                                            <button type="button"
-                                                    class="inline p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Sesi"
-                                                    onclick="showDeleteSessionModal('<?= esc($session['id'], 'js') ?>')">
-                                                <span class="material-symbols-outlined text-[20px]">delete</span>
-                                            </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -171,23 +195,23 @@
                     </table>
                 </div>
                 <!-- Pagination -->
-                <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+                <div class="p-6 border-t border-slate-100 bg-white flex items-center justify-between rounded-b-xl">
                     <span class="text-xs text-slate-500">
                         Menampilkan <?= count($sessions ?? []) ?> dari <?= $totalSessions ?? 0 ?> sesi
                     </span>
-                    <div class="flex gap-1">
+                    <div class="flex gap-2">
                         <a href="<?= base_url('admin/sessions?page=' . max(1, ($currentPage ?? 1) - 1) . '&q=' . ($keyword ?? '')) ?>"
-                           class="p-1.5 border border-slate-200 rounded hover:bg-slate-50 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                             <span class="material-symbols-outlined text-sm">chevron_left</span>
                         </a>
                         <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
                             <a href="<?= base_url('admin/sessions?page=' . $i . '&q=' . ($keyword ?? '')) ?>"
-                               class="px-3 py-1 border rounded text-xs font-bold <?= $i === ($currentPage ?? 1) ? 'bg-primary text-white border-primary' : 'border-slate-200 hover:bg-white' ?>">
+                               class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border border-primary bg-primary text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                                 <?= $i ?>
                             </a>
                         <?php endfor; ?>
                         <a href="<?= base_url('admin/sessions?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&q=' . ($keyword ?? '')) ?>"
-                           class="p-1.5 border border-slate-200 rounded hover:bg-slate-50 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                             <span class="material-symbols-outlined text-sm">chevron_right</span>
                         </a>
                     </div>
@@ -195,42 +219,52 @@
             </div>
 
             <!-- ============================================================
-                 Panel Kanan: Penyimpanan + Aksi Cepat (4 kolom)
+                 Panel Kanan: Penyimpanan (4 kolom)
             ============================================================ -->
-            <div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
-
+            <div class="col-span-12 lg:col-span-4 flex flex-col">
                 <!-- Storage Card -->
-                <div class="bg-white border border-slate-200 rounded shadow-sm p-6 space-y-4">
-                    <div class="flex items-center justify-between">
+                <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 flex-1 flex flex-col">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-1 h-6 bg-primary rounded-full"></div>
                         <h3 class="font-h2 text-h2 text-on-surface">Sesi Terbaru</h3>
-                        <span class="material-symbols-outlined text-blue-600">history</span>
                     </div>
                     <?php if (!empty($latestSession)): ?>
-                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Terakhir Ditambahkan</label>
+                        <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 flex-1">
+                            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Terakhir Ditambahkan</label>
                             <div class="flex items-center justify-between gap-2 overflow-hidden">
-                                <p class="text-xs truncate text-blue-700 font-medium">
+                                <p class="text-sm truncate text-blue-700 font-medium">
                                     #<?= esc($latestSession['id']) ?> — <?= esc($latestSession['email_recipient'] ?? 'No email') ?>
                                 </p>
                                 <?php if (!empty($latestSession['drive_folder_url'])): ?>
                                     <a href="<?= esc($latestSession['drive_folder_url']) ?>" target="_blank"
-                                       class="shrink-0 text-slate-400 hover:text-blue-600" title="Buka Drive">
-                                        <span class="material-symbols-outlined text-sm">open_in_new</span>
+                                       class="shrink-0 p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Buka Drive">
+                                        <span class="material-symbols-outlined text-[18px]">open_in_new</span>
                                     </a>
                                 <?php endif; ?>
                             </div>
                         </div>
+                    <?php else: ?>
+                        <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 flex-1 flex items-center justify-center text-slate-400 text-sm">
+                            Belum ada sesi terbaru
+                        </div>
                     <?php endif; ?>
                 </div>
+            </div>
 
+            <!-- ============================================================
+                 Aksi Cepat (Full Width, di bawah)
+            ============================================================ -->
+            <div class="col-span-12">
                 <!-- Quick Action Card -->
-                <div class="bg-primary-container text-on-primary-container rounded shadow-sm p-6 relative overflow-hidden">
-                    <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl text-on-primary-container opacity-10">mail</span>
-                    <h4 class="font-label-bold text-label-bold text-blue-100 uppercase mb-2">Aksi Cepat</h4>
-                    <p class="text-white font-h2 text-h2 mb-4 leading-tight">Gagal Mengirim Email?</p>
+                <div class="bg-blue-700 text-white rounded-xl shadow-sm p-6 relative overflow-hidden flex flex-col items-start gap-4">
+                    <span class="material-symbols-outlined absolute -right-8 top-1/2 -translate-y-1/2 text-9xl text-white opacity-10">mail</span>
+                    <div class="z-10">
+                        <h4 class="text-[10px] font-bold text-blue-100 uppercase tracking-wider mb-1">Aksi Cepat</h4>
+                        <p class="font-h2 text-h2 leading-tight text-white mb-2">Gagal Mengirim Email?</p>
+                    </div>
                     <a href="<?= base_url('admin/sessions/resend-all') ?>"
-                       class="w-full bg-white text-blue-800 font-bold py-2.5 rounded hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-sm shadow-lg">
-                        <span class="material-symbols-outlined">send</span>
+                       class="w-full bg-white text-blue-700 font-bold px-4 py-3 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-sm shadow-sm z-10 border border-blue-100">
+                        <span class="material-symbols-outlined text-[18px]">send</span>
                         Kirim Manual Sekarang
                     </a>
                 </div>
@@ -277,11 +311,14 @@
                                                     <span class="material-symbols-outlined text-sm">download</span>
                                                 </a>
                                             <?php endif; ?>
-                                            <button type="button"
-                                                    class="bg-white/20 backdrop-blur-md p-2 rounded-full text-white hover:bg-red-500 transition-colors"
-                                                    onclick="showDeletePhotoModal('<?= esc($photo['id'], 'js') ?>', <?= (int)($photo['shot_number'] ?? ($index + 1)) ?>)">
-                                                <span class="material-symbols-outlined text-sm">delete</span>
-                                            </button>
+                                            <form action="<?= base_url('admin/photos/' . $photo['id'] . '/delete') ?>" method="post" class="inline">
+                                                <?= csrf_field() ?>
+                                                <button type="submit"
+                                                        class="bg-white/20 backdrop-blur-md p-2 rounded-full text-white hover:bg-error transition-colors"
+                                                        onclick="return confirm('Hapus foto ini?')">
+                                                    <span class="material-symbols-outlined text-sm">delete</span>
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -316,122 +353,5 @@
         <?= $this->include('Admin/layouts/footer') ?>
     </div>
 </main>
-
-<!-- ================================================================
-     Modal Konfirmasi Hapus SESI
-================================================================ -->
-<div id="deleteSessionModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0 duration-300" id="deleteSessionModalContent">
-        <div class="p-5 border-b border-slate-100 bg-slate-50/50">
-            <h4 class="font-bold text-slate-800 flex items-center gap-2">
-                <span class="material-symbols-outlined text-red-500">warning</span>
-                Hapus Sesi?
-            </h4>
-        </div>
-        <div class="p-6 text-center">
-            <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-                <span class="material-symbols-outlined text-4xl text-red-500">delete_forever</span>
-            </div>
-            <h3 class="text-lg font-black text-slate-800 mb-2">Yakin ingin menghapus?</h3>
-            <p class="text-sm text-slate-500 leading-relaxed mb-6">
-                Sesi <strong id="deleteSessionId"></strong> beserta <span class="font-bold text-red-600">seluruh foto fisiknya</span> akan dihapus permanen dan tidak dapat dipulihkan.
-            </p>
-            <form id="deleteSessionForm" method="post">
-                <?= csrf_field() ?>
-                <div class="flex gap-3">
-                    <button type="button" onclick="closeDeleteSessionModal()"
-                            class="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm rounded-lg transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors">
-                        Ya, Hapus Sesi
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- ================================================================
-     Modal Konfirmasi Hapus FOTO
-================================================================ -->
-<div id="deletePhotoModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0 duration-300" id="deletePhotoModalContent">
-        <div class="p-5 border-b border-slate-100 bg-slate-50/50">
-            <h4 class="font-bold text-slate-800 flex items-center gap-2">
-                <span class="material-symbols-outlined text-red-500">warning</span>
-                Hapus Foto?
-            </h4>
-        </div>
-        <div class="p-6 text-center">
-            <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-                <span class="material-symbols-outlined text-4xl text-red-500">hide_image</span>
-            </div>
-            <h3 class="text-lg font-black text-slate-800 mb-2">Hapus foto ini?</h3>
-            <p class="text-sm text-slate-500 leading-relaxed mb-6">
-                <strong id="deletePhotoLabel"></strong> akan dihapus permanen dari server. Tindakan ini <span class="font-bold text-red-600">tidak dapat dibatalkan</span>.
-            </p>
-            <form id="deletePhotoForm" method="post">
-                <?= csrf_field() ?>
-                <div class="flex gap-3">
-                    <button type="button" onclick="closeDeletePhotoModal()"
-                            class="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm rounded-lg transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors">
-                        Ya, Hapus Foto
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script>
-    const baseSessionUrl = '<?= base_url("admin/sessions") ?>';
-    const basePhotoUrl   = '<?= base_url("admin/photos") ?>';
-
-    function showDeleteSessionModal(sessionId) {
-        document.getElementById('deleteSessionId').textContent = '#' + sessionId;
-        document.getElementById('deleteSessionForm').action = baseSessionUrl + '/' + sessionId + '/delete';
-        const modal = document.getElementById('deleteSessionModal');
-        const content = document.getElementById('deleteSessionModalContent');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            content.classList.remove('scale-95', 'opacity-0');
-            content.classList.add('scale-100', 'opacity-100');
-        }, 10);
-    }
-
-    function closeDeleteSessionModal() {
-        const modal = document.getElementById('deleteSessionModal');
-        const content = document.getElementById('deleteSessionModalContent');
-        content.classList.remove('scale-100', 'opacity-100');
-        content.classList.add('scale-95', 'opacity-0');
-        setTimeout(() => modal.classList.add('hidden'), 300);
-    }
-
-    function showDeletePhotoModal(photoId, shotNumber) {
-        document.getElementById('deletePhotoLabel').textContent = 'Shot #' + String(shotNumber).padStart(2, '0');
-        document.getElementById('deletePhotoForm').action = basePhotoUrl + '/' + photoId + '/delete';
-        const modal = document.getElementById('deletePhotoModal');
-        const content = document.getElementById('deletePhotoModalContent');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            content.classList.remove('scale-95', 'opacity-0');
-            content.classList.add('scale-100', 'opacity-100');
-        }, 10);
-    }
-
-    function closeDeletePhotoModal() {
-        const modal = document.getElementById('deletePhotoModal');
-        const content = document.getElementById('deletePhotoModalContent');
-        content.classList.remove('scale-100', 'opacity-100');
-        content.classList.add('scale-95', 'opacity-0');
-        setTimeout(() => modal.classList.add('hidden'), 300);
-    }
-</script>
 
 <?php $this->endSection(); ?>

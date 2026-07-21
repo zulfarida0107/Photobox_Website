@@ -9,57 +9,62 @@ use CodeIgniter\Router\RouteCollection;
 // ============================================================
 // HOME / DEFAULT ROUTE
 // ============================================================
-$routes->get('/', 'Home::index');
+// $routes->get('/', 'Home::index');
 
 // Handle global OPTIONS requests for CORS preflight
-$routes->options('(:any)', function() {});
+$routes->options('(:any)', function () {});
 
 // ============================================================
 // API ROUTES
 // ============================================================
 $routes->group('api', static function ($routes) {
-    $routes->post('customer/booking/verify', 'Api\\CustomerController::verifyBooking');
-    $routes->post('customer/booking/create-walkin', 'Api\\CustomerController::createWalkin');
-    $routes->get('customer/print-options', 'Api\\CatalogController::listPrintOptions');
-    $routes->get('customer/frames', 'Api\\CatalogController::listFrames');
-    $routes->get('customer/frame', 'Api\\CatalogController::listFrames');
-    $routes->get('booths/(:segment)/session-check', 'Api\\BoothApiController::sessionCheck/$1'); 
+	$routes->post('customer/booking/verify', 'Api\\CustomerController::verifyBooking');
+	$routes->post('customer/booking/create-walkin', 'Api\\CustomerController::createWalkin');
+	$routes->get('customer/print-options', 'Api\\CatalogController::listPrintOptions');
+	$routes->get('customer/frames', 'Api\\CatalogController::listFrames');
+	$routes->get('customer/frame', 'Api\\CatalogController::listFrames');
+	$routes->get('booths/(:segment)/session-check', 'Api\\BoothApiController::sessionCheck/$1');
 
-    $routes->post('payment/qr', 'Api\\PaymentController::createQr');
-    $routes->get('payment', 'Api\\PaymentController::statusByQuery');
-    $routes->get('payment/(:segment)/status', 'Api\\PaymentController::status/$1');
-    $routes->post('payment/midtrans/callback', 'Api\\PaymentController::midtransCallback');
+	$routes->post('payment/qr', 'Api\\PaymentController::createQr');
+	$routes->get('payment', 'Api\\PaymentController::statusByQuery');
+	$routes->get('payment/(:segment)/status', 'Api\\PaymentController::status/$1');
+	$routes->post('payment/midtrans/callback', 'Api\\PaymentController::midtransCallback');
 
-    $routes->post('session/start', 'Api\\SessionController::start');
-    $routes->post('session/(:segment)/email', 'Api\\SessionController::submitEmail/$1');
-    $routes->post('session/(:segment)/complete', 'Api\\SessionController::complete/$1');
+	$routes->post('session/start', 'Api\\SessionController::start');
+	$routes->post('session/(:segment)/email', 'Api\\SessionController::submitEmail/$1');
+	$routes->post('session/(:segment)/complete', 'Api\\SessionController::complete/$1');
 
-    $routes->post('photo/session/(:segment)/upload', 'Api\\PhotoController::upload/$1');
+	$routes->post('session/(:segment)/upload', 'Api\\SessionController::upload/$1');
+	$routes->get('frame/(:any)', 'Api\\FrameController::show/$1');
+	$routes->get('drive/test', 'GoogleDriveController::test');
+	$routes->get('drive/upload/(:segment)', 'GoogleDriveController::upload/$1');
+	$routes->get('google/auth', 'GoogleAuthController::auth');
+	$routes->get('google/callback', 'GoogleAuthController::callback');
 });
 
 // ============================================================
 // PREVIEW ROUTES
 // ============================================================
-$routes->get('preview/frame', function() {
-    $dummyData = [
-        'booking' => [
-            'id' => 'DEMO001',
-            'booking_code' => 'DEMO001',
-            'verification_code' => '123456'
-        ]
-    ];
-    return view('customer/all_frame', $dummyData);
+$routes->get('preview/frame', function () {
+	$dummyData = [
+		'booking' => [
+			'id' => 'DEMO001',
+			'booking_code' => 'DEMO001',
+			'verification_code' => '123456'
+		]
+	];
+	return view('customer/all_frame', $dummyData);
 });
 
-$routes->get('preview/verify', function() {
-    $dummyData = [
-        'booking' => [
-            'id' => 'DEMO001',
-            'booking_code' => 'DEMO001',
-            'verification_code' => '123456'
-        ]
-    ];
-    return view('customer/verify_code', $dummyData);
+$routes->get('preview/verify', function () {
+	$dummyData = [
+		'booking' => [
+			'id' => 'DEMO001',
+			'booking_code' => 'DEMO001',
+			'verification_code' => '123456'
+		]
+	];
+	return view('customer/verify_code', $dummyData);
 });
 
 // ============================================================
@@ -73,25 +78,25 @@ $routes->get('admin/logout', 'Admin\AuthController::logout');
 // CUSTOMER ROUTES
 // ============================================================
 $routes->group('customer', static function ($routes) {
-    $routes->get('/', 'Customer\CustomerController::index');
-    $routes->get('booking', 'Customer\CustomerController::bookingForm');
-    $routes->post('create-booking', 'Customer\CustomerController::createBooking');
-    $routes->get('verify', 'Customer\CustomerController::verifyPage');
-    $routes->post('check-verification', 'Customer\CustomerController::checkVerification');
-    $routes->get('choose-frame', 'Customer\CustomerController::chooseFrame');
-    $routes->post('save-frame', 'Customer\CustomerController::saveFrameChoice');
-    $routes->get('bookings/(:segment)', 'Customer\CustomerController::showBooking/$1');
-    $routes->get('my-bookings/(:segment)', 'Customer\CustomerController::myBookings/$1');
+	$routes->get('/', 'Customer\CustomerController::index');
+	$routes->get('booking', 'Customer\CustomerController::bookingForm');
+	$routes->post('create-booking', 'Customer\CustomerController::createBooking');
+	$routes->get('verify', 'Customer\CustomerController::verifyPage');
+	$routes->post('check-verification', 'Customer\CustomerController::checkVerification');
+	$routes->get('choose-frame', 'Customer\CustomerController::chooseFrame');
+	$routes->post('save-frame', 'Customer\CustomerController::saveFrameChoice');
+	$routes->get('bookings/(:segment)', 'Customer\CustomerController::showBooking/$1');
+	$routes->get('my-bookings/(:segment)', 'Customer\CustomerController::myBookings/$1');
 
-    // Camera
-    $routes->get('camera', 'Customer\CameraController::index');
-    $routes->post('camera/upload', 'Customer\CameraController::upload');
-    $routes->post('camera/save-photo', 'Customer\CameraController::savePhoto');
+	// Camera
+	$routes->get('camera', 'Customer\CameraController::index');
+	$routes->post('camera/upload', 'Customer\CameraController::upload');
+	$routes->post('camera/save-photo', 'Customer\CameraController::savePhoto');
 
-    // Payment
-    $routes->get('payment', 'Customer\PaymentController::index');
-    $routes->post('payment/process', 'Customer\PaymentController::processPayment');
-    $routes->get('payment/status', 'Customer\PaymentController::checkStatus');
+	// Payment
+	$routes->get('payment', 'Customer\PaymentController::index');
+	$routes->post('payment/process', 'Customer\PaymentController::processPayment');
+	$routes->get('payment/status', 'Customer\PaymentController::checkStatus');
 });
 
 // ============================================================
@@ -104,9 +109,15 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->get('dashboard', 'Admin\AdminDashboardController::index');
 
 	// Redirect alias (salah ketik URL)
-	$routes->get('booking',  function() { return redirect()->to(base_url('admin/bookings')); });
-	$routes->get('customer', function() { return redirect()->to(base_url('admin/customers')); });
-	$routes->get('payment',  function() { return redirect()->to(base_url('admin/payments')); });
+	$routes->get('booking',  function () {
+		return redirect()->to(base_url('admin/bookings'));
+	});
+	$routes->get('customer', function () {
+		return redirect()->to(base_url('admin/customers'));
+	});
+	$routes->get('payment',  function () {
+		return redirect()->to(base_url('admin/payments'));
+	});
 
 	// ---- Tab 2: Manajemen Pelanggan ----
 	$routes->get('customers',                    'Admin\CustomerController::index');
@@ -119,6 +130,7 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 
 	// ---- Tab 3: Manajemen Reservasi & Slot ----
 	$routes->get('bookings',                     'Admin\BookingAndSlotController::index');
+	$routes->get('bookings/export',              'Admin\BookingAndSlotController::export');
 	$routes->get('bookings/(:segment)',          'Admin\BookingAndSlotController::show/$1');
 	$routes->get('bookings/(:segment)/edit',     'Admin\BookingAndSlotController::edit/$1');
 	$routes->post('bookings/(:segment)/update',  'Admin\BookingAndSlotController::update/$1');
@@ -207,9 +219,9 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 // Routes User Booking //** 
 //////////////////////////////
 
-// ===== LANDING PAGE =====
+// ===== INDEX PAGE =====
 $routes->get('/', 'User_Booking\LandingPageController::index');
-$routes->get('landing', 'User_Booking\LandingPageController::index');
+$routes->get('index', 'User_Booking\LandingPageController::index');
 
 // Routes untuk Register
 $routes->get('register', 'User_Booking\RegisterController::index');
@@ -243,4 +255,3 @@ $routes->get('barcode', 'User_Booking\BarcodeController::index');
 $routes->get('barcode/generate/(:any)', 'User_Booking\BarcodeController::generate/$1');
 $routes->get('barcode/scan', 'User_Booking\BarcodeController::scan');
 $routes->post('barcode/verify', 'User_Booking\BarcodeController::verify');
-

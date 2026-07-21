@@ -37,21 +37,19 @@
             background-attachment: fixed;
         }
         .main-container-rounded {
-            border-radius: 24px;
+            border-radius: 0;
             overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
         .page-wrapper {
-            background-color: #e5e7eb;
             min-height: 100vh;
             display: flex;
-            align-items: center;
+            align-items: stretch;
             justify-content: center;
-            padding: 20px;
+            padding: 0;
         }
         @media (min-width: 640px) {
             .page-wrapper {
-                padding: 40px;
+                padding: 0;
             }
         }
         .header-bg {
@@ -207,13 +205,10 @@
     </style>
 </head>
 <body>
-    <!-- Toast Container untuk notifikasi -->
-    <div class="toast-container" id="toastContainer"></div>
-
     <!-- BEGIN: Page Wrapper with Gray Background -->
     <div class="page-wrapper">
         <!-- BEGIN: MainContainer with Gradient #B8E4FF to #FCD2E8 -->
-        <div class="max-w-[1200px] w-full main-container-rounded gradient-bg">
+        <div class="w-full main-container-rounded gradient-bg flex flex-col min-h-screen">
 
             <!-- BEGIN: MainHeader -->
             <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">

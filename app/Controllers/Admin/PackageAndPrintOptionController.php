@@ -22,27 +22,49 @@ class PackageAndPrintOptionController extends BaseController
     // =========================================================================
     public function index()
     {
-        $perPage       = 8;
-        $currentPage   = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $perPage = 10;
+        $currentPkgPage = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $currentOptPage = max(1, (int) ($this->request->getGet('opt_page') ?? 1));
         $keyword       = $this->request->getGet('q') ?? '';
+        $sortPkg       = $this->request->getGet('sort_pkg') ?? 'terbaru';
+        $sortOpt       = $this->request->getGet('sort_opt') ?? 'termurah';
 
         // --- Query Paket ---
-        $pkgBuilder = $this->packageModel;
+        $db = \Config\Database::connect();
+        $pkgBuilder = $db->table('packages');
         if ($keyword !== '') {
-            $pkgBuilder = $pkgBuilder->like('name', $keyword);
+            $pkgBuilder->groupStart()->like('name', $keyword)->orLike('id', $keyword)->groupEnd();
         }
-        $totalPackages  = $pkgBuilder->countAllResults(false);
-        $totalPkgPages  = max(1, (int) ceil($totalPackages / $perPage));
-        
-        // PENTING: reset SELECT setelah countAllResults
+        if ($sortPkg == 'lebih50') {
+            $pkgBuilder->where('base_price >', 50000);
+        } elseif ($sortPkg == 'kurang50') {
+            $pkgBuilder->where('base_price <=', 50000);
+        }
+        $totalPackages = $pkgBuilder->countAllResults(false);
+        $totalPkgPages = max(1, (int) ceil($totalPackages / $perPage));
+        $currentPkgPage = min($currentPkgPage, $totalPkgPages);
+
         $pkgBuilder->select('*');
+        if ($sortPkg == 'lebih50' || $sortPkg == 'kurang50') {
+            $pkgBuilder->orderBy('base_price', 'ASC');
+        } else {
+            $pkgBuilder->orderBy('created_at', 'DESC');
+        }
+        $packages = $pkgBuilder->limit($perPage, ($currentPkgPage - 1) * $perPage)->get()->getResultArray();
 
-        $packages       = $pkgBuilder
-            ->orderBy('created_at', 'DESC')
-            ->findAll($perPage, ($currentPage - 1) * $perPage);
+        // --- Query Opsi Cetak ---
+        $optBuilder = $db->table('print_options');
+        if ($sortOpt == 'lebih50') {
+            $optBuilder->where('extra_price >', 50000);
+        } elseif ($sortOpt == 'kurang50') {
+            $optBuilder->where('extra_price <=', 50000);
+        }
+        $totalPrintOptions = $optBuilder->countAllResults(false);
+        $totalOptPages = max(1, (int) ceil($totalPrintOptions / $perPage));
+        $currentOptPage = min($currentOptPage, $totalOptPages);
 
-        // --- Semua opsi cetak (sidebar kanan, tidak di-paginate) ---
-        $printOptions = $this->printOptionModel->orderBy('extra_price', 'ASC')->findAll();
+        $optBuilder->select('*')->orderBy('extra_price', 'ASC');
+        $printOptions = $optBuilder->limit($perPage, ($currentOptPage - 1) * $perPage)->get()->getResultArray();
 
         // --- Stats ---
         $statTotalPackages    = $this->packageModel->countAll();
@@ -62,7 +84,7 @@ class PackageAndPrintOptionController extends BaseController
             ->join('packages', 'packages.id = bookings.package_id', 'left')
             ->groupBy('bookings.package_id')
             ->orderBy('total', 'DESC')
-            ->limit(1)
+            ->limit(10)
             ->get()->getRowArray();
         $statTopPackage = $topPkg['name'] ?? 'N/A';
 
@@ -70,9 +92,14 @@ class PackageAndPrintOptionController extends BaseController
             'title'               => 'Manajemen Paket & Cetak | Admin Panel',
             'packages'            => $packages,
             'totalPackages'       => $totalPackages,
-            'currentPkgPage'      => $currentPage,
+            'currentPkgPage'      => $currentPkgPage,
             'totalPkgPages'       => $totalPkgPages,
+            'totalPrintOptions'   => $totalPrintOptions,
+            'currentOptPage'      => $currentOptPage,
+            'totalOptPages'       => $totalOptPages,
             'keyword'             => $keyword,
+            'sortPkg'             => $sortPkg,
+            'sortOpt'             => $sortOpt,
             'printOptions'        => $printOptions,
             'statTotalPackages'   => $statTotalPackages,
             'statTotalPrintOptions' => $statTotalPrintOptions,
@@ -111,16 +138,9 @@ class PackageAndPrintOptionController extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        // Generate ID: PKT-XXX yang kebal dari crash hapus data
-        $allPackages = $this->packageModel->select('id')->findAll();
-        $maxNum = 0;
-        foreach ($allPackages as $p) {
-            $num = (int) substr($p['id'], 4);
-            if ($num > $maxNum) {
-                $maxNum = $num;
-            }
-        }
-        $newId = sprintf('PKT-%03d', $maxNum + 1);
+        // Generate ID: PKT-XXX
+        $count = $this->packageModel->countAll();
+        $newId = sprintf('PKT-%03d', $count + 1);
 
         $this->packageModel->insert([
             'id'          => $newId,
@@ -198,14 +218,6 @@ class PackageAndPrintOptionController extends BaseController
                 ->with('error', 'Paket tidak ditemukan.');
         }
 
-        // Mencegah data loss: Cek apakah paket ini sudah pernah dipesan (ada di bookings)
-        $bookingModel = new \App\Models\BookingModel();
-        $isUsed = $bookingModel->where('package_id', $id)->countAllResults() > 0;
-        if ($isUsed) {
-            return redirect()->to(base_url('admin/packages'))
-                ->with('error', 'Penghapusan ditolak! Paket ini sedang digunakan pada data reservasi pelanggan.');
-        }
-
         $this->packageModel->delete($id);
 
         return redirect()->to(base_url('admin/packages'))
@@ -218,41 +230,76 @@ class PackageAndPrintOptionController extends BaseController
     public function exportPackages()
     {
         $packages = $this->packageModel->orderBy('created_at', 'DESC')->findAll();
+        $printOptions = $this->printOptionModel->orderBy('extra_price', 'ASC')->findAll();
 
-        // Nama file dinamis dengan format Hari, Tanggal Bulan Tahun, Jam-Menit-Detik
-        $hariIndo = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        $hari = $hariIndo[date('w')];
-        $tanggal = date('d');
-        $bulan = $bulanIndo[date('n')];
-        $tahun = date('Y');
-        $waktu = date('H-i-s');
-        $filename = "Laporan Paket Dan Cetak {$hari}, {$tanggal} {$bulan} {$tahun}, {$waktu}.csv";
-
-        header('Content-Type: text/csv');
+        $filename = 'Laporan_Paket_Cetak_' . date('Ymd_His') . '.csv';
+        header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
 
         $output = fopen('php://output', 'w');
+        fputs($output, $bom =(chr(0xEF) . chr(0xBB) . chr(0xBF)));
+        fputs($output, "sep=;\n");
+
+        $adminName = session('adminName') ?? session('admin_name') ?? 'Admin';
+        $adminRole = session('adminRole') ?? session('admin_role') ?? 'Unknown Role';
+        $adminEmail = session('adminEmail');
         
-        // Tambahkan UTF-8 BOM dan deklarasi separator khusus agar rapi di Excel
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-        fputs($output, "sep=,\n");
-        
-        fputcsv($output, ['ID', 'Nama Paket', 'Jumlah Foto', 'Durasi (Menit)', 'Harga']);
-        foreach ($packages as $p) {
-            fputcsv($output, [
-                $p['id'], $p['name'], $p['photo_count'],
-                $p['duration'], 'Rp ' . number_format($p['base_price'], 0, ',', '.'),
-            ]);
+        if (!$adminEmail && session('adminId')) {
+            $adminModel = new \App\Models\AdminModel();
+            $adminData = $adminModel->find(session('adminId'));
+            if ($adminData) {
+                $adminEmail = $adminData['email'];
+                $adminName = $adminData['name'];
+            }
         }
+        $adminEmail = $adminEmail ?? 'No Email';
         
-        // Tanda Tangan Pertanggungjawaban
-        fputcsv($output, []); // Baris kosong
-        fputcsv($output, []); // Baris kosong
-        fputcsv($output, ['--- RIWAYAT PERTANGGUNGJAWABAN EKSPOR ---']);
-        fputcsv($output, ['Dihasilkan Oleh:', session()->get('adminName') ?? 'Admin (Sistem)']);
-        fputcsv($output, ['Waktu Unduh:', date('Y-m-d H:i:s')]);
-        fputcsv($output, ['Catatan Khusus:', 'Laporan ini dihasilkan secara otomatis oleh sistem CuitBox Studio dan sah sebagai bukti audit operasional.']);
+        $penanggungJawab = $adminName . ' (' . $adminRole . ') - ' . $adminEmail;
+
+        $currentTime = date('d M Y, H:i:s');
+        $currentDate = date('d F Y');
+
+        fputcsv($output, ['LAPORAN PAKET & CETAK'], ';');
+        fputcsv($output, [], ';');
+        fputcsv($output, ['Penanggung Jawab: ' . $penanggungJawab], ';');
+        fputcsv($output, ['Waktu Realtime: ' . $currentTime . ' WIB'], ';');
+        fputcsv($output, ['Keterangan Tanggal: Diekspor pada ' . $currentDate], ';');
+        fputcsv($output, [], ';');
+
+        fputcsv($output, ['DAFTAR PAKET LAYANAN', '', '', '', '', '', 'DAFTAR CETAK'], ';');
+        fputcsv($output, ['ID Paket', 'Nama Paket', 'Jumlah Foto', 'Durasi (Menit)', 'Harga Dasar (Rp)', '', 'ID Opsi', 'Nama Opsi', 'Jumlah Copies', 'Harga Tambahan (Rp)'], ';');
+        
+        $max_rows = max(count($packages), count($printOptions));
+        for ($i = 0; $i < $max_rows; $i++) {
+            $p = $packages[$i] ?? null;
+            $opt = $printOptions[$i] ?? null;
+            
+            $row = [];
+            if ($p) {
+                $row[] = $p['id'];
+                $row[] = $p['name'];
+                $row[] = $p['photo_count'];
+                $row[] = $p['duration'];
+                $row[] = $p['base_price'];
+            } else {
+                $row = array_merge($row, ['', '', '', '', '']);
+            }
+            
+            $row[] = ''; // Separator column
+            
+            if ($opt) {
+                $name = isset($opt['name']) ? $opt['name'] : 'Opsi Cetak';
+                $row[] = $opt['id'];
+                $row[] = $name;
+                $row[] = $opt['copies'];
+                $row[] = $opt['extra_price'];
+            } else {
+                $row = array_merge($row, ['', '', '', '']);
+            }
+            
+            fputcsv($output, $row, ';');
+        }
 
         fclose($output);
         exit;
@@ -284,16 +331,8 @@ class PackageAndPrintOptionController extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        // Generate ID: OPT-XX yang kebal dari crash hapus data
-        $allOpts = $this->printOptionModel->select('id')->findAll();
-        $maxNum = 0;
-        foreach ($allOpts as $o) {
-            $num = (int) substr($o['id'], 4);
-            if ($num > $maxNum) {
-                $maxNum = $num;
-            }
-        }
-        $newId = sprintf('OPT-%02d', $maxNum + 1);
+        $count = $this->printOptionModel->countAll();
+        $newId = sprintf('OPT-%02d', $count + 1);
 
         $this->printOptionModel->insert([
             'id'          => $newId,
@@ -364,14 +403,6 @@ class PackageAndPrintOptionController extends BaseController
                 ->with('error', 'Opsi cetak tidak ditemukan.');
         }
 
-        // Mencegah data loss/kebingungan: Cek apakah opsi cetak dipakai di riwayat pembayaran
-        $paymentModel = new \App\Models\PaymentModel();
-        $isUsed = $paymentModel->where('print_option_id', $id)->countAllResults() > 0;
-        if ($isUsed) {
-            return redirect()->to(base_url('admin/packages'))
-                ->with('error', 'Penghapusan ditolak! Opsi cetak ini terikat dengan data riwayat pembayaran.');
-        }
-
         $this->printOptionModel->delete($id);
 
         return redirect()->to(base_url('admin/packages'))
@@ -385,9 +416,6 @@ class PackageAndPrintOptionController extends BaseController
     {
         $printOptions = $this->printOptionModel->orderBy('extra_price', 'ASC')->findAll();
 
-        return view('Admin/PackageAndPrintOption/PrintOptionManajemen', [
-            'title'        => 'Kelola Opsi Cetak | Admin Panel',
-            'printOptions' => $printOptions,
-        ]);
+        return redirect()->to(base_url('admin/packages'));
     }
 }

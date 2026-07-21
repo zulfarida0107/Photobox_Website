@@ -156,56 +156,52 @@
         <?= $this->renderSection('content') ?>
 
     </div>
+    <!-- Global Floating Toast for Export -->
+    <div id="export-toast" class="fixed top-20 right-6 z-[9999] bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2 shadow-lg transition-opacity duration-300 opacity-0 pointer-events-none">
+        <span class="material-symbols-outlined text-blue-500">cloud_download</span>
+        <span>Berhasil! Laporan sedang diunduh.</span>
+    </div>
+    <script>
+        function showExportNotif() {
+            const toast = document.getElementById('export-toast');
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 1000);
 
-    <!-- SweetAlert2 CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- Global SweetAlert Logic -->
-    <?php if (session()->getFlashdata('success')): ?>
-        <?php 
-            $msg = session()->getFlashdata('success'); 
-            // Cek apakah pesannya mengandung kata "hapus" atau "batal" untuk memicu popup merah
-            $isDelete = (stripos($msg, 'hapus') !== false || stripos($msg, 'batal') !== false);
-        ?>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Sembunyikan notifikasi bawaan (kotak hijau) jika ada agar tidak double
-                const oldFlashes = document.querySelectorAll('.bg-green-50, .bg-red-50');
-                oldFlashes.forEach(el => el.style.display = 'none');
+            // Determine report name
+            let reportName = "Sistem";
+            const path = window.location.pathname;
+            if (path.includes('booths')) reportName = "Mesin Booth";
+            else if (path.includes('packages')) reportName = "Paket & Cetak";
+            else if (path.includes('payments')) reportName = "Pembayaran";
+            else if (path.includes('sessions')) reportName = "Galeri Sesi";
+            else {
+                const titleText = document.title || "";
+                if (titleText.includes("Booth")) reportName = "Mesin Booth";
+                else if (titleText.includes("Paket")) reportName = "Paket & Cetak";
+                else if (titleText.includes("Pembayaran")) reportName = "Pembayaran";
+                else if (titleText.includes("Sesi")) reportName = "Galeri Sesi";
+            }
 
-                Swal.fire({
-                    icon: '<?= $isDelete ? "success" : "success" ?>',
-                    title: '<?= $isDelete ? "Berhasil Dihapus!" : "Berhasil!" ?>',
-                    text: '<?= esc($msg) ?>',
-                    showConfirmButton: false,
-                    timer: 1500,
-                    iconColor: '<?= $isDelete ? "#dc2626" : "#16a34a" ?>',
-                    color: '<?= $isDelete ? "#991b1b" : "#166534" ?>',
-                    background: '#ffffff',
-                    customClass: {
-                        popup: 'border <?= $isDelete ? "border-red-200" : "border-green-200" ?>'
-                    }
-                });
+            // Save to localStorage
+            let exports = JSON.parse(localStorage.getItem('export_reports') || '[]');
+            exports.unshift({
+                name: reportName,
+                time: new Date().toISOString(),
+                id: 'export_' + Date.now()
             });
-        </script>
-    <?php endif; ?>
+            localStorage.setItem('export_reports', JSON.stringify(exports));
+            localStorage.setItem('notifsRead', 'false');
 
-    <?php if (session()->getFlashdata('error')): ?>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const oldFlashes = document.querySelectorAll('.bg-green-50, .bg-red-50');
-                oldFlashes.forEach(el => el.style.display = 'none');
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal!',
-                    text: '<?= esc(session()->getFlashdata('error')) ?>',
-                    showConfirmButton: true,
-                    confirmButtonColor: '#2563eb'
-                });
-            });
-        </script>
-    <?php endif; ?>
-
+            // Trigger header update if function exists
+            const badge = document.getElementById('notif-badge');
+            if (badge) badge.classList.remove('hidden');
+            if (window.renderExportNotifications) {
+                window.renderExportNotifications();
+            }
+        }
+    </script>
 </body>
 </html>

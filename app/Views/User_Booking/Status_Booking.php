@@ -28,27 +28,27 @@
         }
     </script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         .gradient-bg {
             background: linear-gradient(135deg, #B8E4FF 0%, #FCD2E8 100%);
             background-attachment: fixed;
         }
-        .main-container-rounded {
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
         .page-wrapper {
-            background-color: #e5e7eb;
             min-height: 100vh;
             display: flex;
-            align-items: center;
+            align-items: stretch;
             justify-content: center;
-            padding: 20px;
+            padding: 0;
+            background-color: #e5e7eb;
         }
-        @media (min-width: 640px) {
-            .page-wrapper {
-                padding: 40px;
-            }
+        .main-container {
+            width: 100%;
+            border-radius: 0;
+            overflow: hidden;
         }
         .success-circle-animation {
             animation: scale-up 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -103,22 +103,96 @@
             vertical-align: middle;
         }
         .booking-info {
-            background: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.7);
             border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 20px;
+            padding: 24px;
             width: 100%;
+            max-width: 500px;
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.5);
         }
         .booking-code-display {
             font-family: monospace;
             background: white;
-            padding: 8px 16px;
-            border-radius: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
             display: inline-block;
             font-weight: 700;
-            font-size: 1.1rem;
-            letter-spacing: 1px;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            color: #2563eb;
+            border: 1px solid #e2e8f0;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 14px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .icon-wrapper {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #bef264;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(190, 242, 100, 0.4);
+            position: relative;
+            margin: 0 auto 24px;
+        }
+        .icon-wrapper .ring-1 {
+            position: absolute;
+            inset: -12px;
+            border: 6px solid rgba(190, 242, 100, 0.3);
+            border-radius: 50%;
+        }
+        .icon-wrapper .ring-2 {
+            position: absolute;
+            inset: -24px;
+            border: 6px solid rgba(190, 242, 100, 0.15);
+            border-radius: 50%;
+        }
+        .icon-wrapper .material-symbols-outlined {
+            font-size: 64px;
+            color: #365314;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+            margin-top: 12px;
+        }
+        .info-item {
+            background: rgba(255,255,255,0.5);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+        .info-item .label {
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .info-item .value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-top: 2px;
+        }
+        .content-wrapper {
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .spinner {
             display: none;
@@ -138,96 +212,137 @@
         .btn-loading .btn-text {
             display: none;
         }
+        @media (max-width: 480px) {
+            .info-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .icon-wrapper {
+                width: 96px;
+                height: 96px;
+            }
+            .icon-wrapper .material-symbols-outlined {
+                font-size: 48px;
+            }
+            .icon-wrapper .ring-1 {
+                inset: -8px;
+                border-width: 4px;
+            }
+            .icon-wrapper .ring-2 {
+                inset: -16px;
+                border-width: 4px;
+            }
+            .booking-code-display {
+                font-size: 1rem;
+                padding: 8px 16px;
+            }
+            .booking-info {
+                padding: 16px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="page-wrapper">
-        <div class="max-w-[1200px] w-full main-container-rounded gradient-bg">
+        <div class="main-container gradient-bg flex flex-col min-h-screen">
 
-            <!-- Header -->
-            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100">
+            <!-- HEADER - SAMA PERSIS DENGAN REFERENSI (Help & Language) -->
+            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">
                 <div class="flex items-center">
                     <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
                 </div>
                 <div class="flex items-center space-x-2 sm:space-x-4 text-slate-600">
-                    <a href="/StatusBooking" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" title="Cek Status">
-                        <span class="material-symbols-outlined">receipt_long</span>
+                    <a href="/StatusBooking" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" aria-label="Help" title="Cek Status">
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+                        </svg>
                     </a>
-                    <a href="/barcode" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" title="Lihat Barcode">
-                        <span class="material-symbols-outlined">qr_code</span>
+                    <a href="/barcode" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" aria-label="Language" title="Lihat Barcode">
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+                        </svg>
                     </a>
                 </div>
             </header>
+            <!-- END: HEADER -->
 
             <!-- Main Content -->
-            <main class="relative px-6 sm:px-8 pt-12 pb-12 overflow-hidden bg-white/40 backdrop-blur-sm flex items-center justify-center">
-                <div class="w-full max-w-[600px] mx-auto flex flex-col items-center text-center success-circle-animation">
+            <main class="flex-1 px-6 sm:px-8 py-10 md:py-16 bg-white/40 backdrop-blur-sm flex items-center justify-center">
+                <div class="content-wrapper success-circle-animation">
                     
                     <!-- Flash Messages -->
                     <?php if (session()->getFlashdata('error')): ?>
-                        <div class="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
+                        <div class="w-full bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">
                             <?= session()->getFlashdata('error') ?>
                         </div>
                     <?php endif; ?>
                     
                     <?php if (session()->getFlashdata('success')): ?>
-                        <div class="w-full bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4 text-sm">
+                        <div class="w-full bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded-xl mb-4 text-sm">
                             <?= session()->getFlashdata('success') ?>
                         </div>
                     <?php endif; ?>
 
                     <!-- Icon -->
-                    <div class="relative w-32 h-32 mb-6">
-                        <div class="absolute inset-0 border-[6px] border-[#d9f99d]/40 rounded-full scale-[1.4]"></div>
-                        <div class="absolute inset-0 border-[6px] border-[#d9f99d]/60 rounded-full scale-[1.2]"></div>
-                        <div class="w-full h-full rounded-full bg-[#bef264] flex items-center justify-center shadow-lg">
-                            <span class="material-symbols-outlined text-[#365314] text-[64px] font-bold">check</span>
-                        </div>
+                    <div class="icon-wrapper">
+                        <div class="ring-1"></div>
+                        <div class="ring-2"></div>
+                        <span class="material-symbols-outlined">check</span>
                     </div>
                     
-                    <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 mb-4">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 mb-2">
                         Booking Berhasil!
                     </h2>
-                    <p class="text-slate-500 text-base leading-relaxed max-w-sm mb-2">
+                    <p class="text-slate-500 text-sm md:text-base leading-relaxed mb-1">
                         Kode booking Anda telah dikirim ke email Anda.
                     </p>
-                    <p class="text-slate-700 text-base font-semibold max-w-sm mb-6">
-                        CuitBox Team sudah menyimpan Jadwal Booking Photo untuk momen spesial Anda!
+                    <p class="text-slate-600 text-sm md:text-base font-semibold mb-6">
+                        Tim CuitBox sudah menyimpan jadwal booking photo Anda!
                     </p>
                     
                     <!-- Informasi Booking -->
                     <?php if (isset($booking) && $booking && !empty($booking['booking_code'])): ?>
                     <div class="booking-info">
-                        <p class="text-sm text-slate-600 mb-1">
-                            <span class="font-semibold">Kode Booking:</span>
-                        </p>
-                        <div class="booking-code-display text-blue-600">
+                        <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">Kode Booking</p>
+                        <div class="booking-code-display">
                             <?= $booking['booking_code'] ?>
                         </div>
-                        <p class="text-sm text-slate-600 mt-2">
-                            <span class="font-semibold">Status:</span> 
-                            <span class="inline-flex items-center px-3 py-1 rounded-full <?= $booking['status_badge'] ?? 'bg-gray-100 text-gray-800' ?> text-xs font-medium">
-                                <span class="material-symbols-outlined text-sm mr-1"><?= $booking['status_icon'] ?? 'info' ?></span>
-                                <?= $booking['status_label'] ?? ucfirst($booking['status'] ?? 'Pending') ?>
-                            </span>
-                        </p>
-                        <p class="text-sm text-slate-600 mt-1">
-                            <span class="font-semibold">Tanggal:</span> <?= $booking['booking_date'] ?? 'N/A' ?>
-                        </p>
-                        <p class="text-sm text-slate-600 mt-1">
-                            <span class="font-semibold">Jam:</span> <?= $booking['booking_time'] ?? 'N/A' ?>
-                        </p>
+                        
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <p class="label">Status</p>
+                                <p class="value">
+                                    <span class="status-badge <?= $booking['status_badge'] ?? 'bg-gray-100 text-gray-800' ?>">
+                                        <span class="material-symbols-outlined text-sm"><?= $booking['status_icon'] ?? 'info' ?></span>
+                                        <?= $booking['status_label'] ?? ucfirst($booking['status'] ?? 'Pending') ?>
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="info-item">
+                                <p class="label">Tanggal</p>
+                                <p class="value"><?= $booking['booking_date'] ?? 'N/A' ?></p>
+                            </div>
+                            <div class="info-item">
+                                <p class="label">Jam</p>
+                                <p class="value"><?= $booking['booking_time'] ?? 'N/A' ?></p>
+                            </div>
+                            <div class="info-item">
+                                <p class="label">Durasi</p>
+                                <p class="value"><?= $booking['duration'] ?? 1 ?> Jam</p>
+                            </div>
+                        </div>
                     </div>
                     <?php endif; ?>
                     
-                    <!-- BUTTON NEXT PAGE - POST ke StatusBooking/store -->
-                    <div class="w-full max-w-sm">
+                    <!-- Button Next Page -->
+                    <div class="w-full mt-6">
                         <form action="/StatusBooking/store" method="post" class="w-full">
                             <?= csrf_field() ?>
-                            <button type="submit" class="btn-primary">
+                            <button type="submit" class="btn-primary" id="btnBarcode">
+                                <span class="spinner"></span>
                                 <span class="btn-text">
                                     <?php if (isset($booking) && $booking && !empty($booking['booking_code'])): ?>
-                                        Simpan dan Lihat Kode Booking Anda
+                                        Simpan & Lihat Kode Booking
                                     <?php else: ?>
                                         Cek Status Booking
                                     <?php endif; ?>
@@ -242,7 +357,7 @@
             <!-- END: Main Content -->
 
             <!-- Footer -->
-            <footer class="flex flex-col sm:flex-row items-center justify-between px-6 sm:px-8 py-4 footer-bg border-t border-gray-100 text-slate-500 text-xs font-medium gap-2 sm:gap-0">
+            <footer class="flex flex-col sm:flex-row items-center justify-between px-6 sm:px-8 py-4 footer-bg border-t border-gray-100 text-slate-500 text-xs font-medium gap-2">
                 <div class="flex items-center gap-2">
                     <svg class="h-3 w-3 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
@@ -254,5 +369,21 @@
 
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form[action="/StatusBooking/store"]');
+            const button = document.getElementById('btnBarcode');
+            
+            if (form && button) {
+                form.addEventListener('submit', function(e) {
+                    button.classList.add('btn-loading');
+                    button.disabled = true;
+                    console.log('📤 Submitting to StatusBooking/store');
+                    return true;
+                });
+            }
+        });
+    </script>
 </body>
 </html>
