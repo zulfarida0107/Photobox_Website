@@ -239,20 +239,19 @@ $routes->post('schedule/submit', 'User_Booking\ScheduleController::submitSchedul
 $routes->get('booth', 'User_Booking\BoothController::index');
 $routes->post('booth/store', 'User_Booking\BoothController::store');
 
+// Payment Routes
+$routes->get('payment', 'User_Booking\PaymentMethodController::index');
+$routes->post('payment/store', 'User_Booking\PaymentMethodController::store');
+$routes->get('payment/detail/(:any)', 'User_Booking\PaymentMethodController::detail/$1');
+$routes->post('payment/confirm', 'User_Booking\PaymentMethodController::confirm');
+$routes->get('payment/success/(:any)', 'User_Booking\PaymentMethodController::success/$1');
+
 // Status Booking Routes 
 $routes->get('StatusBooking', 'User_Booking\StatusBookingController::index');
 $routes->post('StatusBooking/store', 'User_Booking\StatusBookingController::store');
-$routes->get('StatusBooking/clearSession', 'User_Booking\StatusBookingController::clearSession');
-$routes->get('booking/success', 'User_Booking\BookingController::success');
 
 // Barcode/QR Code Routes
 $routes->get('barcode', 'User_Booking\BarcodeController::index');
 $routes->get('barcode/generate/(:any)', 'User_Booking\BarcodeController::generate/$1');
 $routes->get('barcode/scan', 'User_Booking\BarcodeController::scan');
 $routes->post('barcode/verify', 'User_Booking\BarcodeController::verify');
-
-// Payment Routes
-$routes->get('payment', 'User_Booking\PaymentMethodController::index');
-$routes->get('payment/detail/(:any)', 'User_Booking\PaymentMethodController::detail/$1');
-$routes->post('payment/confirm', 'User_Booking\PaymentMethodController::confirm');
-$routes->get('payment/success/(:any)', 'User_Booking\PaymentMethodController::success/$1');

@@ -70,6 +70,7 @@
             gap: 8px;
             border: none;
             cursor: pointer;
+            width: 100%;
         }
         .btn-primary:hover {
             transform: scale(1.02);
@@ -77,6 +78,11 @@
         }
         .btn-primary:active {
             transform: scale(0.98);
+        }
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
         }
         .btn-back {
             background: #1e293b;
@@ -92,6 +98,7 @@
             border: none;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
         }
         .btn-back:hover {
             background: #334155;
@@ -131,16 +138,85 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+            width: 100%;
+        }
+        .toast {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            animation: slideInRight 0.5s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .toast-success {
+            background: #10b981;
+            color: white;
+        }
+        .toast-error {
+            background: #ef4444;
+            color: white;
+        }
+        .toast-info {
+            background: #3b82f6;
+            color: white;
+        }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .toast-close {
+            margin-left: auto;
+            cursor: pointer;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        .toast-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: #1e293b;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <!-- BEGIN: Page Wrapper -->
+    <!-- BEGIN: Page Wrapper with Gray Background -->
     <div class="page-wrapper">
         <!-- BEGIN: MainContainer with Gradient -->
-        <div class="w-full main-container-rounded gradient-bg flex flex-col min-h-screen">
+        <div class="max-w-[1200px] w-full main-container-rounded gradient-bg">
 
-            <!-- BEGIN: MainHeader -->
-            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">
+            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100">
                 <div class="flex items-center">
                     <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
                 </div>
@@ -157,103 +233,126 @@
                     </button>
                 </div>
             </header>
-            <!-- END: MainHeader -->
 
-            <!-- BEGIN: HeroSection -->
-            <main class="relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm" data-purpose="hero-content">
+            <main class="relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm">
+                
+                <?php if (session()->getFlashdata('success')): ?>
+                    <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                        <?= session()->getFlashdata('success') ?>
+                    </div>
+                <?php endif; ?>
+                <?php if (session()->getFlashdata('error')): ?>
+                    <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                        <?= session()->getFlashdata('error') ?>
+                    </div>
+                <?php endif; ?>
+
                 <div class="text-center mb-8">
                     <h2 class="text-2xl font-extrabold mb-1 text-slate-800">Pembayaran Booking CuitBox Studio</h2>
                     <p class="text-[10px] text-slate-600 font-medium">Segera lakukan pembayaran untuk Booking Photo Anda.</p>
                 </div>
 
-                <!-- Content Layout: Payment Details & QR -->
-                <div class="flex flex-col lg:flex-row gap-6">
-                    <!-- Left Column: Order Details -->
-                    <div class="flex-1" data-purpose="order-details-column">
-                        <div class="bg-white/90 rounded-2xl p-6 shadow-sm">
-                            <div class="flex justify-between items-start mb-6">
-                                <h3 class="text-lg font-bold text-slate-800">Detail Booking</h3>
-                                <span class="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-3 py-1 rounded-md border border-indigo-100">ID #GPB-8829</span>
-                            </div>
-                            <div class="space-y-4">
-                                <!-- Selection Item: Booth -->
-                                <div class="flex items-center space-x-4">
-                                    <div class="bg-indigo-600 p-3 rounded-xl shadow-md shadow-indigo-100">
-                                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                                        </svg>
+                <!-- FORM PEMBAYARAN - SATU FORM UTUH -->
+                <form action="/payment/store" method="post" id="paymentForm">
+                    <?= csrf_field() ?>
+                    
+                    <!-- HIDDEN INPUTS - SEMUA DATA WAJIB ADA -->
+                    <?php 
+                    $bookingId = $booking['id'] ?? session()->get('booking_id') ?? 1;
+                    $amount = $booking['total_amount'] ?? 45000;
+                    ?>
+                    <input type="hidden" name="payment_id" value="<?= 'PAY' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT) ?>">
+                    <input type="hidden" name="booking_id" value="<?= $bookingId ?>">
+                    <input type="hidden" name="amount" value="<?= $amount ?>">
+                    <input type="hidden" name="status" value="success">
+                    <input type="hidden" name="payment_method" value="QRIS">
+
+                    <div class="flex flex-col lg:flex-row gap-6">
+                        <!-- Left Column -->
+                        <div class="flex-1">
+                            <div class="bg-white/90 rounded-2xl p-6 shadow-sm">
+                                <div class="flex justify-between items-start mb-6">
+                                    <h3 class="text-lg font-bold text-slate-800">Detail Booking</h3>
+                                    <span class="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-3 py-1 rounded-md border border-indigo-100">
+                                        ID #<?= $booking['booking_code'] ?? 'GPB-8829' ?>
+                                    </span>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="bg-indigo-600 p-3 rounded-xl shadow-md shadow-indigo-100">
+                                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest">Booth Terpilih</p>
+                                            <p class="text-slate-800 font-bold text-base"><?= $booth['name'] ?? 'Retro Vibes' ?></p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest">Booth Terpilih</p>
-                                        <p class="text-slate-800 font-bold text-base">Retro Vibes</p>
+                                    <div class="flex items-center space-x-4">
+                                        <div class="bg-cyan-600 p-3 rounded-xl shadow-md shadow-cyan-100">
+                                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] font-extrabold text-cyan-500 uppercase tracking-widest">Jadwal Sesi</p>
+                                            <p class="text-slate-800 font-bold text-base"><?= $booking['booking_date'] ?? 'Sabtu, 24 Mei 2024' ?> • <?= $booking['booking_time'] ?? '19:00 WIB' ?></p>
+                                        </div>
                                     </div>
                                 </div>
-                                <!-- Selection Item: Schedule -->
-                                <div class="flex items-center space-x-4">
-                                    <div class="bg-cyan-600 p-3 rounded-xl shadow-md shadow-cyan-100">
-                                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-[10px] font-extrabold text-cyan-500 uppercase tracking-widest">Jadwal Sesi</p>
-                                        <p class="text-slate-800 font-bold text-base">Sabtu, 24 Mei 2024 • 19:00 WIB</p>
-                                    </div>
+                                <hr class="my-6 border-dashed border-slate-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-lg font-bold text-slate-800">Total Tagihan</span>
+                                    <span class="text-2xl font-black text-indigo-700">Rp <?= number_format($amount, 0, ',', '.') ?></span>
                                 </div>
                             </div>
-                            <hr class="my-6 border-dashed border-slate-200">
-                            <div class="flex justify-between items-center">
-                                <span class="text-lg font-bold text-slate-800">Total Tagihan</span>
-                                <span class="text-2xl font-black text-indigo-700">Rp 45.000</span>
+                        </div>
+
+                        <!-- Right Column: QR Code -->
+                        <div class="flex-1">
+                            <div class="bg-white/90 rounded-2xl p-6 shadow-sm flex flex-col items-center">
+                                <div class="barcode-wrapper">
+                                    <div class="barcode-container">
+                                        <img alt="QR Code Barcode" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PAYMENT-<?= date('Ymd') ?>-CUITBOX-<?= $bookingId ?>" class="w-40 h-40">
+                                    </div>
+                                </div>
+                                <div class="bg-indigo-50/50 w-full rounded-2xl p-4 mt-4 mb-4 text-center border border-indigo-100/50">
+                                    <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1">Scan Qris dan Lakukan Pembayaran</p>
+                                    <p class="text-2xl font-black text-slate-800">Rp <?= number_format($amount, 0, ',', '.') ?></p>
+                                </div>
+                                <div class="w-full bg-[#D9F99D] rounded-2xl py-3 flex items-center justify-center space-x-2 text-slate-800 font-bold mb-3" id="timer-container">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                    </svg>
+                                    <span class="text-sm" id="timer-display">Sesi berakhir dalam: 05:00</span>
+                                </div>
+                                <p class="text-[10px] text-slate-700 text-center leading-relaxed font-medium">
+                                    *Dapat dibayar melalui semua aplikasi m-banking dan e-wallet.
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right Column: QR Code -->
-                    <div class="flex-1" data-purpose="qr-code-column">
-                        <div class="bg-white/90 rounded-2xl p-6 shadow-sm flex flex-col items-center">
-                            <!-- QR Code Barcode -->
-                            <div class="barcode-wrapper">
-                                <div class="barcode-container">
-                                    <img alt="QR Code Barcode" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PAYMENT-2024-CUITBOX-8829" class="w-40 h-40">
-                                </div>
-                            </div>
-                            <!-- Total Payment Bubble -->
-                            <div class="bg-indigo-50/50 w-full rounded-2xl p-4 mt-4 mb-4 text-center border border-indigo-100/50">
-                                <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1">Scan Qris dan Lakukan Pembayaran</p>
-                                <p class="text-2xl font-black text-slate-800">Rp 45.000</p>
-                            </div>
-                            <!-- Countdown Timer Button -->
-                            <div class="w-full bg-[#D9F99D] rounded-2xl py-3 flex items-center justify-center space-x-2 text-slate-800 font-bold mb-3" id="timer-container">
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                                </svg>
-                                <span class="text-sm" id="timer-display">Sesi berakhir dalam: 05:00</span>
-                            </div>
-                            <p class="text-[10px] text-slate-700 text-center leading-relaxed font-medium">
-                                *Dapat dibayar melalui semua aplikasi m-banking dan e-wallet.
-                            </p>
-                        </div>
+                    <!-- Bottom Action Buttons -->
+                    <div class="mt-6 flex flex-col sm:flex-row gap-4">
+                        <a href="/booth" class="btn-back flex-1 text-center no-underline">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                            </svg>
+                            Kembali
+                        </a>
+                        <button type="submit" class="btn-primary flex-1" id="confirmPaymentBtn">
+                            <span id="btnText">Konfirmasi Pembayaran</span>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" id="btnIcon">
+                                <path clip-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.64.304 1.24.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"/>
+                            </svg>
+                        </button>
                     </div>
-                </div>
-
-                <!-- Bottom Action Buttons -->
-                <div class="mt-6 flex flex-col sm:flex-row gap-4">
-                    <button class="btn-back flex-1">
-                        Kembali
-                    </button>
-                    <button class="btn-primary flex-1">
-                        <span>Konfirmasi Pembayaran</span>
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path clip-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.64.304 1.24.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"/>
-                        </svg>
-                    </button>
-                </div>
+                </form>
             </main>
-            <!-- END: HeroSection -->
 
-            <!-- BEGIN: Footer -->
-            <footer class="flex flex-col sm:flex-row items-center justify-between px-6 sm:px-8 py-4 footer-bg border-t border-gray-100 text-slate-500 text-xs font-medium gap-2 sm:gap-0" data-purpose="site-footer">
+            <footer class="flex flex-col sm:flex-row items-center justify-between px-6 sm:px-8 py-4 footer-bg border-t border-gray-100 text-slate-500 text-xs font-medium gap-2 sm:gap-0">
                 <div class="flex items-center gap-2">
                     <svg class="h-3 w-3 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
@@ -262,19 +361,17 @@
                 </div>
                 <div class="text-center">© 2026 CuitBox Studio. All rights reserved.</div>
             </footer>
-            <!-- END: Footer -->
 
         </div>
-        <!-- END: MainContainer -->
     </div>
-    <!-- END: Page Wrapper -->
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ===== COUNTDOWN TIMER LOGIC =====
-            let totalSeconds = 300; // 5 menit = 300 detik
+            // COUNTDOWN TIMER
+            let totalSeconds = 300;
             const timerDisplay = document.getElementById('timer-display');
             const timerContainer = document.getElementById('timer-container');
+            let timerInterval;
             
             function formatTime(seconds) {
                 const mins = Math.floor(seconds / 60);
@@ -288,12 +385,19 @@
                     timerContainer.classList.add('timer-warning');
                     timerContainer.style.background = '#ef4444';
                     timerContainer.style.color = 'white';
+                    clearInterval(timerInterval);
+                    
+                    const btn = document.getElementById('confirmPaymentBtn');
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                    document.getElementById('btnText').textContent = 'Sesi Berakhir';
+                    document.getElementById('btnIcon').style.display = 'none';
                     return;
                 }
                 
                 timerDisplay.textContent = `Sesi berakhir dalam: ${formatTime(totalSeconds)}`;
                 
-                // Warning ketika kurang dari 60 detik
                 if (totalSeconds <= 60) {
                     timerContainer.classList.add('timer-warning');
                     timerContainer.style.background = '#f59e0b';
@@ -305,25 +409,39 @@
                 totalSeconds--;
             }
             
-            // Jalankan timer setiap detik
-            const timerInterval = setInterval(updateTimer, 1000);
-            
-            // Update timer pertama kali
+            timerInterval = setInterval(updateTimer, 1000);
             updateTimer();
+
+            // TOAST NOTIFICATION
+            window.showToast = function(message, type = 'success') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+                toast.className = `toast toast-${type}`;
+                toast.innerHTML = `
+                    <span class="text-xl">${icons[type] || 'ℹ️'}</span>
+                    <span class="flex-1">${message}</span>
+                    <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+                `;
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.style.opacity = '0';
+                        toast.style.transition = 'opacity 0.5s ease';
+                        setTimeout(() => toast.remove(), 500);
+                    }
+                }, 5000);
+            };
+
+            // FLASH MESSAGES
+            <?php if (session()->getFlashdata('success')): ?>
+                showToast('<?= session()->getFlashdata('success') ?>', 'success');
+            <?php endif; ?>
             
-            // ===== BUTTON INTERACTIONS =====
-            const buttons = document.querySelectorAll('button');
-            buttons.forEach(button => {
-                button.addEventListener('click', function() {
-                    if (this.textContent.includes('Konfirmasi Pembayaran')) {
-                        clearInterval(timerInterval);
-                        alert('Pembayaran berhasil dikonfirmasi!');
-                    }
-                    if (this.textContent.includes('Kembali')) {
-                        alert('Kembali ke halaman sebelumnya');
-                    }
-                });
-            });
+            <?php if (session()->getFlashdata('error')): ?>
+                showToast('<?= session()->getFlashdata('error') ?>', 'error');
+            <?php endif; ?>
         });
     </script>
 </body>

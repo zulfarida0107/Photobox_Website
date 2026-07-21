@@ -7,8 +7,6 @@ use App\Models\BookingModel;
 use App\Models\CustomerModel;
 use App\Models\BoothModel;
 use App\Models\PackageModel;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
 
 class BarcodeController extends BaseController
 {
@@ -33,26 +31,25 @@ class BarcodeController extends BaseController
             'title' => 'Barcode Booking - CuitBox Studio',
             'booking' => null,
             'error' => null,
+            'qr_code' => null,
         ];
 
-        // Cek jika ada booking_id di session
         if ($this->session->has('booking_id')) {
             $bookingId = $this->session->get('booking_id');
             $booking = $this->getBookingDetail($bookingId);
             if ($booking) {
                 $data['booking'] = $booking;
-                // Generate QR Code
                 $data['qr_code'] = $this->generateQRCode($booking['booking_code']);
             }
         }
 
-        return view('User_Booking/barcode', $data);
+        return view('user_booking/barcode', $data);
     }
 
     public function generate($bookingCode = null)
     {
         if (!$bookingCode) {
-            return redirect()->to('barcode')->with('error', 'Kode booking tidak ditemukan');
+            return redirect()->to('StatusBooking')->with('error', '❌ Kode booking tidak ditemukan');
         }
 
         $booking = $this->bookingModel
@@ -60,14 +57,15 @@ class BarcodeController extends BaseController
             ->first();
 
         if (!$booking) {
-            return redirect()->to('barcode')->with('error', 'Booking tidak ditemukan');
+            return redirect()->to('StatusBooking')->with('error', '❌ Booking tidak ditemukan');
         }
 
-        // Simpan ke session
         $this->session->set('booking_id', $booking['id']);
 
-        return redirect()->to('barcode');
+        return redirect()->to('barcode')->with('success', '✅ Berhasil menampilkan kode booking');
     }
+
+    // HAPUS METHOD generatePost() - Tidak perlu
 
     public function scan()
     {
@@ -75,7 +73,7 @@ class BarcodeController extends BaseController
             'title' => 'Scan Barcode - CuitBox Studio',
         ];
 
-        return view('User_Booking/scan_barcode', $data);
+        return view('user_booking/scan_barcode', $data);
     }
 
     public function verify()
@@ -100,7 +98,6 @@ class BarcodeController extends BaseController
             ]);
         }
 
-        // Cek status booking
         if ($booking['status'] === 'cancelled') {
             return $this->response->setJSON([
                 'status' => 'error',
@@ -115,7 +112,6 @@ class BarcodeController extends BaseController
             ]);
         }
 
-        // Update status ke confirmed jika masih pending
         if ($booking['status'] === 'pending') {
             $this->bookingModel->update($booking['id'], [
                 'status' => 'confirmed'
@@ -174,11 +170,7 @@ class BarcodeController extends BaseController
 
     private function generateQRCode($bookingCode)
     {
-        // Buat URL untuk verifikasi
         $url = site_url('barcode/verify') . '?code=' . $bookingCode;
-        
-        // Generate QR Code menggunakan library sederhana
-        // Karena kita tidak pakai composer, kita buat manual dengan CSS/JS
         
         return [
             'code' => $bookingCode,
