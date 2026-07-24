@@ -25,8 +25,18 @@
             </div>
 <<<<<<< Updated upstream
             <div class="flex gap-3">
+<<<<<<< HEAD
 =======
             <div class="flex items-center gap-3">
+=======
+<<<<<<< Updated upstream
+=======
+                <a href="<?= base_url('admin/payments/export?status=' . ($filterStatus ?? '') . '&period=' . ($filterPeriod ?? 'all')) ?>"
+                   class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2 rounded font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">cloud_download</span>
+                    Ekspor Laporan
+                </a>
+>>>>>>> e8d7fca2d1aabec6d178100f83792d7d253ded31
 >>>>>>> Stashed changes
                 <form action="<?= base_url('admin/payments/verify-bulk') ?>" method="post" class="inline">
                     <?= csrf_field() ?>
@@ -140,8 +150,6 @@
                                 <option value="7"     <?= ($filterPeriod ?? '')    === '7'     ? 'selected' : '' ?>>7 Hari Terakhir</option>
                                 <option value="30"    <?= ($filterPeriod ?? '')    === '30'    ? 'selected' : '' ?>>30 Hari Terakhir</option>
                                 <option value="month" <?= ($filterPeriod ?? '')    === 'month' ? 'selected' : '' ?>>Bulan Ini</option>
-                            </select>
-                        </div>
                             </select>
                         </div>
                         <!-- Pilih Tanggal Langsung -->

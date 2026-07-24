@@ -18,6 +18,8 @@ class SessionModel extends Model
 		'filter_id',
 		'email_recipient',
 		'drive_folder_url',
+		'final_image_path',
+		'capture_folder',
 	];
 
 	protected $useSoftDeletes = false;

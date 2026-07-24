@@ -17,6 +17,21 @@ class CreateSessions extends Migration
             'drive_folder_url' => ['type' => 'TEXT'],
             'created_at' => ['type' => 'DATETIME', 'null' => true],
             'updated_at' => ['type' => 'DATETIME', 'null' => true],
+            'email_recipient' => [
+                'type' => 'VARCHAR',
+                'constraint' => 100,
+            ],
+
+            'drive_folder_id' => [
+                'type' => 'VARCHAR',
+                'constraint' => 100,
+                'null' => true,
+            ],
+
+            'drive_folder_url' => [
+                'type' => 'TEXT',
+                'null' => true,
+            ],
         ]);
 
         $this->forge->addKey('id', true);
