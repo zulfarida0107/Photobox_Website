@@ -37,6 +37,20 @@
                 <h2 class="font-h1 text-h1 text-on-surface">Manajemen Reservasi</h2>
                 <p class="font-body-sm text-body-sm text-on-surface-variant">Atur jadwal operasional booth dan reservasi pelanggan.</p>
             </div>
+            <div class="flex items-center gap-3">
+                <form method="get" action="<?= base_url('admin/bookings') ?>" class="inline-block">
+                    <div class="flex items-center gap-3.5 bg-white border border-slate-200 px-6 py-2.5 rounded-xl text-sm shadow-sm min-w-[350px]">
+                        <span class="material-symbols-outlined text-slate-400 text-lg flex-shrink-0">calendar_month</span>
+                        <span class="text-slate-600 font-medium whitespace-nowrap">Periode:</span>
+                        <select name="period" class="border-none bg-transparent py-0 pl-2 pr-6 focus:ring-0 text-sm font-bold text-primary cursor-pointer outline-none flex-1" onchange="this.form.submit()">
+                            <option value="all"   <?= ($period ?? 'all') === 'all'   ? 'selected' : '' ?>>Semua Waktu</option>
+                            <option value="today" <?= ($period ?? '')    === 'today' ? 'selected' : '' ?>>Hari Ini</option>
+                            <option value="week"  <?= ($period ?? '')    === 'week'  ? 'selected' : '' ?>>Minggu Ini</option>
+                            <option value="month" <?= ($period ?? '')    === 'month' ? 'selected' : '' ?>>Bulan Ini</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <!-- Bento Stats Grid -->
@@ -67,7 +81,7 @@
                         <span class="material-symbols-outlined text-sm">trending_up</span> +3%
                     </span>
                     <svg class="w-16 h-8 stroke-blue-500 fill-none stroke-2" viewBox="0 0 100 40">
-                        <path d="M0,30 Q30,35 50,15 T100,10"></path>
+                        <path d="M0,30 Q30,15 50,15 T100,10"></path>
                     </svg>
                 </div>
             </div>
@@ -117,8 +131,8 @@
                         </div>
                         <a href="<?= base_url('admin/slots/create') ?>"
                            class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 hover:bg-primary-container transition-colors shadow-sm whitespace-nowrap">
-                            <span class="material-symbols-outlined text-[16px]">add</span>
-                            Tambah Slot Baru
+                            <span class="material-symbols-outlined text-[16px]">event_available</span>
+                            Tambah Slot
                         </a>
                     </div>
                     <div class="overflow-x-auto flex-1">
@@ -312,87 +326,9 @@
                     </div>
                 </div>
             </section>
-
-            <!-- BAWAH: Quick Stats -->
-            <div class="lg:col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                <div class="bg-white p-5 border border-slate-200 rounded-xl shadow-sm flex flex-col justify-between">
-                    <div>
-                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Reservasi</span>
-                        <div class="text-2xl font-black text-slate-900 mt-1"><?= $statTotalReservasi ?? 0 ?></div>
-                    </div>
-                    <div class="mt-4 flex items-center justify-between">
-                        <span class="text-[10px] text-green-600 font-bold flex items-center gap-1">
-                            <span class="material-symbols-outlined text-sm">trending_up</span> +12%
-                        </span>
-                        <svg class="w-16 h-8 stroke-green-500 fill-none stroke-2" viewBox="0 0 100 40">
-                            <path d="M0,35 Q20,30 40,20 T80,15 T100,5"></path>
-                        </svg>
-                    </div>
-                </div>
-                <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <span class="font-semibold text-slate-500">Nama Pelanggan</span>
-                    <span class="text-slate-800 font-semibold" id="modalBkCust"></span>
-                </div>
-                <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <span class="font-semibold text-slate-500">Slot &amp; Booth</span>
-                    <span class="text-slate-800 font-semibold" id="modalBkSlot"></span>
-                </div>
-                <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <span class="font-semibold text-slate-500">Paket Terpilih</span>
-                    <span class="text-slate-800 font-semibold" id="modalBkPackage"></span>
-                </div>
-                <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <span class="font-semibold text-slate-500">Nomor Antrean</span>
-                    <span class="text-slate-800 font-black" id="modalBkQueue"></span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="font-semibold text-slate-500">Status</span>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold" id="modalBkStatus"></span>
-                </div>
-            </div>
-            
-            <!-- Close Button -->
-            <button type="button" onclick="closeBookingPreviewModal()" class="w-full py-2.5 bg-primary hover:bg-primary-container text-white font-semibold text-sm rounded-lg transition-colors shadow-md">
-                Tutup
-            </button>
         </div>
     </div>
-</div>
-
-<script>
-    function showBookingPreviewModal(code, cust, slot, pkg, queue, badgeText, badgeClass) {
-        const modal = document.getElementById('bookingPreviewModal');
-        const content = document.getElementById('bookingPreviewModalContent');
-        
-        document.getElementById('modalBkCode').textContent = code;
-        document.getElementById('modalBkCust').textContent = cust;
-        document.getElementById('modalBkSlot').textContent = slot;
-        document.getElementById('modalBkPackage').textContent = pkg;
-        document.getElementById('modalBkQueue').textContent = queue;
-        
-        const statusEl = document.getElementById('modalBkStatus');
-        statusEl.textContent = badgeText;
-        statusEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ' + badgeClass;
-
-        // Show Modal
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            content.classList.remove('scale-95', 'opacity-0');
-            content.classList.add('scale-100', 'opacity-100');
-        }, 10);
-    }
-
-    function closeBookingPreviewModal() {
-        const modal = document.getElementById('bookingPreviewModal');
-        const content = document.getElementById('bookingPreviewModalContent');
-
-        content.classList.remove('scale-100', 'opacity-100');
-        content.classList.add('scale-95', 'opacity-0');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 300);
-    }
-</script>
+</main>
 
 <!-- Booking Preview Modal -->
 <div id="bookingPreviewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">

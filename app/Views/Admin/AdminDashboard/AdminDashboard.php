@@ -114,9 +114,9 @@
         <!-- Sejajar Section: Pendapatan Bulan Ini (Kiri) & Pemesanan Terbaru (Kanan) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6 items-stretch">
             
-            <!-- KIRI: Pendapatan Bulan Ini -->
+             <!-- KIRI: Pendapatan Bulan Ini -->
              <div class="lg:col-span-4 flex flex-col h-full">
-                <div class="bg-primary rounded-xl overflow-hidden relative min-h-[350px] flex flex-col justify-start p-6 text-white shadow-lg h-full flex-grow">
+                <div class="bg-primary rounded-xl overflow-hidden relative min-h-[380px] flex flex-col justify-between p-6 text-white shadow-lg h-full flex-grow">
                     <div class="relative z-10">
                         <div class="mb-4 inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest border border-white/20">
                             <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
@@ -129,16 +129,16 @@
                         <p class="text-sm text-blue-100/90 mb-6 leading-relaxed">
                             Saat ini terdapat <strong><?= $totalActiveBooths ?? 0 ?> mesin booth</strong> yang sedang beroperasi secara aktif dan optimal di seluruh lokasi. Seluruh sistem pembayaran, sinkronisasi galeri cloud, dan modul pencetakan foto berjalan normal tanpa kendala. Pantau terus performa dan tren transaksi harian untuk memaksimalkan potensi pendapatan CuitBox Studio Anda di bulan ini.
                         </p>
-                        <div class="flex gap-4">
-                            <a href="<?= base_url('admin/booths') ?>"
-                               class="px-4 py-2 bg-white text-blue-700 font-bold rounded-lg text-xs hover:bg-blue-50 transition-colors">
-                                Cek Status
-                            </a>
-                            <a href="<?= base_url('admin/payments') ?>"
-                               class="px-4 py-2 bg-blue-600/40 backdrop-blur-sm text-white font-bold rounded-lg text-xs hover:bg-blue-600/60 transition-colors border border-white/20">
-                                Lihat Transaksi
-                            </a>
-                        </div>
+                    </div>
+                    <div class="relative z-10 pt-4 border-t border-white/10 flex gap-3">
+                        <a href="<?= base_url('admin/booths') ?>"
+                           class="flex-1 py-2.5 bg-white text-blue-700 font-bold rounded-lg text-xs hover:bg-blue-50 transition-colors text-center shadow-sm">
+                            Cek Status
+                        </a>
+                        <a href="<?= base_url('admin/payments') ?>"
+                           class="flex-1 py-2.5 bg-blue-600/40 backdrop-blur-sm text-white font-bold rounded-lg text-xs hover:bg-blue-600/60 transition-colors border border-white/20 text-center shadow-sm">
+                            Lihat Transaksi
+                        </a>
                     </div>
                 </div>
             </div>
@@ -158,14 +158,14 @@
                         </a>
                     </div>
                     <div class="overflow-x-auto flex-1">
-                        <table class="w-full text-left">
+                        <table class="w-full text-center">
                             <thead class="border-y border-slate-100 bg-white">
                                 <tr>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Kode Booking</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Pelanggan</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Paket</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Tanggal</th>
-                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase">Status</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Kode Booking</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Pelanggan</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Paket</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Tanggal</th>
+                                    <th class="px-6 py-3 font-label-bold text-label-bold text-slate-600 uppercase text-center">Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-50 bg-white">
@@ -189,19 +189,19 @@
                                             };
                                         ?>
                                         <tr class="hover:bg-blue-50/50 transition-colors">
-                                            <td class="px-6 py-4 font-data-tabular font-bold text-blue-700">
+                                            <td class="px-6 py-4 font-data-tabular font-bold text-blue-700 text-center">
                                                 #<?= esc($booking['booking_code'] ?? 'N/A') ?>
                                             </td>
-                                            <td class="px-6 py-4 text-slate-600 text-sm">
-                                                <?= esc($booking['customer_name'] ?? '-') ?>
+                                            <td class="px-6 py-4 text-slate-600 text-sm text-center">
+                                                <?= esc(!empty($booking['customer_name']) ? $booking['customer_name'] : 'Pengunjung Kiosk') ?>
                                             </td>
-                                            <td class="px-6 py-4 text-slate-600 text-sm">
-                                                <?= esc($booking['package_name'] ?? '-') ?>
+                                            <td class="px-6 py-4 text-slate-600 text-sm text-center">
+                                                <?= esc(!empty($booking['package_name']) ? $booking['package_name'] : 'Paket Kiosk') ?>
                                             </td>
-                                            <td class="px-6 py-4 font-data-tabular text-slate-600">
+                                            <td class="px-6 py-4 font-data-tabular text-slate-600 text-center">
                                                 <?= date('d M Y, H:i', strtotime($booking['created_at'] ?? 'now')) ?>
                                             </td>
-                                            <td class="px-6 py-4">
+                                            <td class="px-6 py-4 text-center">
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold border <?= $spanClass ?>">
                                                     <?= esc($statusText) ?>
                                                 </span>
@@ -217,6 +217,25 @@
                                 <?php endif; ?>
                             </tbody>
                         </table>
+                    </div>
+                    <!-- Table Footer / Pagination -->
+                    <div class="px-6 py-3.5 border-t border-slate-100 bg-white flex items-center justify-between">
+                        <span class="text-xs text-slate-500 font-medium">
+                            Menampilkan <?= count($recentBookings ?? []) ?> dari <?= $totalBookingsCount ?? 0 ?> pemesanan
+                        </span>
+                        <div class="flex items-center gap-1">
+                            <a href="<?= base_url('admin/dashboard?page=' . max(1, ($currentPage ?? 1) - 1)) ?>"
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg text-slate-400 hover:bg-slate-50 transition-colors <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_left</span>
+                            </a>
+                            <span class="w-8 h-8 flex items-center justify-center bg-primary text-white rounded-lg text-xs font-bold shadow-sm">
+                                <?= $currentPage ?? 1 ?>
+                            </span>
+                            <a href="<?= base_url('admin/dashboard?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1)) ?>"
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg text-slate-400 hover:bg-slate-50 transition-colors <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
