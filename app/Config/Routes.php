@@ -206,6 +206,7 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 // ============================================================
 $routes->get('landing', 'User_Booking\LandingPageController::index');
 
+$routes->get('login', 'Admin\AuthController::login');
 $routes->get('register', 'User_Booking\RegisterController::index');
 $routes->post('register/store', 'User_Booking\RegisterController::store');
 $routes->post('register/from-landing', 'User_Booking\RegisterController::fromLanding');
