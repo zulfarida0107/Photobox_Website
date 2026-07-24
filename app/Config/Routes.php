@@ -170,6 +170,11 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->post('categories/(:segment)/update', 'Admin\FrameAndFilterController::updateCategory/$1');
 	$routes->post('categories/(:segment)/delete', 'Admin\FrameAndFilterController::deleteCategory/$1');
 
+	// ---- Layout Frame ----
+	$routes->post('layouts',                     'Admin\FrameAndFilterController::storeLayout');
+	$routes->post('layouts/(:segment)/update',   'Admin\FrameAndFilterController::updateLayout/$1');
+	$routes->post('layouts/(:segment)/delete',   'Admin\FrameAndFilterController::deleteLayout/$1');
+
 	// ---- Tab 7: Mesin Booth ----
 	$routes->get('booths',                      'Admin\BoothController::index');
 	$routes->get('booths/create',               'Admin\BoothController::create');

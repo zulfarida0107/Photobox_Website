@@ -40,6 +40,10 @@ abstract class BaseController extends Controller
         parent::initController($request, $response, $logger);
 
         // Preload any models, libraries, etc, here.
-        $this->session = \Config\Services::session();
+        $uriPath = $request->getUri()->getPath();
+        $routePath = method_exists($request, 'getPath') ? $request->getPath() : '';
+        if (strpos($uriPath, 'api/') === false && strpos($routePath, 'api/') === false) {
+            $this->session = \Config\Services::session();
+        }
     }
 }
