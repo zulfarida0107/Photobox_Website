@@ -44,7 +44,27 @@ class PaymentController extends BaseApiController
 
         $printOption = $this->printOptionModel->find($printOptionId);
         if ($printOption === null) {
-            return $this->failNotFound('Print option tidak ditemukan.');
+            if (substr($printOptionId, 0, 7) === 'custom_') {
+                $copies = (int) substr($printOptionId, 7);
+                if ($copies > 0) {
+                    $extraPrice = 25000.00;
+                    if ($copies > 2) {
+                        $extraPrice += ($copies - 2) * 15000.00;
+                    }
+                    $printOption = [
+                        'id' => $printOptionId,
+                        'copies' => $copies,
+                        'extra_price' => $extraPrice,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ];
+                    $this->printOptionModel->insert($printOption);
+                } else {
+                    return $this->failNotFound('Print option tidak ditemukan.');
+                }
+            } else {
+                return $this->failNotFound('Print option tidak ditemukan.');
+            }
         }
 
         $package = $this->packageModel->find($booking['package_id']);

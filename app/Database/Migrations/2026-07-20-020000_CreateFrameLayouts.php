@@ -14,6 +14,7 @@ class CreateFrameLayouts extends Migration
             'photo_count'      => ['type' => 'INT', 'default' => 4],
             'aspect_ratio'     => ['type' => 'VARCHAR', 'constraint' => 20, 'null' => true],
             'slot_coordinates' => ['type' => 'TEXT', 'null' => true],
+            'image_path'       => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
             'created_at'       => ['type' => 'DATETIME', 'null' => true],
             'updated_at'       => ['type' => 'DATETIME', 'null' => true],
         ]);

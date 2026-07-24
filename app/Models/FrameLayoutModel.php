@@ -17,6 +17,7 @@ class FrameLayoutModel extends Model
         'photo_count',
         'aspect_ratio',
         'slot_coordinates',
+        'image_path',
     ];
 
     protected $useSoftDeletes = false;

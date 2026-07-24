@@ -35,6 +35,7 @@ $routes->group('api', static function ($routes) {
 	$routes->post('session/(:segment)/complete', 'Api\\SessionController::complete/$1');
 
 	$routes->post('session/(:segment)/upload', 'Api\\SessionController::upload/$1');
+	$routes->post('session/(:segment)/upload-live', 'Api\\SessionController::uploadLive/$1');
 	$routes->get('frame/(:any)', 'Api\\FrameController::show/$1');
 	$routes->get('drive/test', 'GoogleDriveController::test');
 	$routes->get('drive/upload/(:segment)', 'GoogleDriveController::upload/$1');
@@ -180,6 +181,11 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->post('categories',                  'Admin\FrameAndFilterController::storeCategory');
 	$routes->post('categories/(:segment)/update', 'Admin\FrameAndFilterController::updateCategory/$1');
 	$routes->post('categories/(:segment)/delete', 'Admin\FrameAndFilterController::deleteCategory/$1');
+
+	// ---- Layout Frame ----
+	$routes->post('layouts',                     'Admin\FrameAndFilterController::storeLayout');
+	$routes->post('layouts/(:segment)/update',   'Admin\FrameAndFilterController::updateLayout/$1');
+	$routes->post('layouts/(:segment)/delete',   'Admin\FrameAndFilterController::deleteLayout/$1');
 
 	// ---- Tab 7: Mesin Booth ----
 	$routes->get('booths',                      'Admin\BoothController::index');

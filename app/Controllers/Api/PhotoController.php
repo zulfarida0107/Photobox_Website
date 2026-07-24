@@ -55,7 +55,7 @@ class PhotoController extends BaseApiController
                 'id' => $this->makeId('pho_'),
                 'session_id' => $sessionId,
                 'file_path' => 'uploads/sessions/' . $sessionId . '/' . $randomName,
-                'drive_file_id' => null,
+                'drive_file_id' => '',
                 'shot_number' => $nextShot,
             ];
 
