@@ -25,4 +25,13 @@ class SlotModel extends Model
 	protected $dateFormat = 'datetime';
 	protected $createdField = 'created_at';
 	protected $updatedField = 'updated_at';
+
+	public function getAvailableSlots($date = null)
+	{
+		if ($date) {
+			return $this->where('slot_date', $date)->findAll();
+		}
+		return $this->findAll();
+	}
 }
+

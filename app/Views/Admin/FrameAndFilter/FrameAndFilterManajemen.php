@@ -263,7 +263,7 @@
                         <button type="button" onclick="openAddCategoryModal()"
                                 class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-blue-800 transition-colors whitespace-nowrap">
                             <span class="material-symbols-outlined text-[16px]">category</span>
-                            Tambah
+                            Tambah Kategori
                         </button>
                     </div>
                     <div class="p-4 bg-white border-b border-slate-100">
@@ -315,8 +315,8 @@
                     </div>
                     <!-- Pagination Kategori -->
                     <div class="mt-auto p-4 bg-white border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-[10px] text-slate-400 font-bold uppercase">
-                            <?= count($categoriesPaginated ?? []) ?>/<?= $totalCategories ?? 0 ?> Cat
+                        <span class="text-xs text-slate-500 font-medium">
+                            Menampilkan <?= count($categoriesPaginated ?? []) ?> dari <?= $totalCategories ?? 0 ?> Kategori
                         </span>
                         <div class="flex gap-1.5">
                             <a href="<?= base_url('admin/frames?cat_page=' . max(1, ($currentCatPage ?? 1) - 1)) ?>"

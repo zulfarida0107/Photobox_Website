@@ -18,16 +18,9 @@
         </nav>
 
         <!-- Page Header -->
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h2 class="font-h1 text-h1 text-on-surface">Manajemen Pelanggan</h2>
-                <p class="font-body-sm text-body-sm text-on-surface-variant">Kelola basis data pelanggan dan informasi kontak mereka.</p>
-            </div>
-            <a href="<?= base_url('admin/customers/create') ?>"
-               class="flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded font-label-bold text-label-bold hover:bg-primary-container transition-colors shadow-sm">
-                <span class="material-symbols-outlined text-sm">person_add</span>
-                Tambah Pelanggan
-            </a>
+        <div class="mb-6">
+            <h2 class="font-h1 text-h1 text-on-surface">Manajemen Pelanggan</h2>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">Kelola basis data pelanggan dan informasi kontak mereka.</p>
         </div>
 
         <!-- Dashboard Stats Row (Bento Style) -->
@@ -84,11 +77,16 @@
         <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
 
             <!-- Table Header -->
-            <div class="px-6 py-4 border-b border-slate-100 bg-white">
+            <div class="px-6 py-4 border-b border-slate-100 bg-white flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-1 h-6 bg-primary rounded-full"></div>
                     <h4 class="font-h2 text-h2 text-on-surface">Daftar Pelanggan</h4>
                 </div>
+                <a href="<?= base_url('admin/customers/create') ?>"
+                   class="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-800 transition-colors shadow-sm whitespace-nowrap">
+                    <span class="material-symbols-outlined text-[18px]">person_add</span>
+                    Tambah Pelanggan
+                </a>
             </div>
 
             <!-- Table Toolbar -->

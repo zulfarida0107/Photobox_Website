@@ -74,12 +74,12 @@
                 <p class="text-sm font-medium text-slate-500">Superadmin</p>
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statSuperadmin ?? 0 ?></h3>
             </div>
-            <!-- Admin biasa -->
+            <!-- Staff -->
             <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-amber-600 bg-amber-50 p-2 rounded-lg material-symbols-outlined">badge</span>
                 </div>
-                <p class="text-sm font-medium text-slate-500">Admin</p>
+                <p class="text-sm font-medium text-slate-500">Staff</p>
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statAdmin ?? 0 ?></h3>
             </div>
             <!-- Status Keamanan -->
@@ -122,7 +122,7 @@
                             class="w-full sm:w-48 px-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all text-slate-600">
                         <option value="" <?= ($filterRole ?? '') === '' ? 'selected' : '' ?>>Semua Role</option>
                         <option value="superadmin" <?= ($filterRole ?? '') === 'superadmin' ? 'selected' : '' ?>>Superadmin</option>
-                        <option value="staff"      <?= ($filterRole ?? '') === 'staff'      ? 'selected' : '' ?>>Admin</option>
+                        <option value="staff"      <?= ($filterRole ?? '') === 'staff'      ? 'selected' : '' ?>>Staff</option>
                     </select>
 
                     <!-- Reset button if search or filter is active -->
@@ -169,7 +169,7 @@
                                     <td class="px-6 py-4 text-sm text-slate-600 text-center"><?= esc($admin['email']) ?></td>
                                     <td class="px-6 py-4 text-center">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold <?= $badgeClass ?> uppercase tracking-wide">
-                                            <?= esc($admin['role'] === 'superadmin' ? 'Superadmin' : 'Admin') ?>
+                                            <?= esc($admin['role'] === 'superadmin' ? 'Superadmin' : 'Staff') ?>
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-center text-xs text-slate-500">

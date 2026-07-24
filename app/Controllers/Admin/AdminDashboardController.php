@@ -29,13 +29,18 @@ class AdminDashboardController extends BaseController
         $totalBooths           = $boothModel->countAllResults();
         $totalActiveBooths     = $boothModel->where('status', 'active')->countAllResults();
 
-        // Pemesanan terbaru dengan nama pelanggan
+        // Pemesanan terbaru dengan nama pelanggan (Maksimal 5 data per halaman)
+        $currentPage        = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $perPage            = 5;
+        $totalBookingsCount = $bookingModel->countAllResults(false);
+        $totalPages         = max(1, (int) ceil($totalBookingsCount / $perPage));
+
         $recentBookings = $bookingModel
             ->select('bookings.*, customers.name AS customer_name, packages.name AS package_name')
             ->join('customers', 'customers.id = bookings.customer_id', 'left')
             ->join('packages',  'packages.id = bookings.package_id',  'left')
             ->orderBy('bookings.created_at', 'DESC')
-            ->findAll(10);
+            ->findAll($perPage, ($currentPage - 1) * $perPage);
 
         // Total pendapatan bulan ini
         $revenueRow = $paymentModel->db
@@ -57,6 +62,9 @@ class AdminDashboardController extends BaseController
             'totalActiveBooths'     => $totalActiveBooths,
             'recentBookings'        => $recentBookings,
             'totalRevenueThisMonth' => $totalRevenueThisMonth,
+            'currentPage'           => $currentPage,
+            'totalPages'            => $totalPages,
+            'totalBookingsCount'    => $totalBookingsCount,
         ];
 
         return view('Admin/AdminDashboard/AdminDashboard', $data);
