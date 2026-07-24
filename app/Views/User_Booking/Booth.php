@@ -66,6 +66,7 @@
             border-radius: 16px;
             border: 2px solid transparent;
             cursor: pointer;
+            position: relative;
         }
         .theme-card:hover {
             transform: translateY(-8px);
@@ -85,6 +86,8 @@
             box-shadow: 0 10px 15px -3px rgba(190, 242, 100, 0.4);
             transition: all 0.3s ease;
             border-radius: 9999px;
+            position: relative;
+            z-index: 10;
         }
         .cta-button-gradient:hover {
             transform: scale(1.02);
@@ -111,6 +114,8 @@
             opacity: 0;
             transition: opacity 0.3s ease;
             border-radius: 16px;
+            pointer-events: none;
+            z-index: 1;
         }
         .theme-card.selected .card-overlay {
             opacity: 1;
@@ -118,10 +123,89 @@
         .theme-card:active .card-overlay {
             opacity: 0.3;
         }
+        /* Toast/Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+            width: 100%;
+        }
+        .toast {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            animation: slideInRight 0.5s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .toast-success {
+            background: #10b981;
+            color: white;
+        }
+        .toast-error {
+            background: #ef4444;
+            color: white;
+        }
+        .toast-info {
+            background: #3b82f6;
+            color: white;
+        }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .toast-close {
+            margin-left: auto;
+            cursor: pointer;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        .toast-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        /* Card content wrapper untuk memastikan klik pada card tidak mengganggu button */
+        .card-content {
+            position: relative;
+            z-index: 2;
+        }
+        .card-click-area {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            cursor: pointer;
+            border-radius: 16px;
+        }
+        .card-content > * {
+            position: relative;
+            z-index: 2;
+        }
+        form {
+            position: relative;
+            z-index: 5;
+        }
     </style>
 </head>
 <body>
-    <!-- BEGIN: Page Wrapper -->
+    <!-- BEGIN: Page Wrapper with Gray Background -->
     <div class="page-wrapper">
         <!-- BEGIN: MainContainer with Gradient #B8E4FF to #FCD2E8 -->
         <div class="w-full main-container-rounded gradient-bg flex flex-col min-h-screen">
@@ -156,7 +240,7 @@
                 <!-- Theme Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                     <!-- Card 1: Retro Vibes 80's -->
-                    <div class="theme-card bg-white/90 overflow-hidden flex flex-col group shadow-sm hover:shadow-xl relative" data-card="retro">
+                    <div class="theme-card bg-white/90 overflow-hidden flex flex-col group shadow-sm hover:shadow-xl" data-card="retro" data-booth-id="B001">
                         <div class="card-overlay"></div>
                         <div class="h-48 relative overflow-hidden card-image">
                             <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
@@ -165,7 +249,7 @@
                             <div class="absolute top-4 right-4 bg-slate-800 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">POPULAR</div>
                             <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                         </div>
-                        <div class="p-6 flex flex-col flex-grow">
+                        <div class="p-6 flex flex-col flex-grow card-content">
                             <h3 class="font-headline-md text-headline-md text-on-surface mb-4 text-xl font-bold text-slate-800">Retro Vibes 80's</h3>
                             <ul class="space-y-3 mb-6 flex-grow">
                                 <li class="flex items-center gap-3 font-body-md text-body-md text-slate-600">
@@ -187,14 +271,18 @@
                                     Vintage Cameras &amp; Props
                                 </li>
                             </ul>
-                            <button class="cta-button-gradient w-full text-slate-800 font-extrabold text-sm py-4 transition-all">
-                                Pilih Tema
-                            </button>
+                            <form action="/booth/store" method="post" class="w-full">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="booth_id" value="B001">
+                                <button type="submit" class="cta-button-gradient w-full text-slate-800 font-extrabold text-sm py-4 transition-all">
+                                    Pilih Tema
+                                </button>
+                            </form>
                         </div>
                     </div>
 
                     <!-- Card 2: Cute and Kawaii -->
-                    <div class="theme-card bg-white/90 overflow-hidden flex flex-col group shadow-sm hover:shadow-xl relative" data-card="cute">
+                    <div class="theme-card bg-white/90 overflow-hidden flex flex-col group shadow-sm hover:shadow-xl" data-card="cute" data-booth-id="B002">
                         <div class="card-overlay"></div>
                         <div class="h-48 relative overflow-hidden card-image">
                             <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
@@ -202,7 +290,7 @@
                                  alt="Cute and Kawaii"/>
                             <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                         </div>
-                        <div class="p-6 flex flex-col flex-grow">
+                        <div class="p-6 flex flex-col flex-grow card-content">
                             <h3 class="font-headline-md text-headline-md text-on-surface mb-4 text-xl font-bold text-slate-800">Cute and Kawaii</h3>
                             <ul class="space-y-3 mb-6 flex-grow">
                                 <li class="flex items-center gap-3 font-body-md text-body-md text-slate-600">
@@ -224,14 +312,18 @@
                                     Pastel Aesthetic Props
                                 </li>
                             </ul>
-                            <button class="cta-button-gradient w-full text-slate-800 font-extrabold text-sm py-4 transition-all">
-                                Pilih Tema
-                            </button>
+                            <form action="/booth/store" method="post" class="w-full">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="booth_id" value="B002">
+                                <button type="submit" class="cta-button-gradient w-full text-slate-800 font-extrabold text-sm py-4 transition-all">
+                                    Pilih Tema
+                                </button>
+                            </form>
                         </div>
                     </div>
 
                     <!-- Card 3: Minimalist and Clean -->
-                    <div class="theme-card bg-white/90 overflow-hidden flex flex-col group shadow-sm hover:shadow-xl relative" data-card="minimalist">
+                    <div class="theme-card bg-white/90 overflow-hidden flex flex-col group shadow-sm hover:shadow-xl" data-card="minimalist" data-booth-id="B003">
                         <div class="card-overlay"></div>
                         <div class="h-48 relative overflow-hidden card-image">
                             <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
@@ -239,7 +331,7 @@
                                  alt="Minimalist and Clean"/>
                             <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                         </div>
-                        <div class="p-6 flex flex-col flex-grow">
+                        <div class="p-6 flex flex-col flex-grow card-content">
                             <h3 class="font-headline-md text-headline-md text-on-surface mb-4 text-xl font-bold text-slate-800">Minimalist and Clean</h3>
                             <ul class="space-y-3 mb-6 flex-grow">
                                 <li class="flex items-center gap-3 font-body-md text-body-md text-slate-600">
@@ -261,14 +353,18 @@
                                     High-Class Minimalist Studio
                                 </li>
                             </ul>
-                            <button class="cta-button-gradient w-full text-slate-800 font-extrabold text-sm py-4 transition-all">
-                                Pilih Tema
-                            </button>
+                            <form action="/booth/store" method="post" class="w-full">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="booth_id" value="B003">
+                                <button type="submit" class="cta-button-gradient w-full text-slate-800 font-extrabold text-sm py-4 transition-all">
+                                    Pilih Tema
+                                </button>
+                            </form>
                         </div>
                     </div>
 
                     <!-- Card 4: Soft and Pastel -->
-                    <div class="theme-card bg-white/90 overflow-hidden flex flex-col group shadow-sm hover:shadow-xl relative" data-card="pastel">
+                    <div class="theme-card bg-white/90 overflow-hidden flex flex-col group shadow-sm hover:shadow-xl" data-card="pastel" data-booth-id="B004">
                         <div class="card-overlay"></div>
                         <div class="h-48 relative overflow-hidden card-image">
                             <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
@@ -276,7 +372,7 @@
                                  alt="Soft and Pastel"/>
                             <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                         </div>
-                        <div class="p-6 flex flex-col flex-grow">
+                        <div class="p-6 flex flex-col flex-grow card-content">
                             <h3 class="font-headline-md text-headline-md text-on-surface mb-4 text-xl font-bold text-slate-800">Soft and Pastel</h3>
                             <ul class="space-y-3 mb-6 flex-grow">
                                 <li class="flex items-center gap-3 font-body-md text-body-md text-slate-600">
@@ -298,14 +394,18 @@
                                     Ethereal Romantic Props
                                 </li>
                             </ul>
-                            <button class="cta-button-gradient w-full text-slate-800 font-extrabold text-sm py-4 transition-all">
-                                Pilih Tema
-                            </button>
+                            <form action="/booth/store" method="post" class="w-full">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="booth_id" value="B004">
+                                <button type="submit" class="cta-button-gradient w-full text-slate-800 font-extrabold text-sm py-4 transition-all">
+                                    Pilih Tema
+                                </button>
+                            </form>
                         </div>
                     </div>
 
                     <!-- Card 5: Magazine News -->
-                    <div class="theme-card bg-white/90 overflow-hidden flex flex-col group shadow-sm hover:shadow-xl relative" data-card="magazine">
+                    <div class="theme-card bg-white/90 overflow-hidden flex flex-col group shadow-sm hover:shadow-xl" data-card="magazine" data-booth-id="B005">
                         <div class="card-overlay"></div>
                         <div class="h-48 relative overflow-hidden card-image">
                             <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
@@ -313,7 +413,7 @@
                                  alt="Magazine News"/>
                             <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                         </div>
-                        <div class="p-6 flex flex-col flex-grow">
+                        <div class="p-6 flex flex-col flex-grow card-content">
                             <h3 class="font-headline-md text-headline-md text-on-surface mb-4 text-xl font-bold text-slate-800">Magazine News</h3>
                             <ul class="space-y-3 mb-6 flex-grow">
                                 <li class="flex items-center gap-3 font-body-md text-body-md text-slate-600">
@@ -335,14 +435,18 @@
                                     Atmospheric Golden Hour
                                 </li>
                             </ul>
-                            <button class="cta-button-gradient w-full text-slate-800 font-extrabold text-sm py-4 transition-all">
-                                Pilih Tema
-                            </button>
+                            <form action="/booth/store" method="post" class="w-full">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="booth_id" value="B005">
+                                <button type="submit" class="cta-button-gradient w-full text-slate-800 font-extrabold text-sm py-4 transition-all">
+                                    Pilih Tema
+                                </button>
+                            </form>
                         </div>
                     </div>
 
                     <!-- Card 6: General Universitas Indonesia - Selected by default -->
-                    <div class="theme-card bg-white/90 overflow-hidden flex flex-col group shadow-sm hover:shadow-xl relative selected border-2 border-green-500" data-card="ui">
+                    <div class="theme-card bg-white/90 overflow-hidden flex flex-col group shadow-sm hover:shadow-xl selected border-2 border-green-500" data-card="ui" data-booth-id="B006">
                         <div class="card-overlay"></div>
                         <div class="h-48 relative overflow-hidden card-image">
                             <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
@@ -357,7 +461,7 @@
                                 </svg>
                             </div>
                         </div>
-                        <div class="p-6 flex flex-col flex-grow">
+                        <div class="p-6 flex flex-col flex-grow card-content">
                             <h3 class="font-headline-md text-headline-md text-on-surface mb-4 text-xl font-bold text-slate-800">All Faculty in University of Indonesia</h3>
                             <ul class="space-y-3 mb-6 flex-grow">
                                 <li class="flex items-center gap-3 font-body-md text-body-md text-slate-600">
@@ -379,9 +483,13 @@
                                     University Campus Vibe
                                 </li>
                             </ul>
-                            <button class="cta-button-gradient w-full text-slate-800 font-extrabold text-sm py-4 transition-all">
-                                Pilih Tema
-                            </button>
+                            <form action="/booth/store" method="post" class="w-full">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="booth_id" value="B006">
+                                <button type="submit" class="cta-button-gradient w-full text-slate-800 font-extrabold text-sm py-4 transition-all">
+                                    Pilih Tema
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -406,25 +514,62 @@
     <!-- END: Page Wrapper -->
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Card click/select functionality
-            const cards = document.querySelectorAll('.theme-card');
-            
+          // Click event untuk memilih card secara visual
             cards.forEach(card => {
-                // Click event untuk memilih card
-                card.addEventListener('click', function(e) {
                     // Remove selected class from all cards
                     cards.forEach(c => {
                         c.classList.remove('selected');
                         c.style.borderColor = 'transparent';
                     });
                     
-                    // Add selected class to clicked card
-                    this.classList.add('selected');
-                    this.style.borderColor = '#22c55e';
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.style.opacity = '0';
+                        toast.style.transition = 'opacity 0.5s ease';
+                        setTimeout(() => toast.remove(), 500);
+                    }
+                }, 5000);
+            }
+
+            // Handle flash messages from session
+            <?php if (session()->getFlashdata('success')): ?>
+                showToast('<?= session()->getFlashdata('success') ?>', 'success');
+            <?php endif; ?>
+            
+            <?php if (session()->getFlashdata('error')): ?>
+                showToast('<?= session()->getFlashdata('error') ?>', 'error');
+            <?php endif; ?>
+            
+            <?php if (session()->getFlashdata('errors')): ?>
+                <?php $errors = session()->getFlashdata('errors'); ?>
+                <?php if (is_array($errors)): ?>
+                    <?php foreach ($errors as $error): ?>
+                        showToast('<?= $error ?>', 'error');
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            <?php endif; ?>
+
+            // Handle form submissions with loading state - tanpa mengganggu event click card
+            const forms = document.querySelectorAll('form[action="/booth/store"]');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const button = this.querySelector('button[type="submit"]');
+                    if (button) {
+                        const originalText = button.textContent;
+                        button.textContent = '⏳ Memproses...';
+                        button.disabled = true;
+                        button.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
                 });
             });
-        });
+
+            // Mencegah event click pada card ketika mengklik button
+            document.querySelectorAll('.cta-button-gradient').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
     </script>
 </body>
 </html>

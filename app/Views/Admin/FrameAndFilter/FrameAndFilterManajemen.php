@@ -239,10 +239,10 @@
                             <div class="w-1 h-6 bg-primary rounded-full"></div>
                             <h4 class="font-bold text-lg text-slate-800">Daftar Layout Frame</h4>
                         </div>
-                        <button type="button" onclick="openAddLayoutModal()"
-                                class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-blue-800 transition-colors">
-                            <span class="material-symbols-outlined text-[16px]">grid_view</span>
-                            Tambah Layout
+                        <button type="button" onclick="openAddCategoryModal()"
+                                class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-blue-800 transition-colors whitespace-nowrap">
+                            <span class="material-symbols-outlined text-[16px]">category</span>
+                            Tambah Kategori
                         </button>
                     </div>
                     
@@ -327,11 +327,10 @@
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- Pagination Layout -->
-                    <div class="mt-auto p-6 bg-white border-t border-slate-100 flex items-center justify-between">
+                    <!-- Pagination Kategori -->
+                    <div class="mt-auto p-4 bg-white border-t border-slate-100 flex items-center justify-between">
                         <span class="text-xs text-slate-500 font-medium">
-                            Menampilkan <?= count($layouts ?? []) ?> dari <?= $totalLayouts ?? 0 ?> layout
+                            Menampilkan <?= count($categoriesPaginated ?? []) ?> dari <?= $totalCategories ?? 0 ?> Kategori
                         </span>
                         <div class="flex gap-2">
                             <a href="<?= base_url('admin/frames?layout_page=' . max(1, ($currentLayoutPage ?? 1) - 1)) ?>"

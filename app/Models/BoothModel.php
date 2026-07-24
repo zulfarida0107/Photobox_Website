@@ -27,4 +27,10 @@ class BoothModel extends Model
 	protected $dateFormat = 'datetime';
 	protected $createdField = 'created_at';
 	protected $updatedField = 'updated_at';
+
+	public function getActiveBooths()
+	{
+		return $this->where('status !=', 'maintenance')->findAll();
+	}
 }
+
