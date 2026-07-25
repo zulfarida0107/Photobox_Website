@@ -24,6 +24,11 @@
                 <p class="font-body-sm text-body-sm text-on-surface-variant">Pantau dan kelola semua transaksi masuk secara real-time.</p>
             </div>
             <div class="flex items-center gap-3">
+                <a href="<?= base_url('admin/payments/export?status=' . ($filterStatus ?? '') . '&period=' . ($filterPeriod ?? 'all')) ?>"
+                   class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2 rounded font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">cloud_download</span>
+                    Ekspor Laporan
+                </a>
                 <form action="<?= base_url('admin/payments/verify-bulk') ?>" method="post" class="inline">
                     <?= csrf_field() ?>
                     <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-blue-800 transition-colors shadow-sm">

@@ -35,7 +35,7 @@ class PhotoController extends BaseApiController
             $photoFiles = [$photoFiles];
         }
 
-        $uploadDir = WRITEPATH . 'uploads/sessions/' . $sessionId;
+        $uploadDir = FCPATH . 'uploads/sessions/' . $sessionId;
         if (! is_dir($uploadDir)) {
             mkdir($uploadDir, 0775, true);
         }
@@ -55,7 +55,7 @@ class PhotoController extends BaseApiController
                 'id' => $this->makeId('pho_'),
                 'session_id' => $sessionId,
                 'file_path' => 'uploads/sessions/' . $sessionId . '/' . $randomName,
-                'drive_file_id' => null,
+                'drive_file_id' => '',
                 'shot_number' => $nextShot,
             ];
 

@@ -15,9 +15,9 @@ class FrameModel extends Model
 		'id',
 		'name',
 		'category_id',
+		'layout_id',
 		'file_path',
 		'is_active',
-		'photo_count',
 	];
 
 	protected $useSoftDeletes = false;
