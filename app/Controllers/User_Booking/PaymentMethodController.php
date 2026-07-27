@@ -6,14 +6,14 @@ use App\Controllers\BaseController;
 use App\Models\PaymentModel;
 use App\Models\BookingModel;
 use App\Models\CustomerModel;
-use App\Models\BoothModel;
+use App\Models\frameModel;
 
 class PaymentMethodController extends BaseController
 {
     protected $paymentModel;
     protected $bookingModel;
     protected $customerModel;
-    protected $boothModel;
+    protected $frameModel;
     protected $session;
 
     public function __construct()
@@ -21,7 +21,7 @@ class PaymentMethodController extends BaseController
         $this->paymentModel = new PaymentModel();
         $this->bookingModel = new BookingModel();
         $this->customerModel = new CustomerModel();
-        $this->boothModel = new BoothModel();
+        $this->frameModel = new FrameModel();
         $this->session = \Config\Services::session();
     }
 
@@ -31,27 +31,27 @@ class PaymentMethodController extends BaseController
             'title' => 'Payment Method - CuitBox Studio',
             'booking' => null,
             'payment' => null,
-            'booth' => null,
+            'frame' => null,
             'error' => null,
             'success' => null,
         ];
 
-        // Ambil booth_id dari URL atau session
-        $boothId = $this->request->getGet('booth_id') ?? $this->session->get('selected_booth_id');
+        // Ambil frame_id dari URL atau session
+        $frameId = $this->request->getGet('frame_id') ?? $this->session->get('selected_frame_id');
         
-        if ($boothId) {
-            $this->session->set('selected_booth_id', $boothId);
-            $booth = $this->boothModel->find($boothId);
-            if (!$booth) {
-                $booths = $this->getDummyBooths();
-                foreach ($booths as $b) {
-                    if ($b['id'] == $boothId) {
-                        $booth = $b;
+        if ($frameId) {
+            $this->session->set('selected_frame_id', $frameId);
+            $frame = $this->frameModel->find($frameId);
+            if (!$frame) {
+                $frames = $this->getDummyFrames();
+                foreach ($frames as $f) {
+                    if ($f['id'] == $frameId) {
+                        $frame = $f;
                         break;
                     }
                 }
             }
-            $data['booth'] = $booth;
+            $data['frame'] = $frame;
         }
 
         // Cek booking_id dari berbagai sumber
@@ -77,10 +77,10 @@ class PaymentMethodController extends BaseController
                     $data['payment'] = $payment;
                 }
             } else {
-                $data['booking'] = $this->createDummyBooking($data['booth']['price'] ?? 45000);
+                $data['booking'] = $this->createDummyBooking($data['frame']['price'] ?? 45000);
             }
         } else {
-            $data['booking'] = $this->createDummyBooking($data['booth']['price'] ?? 45000);
+            $data['booking'] = $this->createDummyBooking($data['frame']['price'] ?? 45000);
         }
 
         if ($this->session->getFlashdata('error')) {
@@ -116,7 +116,7 @@ class PaymentMethodController extends BaseController
             if (empty($bookingId)) {
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', 'Session booking tidak ditemukan. Silahkan pilih booth terlebih dahulu.');
+                    ->with('error', 'Session booking tidak ditemukan. Silahkan pilih frame terlebih dahulu.');
             }
         }
 
@@ -125,7 +125,7 @@ class PaymentMethodController extends BaseController
         if (!$booking) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Booking tidak ditemukan. Silahkan pilih booth terlebih dahulu.');
+                ->with('error', 'Booking tidak ditemukan. Silahkan pilih frame terlebih dahulu.');
         }
 
         // Cek apakah payment sudah ada
@@ -239,7 +239,7 @@ class PaymentMethodController extends BaseController
             'id' => $booking['id'] ?? 0,
             'booking_code' => $booking['booking_code'] ?? 'N/A',
             'queue_number' => $booking['queue_number'] ?? null,
-            'booth_id' => $booking['booth_id'] ?? null,
+            'frame_id' => $booking['frame_id'] ?? null,
             'total_amount' => $booking['total_amount'] ?? 0,
             'status' => $booking['status'] ?? 'pending',
             'booking_date' => isset($booking['booking_date']) ? date('d F Y', strtotime($booking['booking_date'])) : date('d F Y'),
@@ -281,59 +281,59 @@ class PaymentMethodController extends BaseController
         ];
     }
 
-    private function getDummyBooths()
+    private function getDummyFrames()
     {
         return [
             [
                 'id' => 'B001',
-                'name' => 'Booth Premium 1',
+                'name' => 'frame Premium 1',
                 'price' => 150000,
-                'description' => 'Booth premium dengan kamera 4K dan lighting profesional',
+                'description' => 'frame premium dengan kamera 4K dan lighting profesional',
                 'capacity' => 4,
                 'status' => 'available',
                 'facilities' => ['Kamera 4K', 'Lighting Profesional', 'Background LED', 'Prop lengkap']
             ],
             [
                 'id' => 'B002',
-                'name' => 'Booth Premium 2',
+                'name' => 'frame Premium 2',
                 'price' => 150000,
-                'description' => 'Booth premium dengan aksesoris lengkap dan ruang yang luas',
+                'description' => 'frame premium dengan aksesoris lengkap dan ruang yang luas',
                 'capacity' => 4,
                 'status' => 'available',
                 'facilities' => ['Kamera 4K', 'Lighting Profesional', 'Background Video', 'Prop lengkap', 'Monitor 32"']
             ],
             [
                 'id' => 'B003',
-                'name' => 'Booth Standar 1',
+                'name' => 'frame Standar 1',
                 'price' => 100000,
-                'description' => 'Booth standar dengan kualitas gambar yang baik dan nyaman',
+                'description' => 'frame standar dengan kualitas gambar yang baik dan nyaman',
                 'capacity' => 3,
                 'status' => 'available',
                 'facilities' => ['Kamera HD', 'Lighting Standar', 'Background Polos', 'Prop dasar']
             ],
             [
                 'id' => 'B004',
-                'name' => 'Booth Standar 2',
+                'name' => 'frame Standar 2',
                 'price' => 100000,
-                'description' => 'Booth standar dengan desain minimalis dan modern',
+                'description' => 'frame standar dengan desain minimalis dan modern',
                 'capacity' => 3,
                 'status' => 'available',
                 'facilities' => ['Kamera HD', 'Lighting Standar', 'Background Polos', 'Aksesoris tambahan']
             ],
             [
                 'id' => 'B005',
-                'name' => 'Booth Family 1',
+                'name' => 'frame Family 1',
                 'price' => 200000,
-                'description' => 'Booth khusus keluarga dengan ruang yang luas dan nyaman',
+                'description' => 'frame khusus keluarga dengan ruang yang luas dan nyaman',
                 'capacity' => 6,
                 'status' => 'available',
                 'facilities' => ['Kamera 4K', 'Lighting Premium', 'Background LED', 'Prop lengkap', 'Ruang luas']
             ],
             [
                 'id' => 'B006',
-                'name' => 'Booth Couple 1',
+                'name' => 'frame Couple 1',
                 'price' => 180000,
-                'description' => 'Booth romantis khusus untuk couple dengan dekorasi spesial',
+                'description' => 'frame romantis khusus untuk couple dengan dekorasi spesial',
                 'capacity' => 2,
                 'status' => 'available',
                 'facilities' => ['Kamera 4K', 'Lighting Romantis', 'Background Dekorasi', 'Prop couple']

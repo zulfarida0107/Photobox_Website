@@ -208,33 +208,39 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        /* Main content agar footer menempel di bawah */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
     </style>
 </head>
 <body>
-    <!-- BEGIN: Page Wrapper with Gray Background -->
+    <!-- BEGIN: Page Wrapper -->
     <div class="page-wrapper">
         <!-- BEGIN: MainContainer with Gradient -->
-        <div class="max-w-[1200px] w-full main-container-rounded gradient-bg">
+        <div class="w-full main-container-rounded gradient-bg flex flex-col min-h-screen">
 
-            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100">
+            <!-- BEGIN: MainHeader -->
+            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">
                 <div class="flex items-center">
                     <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
                 </div>
                 <div class="flex items-center space-x-2 sm:space-x-4 text-slate-600">
-                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" aria-label="Help">
+                    <!-- Help Button -->
+                    <a href="<?= base_url('help') ?>" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all relative group" aria-label="Help">
                         <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
                         </svg>
-                    </button>
-                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" aria-label="Language">
-                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
-                        </svg>
-                    </button>
+                        <span class="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Bantuan</span>
+                    </a>
                 </div>
             </header>
+            <!-- END: MainHeader -->
 
-            <main class="relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm">
+            <!-- BEGIN: Main Content -->
+            <main class="main-content relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm">
                 
                 <?php if (session()->getFlashdata('success')): ?>
                     <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
@@ -252,11 +258,11 @@
                     <p class="text-[10px] text-slate-600 font-medium">Segera lakukan pembayaran untuk Booking Photo Anda.</p>
                 </div>
 
-                <!-- FORM PEMBAYARAN - SATU FORM UTUH -->
+                <!-- FORM PEMBAYARAN -->
                 <form action="/payment/store" method="post" id="paymentForm">
                     <?= csrf_field() ?>
                     
-                    <!-- HIDDEN INPUTS - SEMUA DATA WAJIB ADA -->
+                    <!-- HIDDEN INPUTS -->
                     <?php 
                     $bookingId = $booking['id'] ?? session()->get('booking_id') ?? 1;
                     $amount = $booking['total_amount'] ?? 45000;
@@ -351,7 +357,9 @@
                     </div>
                 </form>
             </main>
+            <!-- END: Main Content -->
 
+            <!-- BEGIN: Footer -->
             <footer class="flex flex-col sm:flex-row items-center justify-between px-6 sm:px-8 py-4 footer-bg border-t border-gray-100 text-slate-500 text-xs font-medium gap-2 sm:gap-0">
                 <div class="flex items-center gap-2">
                     <svg class="h-3 w-3 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -361,9 +369,12 @@
                 </div>
                 <div class="text-center">© 2026 CuitBox Studio. All rights reserved.</div>
             </footer>
+            <!-- END: Footer -->
 
         </div>
+        <!-- END: MainContainer -->
     </div>
+    <!-- END: Page Wrapper -->
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

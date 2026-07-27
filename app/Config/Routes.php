@@ -227,6 +227,12 @@ $routes->get('index', 'User_Booking\LandingPageController::index');
 $routes->get('register', 'User_Booking\RegisterController::index');
 $routes->post('register/store', 'User_Booking\RegisterController::store');
 $routes->post('register/from-landing', 'User_Booking\RegisterController::fromLanding');
+$routes->post('register/check-email', 'User_Booking\RegisterController::checkEmail');
+
+// Routes untuk Login
+$routes->get('login', 'User_Booking\LoginController::index');
+$routes->post('login/auth', 'User_Booking\LoginController::auth');
+$routes->get('logout', 'User_Booking\LoginController::logout');
 
 // ===== SCHEDULE =====
 $routes->get('schedule', 'User_Booking\ScheduleController::index');
@@ -235,9 +241,9 @@ $routes->get('schedule/getSlots', 'User_Booking\ScheduleController::getSlots');
 $routes->post('schedule/book', 'User_Booking\ScheduleController::book');
 $routes->post('schedule/submit', 'User_Booking\ScheduleController::submitSchedule'); // ✅ TAMBAHKAN INI untuk submit pilihan schedule
 
-// Booth Routes
-$routes->get('booth', 'User_Booking\BoothController::index');
-$routes->post('booth/store', 'User_Booking\BoothController::store');
+// Frame Routes
+$routes->get('frame', 'User_Booking\frameController::index');
+$routes->post('frame/store', 'User_Booking\frameController::store');
 
 // Payment Routes
 $routes->get('payment', 'User_Booking\PaymentMethodController::index');
@@ -255,3 +261,8 @@ $routes->get('barcode', 'User_Booking\BarcodeController::index');
 $routes->get('barcode/generate/(:any)', 'User_Booking\BarcodeController::generate/$1');
 $routes->get('barcode/scan', 'User_Booking\BarcodeController::scan');
 $routes->post('barcode/verify', 'User_Booking\BarcodeController::verify');
+
+// Routes untuk Help & Language
+$routes->get('help', 'User_Booking\HelpController::index');
+$routes->post('help/send', 'User_Booking\HelpController::send');
+$routes->get('language/change/(:any)', 'User_Booking\LanguageController::change/$1');
