@@ -164,6 +164,21 @@
             color: #94a3b8;
         }
         
+        .time-slot.past-time {
+            background-color: #f1f5f9;
+            border-color: #e2e8f0;
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .time-slot.past-time .time-text {
+            color: #94a3b8;
+        }
+        
+        .time-slot.past-time .status-text {
+            color: #94a3b8;
+        }
+        
         /* ===== BUTTONS ===== */
         .btn-primary {
             background: #bef264;
@@ -247,6 +262,27 @@
             color: #1e293b;
             margin-top: 2px;
         }
+        
+        /* ===== DATE CELL DISABLED ===== */
+        .date-cell.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .date-cell.disabled:hover {
+            background: transparent;
+        }
+        
+        /* ===== CURRENT TIME INDICATOR ===== */
+        .current-time-indicator {
+            font-size: 10px;
+            color: #64748b;
+            padding: 4px 12px;
+            background: #f1f5f9;
+            border-radius: 9999px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -255,31 +291,30 @@
         <!-- BEGIN: MainContainer -->
         <div class="w-full main-container-rounded gradient-bg flex flex-col min-h-screen">
 
-            <!-- BEGIN: Header -->
-            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100">
-                <div class="flex items-center">
-                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
-                </div>
-                <div class="flex items-center space-x-2 sm:space-x-4 text-slate-600">
-                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" aria-label="Help">
-                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
-                        </svg>
-                    </button>
-                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" aria-label="Language">
-                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
-                        </svg>
-                    </button>
-                </div>
-            </header>
-            <!-- END: Header -->
+        <!-- BEGIN: MainHeader -->
+<header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">
+    <div class="flex items-center">
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
+    </div>
+    <div class="flex items-center space-x-2 sm:space-x-4 text-slate-600">
+        <!-- Help Button -->
+        <a href="<?= base_url('help') ?>" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all relative group" aria-label="Help">
+            <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+</svg>
+        </a>
+    </div>
+</header>
+<!-- END: MainHeader -->
 
             <!-- BEGIN: HeroSection -->
             <main class="relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm">
                 <div class="text-center mb-8">
                     <h2 class="text-2xl font-extrabold mb-1 text-slate-800">Booking Session</h2>
                     <p class="text-[10px] text-slate-600 font-medium">Pilih Tanggal &amp; Waktu Sesi Fotobox</p>
+                    <div class="mt-2">
+                        <span class="current-time-indicator" id="current-time-display">⏰ Memuat waktu...</span>
+                    </div>
                 </div>
                 
 <?php
@@ -319,6 +354,10 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                             <div class="grid grid-cols-7 gap-y-1 text-center" id="calendar-grid">
                                 <!-- Calendar akan di-generate oleh JavaScript -->
                             </div>
+                            <div class="mt-2 text-xs text-slate-400 text-center">
+                                <span class="inline-block w-3 h-3 bg-black rounded-sm mr-1 align-middle"></span> Dipilih
+                                <span class="inline-block w-3 h-3 bg-slate-200 rounded-sm ml-3 mr-1 align-middle"></span> Tidak Tersedia
+                            </div>
                         </div>
                     </section>
 
@@ -342,11 +381,11 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                                     <p class="text-[10px] font-bold tracking-wider session-label">A. PAGI</p>
                                     <div class="grid grid-cols-2 gap-3">
                                         <button class="time-slot available p-3 rounded-xl text-left" data-time="09:00 - 11:00" data-slot="09:00">
-                                            <div class="text-xs font-bold time-text">09:00 - 11:00</div>
+                                            <div class="text-xs font-bold time-text">08:00 - 10:00</div>
                                             <div class="text-[9px] text-slate-400 status-text">Tersedia</div>
                                         </button>
                                         <button class="time-slot available p-3 rounded-xl text-left" data-time="11:00 - 13:00" data-slot="11:00">
-                                            <div class="text-xs font-bold time-text">11:00 - 13:00</div>
+                                            <div class="text-xs font-bold time-text">10:00 - 12:00</div>
                                             <div class="text-[9px] text-slate-400 status-text">Tersedia</div>
                                         </button>
                                     </div>
@@ -355,12 +394,12 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                                 <div>
                                     <p class="text-[10px] font-bold tracking-wider session-label">B. SIANG</p>
                                     <div class="grid grid-cols-2 gap-3">
-                                        <button class="time-slot selected p-3 rounded-xl text-left" data-time="13:00 - 15:00" data-slot="13:00">
-                                            <div class="text-xs font-bold time-text">13:00 - 15:00</div>
-                                            <div class="text-[9px] status-text">Terpilih</div>
+                                        <button class="time-slot available p-3 rounded-xl text-left" data-time="13:00 - 15:00" data-slot="13:00">
+                                            <div class="text-xs font-bold time-text">12:00 - 14:00</div>
+                                            <div class="text-[9px] text-slate-400 status-text">Tersedia</div>
                                         </button>
                                         <button class="time-slot available p-3 rounded-xl text-left" data-time="15:00 - 17:00" data-slot="15:00">
-                                            <div class="text-xs font-bold time-text">15:00 - 17:00</div>
+                                            <div class="text-xs font-bold time-text">14:00 - 16:00</div>
                                             <div class="text-[9px] text-slate-400 status-text">Tersedia</div>
                                         </button>
                                     </div>
@@ -369,12 +408,12 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                                 <div>
                                     <p class="text-[10px] font-bold tracking-wider session-label">C. SORE</p>
                                     <div class="grid grid-cols-2 gap-3">
-                                        <button class="time-slot full p-3 rounded-xl text-left" data-time="17:00 - 19:00" data-slot="17:00" disabled>
-                                            <div class="text-xs font-bold time-text">17:00 - 19:00</div>
-                                            <div class="text-[9px] text-slate-300 status-text">Penuh</div>
+                                        <button class="time-slot available p-3 rounded-xl text-left" data-time="17:00 - 19:00" data-slot="17:00" disabled>
+                                            <div class="text-xs font-bold time-text">16:00 - 18:00</div>
+                                            <div class="text-[9px] text-slate-300 status-text">Tersedia</div>
                                         </button>
                                         <button class="time-slot available p-3 rounded-xl text-left" data-time="19:00 - 21:00" data-slot="19:00">
-                                            <div class="text-xs font-bold time-text">19:00 - 21:00</div>
+                                            <div class="text-xs font-bold time-text">18:00 - 20:00</div>
                                             <div class="text-[9px] text-slate-400 status-text">Tersedia</div>
                                         </button>
                                     </div>
@@ -384,7 +423,7 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                                     <p class="text-[10px] font-bold tracking-wider session-label">D. MALAM</p>
                                     <div class="grid grid-cols-2 gap-3">
                                         <button class="time-slot available p-3 rounded-xl text-left" data-time="21:00 - 23:00" data-slot="21:00">
-                                            <div class="text-xs font-bold time-text">21:00 - 23:00</div>
+                                            <div class="text-xs font-bold time-text">20:00 - 22:00</div>
                                             <div class="text-[9px] text-slate-400 status-text">Tersedia</div>
                                         </button>
                                     </div>
@@ -407,9 +446,9 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                                     <input type="hidden" name="selected_date" id="selected_date" value="">
                                     <input type="hidden" name="selected_time" id="selected_time" value="">
                                     
-                                    <!-- Button Lanjutkan ke Booth -->
+                                    <!-- Button Lanjutkan ke frame -->
                                     <button type="submit" class="btn-primary" id="submitScheduleBtn">
-                                        <span>Lanjutkan ke Pemilihan Booth</span>
+                                        <span>Lanjutkan ke Pemilihan Tema Frame</span>
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                                         </svg>
@@ -447,12 +486,30 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
     <!-- ===== JAVASCRIPT ===== -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // ===== AUTO-DETECT TANGGAL & JAM HARI INI =====
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            
+            const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
             // ===== VARIABLES =====
             let currentDate = new Date();
             let selectedDate = new Date();
             let selectedTime = '13:00 - 15:00';
             
             const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            // ===== TIME SLOTS DEFINITION =====
+            const timeSlotsData = [
+                { start: 9, end: 11, label: '09:00 - 11:00', category: 'PAGI' },
+                { start: 11, end: 13, label: '11:00 - 13:00', category: 'PAGI' },
+                { start: 13, end: 15, label: '13:00 - 15:00', category: 'SIANG' },
+                { start: 15, end: 17, label: '15:00 - 17:00', category: 'SIANG' },
+                { start: 17, end: 19, label: '17:00 - 19:00', category: 'SORE' },
+                { start: 19, end: 21, label: '19:00 - 21:00', category: 'SORE' },
+                { start: 21, end: 23, label: '21:00 - 23:00', category: 'MALAM' }
+            ];
             
             // ===== DOM ELEMENTS =====
             const calendarGrid = document.getElementById('calendar-grid');
@@ -464,10 +521,63 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
             const submitBtn = document.getElementById('submitScheduleBtn');
             const scheduleForm = document.getElementById('scheduleForm');
             const btnBack = document.getElementById('btn-back');
+            const currentTimeDisplay = document.getElementById('current-time-display');
+            
+            // ===== UPDATE CURRENT TIME DISPLAY =====
+            function updateCurrentTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                const dayName = days[now.getDay()];
+                const date = now.getDate();
+                const month = monthNames[now.getMonth()];
+                const year = now.getFullYear();
+                
+                if (currentTimeDisplay) {
+                    currentTimeDisplay.textContent = `⏰ ${dayName}, ${date} ${month} ${year} | ${hours}:${minutes} WIB`;
+                }
+            }
+            
+            // Update time every minute
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 60000);
             
             // ===== HELPER FUNCTIONS =====
             function formatDate(date) {
                 return date.getDate() + ' ' + monthNames[date.getMonth()] + ' ' + date.getFullYear();
+            }
+            
+            function isToday(date) {
+                const today = new Date();
+                return date.getDate() === today.getDate() &&
+                       date.getMonth() === today.getMonth() &&
+                       date.getFullYear() === today.getFullYear();
+            }
+            
+            function isPastDate(date) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const checkDate = new Date(date);
+                checkDate.setHours(0, 0, 0, 0);
+                return checkDate < today;
+            }
+            
+            function isTimeSlotPast(timeLabel) {
+                if (!isToday(selectedDate)) return false;
+                
+                const parts = timeLabel.split(' - ');
+                const startHour = parseInt(parts[0].split(':')[0]);
+                const startMinute = parseInt(parts[0].split(':')[1] || 0);
+                
+                const now = new Date();
+                const currentHour = now.getHours();
+                const currentMinute = now.getMinutes();
+                
+                // Jika jam mulai <= jam sekarang, berarti slot sudah lewat
+                if (startHour < currentHour) return true;
+                if (startHour === currentHour && startMinute <= currentMinute) return true;
+                return false;
             }
             
             function updateHiddenFields() {
@@ -516,17 +626,19 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                     const isSelected = (dateObj.getDate() === selectedDate.getDate() && 
                                        dateObj.getMonth() === selectedDate.getMonth() && 
                                        dateObj.getFullYear() === selectedDate.getFullYear());
+                    const isPast = isPastDate(dateObj);
                     
                     let classes = 'date-cell py-1';
                     if (isSelected) classes += ' selected-date';
+                    if (isPast) classes += ' disabled';
                     
                     html += `<div class="${classes}" data-day="${day}" data-month="${month}" data-year="${year}">${day}</div>`;
                 }
                 
                 calendarGrid.innerHTML = html;
                 
-                // Add click event to date cells
-                document.querySelectorAll('.date-cell:not(.empty)').forEach(cell => {
+                // Add click event to date cells (only for non-disabled)
+                document.querySelectorAll('.date-cell:not(.empty):not(.disabled)').forEach(cell => {
                     cell.addEventListener('click', function() {
                         const day = parseInt(this.dataset.day);
                         const month = parseInt(this.dataset.month);
@@ -536,19 +648,82 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                         selectedDateDisplay.textContent = formatDate(selectedDate);
                         updateConfirmation();
                         renderCalendar();
+                        updateTimeSlotsStatus();
                     });
                 });
             }
             
+            // ===== UPDATE TIME SLOTS STATUS =====
+            function updateTimeSlotsStatus() {
+                const allSlots = document.querySelectorAll('.time-slot');
+                
+                allSlots.forEach(slot => {
+                    // Skip jika slot sudah full
+                    if (slot.classList.contains('full')) return;
+                    
+                    const timeLabel = slot.dataset.time;
+                    const isPast = isTimeSlotPast(timeLabel);
+                    
+                    // Reset classes
+                    slot.classList.remove('past-time');
+                    
+                    if (isPast && isToday(selectedDate)) {
+                        slot.classList.add('past-time');
+                        slot.disabled = true;
+                        const statusText = slot.querySelector('.status-text');
+                        if (statusText) {
+                            statusText.textContent = 'Lewat';
+                            statusText.className = 'text-[9px] text-slate-400 status-text';
+                        }
+                    } else {
+                        slot.disabled = false;
+                        const statusText = slot.querySelector('.status-text');
+                        if (statusText && !slot.classList.contains('selected')) {
+                            statusText.textContent = 'Tersedia';
+                            statusText.className = 'text-[9px] text-slate-400 status-text';
+                        }
+                    }
+                });
+                
+                // Jika slot yang dipilih sudah lewat, reset pilihan
+                const selectedSlot = document.querySelector('.time-slot.selected');
+                if (selectedSlot && selectedSlot.classList.contains('past-time')) {
+                    selectedSlot.classList.remove('selected');
+                    selectedSlot.style.background = 'white';
+                    selectedSlot.style.borderColor = '#e2e8f0';
+                    
+                    // Cari slot tersedia pertama
+                    const firstAvailable = document.querySelector('.time-slot:not(.full):not(.past-time)');
+                    if (firstAvailable) {
+                        firstAvailable.click();
+                    } else {
+                        selectedTime = '';
+                        updateConfirmation();
+                    }
+                }
+            }
+            
             // Month navigation
             document.getElementById('prev-month').addEventListener('click', function() {
-                currentDate.setMonth(currentDate.getMonth() - 1);
+                const newDate = new Date(currentDate);
+                newDate.setMonth(newDate.getMonth() - 1);
+                
+                // Tidak bisa ke bulan sebelum bulan ini
+                const today = new Date();
+                if (newDate.getFullYear() < today.getFullYear() || 
+                    (newDate.getFullYear() === today.getFullYear() && newDate.getMonth() < today.getMonth())) {
+                    return;
+                }
+                
+                currentDate = newDate;
                 renderCalendar();
+                updateTimeSlotsStatus();
             });
             
             document.getElementById('next-month').addEventListener('click', function() {
                 currentDate.setMonth(currentDate.getMonth() + 1);
                 renderCalendar();
+                updateTimeSlotsStatus();
             });
             
             // ===== TIME SLOT LOGIC =====
@@ -556,15 +731,22 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
             
             timeSlots.forEach(slot => {
                 slot.addEventListener('click', function() {
+                    // Jika slot sudah lewat atau full, tidak bisa dipilih
+                    if (this.classList.contains('past-time') || this.classList.contains('full')) {
+                        return;
+                    }
+                    
                     // Reset all time slots
                     timeSlots.forEach(s => {
                         s.classList.remove('selected');
                         s.style.background = 'white';
-                        s.style.borderColor = '#bef264';
-                        const statusText = s.querySelector('.status-text');
-                        if (statusText) {
-                            statusText.className = 'text-[9px] text-slate-400 status-text';
-                            statusText.textContent = 'Tersedia';
+                        s.style.borderColor = '#e2e8f0';
+                        if (!s.classList.contains('full') && !s.classList.contains('past-time')) {
+                            const statusText = s.querySelector('.status-text');
+                            if (statusText) {
+                                statusText.className = 'text-[9px] text-slate-400 status-text';
+                                statusText.textContent = 'Tersedia';
+                            }
                         }
                         const timeText = s.querySelector('.time-text');
                         if (timeText) {
@@ -628,16 +810,56 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                 });
             }
             
+            // ===== AUTO-SELECT TIME SLOT BERDASARKAN JAM SEKARANG =====
+            function getRecommendedTimeSlot() {
+                const now = new Date();
+                const hour = now.getHours();
+                const minute = now.getMinutes();
+                
+                // Cari slot yang jam mulai-nya >= jam sekarang + 1 jam
+                for (let slot of timeSlotsData) {
+                    // Jika slot mulai >= jam sekarang + 1 (buffer 1 jam)
+                    if (slot.start > hour + 1 || (slot.start === hour + 1 && minute === 0)) {
+                        return slot.label;
+                    }
+                }
+                
+                // Jika semua slot sudah lewat, pilih slot pertama yang tersedia untuk besok
+                return timeSlotsData[0].label;
+            }
+            
+            function setDefaultTimeSlot() {
+                const recommendedTime = getRecommendedTimeSlot();
+                
+                // Cari slot dengan waktu yang direkomendasikan
+                let defaultSlot = document.querySelector(`.time-slot[data-time="${recommendedTime}"]`);
+                
+                // Jika slot tidak ada atau full/past, cari slot pertama yang tersedia
+                if (!defaultSlot || defaultSlot.classList.contains('full') || defaultSlot.classList.contains('past-time')) {
+                    defaultSlot = document.querySelector('.time-slot:not(.full):not(.past-time)');
+                }
+                
+                if (defaultSlot) {
+                    defaultSlot.click();
+                } else {
+                    // Jika tidak ada slot tersedia sama sekali
+                    const firstSlot = document.querySelector('.time-slot:not(.full)');
+                    if (firstSlot) {
+                        firstSlot.click();
+                    }
+                }
+            }
+            
             // ===== INITIAL RENDER =====
             renderCalendar();
             selectedDateDisplay.textContent = formatDate(selectedDate);
             updateConfirmation();
             
-            // Set default selected time slot
-            const defaultSlot = document.querySelector('.time-slot[data-time="13:00 - 15:00"]');
-            if (defaultSlot) {
-                defaultSlot.click();
-            }
+            // Update time slots status
+            setTimeout(() => {
+                updateTimeSlotsStatus();
+                setDefaultTimeSlot();
+            }, 200);
         });
     </script>
 </body>

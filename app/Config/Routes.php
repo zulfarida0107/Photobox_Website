@@ -215,6 +215,12 @@ $routes->get('landing', 'User_Booking\LandingPageController::index');
 $routes->get('register', 'User_Booking\RegisterController::index');
 $routes->post('register/store', 'User_Booking\RegisterController::store');
 $routes->post('register/from-landing', 'User_Booking\RegisterController::fromLanding');
+$routes->post('register/check-email', 'User_Booking\RegisterController::checkEmail');
+
+// Routes untuk Login
+$routes->get('login', 'User_Booking\LoginController::index');
+$routes->post('login/auth', 'User_Booking\LoginController::auth');
+$routes->get('logout', 'User_Booking\LoginController::logout');
 
 $routes->get('schedule', 'User_Booking\ScheduleController::index');
 $routes->post('schedule', 'User_Booking\ScheduleController::store');

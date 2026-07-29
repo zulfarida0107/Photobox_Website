@@ -501,25 +501,21 @@
         <!-- BEGIN: MainContainer with Gradient -->
         <div class="w-full main-container-rounded gradient-bg flex flex-col min-h-screen" data-purpose="registration-page-wrapper">
             
-            <!-- BEGIN: MainHeader -->
-            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">
-                <div class="flex items-center">
-                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
-                </div>
-                <div class="flex items-center space-x-2 sm:space-x-4 text-slate-600">
-                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" aria-label="Help">
-                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
-                        </svg>
-                    </button>
-                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" aria-label="Language">
-                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
-                        </svg>
-                    </button>
-                </div>
-            </header>
-            <!-- END: MainHeader -->
+          <!-- BEGIN: MainHeader -->
+<header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">
+    <div class="flex items-center">
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
+    </div>
+    <div class="flex items-center space-x-2 sm:space-x-4 text-slate-600">
+        <!-- Help Button -->
+        <a href="<?= base_url('help') ?>" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all relative group" aria-label="Help">
+            <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+</svg>
+        </a>
+    </div>
+</header>
+<!-- END: MainHeader -->
             
             <!-- BEGIN: ContentArea -->
             <div class="flex-1 flex flex-col lg:flex-row items-center p-6 sm:p-8 lg:p-12 xl:p-16 gap-8 lg:gap-12 xl:gap-16 bg-white/40 backdrop-blur-sm" data-purpose="main-content-area">
@@ -610,9 +606,9 @@
                         </div>
                     <?php endif; ?>
                     
-        <!-- Form di register.php -->
-<form action="<?= base_url('schedule') ?>" method="POST" class="space-y-4 sm:space-y-5" data-purpose="signup-form" id="registerForm">
-    <?= csrf_field() ?>
+                    <!-- Form -->
+                    <form action="<?= base_url('register/store') ?>" method="POST" class="space-y-4 sm:space-y-5" data-purpose="signup-form" id="registerForm">
+                        <?= csrf_field() ?>
                         
                         <!-- Field: Full Name -->
                         <div>
@@ -792,6 +788,7 @@
 
     <!-- ===== JAVASCRIPT ===== -->
     <script>
+        // ===== TOGGLE PASSWORD =====
         function togglePassword(fieldId) {
             const input = document.getElementById(fieldId);
             if (!input) return;
@@ -799,11 +796,13 @@
             input.setAttribute('type', type);
         }
 
+        // ===== FOCUS FIRST INPUT =====
         document.addEventListener('DOMContentLoaded', function() {
             const firstNameInput = document.getElementById('full_name');
             if (firstNameInput) firstNameInput.focus();
         });
 
+        // ===== TIMER =====
         let seconds = 5;
         const timerElement = document.getElementById('timerText');
         if (timerElement) {
@@ -816,6 +815,11 @@
                 }
             }, 1000);
         }
+
+        // ===== VARIABLES =====
+        let emailCheckTimeout = null;
+        let isEmailExists = false;
+        let lastCheckedEmail = '';
 
         // ===== PASSWORD STRENGTH VALIDATION =====
         document.getElementById('password')?.addEventListener('input', function() {
@@ -904,7 +908,7 @@
             }
         });
 
-        // ===== VALIDASI NAMA LENGKAP (Harus ada Huruf Kapital dan Huruf Kecil) =====
+        // ===== VALIDASI NAMA LENGKAP =====
         document.getElementById('full_name')?.addEventListener('input', function() {
             const error = document.getElementById('name-error');
             const value = this.value.trim();
@@ -943,49 +947,150 @@
             }
         });
 
-        // ===== VALIDASI EMAIL (Hanya huruf kecil, angka, dan format email) =====
+        // ===== VALIDASI EMAIL & CEK DUPLIKAT (REAL-TIME) =====
         document.getElementById('email')?.addEventListener('input', function() {
             const error = document.getElementById('email-error');
             const value = this.value.trim();
+            const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
             
+            // Clear previous timeout
+            if (emailCheckTimeout) {
+                clearTimeout(emailCheckTimeout);
+            }
+            
+            // Jika email kosong
             if (value.length === 0) {
                 error.style.display = 'none';
                 this.classList.remove('input-error', 'input-success');
+                isEmailExists = false;
+                hideEmailExistsAlert();
+                lastCheckedEmail = '';
                 return;
             }
             
-            // Cek apakah ada huruf kapital
+            // Cek format email (harus valid dulu)
+            if (!emailPattern.test(value)) {
+                error.textContent = '❌ Format email tidak valid (contoh: nama@domain.com)';
+                error.style.color = '#ef4444';
+                error.style.display = 'block';
+                this.classList.remove('input-success');
+                this.classList.add('input-error');
+                isEmailExists = false;
+                hideEmailExistsAlert();
+                lastCheckedEmail = '';
+                return;
+            }
+            
+            // Cek huruf kapital
             if (/[A-Z]/.test(value)) {
                 error.textContent = '❌ Email tidak boleh menggunakan huruf kapital';
                 error.style.color = '#ef4444';
                 error.style.display = 'block';
                 this.classList.remove('input-success');
                 this.classList.add('input-error');
+                isEmailExists = false;
+                hideEmailExistsAlert();
+                lastCheckedEmail = '';
                 return;
             }
             
-            // Cek format email (hanya huruf kecil, angka, @, dan domain)
-            const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
-            if (emailPattern.test(value)) {
-                error.textContent = '✅ Email valid';
-                error.style.color = '#22c55e';
-                error.style.display = 'block';
-                this.classList.remove('input-error');
-                this.classList.add('input-success');
-            } else {
-                error.textContent = '❌ Format email tidak valid (contoh: nama@domain.com)';
-                error.style.color = '#ef4444';
-                error.style.display = 'block';
-                this.classList.remove('input-success');
-                this.classList.add('input-error');
-            }
+            // ✅ JIKA EMAIL VALID, LANGSUNG CEK KE DATABASE
+            error.textContent = '⏳ Memeriksa email...';
+            error.style.color = '#f59e0b';
+            error.style.display = 'block';
+            this.classList.remove('input-error', 'input-success');
+            
+            // Cek ke database via AJAX (delay 300ms agar tidak terlalu sering)
+            emailCheckTimeout = setTimeout(() => {
+                fetch('<?= base_url("register/check-email") ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: 'email=' + encodeURIComponent(value)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        error.innerHTML = '❌ ' + data.message;
+                        error.style.color = '#ef4444';
+                        error.style.display = 'block';
+                        document.getElementById('email').classList.remove('input-success');
+                        document.getElementById('email').classList.add('input-error');
+                        isEmailExists = true;
+                        lastCheckedEmail = value;
+                        showEmailExistsAlert(data.message);
+                    } else {
+                        error.textContent = '✅ Email tersedia';
+                        error.style.color = '#22c55e';
+                        error.style.display = 'block';
+                        document.getElementById('email').classList.remove('input-error');
+                        document.getElementById('email').classList.add('input-success');
+                        isEmailExists = false;
+                        lastCheckedEmail = value;
+                        hideEmailExistsAlert();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    error.textContent = '❌ Gagal memeriksa email';
+                    error.style.color = '#ef4444';
+                    error.style.display = 'block';
+                });
+            }, 300);
         });
+
+        // ===== FUNGSI ALERT EMAIL SUDAH TERDAFTAR =====
+        function showEmailExistsAlert(message) {
+            let alertDiv = document.getElementById('email-exists-alert');
+            if (!alertDiv) {
+                alertDiv = document.createElement('div');
+                alertDiv.id = 'email-exists-alert';
+                alertDiv.className = 'alert';
+                alertDiv.style.marginBottom = '16px';
+                alertDiv.style.padding = '12px 16px';
+                alertDiv.style.borderRadius = '12px';
+                alertDiv.style.fontSize = '13px';
+                alertDiv.style.animation = 'slideDown 0.4s ease-out';
+                alertDiv.style.backgroundColor = '#fef3c7';
+                alertDiv.style.color = '#92400e';
+                alertDiv.style.border = '1px solid #fcd34d';
+                
+                const headerDiv = document.querySelector('.right-column > div:first-child');
+                if (headerDiv) {
+                    headerDiv.parentNode.insertBefore(alertDiv, headerDiv.nextSibling);
+                }
+            }
+            
+            alertDiv.innerHTML = `<span class="icon">⚠️</span> ${message}`;
+            alertDiv.style.display = 'block';
+        }
+
+        function hideEmailExistsAlert() {
+            const alertDiv = document.getElementById('email-exists-alert');
+            if (alertDiv) {
+                alertDiv.style.display = 'none';
+            }
+        }
 
         // ===== VALIDASI FORM SEBELUM SUBMIT =====
         document.getElementById('submitBtn')?.addEventListener('click', function(e) {
             e.preventDefault();
             
             let isValid = true;
+            
+            // ✅ CEK EMAIL SUDAH TERDAFTAR (real-time)
+            if (isEmailExists) {
+                const emailError = document.getElementById('email-error');
+                emailError.innerHTML = '❌ Email sudah terdaftar! Silakan <a href="<?= base_url('login') ?>" class="text-blue-600 font-semibold hover:underline">Masuk di sini</a> atau gunakan email lain.';
+                emailError.style.color = '#ef4444';
+                emailError.style.display = 'block';
+                document.getElementById('email').classList.add('input-error');
+                document.getElementById('email').focus();
+                showEmailExistsAlert('Email sudah terdaftar. <a href="<?= base_url('login') ?>" class="text-blue-600 font-semibold hover:underline" style="color: #2563eb !important; font-weight: 600 !important; text-decoration: underline !important;">Masuk di sini</a>');
+                return;
+            }
             
             // 1. Validasi Nama Lengkap
             const name = document.getElementById('full_name');
@@ -1122,6 +1227,18 @@
                 confirmError.style.display = 'block';
                 confirm.classList.remove('input-error');
                 confirm.classList.add('input-success');
+            }
+            
+            // ✅ DOUBLE CHECK EMAIL EXISTS
+            if (isEmailExists) {
+                const emailError = document.getElementById('email-error');
+                emailError.innerHTML = '❌ Email sudah terdaftar! Silakan <a href="<?= base_url('login') ?>" class="text-blue-600 font-semibold hover:underline">Masuk di sini</a> atau gunakan email lain.';
+                emailError.style.color = '#ef4444';
+                emailError.style.display = 'block';
+                document.getElementById('email').classList.add('input-error');
+                document.getElementById('email').focus();
+                showEmailExistsAlert('Email sudah terdaftar. <a href="<?= base_url('login') ?>" class="text-blue-600 font-semibold hover:underline" style="color: #2563eb !important; font-weight: 600 !important; text-decoration: underline !important;">Masuk di sini</a>');
+                return;
             }
             
             // Jika semua valid, submit form

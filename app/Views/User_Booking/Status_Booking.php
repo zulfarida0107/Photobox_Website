@@ -246,25 +246,21 @@
     <div class="page-wrapper">
         <div class="main-container gradient-bg flex flex-col min-h-screen">
 
-            <!-- HEADER - SAMA PERSIS DENGAN REFERENSI (Help & Language) -->
-            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">
-                <div class="flex items-center">
-                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
-                </div>
-                <div class="flex items-center space-x-2 sm:space-x-4 text-slate-600">
-                    <a href="/StatusBooking" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" aria-label="Help" title="Cek Status">
-                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
-                        </svg>
-                    </a>
-                    <a href="/barcode" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" aria-label="Language" title="Lihat Barcode">
-                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
-                        </svg>
-                    </a>
-                </div>
-            </header>
-            <!-- END: HEADER -->
+          <!-- BEGIN: MainHeader -->
+<header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">
+    <div class="flex items-center">
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
+    </div>
+    <div class="flex items-center space-x-2 sm:space-x-4 text-slate-600">
+        <!-- Help Button -->
+        <a href="<?= base_url('help') ?>" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all relative group" aria-label="Help">
+            <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+</svg>
+        </a>
+    </div>
+</header>
+<!-- END: MainHeader -->
 
             <!-- Main Content -->
             <main class="flex-1 px-6 sm:px-8 py-10 md:py-16 bg-white/40 backdrop-blur-sm flex items-center justify-center">
@@ -387,3 +383,4 @@
     </script>
 </body>
 </html>
+

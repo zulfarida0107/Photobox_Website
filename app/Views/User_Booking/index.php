@@ -143,6 +143,56 @@
         .start-booking-btn:active {
             transform: scale(0.95);
         }
+        /* Language Dropdown */
+        .language-dropdown {
+            position: absolute;
+            right: 0;
+            margin-top: 8px;
+            width: 180px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            z-index: 50;
+            display: none;
+        }
+        .language-dropdown.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .language-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            transition: background 0.2s ease;
+            font-size: 14px;
+            color: #1e293b;
+            text-decoration: none;
+        }
+        .language-dropdown a:hover {
+            background: #f1f5f9;
+        }
+        .language-dropdown a.active {
+            background: #eff6ff;
+            color: #2563eb;
+            font-weight: 600;
+        }
+        .language-dropdown a .check {
+            margin-left: auto;
+            color: #2563eb;
+        }
     </style>
 </head>
 <body>
@@ -151,25 +201,21 @@
         <!-- BEGIN: MainContainer with Gradient #e0f2fe to #fce7f3 -->
         <div class="w-full main-container-rounded gradient-bg flex flex-col min-h-screen">
 
-            <!-- BEGIN: MainHeader -->
-            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">
-                <div class="flex items-center">
-                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
-                </div>
-                <div class="flex items-center space-x-2 sm:space-x-4 text-slate-600">
-                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" aria-label="Help">
-                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
-                        </svg>
-                    </button>
-                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" aria-label="Language">
-                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
-                        </svg>
-                    </button>
-                </div>
-            </header>
-            <!-- END: MainHeader -->
+<!-- BEGIN: MainHeader -->
+<header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">
+    <div class="flex items-center">
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
+    </div>
+    <div class="flex items-center space-x-2 sm:space-x-4 text-slate-600">
+        <!-- Help Button -->
+        <a href="<?= base_url('help') ?>" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all relative group" aria-label="Help">
+            <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+</svg>
+        </a>
+    </div>
+</header>
+<!-- END: MainHeader -->
 
             <!-- BEGIN: HeroSection -->
             <main class="relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm" data-purpose="hero-content">
@@ -188,14 +234,14 @@
                             <span class="moment-highlight">Premium </span> Photobox Experience
                         </p>
                         
-<!-- ===== START BOOKING BUTTON - FORM TO REGISTER ===== -->
-<form action="<?= base_url('register/from-landing') ?>" method="POST" class="inline-block">
-    <?= csrf_field() ?>
-    <input type="hidden" name="from_landing" value="true">
-    <button type="submit" class="start-booking-btn">
-        Start Booking
-    </button>
-</form>
+                        <!-- ===== START BOOKING BUTTON - FORM TO REGISTER ===== -->
+                        <form action="<?= base_url('register/from-landing') ?>" method="POST" class="inline-block">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="from_landing" value="true">
+                            <button type="submit" class="start-booking-btn" id="startBookingBtn">
+                                Start Booking
+                            </button>
+                        </form>
 
                         <div class="flex gap-12 border-t border-slate-300 pt-8 mt-8">
                             <div>
@@ -356,34 +402,55 @@
     </div>
     <!-- END: Page Wrapper -->
 
-<script>
-    // ===== START BOOKING BUTTON - WITH JS =====
-    document.addEventListener('DOMContentLoaded', function() {
-        // Tombol Start Booking
-        const startBtn = document.getElementById('startBookingBtn');
-        if (startBtn) {
-            startBtn.addEventListener('click', function(e) {
-                e.preventDefault(); // Mencegah default action jika ada
-                // Redirect ke halaman register
-                window.location.href = '<?= base_url('register') ?>';
-                // Atau jika mau kirim data tambahan:
-                // window.location.href = '<?= base_url('register') ?>?source=landing';
-            });
+    <script>
+        // ===== TOGGLE LANGUAGE DROPDOWN =====
+        function toggleLanguage() {
+            const dropdown = document.getElementById('languageDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
         }
 
-        // Theme Card click/select functionality
-        const cards = document.querySelectorAll('.theme-card');
-        
-        cards.forEach(card => {
-            card.addEventListener('click', function(e) {
-                // Remove selected class from all cards
-                cards.forEach(c => {
-                    c.classList.remove('selected');
+        // ===== TUTUP DROPDOWN SAAT KLIK DI LUAR =====
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('languageDropdown');
+            const button = event.target.closest('[aria-label="Language"]');
+            const dropdownContent = event.target.closest('.language-dropdown');
+            
+            if (dropdown && dropdown.classList.contains('show')) {
+                if (!button && !dropdownContent) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+
+        // ===== TUTUP DROPDOWN DENGAN ESCAPE KEY =====
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const dropdown = document.getElementById('languageDropdown');
+                if (dropdown && dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+
+        // ===== THEME CARD SELECTION =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme Card click/select functionality
+            const cards = document.querySelectorAll('.theme-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // Remove selected class from all cards
+                    cards.forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked card
+                    this.classList.add('selected');
                 });
-                
-                // Add selected class to clicked card
-                this.classList.add('selected');
             });
         });
-    });
-</script>
+    </script>
+</body>
+</html>

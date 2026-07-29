@@ -148,25 +148,21 @@
         <!-- BEGIN: MainContainer with Gradient -->
         <div class="w-full main-container-rounded gradient-bg flex flex-col min-h-screen">
 
-            <!-- BEGIN: MainHeader -->
-            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">
-                <div class="flex items-center">
-                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
-                </div>
-                <div class="flex items-center space-x-2 sm:space-x-4 text-slate-600">
-                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" aria-label="Help">
-                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
-                        </svg>
-                    </button>
-                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all" aria-label="Language">
-                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
-                        </svg>
-                    </button>
-                </div>
-            </header>
-            <!-- END: MainHeader -->
+         <!-- BEGIN: MainHeader -->
+<header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">
+    <div class="flex items-center">
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
+    </div>
+    <div class="flex items-center space-x-2 sm:space-x-4 text-slate-600">
+        <!-- Help Button -->
+        <a href="<?= base_url('help') ?>" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all relative group" aria-label="Help">
+            <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+</svg>
+        </a>
+    </div>
+</header>
+<!-- END: MainHeader -->
 
             <!-- BEGIN: HeroSection -->
             <main class="relative px-6 sm:px-8 pt-12 pb-12 overflow-hidden bg-white/40 backdrop-blur-sm flex items-center justify-center" data-purpose="hero-content">
@@ -217,7 +213,7 @@
                                     <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                                 </svg>
                             </div>
-                            <p class="label">Tipe Booth</p>
+                            <p class="label">Tema Frame</p>
                             <p class="value">Retro Vibes</p>
                         </div>
                         <div class="detail-card">
@@ -227,17 +223,32 @@
                                 </svg>
                             </div>
                             <p class="label">Waktu Sesi</p>
-                            <p class="value">09 October 2024 • 13:00</p>
+                            <p class="value">09 October 2024 • 12:00 - 14:00</p>
                         </div>
                     </div>
                     
-                    <!-- Action Button - Camera -->
-                    <button class="btn-camera">
-                        <span class="material-symbols-outlined">photo_camera</span>
-                        <span>take a photo from your device for your Photobooth Booking Code</span>
-                    </button>
-                </div>
-            </main>
+                    <!-- Action Button -->
+<div class="mt-8">
+    <button class="btn-camera w-full">
+        <span>⚠️ Silahkan ambil Foto Barcode &amp; Detail Booking Berikut Menggunakan Handphone/Device Anda</span>
+    </button>
+</div>
+
+<!-- Tombol Kirim ke Email -->
+<div class="mt-4 text-center">
+    <form action="<?= base_url('frame/send-email') ?>" method="post">
+        <?= csrf_field() ?>
+        <input type="hidden" name="frame_id" value="<?= session()->get('selected_frame') ?? '' ?>">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-all shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            Kirim ke Email
+        </button>
+    </form>
+</div>
+</main>
+
             <!-- END: HeroSection -->
 
             <!-- BEGIN: Footer -->
