@@ -54,8 +54,9 @@ class CatalogController extends BaseApiController
     public function listFrames(): ResponseInterface
     {
         $frames = $this->frameModel
-            ->select('frames.*, frame_categories.name as category')
+            ->select('frames.*, frame_categories.name as category, frame_layouts.name as layout_name, frame_layouts.photo_count as layout_photo_count, frame_layouts.aspect_ratio as layout_aspect_ratio, frame_layouts.slot_coordinates as layout_slot_coordinates')
             ->join('frame_categories', 'frame_categories.id = frames.category_id', 'left')
+            ->join('frame_layouts', 'frame_layouts.id = frames.layout_id', 'left')
             ->where('frames.is_active', 1)
             ->findAll();
 

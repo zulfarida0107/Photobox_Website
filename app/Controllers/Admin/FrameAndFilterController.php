@@ -5,16 +5,19 @@ namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 use App\Models\FrameModel;
 use App\Models\FilterModel;
+use App\Models\FrameLayoutModel;
 
 class FrameAndFilterController extends BaseController
 {
-    protected FrameModel  $frameModel;
-    protected FilterModel $filterModel;
+    protected FrameModel       $frameModel;
+    protected FilterModel      $filterModel;
+    protected FrameLayoutModel $layoutModel;
 
     public function __construct()
     {
         $this->frameModel  = new FrameModel();
         $this->filterModel = new FilterModel();
+        $this->layoutModel = new FrameLayoutModel();
     }
 
     // =========================================================================
@@ -39,8 +42,9 @@ class FrameAndFilterController extends BaseController
 
         // --- Frame query builder + Join category name ---
         $frameQuery = $this->frameModel
-            ->select('frames.*, frame_categories.name as category_name')
-            ->join('frame_categories', 'frame_categories.id = frames.category_id', 'left');
+            ->select('frames.*, frame_categories.name as category_name, frame_layouts.name as layout_name')
+            ->join('frame_categories', 'frame_categories.id = frames.category_id', 'left')
+            ->join('frame_layouts', 'frame_layouts.id = frames.layout_id', 'left');
 
         if (!empty($search)) {
             $frameQuery->like('frames.name', $search);
@@ -78,12 +82,30 @@ class FrameAndFilterController extends BaseController
         $totalCategoryPages = max(1, (int) ceil($totalCategories / $catPerPage));
         $categoriesPaginated = $catBuilder->orderBy('name', 'ASC')->limit($catPerPage, ($currentCatPage - 1) * $catPerPage)->get()->getResultArray();
 
+        // --- Semua layout frame (Paginated) ---
+        $layoutPerPage       = 10;
+        $currentLayoutPage   = max(1, (int) ($this->request->getGet('layout_page') ?? 1));
+        $layoutSearch        = $this->request->getGet('layout_search') ?? '';
+
+        $layoutQuery = $this->layoutModel;
+        if (!empty($layoutSearch)) {
+            $layoutQuery->groupStart()
+                ->like('name', $layoutSearch)
+                ->orLike('id', $layoutSearch)
+                ->groupEnd();
+        }
+        $totalLayouts       = $layoutQuery->countAllResults(false);
+        $totalLayoutPages   = max(1, (int) ceil($totalLayouts / $layoutPerPage));
+        $layouts            = $layoutQuery->orderBy('name', 'ASC')->findAll($layoutPerPage, ($currentLayoutPage - 1) * $layoutPerPage);
+
         // Kategori untuk dropdown filter/upload
         $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
+        $allLayouts = $this->layoutModel->orderBy('name', 'ASC')->findAll();
 
         // --- Stats ---
         $statTotalFrames      = $this->frameModel->countAll();
         $statTotalFilters     = $this->filterModel->countAll();
+        $statTotalLayouts     = $this->layoutModel->countAll();
         $statActiveFilters    = $this->filterModel->where('is_active', 1)->countAllResults();
         $statFramesThisMonth  = $this->frameModel
             ->where('created_at >=', date('Y-m-01 00:00:00'))
@@ -104,10 +126,17 @@ class FrameAndFilterController extends BaseController
             'totalCategories'   => $totalCategories,
             'currentCatPage'    => $currentCatPage,
             'totalCategoryPages'=> $totalCategoryPages,
+            'layouts'           => $layouts,
+            'allLayouts'        => $allLayouts,
+            'totalLayouts'      => $totalLayouts,
+            'currentLayoutPage' => $currentLayoutPage,
+            'totalLayoutPages'  => $totalLayoutPages,
+            'layoutSearch'      => $layoutSearch,
             'search'            => $search,
             'selectedCategory'  => $category,
             'statTotalFrames'   => $statTotalFrames,
             'statTotalFilters'  => $statTotalFilters,
+            'statTotalLayouts'  => $statTotalLayouts,
             'statActiveFilters' => $statActiveFilters,
             'statFramesThisMonth' => $statFramesThisMonth,
             'catSearch'         => $catSearch,
@@ -126,6 +155,7 @@ class FrameAndFilterController extends BaseController
         $rules = [
             'name'        => 'required|min_length[3]|max_length[100]',
             'category_id' => 'permit_empty|max_length[20]',
+            'layout_id'   => 'permit_empty|max_length[20]',
             'frame_file'  => 'uploaded[frame_file]|max_size[frame_file,2048]|ext_in[frame_file,png,jpg,jpeg]',
         ];
 
@@ -146,6 +176,7 @@ class FrameAndFilterController extends BaseController
             'id'          => $newId,
             'name'        => $this->request->getPost('name'),
             'category_id' => $this->request->getPost('category_id') ?: null,
+            'layout_id'   => $this->request->getPost('layout_id') ?: null,
             'file_path'   => 'uploads/frames/' . $newName,
         ]);
 
@@ -159,9 +190,11 @@ class FrameAndFilterController extends BaseController
     public function createFrame()
     {
         $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
+        $layouts    = $this->frameModel->db->table('frame_layouts')->orderBy('name', 'ASC')->get()->getResultArray();
         return view('Admin/FrameAndFilter/FrameForm', [
             'title'      => 'Unggah Frame Baru | Admin Panel',
             'categories' => $categories,
+            'layouts'    => $layouts,
             'validation' => \Config\Services::validation(),
         ]);
     }
@@ -178,11 +211,13 @@ class FrameAndFilterController extends BaseController
         }
 
         $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
+        $layouts    = $this->frameModel->db->table('frame_layouts')->orderBy('name', 'ASC')->get()->getResultArray();
 
         return view('Admin/FrameAndFilter/FrameForm', [
             'title'      => 'Edit Frame | Admin Panel',
             'frame'      => $frame,
             'categories' => $categories,
+            'layouts'    => $layouts,
             'validation' => \Config\Services::validation(),
         ]);
     }
@@ -201,6 +236,7 @@ class FrameAndFilterController extends BaseController
         $updateData = [
             'name'        => $this->request->getPost('name'),
             'category_id' => $this->request->getPost('category_id') ?: null,
+            'layout_id'   => $this->request->getPost('layout_id') ?: null,
         ];
 
         // Ganti file jika ada upload baru
@@ -457,5 +493,110 @@ class FrameAndFilterController extends BaseController
         $status = !$frame['is_active'] ? 'diaktifkan (siap digunakan)' : 'dinonaktifkan (disembunyikan)';
         return redirect()->to(base_url('admin/frames'))
             ->with('success', "Frame {$frame['name']} berhasil {$status}.");
+    }
+
+    // =========================================================================
+    // LAYOUT — Store
+    // =========================================================================
+    public function storeLayout()
+    {
+        $rules = [
+            'id'           => 'required|min_length[3]|max_length[50]|is_unique[frame_layouts.id]',
+            'name'         => 'required|min_length[3]|max_length[100]',
+            'photo_count'  => 'required|numeric',
+            'aspect_ratio' => 'permit_empty|max_length[20]',
+            'layout_image' => 'permit_empty|max_size[layout_image,2048]|ext_in[layout_image,png,jpg,jpeg]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->to(base_url('admin/frames'))
+                ->with('error', implode(' ', $this->validator->getErrors()));
+        }
+
+        $imagePath = null;
+        $file = $this->request->getFile('layout_image');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = $file->getRandomName();
+            $file->move(FCPATH . 'uploads/layouts/', $newName);
+            $imagePath = 'uploads/layouts/' . $newName;
+        }
+
+        $this->layoutModel->insert([
+            'id'               => $this->request->getPost('id'),
+            'name'             => $this->request->getPost('name'),
+            'photo_count'      => (int) $this->request->getPost('photo_count'),
+            'aspect_ratio'     => $this->request->getPost('aspect_ratio') ?: null,
+            'slot_coordinates' => $this->request->getPost('slot_coordinates') ?: null,
+            'image_path'       => $imagePath,
+        ]);
+
+        return redirect()->to(base_url('admin/frames'))
+            ->with('success', 'Layout frame baru berhasil ditambahkan.');
+    }
+
+    // =========================================================================
+    // LAYOUT — Update
+    // =========================================================================
+    public function updateLayout(string $id)
+    {
+        $layout = $this->layoutModel->find($id);
+        if (!$layout) {
+            return redirect()->to(base_url('admin/frames'))->with('error', 'Layout tidak ditemukan.');
+        }
+
+        $rules = [
+            'name'         => 'required|min_length[3]|max_length[100]',
+            'photo_count'  => 'required|numeric',
+            'aspect_ratio' => 'permit_empty|max_length[20]',
+            'layout_image' => 'permit_empty|max_size[layout_image,2048]|ext_in[layout_image,png,jpg,jpeg]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->to(base_url('admin/frames'))
+                ->with('error', implode(' ', $this->validator->getErrors()));
+        }
+
+        $updateData = [
+            'name'             => $this->request->getPost('name'),
+            'photo_count'      => (int) $this->request->getPost('photo_count'),
+            'aspect_ratio'     => $this->request->getPost('aspect_ratio') ?: null,
+            'slot_coordinates' => $this->request->getPost('slot_coordinates') ?: null,
+        ];
+
+        $file = $this->request->getFile('layout_image');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            if (!empty($layout['image_path']) && file_exists(FCPATH . $layout['image_path'])) {
+                unlink(FCPATH . $layout['image_path']);
+            }
+            $newName = $file->getRandomName();
+            $file->move(FCPATH . 'uploads/layouts/', $newName);
+            $updateData['image_path'] = 'uploads/layouts/' . $newName;
+        }
+
+        $this->layoutModel->update($id, $updateData);
+
+        return redirect()->to(base_url('admin/frames'))->with('success', 'Layout frame berhasil diperbarui.');
+    }
+
+    // =========================================================================
+    // LAYOUT — Delete
+    // =========================================================================
+    public function deleteLayout(string $id)
+    {
+        $layout = $this->layoutModel->find($id);
+        if (!$layout) {
+            return redirect()->to(base_url('admin/frames'))->with('error', 'Layout tidak ditemukan.');
+        }
+
+        if (!empty($layout['image_path']) && file_exists(FCPATH . $layout['image_path'])) {
+            unlink(FCPATH . $layout['image_path']);
+        }
+
+        // Nullify layout_id on frames using this layout
+        $this->frameModel->db->table('frames')->where('layout_id', $id)->update(['layout_id' => null]);
+
+        $this->layoutModel->delete($id);
+
+        return redirect()->to(base_url('admin/frames'))->with('success', 'Layout frame berhasil dihapus.');
     }
 }

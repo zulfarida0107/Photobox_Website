@@ -50,292 +50,36 @@
         </div>
 
         <!-- Bento Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <!-- Total Frame -->
-            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
-                <div class="flex items-center justify-between mb-3">
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-2">
                     <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">wallpaper</span>
                 </div>
-                <p class="text-sm font-medium text-slate-500">Total Frame</p>
-                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= esc($statTotalFrames ?? 0) ?></h3>
+                <p class="text-xs font-medium text-slate-500">Total Frame</p>
+                <h3 class="text-xl font-black text-slate-900 mt-1"><?= esc($statTotalFrames ?? 0) ?></h3>
             </div>
             <!-- Frame Bulan Ini -->
-            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
-                <div class="flex items-center justify-between mb-3">
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-2">
                     <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">event</span>
                 </div>
-                <p class="text-sm font-medium text-slate-500">Frame Bulan Ini</p>
-                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= esc($statFramesThisMonth ?? 0) ?></h3>
+                <p class="text-xs font-medium text-slate-500">Frame Bulan Ini</p>
+                <h3 class="text-xl font-black text-slate-900 mt-1"><?= esc($statFramesThisMonth ?? 0) ?></h3>
             </div>
-            <!-- Total Filter -->
-            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
-                <div class="flex items-center justify-between mb-3">
-                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">filter_b_and_w</span>
+            <!-- Total Layout -->
+            <div class="bg-white p-5 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">grid_view</span>
                 </div>
-                <p class="text-sm font-medium text-slate-500">Total Filter</p>
-                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= esc($statTotalFilters ?? 0) ?></h3>
-            </div>
-            <!-- Filter Aktif -->
-            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
-                <div class="flex items-center justify-between mb-3">
-                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">check_circle</span>
-                </div>
-                <p class="text-sm font-medium text-slate-500">Filter Aktif</p>
-                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= esc($statActiveFilters ?? 0) ?></h3>
+                <p class="text-xs font-medium text-slate-500">Total Layout</p>
+                <h3 class="text-xl font-black text-slate-900 mt-1"><?= esc($statTotalLayouts ?? 0) ?></h3>
             </div>
         </div>
 
-                                <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+                                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
  
-            <div class="xl:col-span-4 flex flex-col h-full">
-<!-- Panduan Aset -->
-                <div class="p-6 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-sm overflow-hidden relative group h-full flex flex-col justify-between">
-                    <div class="relative z-10">
-                        <h3 class="text-xl font-black mb-4 flex items-center gap-2">
-                            <span class="material-symbols-outlined">menu_book</span>
-                            Panduan Aset
-                        </h3>
-                        <ul class="grid grid-cols-1 gap-3.5 mt-4">
-                            <li class="flex items-start gap-3 bg-white/10 p-3.5 rounded-xl backdrop-blur-sm border border-white/10">
-                                <span class="material-symbols-outlined text-blue-200 mt-0.5 text-[18px]">aspect_ratio</span>
-                                <div>
-                                    <p class="text-sm font-bold text-white">Aspek Rasio</p>
-                                    <p class="text-xs text-blue-100 mt-0.5">Pastikan frame memiliki rasio 4:6 atau 1:1.</p>
-                                </div>
-                            </li>
-                            <li class="flex items-start gap-3 bg-white/10 p-3.5 rounded-xl backdrop-blur-sm border border-white/10">
-                                <span class="material-symbols-outlined text-blue-200 mt-0.5 text-[18px]">layers_clear</span>
-                                <div>
-                                    <p class="text-sm font-bold text-white">Transparansi</p>
-                                    <p class="text-xs text-blue-100 mt-0.5">Area tengah harus transparan (Alpha Channel).</p>
-                                </div>
-                            </li>
-                            <li class="flex items-start gap-3 bg-white/10 p-3.5 rounded-xl backdrop-blur-sm border border-white/10">
-                                <span class="material-symbols-outlined text-blue-200 mt-0.5 text-[18px]">compress</span>
-                                <div>
-                                    <p class="text-sm font-bold text-white">Optimasi</p>
-                                    <p class="text-xs text-blue-100 mt-0.5">Ukuran file maksimal 2MB per frame.</p>
-                                </div>
-                            </li>
-                            <li class="flex items-start gap-3 bg-white/10 p-3.5 rounded-xl backdrop-blur-sm border border-white/10">
-                                <span class="material-symbols-outlined text-blue-200 mt-0.5 text-[18px]">imagesmode</span>
-                                <div>
-                                    <p class="text-sm font-bold text-white">Format File</p>
-                                    <p class="text-xs text-blue-100 mt-0.5">Wajib menggunakan format PNG transparan berkualitas tinggi.</p>
-                                </div>
-                            </li>
-                            <li class="flex items-start gap-3 bg-white/10 p-3.5 rounded-xl backdrop-blur-sm border border-white/10">
-                                <span class="material-symbols-outlined text-blue-200 mt-0.5 text-[18px]">category</span>
-                                <div>
-                                    <p class="text-sm font-bold text-white">Kategorisasi</p>
-                                    <p class="text-xs text-blue-100 mt-0.5">Selalu tentukan kategori untuk mempermudah pencarian.</p>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-700"></div>
-                </div>
-            </div>
- 
-            <div class="xl:col-span-8 flex flex-col h-full">
-<!-- Tabel Filter Warna -->
-                <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm flex flex-col h-full">
-                    <div class="p-6 flex justify-between items-center bg-white border-b border-slate-100">
-                        <div class="flex items-center gap-3">
-                            <div class="w-1 h-6 bg-primary rounded-full"></div>
-                            <h4 class="font-bold text-lg text-slate-800">Daftar Filter Warna</h4>
-                        </div>
-                        <a href="<?= base_url('admin/filters/create') ?>"
-                           class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-blue-800 transition-colors">
-                            <span class="material-symbols-outlined text-[16px]">filter_b_and_w</span>
-                            Tambah Filter
-                        </a>
-                    </div>
-                    <div class="p-6 bg-white flex flex-col sm:flex-row gap-3">
-                        <form method="get" action="<?= base_url('admin/frames') ?>" class="flex flex-col sm:flex-row flex-1 gap-3">
-                            <div class="relative flex-1">
-                                <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">search</span>
-                                <input type="text" name="filter_search" value="<?= esc($filterSearch ?? '') ?>" placeholder="Cari filter..."
-                                       class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all"/>
-                            </div>
-                            <select name="filter_status" onchange="this.form.submit()"
-                                    class="px-4 py-2 w-full sm:w-64 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all text-slate-600 font-medium cursor-pointer">
-                                <option value="">Semua Status</option>
-                                <option value="1" <?= ($filterStatus ?? '') === '1' ? 'selected' : '' ?>>Aktif</option>
-                                <option value="0" <?= ($filterStatus ?? '') === '0' ? 'selected' : '' ?>>Nonaktif</option>
-                            </select>
-                            <?php if (!empty($filterSearch) || ($filterStatus ?? '') !== ''): ?>
-                                <a href="<?= base_url('admin/frames') ?>" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-lg flex items-center transition-colors">
-                                    Reset
-                                </a>
-                            <?php endif; ?>
-                        </form>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-center">
-                            <thead class="border-y border-slate-100 bg-white">
-                                <tr>
-                                    <th class="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">ID</th>
-                                    <th class="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Nama</th>
-                                    <th class="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">CSS Value</th>
-                                    <th class="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Status</th>
-                                    <th class="px-4 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-50 bg-white">
-                                <?php if (!empty($filters)): ?>
-                                    <?php foreach ($filters as $filter): ?>
-                                        <tr class="hover:bg-slate-50 transition-colors group">
-                                            <td class="px-4 py-4 font-mono text-xs font-semibold text-slate-900">#<?= esc($filter['id']) ?></td>
-                                            <td class="px-4 py-4 text-sm font-semibold text-slate-700"><?= esc($filter['name']) ?></td>
-                                            <td class="px-4 py-4">
-                                                <code class="bg-slate-100 px-2 py-1 rounded text-[11px] text-slate-600 font-mono border border-slate-200">
-                                                    <?= esc($filter['css_value']) ?>
-                                                </code>
-                                            </td>
-                                            <td class="px-4 py-4">
-                                                <?php if ($filter['is_active']): ?>
-                                                    <span class="inline-flex items-center px-2 py-1 rounded bg-green-100 text-green-700 text-[10px] font-bold tracking-wide">AKTIF</span>
-                                                <?php else: ?>
-                                                    <span class="inline-flex items-center px-2 py-1 rounded bg-slate-100 text-slate-500 text-[10px] font-bold tracking-wide">NONAKTIF</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="px-4 py-4 flex justify-center items-center gap-2">
-                                                <a href="<?= base_url('admin/filters/' . $filter['id'] . '/edit') ?>"
-                                                   class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
-                                                    <span class="material-symbols-outlined text-[18px]">edit</span>
-                                                </a>
-                                                <form action="<?= base_url('admin/filters/' . $filter['id'] . '/toggle') ?>" method="post" class="inline">
-                                                    <?= csrf_field() ?>
-                                                    <button type="submit" class="transition-transform hover:scale-110" title="Toggle Aktif">
-                                                        <span class="material-symbols-outlined text-[24px] <?= $filter['is_active'] ? 'text-green-500' : 'text-slate-300' ?>">
-                                                            <?= $filter['is_active'] ? 'toggle_on' : 'toggle_off' ?>
-                                                        </span>
-                                                    </button>
-                                                </form>
-                                                <button type="button" class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Filter"
-                                                        onclick="openUniversalDeleteModal('<?= base_url('admin/filters/' . $filter['id'] . '/delete') ?>', 'Apakah Anda yakin ingin menghapus filter ini?<br>Tindakan ini tidak dapat dibatalkan.')">
-                                                    <span class="material-symbols-outlined text-[18px]">delete</span>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <tr>
-                                        <td colspan="5" class="px-4 py-8 text-center text-sm text-slate-400">
-                                            Belum ada filter.
-                                        </td>
-                                    </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    <!-- Pagination Filter -->
-                    <div class="mt-auto p-6 bg-white border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-xs text-slate-500 font-medium">
-                            Menampilkan <?= count($filters ?? []) ?> dari <?= $totalFilters ?? 0 ?> filter
-                        </span>
-                        <div class="flex gap-2">
-                            <a href="<?= base_url('admin/frames?filter_page=' . max(1, ($currentFilterPage ?? 1) - 1)) ?>"
-                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentFilterPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
-                                <span class="material-symbols-outlined text-sm">chevron_left</span>
-                            </a>
-                            <div class="w-8 h-8 flex items-center justify-center bg-primary text-white font-bold text-xs rounded-lg shadow-sm">
-                                <?= $currentFilterPage ?? 1 ?>
-                            </div>
-                            <a href="<?= base_url('admin/frames?filter_page=' . min(($totalFilterPages ?? 1), ($currentFilterPage ?? 1) + 1)) ?>"
-                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentFilterPage ?? 1) >= ($totalFilterPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
-                                <span class="material-symbols-outlined text-sm">chevron_right</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="xl:col-span-4 flex flex-col h-full">
-<!-- Tabel Kategori Frame -->
-                <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm flex flex-col h-full">
-                    <div class="p-6 flex justify-between items-center bg-white border-b border-slate-100">
-                        <div class="flex items-center gap-3">
-                            <div class="w-1 h-6 bg-primary rounded-full"></div>
-                            <h4 class="font-bold text-lg text-slate-800">Daftar Kategori</h4>
-                        </div>
-                        <button type="button" onclick="openAddCategoryModal()"
-                                class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-blue-800 transition-colors whitespace-nowrap">
-                            <span class="material-symbols-outlined text-[16px]">category</span>
-                            Tambah
-                        </button>
-                    </div>
-                    <div class="p-4 bg-white border-b border-slate-100">
-                        <form method="get" action="<?= base_url('admin/frames') ?>" class="w-full">
-                            <div class="relative w-full">
-                                <span class="material-symbols-outlined absolute left-3 top-2 text-slate-400 text-[18px]">search</span>
-                                <input type="text" name="cat_search" value="<?= esc($catSearch ?? '') ?>" placeholder="Cari kategori..."
-                                       class="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all"/>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="overflow-x-auto flex-grow">
-                        <table class="w-full text-center">
-                            <thead class="border-y border-slate-100 bg-white">
-                                <tr>
-                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">ID</th>
-                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Nama Kategori</th>
-                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-50 bg-white">
-                                <?php if (!empty($categoriesPaginated)): ?>
-                                    <?php foreach ($categoriesPaginated as $cat): ?>
-                                        <tr class="hover:bg-slate-50 transition-colors group">
-                                            <td class="px-4 py-3.5 font-mono text-xs font-semibold text-slate-900 text-center">#<?= esc($cat['id']) ?></td>
-                                            <td class="px-4 py-3.5 text-xs font-semibold text-slate-700 text-center"><?= esc($cat['name']) ?></td>
-                                            <td class="px-4 py-3.5 flex justify-center items-center gap-2">
-                                                <button type="button" 
-                                                        onclick="openEditCategoryModal('<?= esc($cat['id'], 'js') ?>', '<?= esc($cat['name'], 'js') ?>')"
-                                                        class="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
-                                                    <span class="material-symbols-outlined text-[16px]">edit</span>
-                                                </button>
-                                                <button type="button" class="p-1 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Kategori"
-                                                        onclick="openUniversalDeleteModal('<?= base_url('admin/categories/' . $cat['id'] . '/delete') ?>', 'Apakah Anda yakin ingin menghapus kategori ini?<br>Semua frame dalam kategori ini akan diubah menjadi uncategorized.')">
-                                                    <span class="material-symbols-outlined text-[16px]">delete</span>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <tr>
-                                        <td colspan="3" class="px-4 py-8 text-center text-xs text-slate-400">
-                                            Belum ada kategori.
-                                        </td>
-                                    </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    <!-- Pagination Kategori -->
-                    <div class="mt-auto p-4 bg-white border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-[10px] text-slate-400 font-bold uppercase">
-                            <?= count($categoriesPaginated ?? []) ?>/<?= $totalCategories ?? 0 ?> Cat
-                        </span>
-                        <div class="flex gap-1.5">
-                            <a href="<?= base_url('admin/frames?cat_page=' . max(1, ($currentCatPage ?? 1) - 1)) ?>"
-                               class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentCatPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
-                                <span class="material-symbols-outlined text-sm">chevron_left</span>
-                            </a>
-                            <div class="w-7 h-7 flex items-center justify-center bg-primary text-white font-bold text-[10px] rounded-lg shadow-sm">
-                                <?= $currentCatPage ?? 1 ?>
-                            </div>
-                            <a href="<?= base_url('admin/frames?cat_page=' . min(($totalCategoryPages ?? 1), ($currentCatPage ?? 1) + 1)) ?>"
-                               class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentCatPage ?? 1) >= ($totalCategoryPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
-                                <span class="material-symbols-outlined text-sm">chevron_right</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
- 
-            <div class="xl:col-span-8 flex flex-col h-full">
+            <div class="lg:col-span-12 flex flex-col h-full">
 <!-- Koleksi Frame -->
                 <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm flex flex-col h-full">
                     <div class="p-6 flex justify-between items-center bg-white border-b border-slate-100">
@@ -388,6 +132,7 @@
                                 <tr>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">ID Frame</th>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Nama Frame</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Layout</th>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Kategori</th>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Preview</th>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Status</th>
@@ -400,6 +145,9 @@
                                         <tr class="hover:bg-slate-50 transition-colors group">
                                             <td class="px-6 py-4 font-mono text-xs font-semibold text-slate-900">#<?= esc($frame['id']) ?></td>
                                             <td class="px-6 py-4 text-sm font-semibold text-slate-700"><?= esc($frame['name']) ?></td>
+                                            <td class="px-6 py-4 text-xs font-medium text-slate-600">
+                                                <?= esc($frame['layout_name'] ?? 'Tanpa Layout') ?>
+                                            </td>
                                             <td class="px-6 py-4">
                                                 <span class="inline-flex items-center px-2 py-1 rounded bg-blue-50 text-blue-700 text-[10px] font-bold tracking-wide uppercase">
                                                     <?= esc($frame['category_name'] ?? 'Uncategorized') ?>
@@ -476,6 +224,257 @@
                             </div>
                             <a href="<?= base_url('admin/frames?page=' . min(($totalFramePages ?? 1), ($currentFramePage ?? 1) + 1) . '&search=' . urlencode($search ?? '') . '&category=' . urlencode($selectedCategory ?? '')) ?>"
                                class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentFramePage ?? 1) >= ($totalFramePages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabel Layout Frame -->
+            <div class="lg:col-span-12 mt-2">
+                <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm flex flex-col">
+                    <div class="p-6 flex justify-between items-center bg-white border-b border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-1 h-6 bg-primary rounded-full"></div>
+                            <h4 class="font-bold text-lg text-slate-800">Daftar Layout Frame</h4>
+                        </div>
+                        <button type="button" onclick="openAddCategoryModal()"
+                                class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-blue-800 transition-colors whitespace-nowrap">
+                            <span class="material-symbols-outlined text-[16px]">category</span>
+                            Tambah Kategori
+                        </button>
+                    </div>
+                    
+                    <div class="p-6 bg-white flex flex-col sm:flex-row gap-3">
+                        <form method="get" action="<?= base_url('admin/frames') ?>" class="flex flex-col sm:flex-row flex-1 gap-3">
+                            <div class="relative flex-1">
+                                <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">search</span>
+                                <input type="text" name="layout_search" value="<?= esc($layoutSearch ?? '') ?>" placeholder="Cari ID atau nama layout..."
+                                       class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all"/>
+                            </div>
+                            <?php if (!empty($layoutSearch)): ?>
+                                <a href="<?= base_url('admin/frames') ?>" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-lg flex items-center transition-colors">
+                                    Reset
+                                </a>
+                            <?php endif; ?>
+                        </form>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-center">
+                            <thead class="border-y border-slate-100 bg-white">
+                                <tr>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">ID Layout</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Diagram Preview</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Nama Layout</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Jumlah Foto</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Rasio</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50 bg-white">
+                                <?php if (!empty($layouts)): ?>
+                                    <?php foreach ($layouts as $ly): ?>
+                                        <tr class="hover:bg-slate-50 transition-colors group">
+                                            <td class="px-6 py-4 font-mono text-xs font-semibold text-slate-900">#<?= esc($ly['id']) ?></td>
+                                            <td class="px-6 py-4 flex justify-center">
+                                                <div class="w-12 h-16 rounded border border-slate-200 bg-slate-50 overflow-hidden shadow-sm flex items-center justify-center p-1 cursor-pointer hover:border-primary transition-all"
+                                                     onclick="showPreviewLayoutModal('<?= esc($ly['id'], 'js') ?>', '<?= esc($ly['name'], 'js') ?>', '<?= !empty($ly['image_path']) ? base_url($ly['image_path']) : '' ?>')">
+                                                    <?php if (!empty($ly['image_path'])): ?>
+                                                        <img alt="<?= esc($ly['name']) ?> diagram"
+                                                             class="max-w-full max-h-full object-contain"
+                                                             src="<?= base_url($ly['image_path']) ?>"/>
+                                                    <?php else: ?>
+                                                        <span class="material-symbols-outlined text-slate-300 text-lg">grid_on</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm font-semibold text-slate-700"><?= esc($ly['name']) ?></td>
+                                            <td class="px-6 py-4 text-xs font-bold text-blue-600">
+                                                <span class="px-2.5 py-1 bg-blue-50 border border-blue-100 rounded-full">
+                                                    <?= esc($ly['photo_count']) ?> Foto
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-xs font-mono font-medium text-slate-600">
+                                                <?= esc($ly['aspect_ratio'] ?? '1:1') ?>
+                                            </td>
+                                            <td class="px-6 py-4 flex justify-center items-center gap-2">
+                                                <button type="button"
+                                                        class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Lihat Diagram Layout"
+                                                        onclick="showPreviewLayoutModal('<?= esc($ly['id'], 'js') ?>', '<?= esc($ly['name'], 'js') ?>', '<?= esc($ly['photo_count'], 'js') ?>', '<?= esc($ly['aspect_ratio'] ?? '1:1', 'js') ?>', '<?= !empty($ly['image_path']) ? base_url($ly['image_path']) : '' ?>')">
+                                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                </button>
+                                                <button type="button"
+                                                        onclick="openEditLayoutModal('<?= esc($ly['id'], 'js') ?>', '<?= esc($ly['name'], 'js') ?>', '<?= esc($ly['photo_count'], 'js') ?>', '<?= esc($ly['aspect_ratio'] ?? '', 'js') ?>', '<?= esc($ly['slot_coordinates'] ?? '', 'js') ?>', '<?= !empty($ly['image_path']) ? base_url($ly['image_path']) : '' ?>')"
+                                                        class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit Layout">
+                                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                                </button>
+                                                <button type="button" class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Layout"
+                                                        onclick="openUniversalDeleteModal('<?= base_url('admin/layouts/' . $ly['id'] . '/delete') ?>', 'Apakah Anda yakin ingin menghapus layout ini?<br>Frame yang menggunakan layout ini akan diubah menjadi tanpa layout.')">
+                                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-8 text-center text-sm text-slate-400">
+                                            Belum ada layout frame.
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination Kategori -->
+                    <div class="mt-auto p-4 bg-white border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs text-slate-500 font-medium">
+                            Menampilkan <?= count($categoriesPaginated ?? []) ?> dari <?= $totalCategories ?? 0 ?> Kategori
+                        </span>
+                        <div class="flex gap-2">
+                            <a href="<?= base_url('admin/frames?layout_page=' . max(1, ($currentLayoutPage ?? 1) - 1)) ?>"
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentLayoutPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_left</span>
+                            </a>
+                            <div class="w-8 h-8 flex items-center justify-center bg-primary text-white font-bold text-xs rounded-lg shadow-sm">
+                                <?= $currentLayoutPage ?? 1 ?>
+                            </div>
+                            <a href="<?= base_url('admin/frames?layout_page=' . min(($totalLayoutPages ?? 1), ($currentLayoutPage ?? 1) + 1)) ?>"
+                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentLayoutPage ?? 1) >= ($totalLayoutPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panduan Aset -->
+            <div class="lg:col-span-6 flex flex-col h-full">
+                <div class="p-6 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-sm overflow-hidden relative group h-full flex flex-col justify-between">
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-black mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined">menu_book</span>
+                            Panduan Aset
+                        </h3>
+                        <ul class="grid grid-cols-1 gap-3.5 mt-4">
+                            <li class="flex items-start gap-3 bg-white/10 p-3.5 rounded-xl backdrop-blur-sm border border-white/10">
+                                <span class="material-symbols-outlined text-blue-200 mt-0.5 text-[18px]">aspect_ratio</span>
+                                <div>
+                                    <p class="text-sm font-bold text-white">Aspek Rasio</p>
+                                    <p class="text-xs text-blue-100 mt-0.5">Pastikan frame memiliki rasio 4:6 atau 1:1.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 bg-white/10 p-3.5 rounded-xl backdrop-blur-sm border border-white/10">
+                                <span class="material-symbols-outlined text-blue-200 mt-0.5 text-[18px]">layers_clear</span>
+                                <div>
+                                    <p class="text-sm font-bold text-white">Transparansi</p>
+                                    <p class="text-xs text-blue-100 mt-0.5">Area tengah harus transparan (Alpha Channel).</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 bg-white/10 p-3.5 rounded-xl backdrop-blur-sm border border-white/10">
+                                <span class="material-symbols-outlined text-blue-200 mt-0.5 text-[18px]">compress</span>
+                                <div>
+                                    <p class="text-sm font-bold text-white">Optimasi</p>
+                                    <p class="text-xs text-blue-100 mt-0.5">Ukuran file maksimal 2MB per frame.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 bg-white/10 p-3.5 rounded-xl backdrop-blur-sm border border-white/10">
+                                <span class="material-symbols-outlined text-blue-200 mt-0.5 text-[18px]">imagesmode</span>
+                                <div>
+                                    <p class="text-sm font-bold text-white">Format File</p>
+                                    <p class="text-xs text-blue-100 mt-0.5">Wajib menggunakan format PNG transparan berkualitas tinggi.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 bg-white/10 p-3.5 rounded-xl backdrop-blur-sm border border-white/10">
+                                <span class="material-symbols-outlined text-blue-200 mt-0.5 text-[18px]">category</span>
+                                <div>
+                                    <p class="text-sm font-bold text-white">Kategorisasi</p>
+                                    <p class="text-xs text-blue-100 mt-0.5">Selalu tentukan kategori untuk mempermudah pencarian.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-700"></div>
+                </div>
+            </div>
+
+            <!-- Tabel Kategori Frame -->
+            <div class="lg:col-span-6 flex flex-col h-full">
+                <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm flex flex-col h-full">
+                    <div class="p-6 flex justify-between items-center bg-white border-b border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-1 h-6 bg-primary rounded-full"></div>
+                            <h4 class="font-bold text-lg text-slate-800">Daftar Kategori</h4>
+                        </div>
+                        <button type="button" onclick="openAddCategoryModal()"
+                                class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-blue-800 transition-colors whitespace-nowrap">
+                            <span class="material-symbols-outlined text-[16px]">category</span>
+                            Tambah Kategori
+                        </button>
+                    </div>
+                    <div class="p-4 bg-white border-b border-slate-100">
+                        <form method="get" action="<?= base_url('admin/frames') ?>" class="w-full">
+                            <div class="relative w-full">
+                                <span class="material-symbols-outlined absolute left-3 top-2 text-slate-400 text-[18px]">search</span>
+                                <input type="text" name="cat_search" value="<?= esc($catSearch ?? '') ?>" placeholder="Cari kategori..."
+                                       class="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all"/>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="overflow-x-auto flex-grow">
+                        <table class="w-full text-center">
+                            <thead class="border-y border-slate-100 bg-white">
+                                <tr>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">ID</th>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Nama Kategori</th>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50 bg-white">
+                                <?php if (!empty($categoriesPaginated)): ?>
+                                    <?php foreach ($categoriesPaginated as $cat): ?>
+                                        <tr class="hover:bg-slate-50 transition-colors group">
+                                            <td class="px-4 py-3.5 font-mono text-xs font-semibold text-slate-900 text-center">#<?= esc($cat['id']) ?></td>
+                                            <td class="px-4 py-3.5 text-xs font-semibold text-slate-700 text-center"><?= esc($cat['name']) ?></td>
+                                            <td class="px-4 py-3.5 flex justify-center items-center gap-2">
+                                                <button type="button" 
+                                                        onclick="openEditCategoryModal('<?= esc($cat['id'], 'js') ?>', '<?= esc($cat['name'], 'js') ?>')"
+                                                        class="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                                    <span class="material-symbols-outlined text-[16px]">edit</span>
+                                                </button>
+                                                <button type="button" class="p-1 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Kategori"
+                                                        onclick="openUniversalDeleteModal('<?= base_url('admin/categories/' . $cat['id'] . '/delete') ?>', 'Apakah Anda yakin ingin menghapus kategori ini?<br>Semua frame dalam kategori ini akan diubah menjadi uncategorized.')">
+                                                    <span class="material-symbols-outlined text-[16px]">delete</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="3" class="px-4 py-8 text-center text-xs text-slate-400">
+                                            Belum ada kategori.
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination Kategori -->
+                    <div class="mt-auto p-4 bg-white border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">
+                            <?= count($categoriesPaginated ?? []) ?>/<?= $totalCategories ?? 0 ?> Cat
+                        </span>
+                        <div class="flex gap-1.5">
+                            <a href="<?= base_url('admin/frames?cat_page=' . max(1, ($currentCatPage ?? 1) - 1)) ?>"
+                               class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentCatPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-sm">chevron_left</span>
+                            </a>
+                            <div class="w-7 h-7 flex items-center justify-center bg-primary text-white font-bold text-[10px] rounded-lg shadow-sm">
+                                <?= $currentCatPage ?? 1 ?>
+                            </div>
+                            <a href="<?= base_url('admin/frames?cat_page=' . min(($totalCategoryPages ?? 1), ($currentCatPage ?? 1) + 1)) ?>"
+                               class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentCatPage ?? 1) >= ($totalCategoryPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_right</span>
                             </a>
                         </div>
@@ -684,7 +683,245 @@
     </div>
 </div>
 
+<!-- Add Layout Modal -->
+<div id="addLayoutModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-lg w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="addLayoutModalContent">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">grid_view</span>
+                Tambah Layout Frame
+            </h4>
+            <button type="button" onclick="closeAddLayoutModal()" class="text-slate-400 hover:text-slate-600">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <form action="<?= base_url('admin/layouts') ?>" method="post" enctype="multipart/form-data" class="p-6 space-y-4">
+            <?= csrf_field() ?>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="layout_id_input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">ID Layout *</label>
+                    <input type="text" name="id" id="layout_id_input" required placeholder="layout_6_custom"
+                           class="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
+                </div>
+                <div>
+                    <label for="layout_name_input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Layout *</label>
+                    <input type="text" name="name" id="layout_name_input" required placeholder="6 Grid Custom"
+                           class="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="photo_count_input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jumlah Foto *</label>
+                    <input type="number" name="photo_count" id="photo_count_input" required value="6" min="1" max="20"
+                           class="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
+                </div>
+                <div>
+                    <label for="aspect_ratio_input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Rasio Foto</label>
+                    <input type="text" name="aspect_ratio" id="aspect_ratio_input" placeholder="2:3"
+                           class="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
+                </div>
+            </div>
+            <div>
+                <label for="layout_image_input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Gambar Diagram Layout (PNG/JPG)</label>
+                <input type="file" name="layout_image" id="layout_image_input" accept="image/png,image/jpeg"
+                       class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-600 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+            </div>
+            <div>
+                <label for="slot_coordinates_input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Koordinat Slot (JSON)</label>
+                <textarea name="slot_coordinates" id="slot_coordinates_input" rows="3" placeholder='[{"slot":1,"x":35,"y":35,"w":295,"h":285}]'
+                          class="w-full border border-slate-200 rounded-lg px-4 py-2 text-xs font-mono focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white"></textarea>
+            </div>
+            <div class="flex gap-3 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeAddLayoutModal()" class="flex-1 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-lg transition-colors">
+                    Batal
+                </button>
+                <button type="submit" class="flex-1 py-2 bg-primary text-white font-semibold text-sm rounded-lg hover:bg-blue-800 transition-colors shadow-md">
+                    Simpan Layout
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Layout Modal -->
+<div id="editLayoutModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-lg w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="editLayoutModalContent">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">edit</span>
+                Edit Layout Frame
+            </h4>
+            <button type="button" onclick="closeEditLayoutModal()" class="text-slate-400 hover:text-slate-600">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <form id="editLayoutForm" action="" method="post" enctype="multipart/form-data" class="p-6 space-y-4">
+            <?= csrf_field() ?>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">ID Layout</label>
+                    <input type="text" id="edit_layout_id_display" disabled class="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm bg-slate-100 text-slate-500 font-mono" />
+                </div>
+                <div>
+                    <label for="edit_layout_name_input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Layout *</label>
+                    <input type="text" name="name" id="edit_layout_name_input" required
+                           class="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="edit_photo_count_input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jumlah Foto *</label>
+                    <input type="number" name="photo_count" id="edit_photo_count_input" required min="1" max="20"
+                           class="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
+                </div>
+                <div>
+                    <label for="edit_aspect_ratio_input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Rasio Foto</label>
+                    <input type="text" name="aspect_ratio" id="edit_aspect_ratio_input"
+                           class="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
+                </div>
+            </div>
+            <div>
+                <label for="edit_layout_image_input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ganti Diagram Layout (Opsional)</label>
+                <input type="file" name="layout_image" id="edit_layout_image_input" accept="image/png,image/jpeg"
+                       class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-600 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+            </div>
+            <div>
+                <label for="edit_slot_coordinates_input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Koordinat Slot (JSON)</label>
+                <textarea name="slot_coordinates" id="edit_slot_coordinates_input" rows="3"
+                          class="w-full border border-slate-200 rounded-lg px-4 py-2 text-xs font-mono focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white"></textarea>
+            </div>
+            <div class="flex gap-3 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeEditLayoutModal()" class="flex-1 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-lg transition-colors">
+                    Batal
+                </button>
+                <button type="submit" class="flex-1 py-2 bg-primary text-white font-semibold text-sm rounded-lg hover:bg-blue-800 transition-colors shadow-md">
+                    Perbarui Layout
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Preview Layout Diagram Modal -->
+<div id="previewLayoutModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="previewLayoutModalContent">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
+            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-emerald-600">visibility</span>
+                Detail &amp; Preview Layout
+            </h4>
+            <button type="button" onclick="closePreviewLayoutModal()" class="text-slate-400 hover:text-slate-600">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="p-6 flex flex-col items-center">
+            <div class="w-full h-80 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex items-center justify-center p-4 mb-5 shadow-inner">
+                <img id="modalLayoutImage" src="" alt="Layout Diagram Preview" class="max-w-full max-h-full object-contain drop-shadow" />
+            </div>
+            <div class="w-full space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-left text-sm mb-6">
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">ID Layout</span>
+                    <span class="font-mono text-slate-800 font-bold" id="modalLayoutId"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Nama Layout</span>
+                    <span class="text-slate-800 font-semibold" id="modalLayoutName"></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="font-semibold text-slate-500">Jumlah Foto</span>
+                    <span class="text-blue-700 font-bold" id="modalLayoutPhotoCount"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-semibold text-slate-500">Rasio Foto</span>
+                    <span class="font-mono text-slate-800" id="modalLayoutAspectRatio"></span>
+                </div>
+            </div>
+            <button type="button" onclick="closePreviewLayoutModal()" class="w-full py-2.5 bg-primary hover:bg-blue-800 text-white font-semibold text-sm rounded-lg transition-colors shadow-md">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
+    function openAddLayoutModal() {
+        const modal = document.getElementById('addLayoutModal');
+        const content = document.getElementById('addLayoutModalContent');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeAddLayoutModal() {
+        const modal = document.getElementById('addLayoutModal');
+        const content = document.getElementById('addLayoutModalContent');
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    function openEditLayoutModal(id, name, photoCount, aspectRatio, slotCoordinates, imagePath) {
+        const modal = document.getElementById('editLayoutModal');
+        const content = document.getElementById('editLayoutModalContent');
+        const form = document.getElementById('editLayoutForm');
+        
+        form.action = `<?= base_url('admin/layouts') ?>/${id}/update`;
+        document.getElementById('edit_layout_id_display').value = id;
+        document.getElementById('edit_layout_name_input').value = name;
+        document.getElementById('edit_photo_count_input').value = photoCount;
+        document.getElementById('edit_aspect_ratio_input').value = aspectRatio;
+        document.getElementById('edit_slot_coordinates_input').value = slotCoordinates;
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeEditLayoutModal() {
+        const modal = document.getElementById('editLayoutModal');
+        const content = document.getElementById('editLayoutModalContent');
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    function showPreviewLayoutModal(id, name, photoCount, aspectRatio, imagePath) {
+        const modal = document.getElementById('previewLayoutModal');
+        const content = document.getElementById('previewLayoutModalContent');
+        
+        document.getElementById('modalLayoutId').textContent = '#' + id;
+        document.getElementById('modalLayoutName').textContent = name;
+        document.getElementById('modalLayoutPhotoCount').textContent = photoCount + ' Foto';
+        document.getElementById('modalLayoutAspectRatio').textContent = aspectRatio || '1:1';
+
+        const imgEl = document.getElementById('modalLayoutImage');
+        if (imagePath) {
+            imgEl.src = imagePath;
+            imgEl.classList.remove('hidden');
+        } else {
+            imgEl.src = '';
+            imgEl.classList.add('hidden');
+        }
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closePreviewLayoutModal() {
+        const modal = document.getElementById('previewLayoutModal');
+        const content = document.getElementById('previewLayoutModalContent');
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
     function openAddCategoryModal() {
         const modal = document.getElementById('addCategoryModal');
         const content = document.getElementById('addCategoryModalContent');

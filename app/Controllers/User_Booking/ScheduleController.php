@@ -84,14 +84,22 @@ class ScheduleController extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        // Generate ID Customer
-        $lastCustomer = $this->customerModel->orderBy('id', 'DESC')->first();
-        if ($lastCustomer) {
-            $lastId = (int) substr($lastCustomer['id'], 1);
-            $newId = 'C' . str_pad($lastId + 1, 4, '0', STR_PAD_LEFT);
-        } else {
-            $newId = 'C0001';
+        // Generate ID Customer secara aman & unik
+        $existingCustomers = $this->customerModel->like('id', 'C', 'after')->findAll();
+        $maxNum = 0;
+        foreach ($existingCustomers as $c) {
+            if (preg_match('/^C(\d+)$/i', $c['id'], $matches)) {
+                $num = (int) $matches[1];
+                if ($num > $maxNum) {
+                    $maxNum = $num;
+                }
+            }
         }
+        $newIdNum = $maxNum + 1;
+        do {
+            $newId = 'C' . str_pad($newIdNum, 4, '0', STR_PAD_LEFT);
+            $newIdNum++;
+        } while ($this->customerModel->find($newId) !== null);
 
         $fullPhone = $countryCode . $phone;
 
