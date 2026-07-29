@@ -22,30 +22,17 @@ class PaymentController extends BaseController
         $perPage       = 10;
         $currentPage   = max(1, (int) ($this->request->getGet('page')   ?? 1));
         $filterStatus  = $this->request->getGet('status') ?? '';
-<<<<<<< Updated upstream
-        $filterPeriod  = $this->request->getGet('period') ?? '7'; // hari
+        $filterPeriod  = $this->request->getGet('period') ?? 'all'; // Default to all time so data is visible on load
         $paymentDate   = $this->request->getGet('payment_date') ?? '';
         $keyword       = $this->request->getGet('q') ?? '';
 
         // --- Rentang tanggal ---
+        $hasDateFilter = false;
         if ($paymentDate !== '') {
             $dateFrom = $paymentDate . ' 00:00:00';
             $dateTo   = $paymentDate . ' 23:59:59';
-        } else {
-            if ($filterPeriod === 'month') {
-                $dateFrom = date('Y-m-01 00:00:00');
-                $dateTo   = date('Y-m-t 23:59:59');
-            } else {
-                $days     = (int) $filterPeriod ?: 7;
-                $dateFrom = date('Y-m-d 00:00:00', strtotime("-{$days} days"));
-                $dateTo   = date('Y-m-d 23:59:59');
-            }
-=======
-        $filterPeriod  = $this->request->getGet('period') ?? 'all'; // Default to all time so data is visible on load
-
-        // --- Rentang tanggal ---
-        $hasDateFilter = false;
-        if ($filterPeriod === 'month') {
+            $hasDateFilter = true;
+        } elseif ($filterPeriod === 'month') {
             $dateFrom = date('Y-m-01 00:00:00');
             $dateTo   = date('Y-m-t 23:59:59');
             $hasDateFilter = true;
@@ -54,7 +41,6 @@ class PaymentController extends BaseController
             $dateFrom = date('Y-m-d 00:00:00', strtotime("-{$days} days"));
             $dateTo   = date('Y-m-d 23:59:59');
             $hasDateFilter = true;
->>>>>>> Stashed changes
         }
 
         // --- Query utama dengan JOIN ---
