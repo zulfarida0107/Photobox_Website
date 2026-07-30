@@ -919,13 +919,9 @@
                     <span class="font-semibold text-slate-500">Jumlah Foto</span>
                     <span class="text-blue-700 font-bold" id="modalLayoutPhotoCount"></span>
                 </div>
-                <div class="flex justify-between border-b border-slate-100 pb-2">
+                <div class="flex justify-between">
                     <span class="font-semibold text-slate-500">Rasio Foto</span>
                     <span class="font-mono text-slate-800" id="modalLayoutAspectRatio"></span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="font-semibold text-slate-500">Koordinat Slot</span>
-                    <span class="font-bold text-slate-500" id="modalLayoutCoordinates">Menghitung...</span>
                 </div>
             </div>
             <button type="button" onclick="closePreviewLayoutModal()" class="w-full py-2.5 bg-primary hover:bg-blue-800 text-white font-semibold text-sm rounded-lg transition-colors shadow-md">
@@ -991,102 +987,13 @@
         document.getElementById('modalLayoutAspectRatio').textContent = aspectRatio || '1:1';
 
         const imgEl = document.getElementById('modalLayoutImage');
-        const coordEl = document.getElementById('modalLayoutCoordinates');
-        coordEl.innerHTML = '<span class="text-slate-400">Menghitung...</span>';
 
         if (imagePath) {
             imgEl.src = imagePath;
             imgEl.classList.remove('hidden');
-            
-            // Run Flood Fill Algorithm
-            const img = new Image();
-            img.crossOrigin = 'Anonymous';
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const w = img.width;
-                const h = img.height;
-                canvas.width = w;
-                canvas.height = h;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, w, h);
-                
-                try {
-                    const imageData = ctx.getImageData(0, 0, w, h);
-                    const data = imageData.data;
-                    const visited = new Uint8Array(w * h);
-                    const holes = [];
-
-                    for (let y = 0; y < h; y++) {
-                        for (let x = 0; x < w; x++) {
-                            const index = (y * w + x) * 4;
-                            const alpha = data[index + 3];
-                            const visitedIndex = y * w + x;
-
-                            if (alpha < 50 && !visited[visitedIndex]) {
-                                let minX = x;
-                                let maxX = x;
-                                let minY = y;
-                                let maxY = y;
-
-                                const queue = [[x, y]];
-                                visited[visitedIndex] = 1;
-                                let head = 0;
-
-                                while (head < queue.length) {
-                                    const [cx, cy] = queue[head++];
-
-                                    const neighbors = [
-                                        [cx + 1, cy],
-                                        [cx - 1, cy],
-                                        [cx, cy + 1],
-                                        [cx, cy - 1]
-                                    ];
-
-                                    for (let i = 0; i < neighbors.length; i++) {
-                                        const nx = neighbors[i][0];
-                                        const ny = neighbors[i][1];
-
-                                        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
-
-                                        const nextIndex = ny * w + nx;
-                                        if (visited[nextIndex]) continue;
-
-                                        const pixel = (nextIndex * 4) + 3;
-                                        if (data[pixel] < 50) {
-                                            visited[nextIndex] = 1;
-                                            queue.push([nx, ny]);
-
-                                            minX = Math.min(minX, nx);
-                                            maxX = Math.max(maxX, nx);
-                                            minY = Math.min(minY, ny);
-                                            maxY = Math.max(maxY, ny);
-                                        }
-                                    }
-                                }
-
-                                const wHole = maxX - minX;
-                                const hHole = maxY - minY;
-                                if (wHole > 10 && hHole > 10) {
-                                    holes.push({ x: minX, y: minY, w: wHole, h: hHole });
-                                }
-                            }
-                        }
-                    }
-                    if (holes.length > 0) {
-                        coordEl.innerHTML = '<span class="text-green-600 font-bold">Terdeteksi (' + holes.length + ')</span>';
-                    } else {
-                        coordEl.innerHTML = '<span class="text-red-500 font-bold">Tidak Terdeteksi</span>';
-                    }
-                } catch(e) {
-                    coordEl.innerHTML = '<span class="text-red-500">Gagal (Error)</span>';
-                }
-            };
-            img.src = imagePath;
-
         } else {
             imgEl.src = '';
             imgEl.classList.add('hidden');
-            coordEl.innerHTML = '<span class="text-slate-400">Tidak ada gambar</span>';
         }
 
         modal.classList.remove('hidden');
