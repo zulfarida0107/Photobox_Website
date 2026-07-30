@@ -14,10 +14,12 @@ class FrameLayoutModel extends Model
     protected $allowedFields = [
         'id',
         'name',
-        'photo_count',
-        'aspect_ratio',
-        'slot_coordinates',
-        'image_path',
+        'category_id',
+        'file_path',
+        'Price', 
+        'is_active',
+        'created_at',
+        'updated_at'
     ];
 
     protected $useSoftDeletes = false;

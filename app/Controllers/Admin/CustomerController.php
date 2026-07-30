@@ -127,7 +127,7 @@ class CustomerController extends BaseController
         $rules = [
             'name'  => 'required|min_length[3]|max_length[100]',
             'email' => 'required|valid_email|is_unique[customers.email]',
-            'phone' => 'required|min_length[9]|max_length[20]',
+            'phone' => 'required|min_length[9]|max_length[20]|is_unique[customers.phone]',
         ];
 
         if (!$this->validate($rules)) {
@@ -201,7 +201,7 @@ class CustomerController extends BaseController
             'name'  => 'required|min_length[3]|max_length[100]',
             // is_unique diabaikan jika email tidak berubah
             'email' => "required|valid_email|is_unique[customers.email,id,{$id}]",
-            'phone' => 'required|min_length[9]|max_length[20]',
+            'phone' => "required|min_length[9]|max_length[20]|is_unique[customers.phone,id,{$id}]",
         ];
 
         if (!$this->validate($rules)) {

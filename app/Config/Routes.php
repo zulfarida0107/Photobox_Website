@@ -34,8 +34,13 @@ $routes->group('api', static function ($routes) {
     $routes->post('session/(:segment)/email', 'Api\\SessionController::submitEmail/$1');
     $routes->post('session/(:segment)/complete', 'Api\\SessionController::complete/$1');
 
+    // --- ROUTES Admin Panel dan Desktop ---
+    $routes->post('session/(:segment)/upload', 'Api\\SessionController::upload/$1');
+    $routes->post('session/(:segment)/upload-live', 'Api\\SessionController::uploadLive/$1');
+
     $routes->post('photo/session/(:segment)/upload', 'Api\\PhotoController::upload/$1');
 	$routes->get('frame/(:any)', 'Api\\FrameController::show/$1');
+	// --------------------------------------
 });
 
 // ============================================================
@@ -154,6 +159,7 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	// ---- Tab 6: Aset Desain (Frame & Filter) ----
 	$routes->get('frames',                       'Admin\FrameAndFilterController::index');
 	$routes->get('frames/create',                'Admin\FrameAndFilterController::createFrame');
+	$routes->post('frames/sync',                 'Admin\FrameAndFilterController::syncAssets');
 	$routes->post('frames',                      'Admin\FrameAndFilterController::storeFrame');
 	$routes->get('frames/(:segment)/edit',       'Admin\FrameAndFilterController::editFrame/$1');
 	$routes->post('frames/(:segment)/update',    'Admin\FrameAndFilterController::updateFrame/$1');
