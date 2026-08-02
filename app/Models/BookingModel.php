@@ -17,7 +17,7 @@ class BookingModel extends Model
 		'customer_id',
 		'slot_id',
 		'booth_id',
-		'package_id',
+		'print_option_id',
 		'queue_number',
 		'status',
 		'edit_count',

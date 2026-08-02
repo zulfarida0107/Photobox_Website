@@ -14,8 +14,8 @@ class FrameModel extends Model
 	protected $allowedFields = [
 		'id',
 		'name',
-		'category_id',
-		'layout_id',
+		'category',
+		'price',
 		'file_path',
 		'is_active',
 	];

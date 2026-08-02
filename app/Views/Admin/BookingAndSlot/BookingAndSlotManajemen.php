@@ -159,16 +159,17 @@
                         <table class="w-full text-left border-collapse">
                             <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
                                 <tr>
-                                    <th class="px-3.5 py-2.5">Slot &amp; Booth</th>
-                                    <th class="px-3.5 py-2.5 text-center">TGL &amp; WAKTU</th>
+                                    <th class="px-3.5 py-2.5">SESI</th>
+                                    <th class="px-3.5 py-2.5 text-center">WAKTU</th>
                                     <th class="px-3.5 py-2.5 text-center">TERISI</th>
+                                    <th class="px-3.5 py-2.5 text-center">AKSI</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 text-xs">
                                 <?php if (!empty($slots)): ?>
                                     <?php foreach ($slots as $slot): ?>
                                         <?php
-                                            $isFull = $slot['booked_count'] >= $slot['max_bookings'];
+                                            $isFull   = $slot['booked_count'] >= $slot['max_bookings'];
                                             $isClosed = isset($slot['status']) && $slot['status'] === 'closed';
                                             if ($isClosed) {
                                                 $sc = 'bg-red-100 text-red-700 border-red-200'; $sl = 'Tutup';
@@ -177,28 +178,59 @@
                                             } else {
                                                 $sc = 'bg-emerald-50 text-emerald-700 border-emerald-200'; $sl = 'Tersedia';
                                             }
-                                            $endTime = date('H:i', strtotime($slot['start_time']) + 3600);
+                                            $startHour = (int) date('H', strtotime($slot['start_time']));
+                                            $startFmt  = date('H:i', strtotime($slot['start_time']));
+                                            // Durasi: PAGI=2jam, SIANG=2jam, SORE=2jam, MALAM=3jam
+                                            if ($startHour < 10) { $sesLabel = 'Pagi'; $dur = 7200; }
+                                            elseif ($startHour < 13) { $sesLabel = 'Pagi'; $dur = 7200; }
+                                            elseif ($startHour < 16) { $sesLabel = 'Siang'; $dur = 7200; }
+                                            elseif ($startHour < 19) { $sesLabel = 'Sore'; $dur = 7200; }
+                                            else { $sesLabel = 'Malam'; $dur = 10800; }
+                                            $endFmt = date('H:i', strtotime($slot['start_time']) + $dur);
+                                            $sesColors = [
+                                                'Pagi'  => 'bg-amber-50 text-amber-700 border-amber-200',
+                                                'Siang' => 'bg-orange-50 text-orange-700 border-orange-200',
+                                                'Sore'  => 'bg-purple-50 text-purple-700 border-purple-200',
+                                                'Malam' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                                            ];
                                         ?>
                                         <tr class="hover:bg-blue-50/50 transition-colors">
-                                            <td class="px-3.5 py-3">
-                                                <div class="font-bold text-slate-900">#<?= esc($slot['id']) ?></div>
-                                                <div class="text-[11px] text-slate-500 font-medium"><?= esc($slot['booth_name'] ?? 'Booth') ?></div>
-                                            </td>
-                                            <td class="px-3.5 py-3 text-center">
-                                                <div class="font-semibold text-slate-800"><?= date('d M Y', strtotime($slot['slot_date'])) ?></div>
-                                                <div class="text-[11px] text-slate-500 font-mono"><?= date('H:i', strtotime($slot['start_time'])) ?> - <?= $endTime ?></div>
-                                            </td>
-                                            <td class="px-3.5 py-3 text-center">
-                                                <div class="font-bold text-slate-800 mb-0.5"><?= $slot['booked_count'] ?> / <?= $slot['max_bookings'] ?></div>
-                                                <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold border <?= $sc ?>">
-                                                    <?= $sl ?>
+                                            <td class="px-3.5 py-2.5">
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border <?= $sesColors[$sesLabel] ?>">
+                                                    <span class="material-symbols-outlined text-[12px]">schedule</span>
+                                                    Sesi <?= $sesLabel ?>
                                                 </span>
+                                            </td>
+                                            <td class="px-3.5 py-2.5 text-center">
+                                                <div class="font-semibold text-slate-800 font-mono text-[11px]"><?= $startFmt ?> - <?= $endFmt ?></div>
+                                            </td>
+                                            <td class="px-3.5 py-2.5 text-center">
+                                                <div class="font-bold text-slate-800 text-[11px] mb-0.5"><?= $slot['booked_count'] ?> / <?= $slot['max_bookings'] ?></div>
+                                                <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold border <?= $sc ?>"><?= $sl ?></span>
+                                            </td>
+                                            <td class="px-3.5 py-2.5 text-center">
+                                                <div class="flex items-center justify-center gap-1.5">
+                                                    <a href="<?= base_url('admin/slots/' . esc($slot['id']) . '/edit') ?>"
+                                                       class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-600 border border-blue-200 text-[10px] font-semibold hover:bg-blue-100 transition-colors">
+                                                        <span class="material-symbols-outlined text-[13px]">edit</span>
+                                                        Edit
+                                                    </a>
+                                                    <form method="post" action="<?= base_url('admin/slots/' . esc($slot['id']) . '/delete') ?>"
+                                                          onsubmit="return confirm('Hapus sesi <?= esc($sesLabel . ' ' . $startFmt) ?>? Tindakan ini tidak dapat dibatalkan.')">
+                                                        <?= csrf_field() ?>
+                                                        <button type="submit"
+                                                                class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-red-50 text-red-600 border border-red-200 text-[10px] font-semibold hover:bg-red-100 transition-colors">
+                                                            <span class="material-symbols-outlined text-[13px]">delete</span>
+                                                            Hapus
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="3" class="px-4 py-8 text-center text-xs text-slate-400">Belum ada slot untuk periode ini.</td>
+                                        <td colspan="4" class="px-4 py-8 text-center text-xs text-slate-400">Belum ada slot operasional. <a href="<?= base_url('admin/slots/create') ?>" class="text-primary font-semibold hover:underline">Tambah sekarang</a></td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -282,7 +314,7 @@
                                         <tr class="hover:bg-blue-50/50 transition-colors">
                                             <td class="px-4 py-3">
                                                 <div class="font-bold text-primary hover:underline cursor-pointer flex items-center gap-1"
-                                                     onclick="showBookingPreviewModal('<?= esc($bk['id'], 'js') ?>', '<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc($bk['package_name'] ?? '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>', '<?= $bk['status'] ?>', <?= $bk['edit_count'] ?? 0 ?>)">
+                                                     onclick="showBookingPreviewModal('<?= esc($bk['id'], 'js') ?>', '<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc(!empty($bk['print_copies']) ? $bk['print_copies'] . ' Cetak' : '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>', '<?= $bk['status'] ?>', <?= $bk['edit_count'] ?? 0 ?>)">
                                                     <span><?= esc($bk['booking_code']) ?></span>
                                                     <span class="material-symbols-outlined text-[14px] text-blue-400">info</span>
                                                 </div>
@@ -290,7 +322,7 @@
                                             </td>
                                             <td class="px-4 py-3">
                                                 <div class="font-semibold text-slate-800">Slot #<?= esc($bk['slot_id']) ?></div>
-                                                <div class="text-[11px] text-slate-500 font-medium"><?= esc($bk['booth_name'] ?? 'Booth') ?> &bull; <?= esc($bk['package_name'] ?? '-') ?></div>
+                                                <div class="text-[11px] text-slate-500 font-medium"><?= esc($bk['booth_name'] ?? 'Booth') ?> &bull; <?= esc(!empty($bk['print_copies']) ? $bk['print_copies'] . ' Cetak' : '-') ?></div>
                                             </td>
                                             <td class="px-4 py-3 text-center">
                                                 <span class="text-base font-black text-slate-700 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200 font-mono">
@@ -314,7 +346,7 @@
                                                             <span class="material-symbols-outlined text-[18px]">cancel</span>
                                                         </button>
                                                     <?php else: ?>
-                                                        <button type="button" onclick="showBookingPreviewModal('<?= esc($bk['id'], 'js') ?>', '<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc($bk['package_name'] ?? '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>', '<?= $bk['status'] ?>', <?= $bk['edit_count'] ?? 0 ?>)"
+                                                        <button type="button" onclick="showBookingPreviewModal('<?= esc($bk['id'], 'js') ?>', '<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc(!empty($bk['print_copies']) ? $bk['print_copies'] . ' Cetak' : '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>', '<?= $bk['status'] ?>', <?= $bk['edit_count'] ?? 0 ?>)"
                                                                 class="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors" title="Detail & Riwayat">
                                                             <span class="material-symbols-outlined text-[18px]">visibility</span>
                                                         </button>

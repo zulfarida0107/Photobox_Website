@@ -7,7 +7,7 @@ use App\Models\BookingModel;
 use App\Models\CustomerModel;
 use App\Models\SlotModel;
 use App\Models\BoothModel;
-use App\Models\PackageModel;
+use App\Models\PrintOptionModel;
 use App\Models\PaymentModel;
 
 class StatusBookingController extends BaseController
@@ -16,7 +16,7 @@ class StatusBookingController extends BaseController
     protected $customerModel;
     protected $slotModel;
     protected $boothModel;
-    protected $packageModel;
+    protected $printOptionModel;
     protected $paymentModel;
     protected $session;
 
@@ -26,7 +26,7 @@ class StatusBookingController extends BaseController
         $this->customerModel = new CustomerModel();
         $this->slotModel = new SlotModel();
         $this->boothModel = new BoothModel();
-        $this->packageModel = new PackageModel();
+        $this->printOptionModel = new PrintOptionModel();
         $this->paymentModel = new PaymentModel();
         $this->session = \Config\Services::session();
     }

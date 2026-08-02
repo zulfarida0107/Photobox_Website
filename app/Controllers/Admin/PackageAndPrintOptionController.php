@@ -3,236 +3,118 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
-use App\Models\PackageModel;
 use App\Models\PrintOptionModel;
 
 class PackageAndPrintOptionController extends BaseController
 {
-    protected PackageModel      $packageModel;
     protected PrintOptionModel  $printOptionModel;
 
     public function __construct()
     {
-        $this->packageModel     = new PackageModel();
         $this->printOptionModel = new PrintOptionModel();
     }
 
     // =========================================================================
-    // INDEX — Daftar paket + opsi cetak + stats
+    // INDEX — Daftar opsi cetak + stats
     // =========================================================================
     public function index()
     {
-        $perPage = 10;
-        $currentPkgPage = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $perPage = 5;
         $currentOptPage = max(1, (int) ($this->request->getGet('opt_page') ?? 1));
-        $keyword       = $this->request->getGet('q') ?? '';
-        $sortPkg       = $this->request->getGet('sort_pkg') ?? 'terbaru';
-        $sortOpt       = $this->request->getGet('sort_opt') ?? 'termurah';
+        $sortOpt        = $this->request->getGet('sort_opt') ?? 'semua';
+        $searchOpt      = $this->request->getGet('search_opt') ?? '';
 
-        // --- Query Paket ---
         $db = \Config\Database::connect();
-        $pkgBuilder = $db->table('packages');
-        if ($keyword !== '') {
-            $pkgBuilder->groupStart()->like('name', $keyword)->orLike('id', $keyword)->groupEnd();
-        }
-        if ($sortPkg == 'lebih50') {
-            $pkgBuilder->where('base_price >', 50000);
-        } elseif ($sortPkg == 'kurang50') {
-            $pkgBuilder->where('base_price <=', 50000);
-        }
-        $totalPackages = $pkgBuilder->countAllResults(false);
-        $totalPkgPages = max(1, (int) ceil($totalPackages / $perPage));
-        $currentPkgPage = min($currentPkgPage, $totalPkgPages);
-
-        $pkgBuilder->select('*');
-        if ($sortPkg == 'lebih50' || $sortPkg == 'kurang50') {
-            $pkgBuilder->orderBy('base_price', 'ASC');
-        } else {
-            $pkgBuilder->orderBy('created_at', 'DESC');
-        }
-        $packages = $pkgBuilder->limit($perPage, ($currentPkgPage - 1) * $perPage)->get()->getResultArray();
 
         // --- Query Opsi Cetak ---
-        $optBuilder = $db->table('print_options');
+        $optBuilder = $db->table('print_options')
+            ->select('print_options.*, COUNT(bookings.id) as total_used')
+            ->join('bookings', 'bookings.print_option_id = print_options.id AND MONTH(bookings.created_at) = MONTH(NOW()) AND YEAR(bookings.created_at) = YEAR(NOW())', 'left')
+            ->groupBy('print_options.id');
+
+        $totalBuilder = $db->table('print_options');
+
         if ($sortOpt == 'lebih50') {
-            $optBuilder->where('extra_price >', 50000);
+            $optBuilder->where('print_options.extra_price >', 50000);
+            $totalBuilder->where('extra_price >', 50000);
         } elseif ($sortOpt == 'kurang50') {
-            $optBuilder->where('extra_price <=', 50000);
+            $optBuilder->where('print_options.extra_price <=', 50000);
+            $totalBuilder->where('extra_price <=', 50000);
         }
-        $totalPrintOptions = $optBuilder->countAllResults(false);
+
+        if (!empty($searchOpt)) {
+            $optBuilder->groupStart()
+                ->like('print_options.name', $searchOpt)
+                ->orLike('print_options.id', $searchOpt)
+                ->groupEnd();
+            $totalBuilder->groupStart()
+                ->like('name', $searchOpt)
+                ->orLike('id', $searchOpt)
+                ->groupEnd();
+        }
+        
+        $totalPrintOptions = $totalBuilder->countAllResults(false);
         $totalOptPages = max(1, (int) ceil($totalPrintOptions / $perPage));
         $currentOptPage = min($currentOptPage, $totalOptPages);
 
-        $optBuilder->select('*')->orderBy('extra_price', 'ASC');
+        $optBuilder->orderBy('print_options.extra_price', 'ASC');
         $printOptions = $optBuilder->limit($perPage, ($currentOptPage - 1) * $perPage)->get()->getResultArray();
 
-        // --- Stats ---
-        $statTotalPackages    = $this->packageModel->countAll();
         $statTotalPrintOptions = $this->printOptionModel->countAll();
 
-        // Rata-rata harga paket
-        $avgRow = $this->packageModel->db
-            ->table('packages')
-            ->select('AVG(base_price) AS avg_price')
+        // Rata-rata Harga Tambahan
+        $avgRow = $this->printOptionModel->db
+            ->table('print_options')
+            ->select('AVG(extra_price) AS avg_price')
             ->get()->getRowArray();
         $statAvgPrice = round($avgRow['avg_price'] ?? 0);
 
-        // Paket terpopuler (paling banyak di-booking)
-        $topPkg = $this->packageModel->db
+        // Opsi Terpopuler (bulan ini)
+        $topOpt = $this->printOptionModel->db
             ->table('bookings')
-            ->select('packages.name, COUNT(bookings.id) AS total')
-            ->join('packages', 'packages.id = bookings.package_id', 'left')
-            ->groupBy('bookings.package_id')
+            ->select('print_options.copies AS print_copies, COUNT(bookings.id) AS total')
+            ->join('print_options', 'print_options.id = bookings.print_option_id', 'left')
+            ->where('MONTH(bookings.created_at) = MONTH(NOW())')
+            ->where('YEAR(bookings.created_at) = YEAR(NOW())')
+            ->groupBy('bookings.print_option_id')
             ->orderBy('total', 'DESC')
-            ->limit(10)
+            ->limit(1)
             ->get()->getRowArray();
-        $statTopPackage = $topPkg['name'] ?? 'N/A';
+        $statTopOption = isset($topOpt['print_copies']) ? $topOpt['print_copies'] . ' Copies' : 'N/A';
+
+        // Total Transaksi Cetak bulan ini
+        $statTotalBookings = $this->printOptionModel->db
+            ->table('bookings')
+            ->where('print_option_id IS NOT NULL')
+            ->where('MONTH(created_at) = MONTH(NOW())')
+            ->where('YEAR(created_at) = YEAR(NOW())')
+            ->countAllResults();
 
         $data = [
-            'title'               => 'Manajemen Paket & Cetak | Admin Panel',
-            'packages'            => $packages,
-            'totalPackages'       => $totalPackages,
-            'currentPkgPage'      => $currentPkgPage,
-            'totalPkgPages'       => $totalPkgPages,
+            'title'               => 'Manajemen Opsi Cetak | Admin Panel',
             'totalPrintOptions'   => $totalPrintOptions,
             'currentOptPage'      => $currentOptPage,
             'totalOptPages'       => $totalOptPages,
-            'keyword'             => $keyword,
-            'sortPkg'             => $sortPkg,
             'sortOpt'             => $sortOpt,
+            'searchOpt'           => $searchOpt,
             'printOptions'        => $printOptions,
-            'statTotalPackages'   => $statTotalPackages,
             'statTotalPrintOptions' => $statTotalPrintOptions,
-            'statAvgPrice'        => $statAvgPrice,
-            'statTopPackage'      => $statTopPackage,
+            'statAvgPrice'          => $statAvgPrice,
+            'statTopOption'         => $statTopOption,
+            'statTotalBookings'     => $statTotalBookings,
         ];
 
         return view('Admin/PackageAndPrintOption/PackageAndPrintOptionManajemen', $data);
     }
 
     // =========================================================================
-    // PACKAGE — Create
+    // PRINT OPTION — Export CSV
     // =========================================================================
-    public function createPackage()
+    public function exportPrintOptions()
     {
-        return view('Admin/PackageAndPrintOption/PackageForm', [
-            'title'      => 'Tambah Paket Baru | Admin Panel',
-            'validation' => \Config\Services::validation(),
-        ]);
-    }
-
-    // =========================================================================
-    // PACKAGE — Store
-    // =========================================================================
-    public function storePackage()
-    {
-        $rules = [
-            'name'        => 'required|min_length[3]|max_length[100]|is_unique[packages.name]',
-            'photo_count' => 'required|is_natural_no_zero',
-            'duration'    => 'required|is_natural_no_zero',
-            'base_price'  => 'required|is_natural_no_zero',
-        ];
-
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()
-                ->with('errors', $this->validator->getErrors());
-        }
-
-        // Generate ID: PKT-XXX
-        $count = $this->packageModel->countAll();
-        $newId = sprintf('PKT-%03d', $count + 1);
-
-        $this->packageModel->insert([
-            'id'          => $newId,
-            'name'        => $this->request->getPost('name'),
-            'photo_count' => (int) $this->request->getPost('photo_count'),
-            'duration'    => (int) $this->request->getPost('duration'),
-            'base_price'  => (int) $this->request->getPost('base_price'),
-        ]);
-
-        return redirect()->to(base_url('admin/packages'))
-            ->with('success', 'Paket baru berhasil ditambahkan.');
-    }
-
-    // =========================================================================
-    // PACKAGE — Edit
-    // =========================================================================
-    public function editPackage(string $id)
-    {
-        $package = $this->packageModel->find($id);
-
-        if (!$package) {
-            return redirect()->to(base_url('admin/packages'))
-                ->with('error', 'Paket tidak ditemukan.');
-        }
-
-        return view('Admin/PackageAndPrintOption/PackageForm', [
-            'title'      => 'Edit Paket | Admin Panel',
-            'package'    => $package,
-            'validation' => \Config\Services::validation(),
-        ]);
-    }
-
-    // =========================================================================
-    // PACKAGE — Update
-    // =========================================================================
-    public function updatePackage(string $id)
-    {
-        $package = $this->packageModel->find($id);
-        if (!$package) {
-            return redirect()->to(base_url('admin/packages'))
-                ->with('error', 'Paket tidak ditemukan.');
-        }
-
-        $rules = [
-            'name'        => "required|min_length[3]|max_length[100]|is_unique[packages.name,id,{$id}]",
-            'photo_count' => 'required|is_natural_no_zero',
-            'duration'    => 'required|is_natural_no_zero',
-            'base_price'  => 'required|is_natural_no_zero',
-        ];
-
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()
-                ->with('errors', $this->validator->getErrors());
-        }
-
-        $this->packageModel->update($id, [
-            'name'        => $this->request->getPost('name'),
-            'photo_count' => (int) $this->request->getPost('photo_count'),
-            'duration'    => (int) $this->request->getPost('duration'),
-            'base_price'  => (int) $this->request->getPost('base_price'),
-        ]);
-
-        return redirect()->to(base_url('admin/packages'))
-            ->with('success', 'Paket berhasil diperbarui.');
-    }
-
-    // =========================================================================
-    // PACKAGE — Delete
-    // =========================================================================
-    public function deletePackage(string $id)
-    {
-        $package = $this->packageModel->find($id);
-        if (!$package) {
-            return redirect()->to(base_url('admin/packages'))
-                ->with('error', 'Paket tidak ditemukan.');
-        }
-
-        $this->packageModel->delete($id);
-
-        return redirect()->to(base_url('admin/packages'))
-            ->with('success', 'Paket berhasil dihapus.');
-    }
-
-    // =========================================================================
-    // PACKAGE — Export CSV
-    // =========================================================================
-    public function exportPackages()
-    {
-        $packages = $this->packageModel->orderBy('created_at', 'DESC')->findAll();
         $printOptions = $this->printOptionModel->orderBy('extra_price', 'ASC')->findAll();
 
-        $filename = 'Laporan_Paket_Cetak_' . date('Ymd_His') . '.csv';
+        $filename = 'Laporan_Cetak_' . date('Ymd_His') . '.csv';
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Cache-Control: max-age=0');
@@ -260,45 +142,23 @@ class PackageAndPrintOptionController extends BaseController
         $currentTime = date('d M Y, H:i:s');
         $currentDate = date('d F Y');
 
-        fputcsv($output, ['LAPORAN PAKET & CETAK'], ';');
+        fputcsv($output, ['LAPORAN OPSI CETAK'], ';');
         fputcsv($output, [], ';');
         fputcsv($output, ['Penanggung Jawab: ' . $penanggungJawab], ';');
         fputcsv($output, ['Waktu Realtime: ' . $currentTime . ' WIB'], ';');
         fputcsv($output, ['Keterangan Tanggal: Diekspor pada ' . $currentDate], ';');
         fputcsv($output, [], ';');
 
-        fputcsv($output, ['DAFTAR PAKET LAYANAN', '', '', '', '', '', 'DAFTAR CETAK'], ';');
-        fputcsv($output, ['ID Paket', 'Nama Paket', 'Jumlah Foto', 'Durasi (Menit)', 'Harga Dasar (Rp)', '', 'ID Opsi', 'Nama Opsi', 'Jumlah Copies', 'Harga Tambahan (Rp)'], ';');
+        fputcsv($output, ['ID Opsi', 'Nama Opsi', 'Jumlah Copies', 'Harga Tambahan (Rp)'], ';');
         
-        $max_rows = max(count($packages), count($printOptions));
-        for ($i = 0; $i < $max_rows; $i++) {
-            $p = $packages[$i] ?? null;
-            $opt = $printOptions[$i] ?? null;
-            
-            $row = [];
-            if ($p) {
-                $row[] = $p['id'];
-                $row[] = $p['name'];
-                $row[] = $p['photo_count'];
-                $row[] = $p['duration'];
-                $row[] = $p['base_price'];
-            } else {
-                $row = array_merge($row, ['', '', '', '', '']);
-            }
-            
-            $row[] = ''; // Separator column
-            
-            if ($opt) {
-                $name = isset($opt['name']) ? $opt['name'] : 'Opsi Cetak';
-                $row[] = $opt['id'];
-                $row[] = $name;
-                $row[] = $opt['copies'];
-                $row[] = $opt['extra_price'];
-            } else {
-                $row = array_merge($row, ['', '', '', '']);
-            }
-            
-            fputcsv($output, $row, ';');
+        foreach ($printOptions as $opt) {
+            $name = isset($opt['name']) ? $opt['name'] : 'Opsi Cetak';
+            fputcsv($output, [
+                $opt['id'],
+                $name,
+                $opt['copies'],
+                $opt['extra_price']
+            ], ';');
         }
 
         fclose($output);
@@ -340,7 +200,7 @@ class PackageAndPrintOptionController extends BaseController
             'extra_price' => (int) $this->request->getPost('extra_price'),
         ]);
 
-        return redirect()->to(base_url('admin/packages'))
+        return redirect()->to(base_url('admin/print-options'))
             ->with('success', 'Opsi cetak baru berhasil ditambahkan.');
     }
 
@@ -351,7 +211,7 @@ class PackageAndPrintOptionController extends BaseController
     {
         $option = $this->printOptionModel->find($id);
         if (!$option) {
-            return redirect()->to(base_url('admin/packages'))
+            return redirect()->to(base_url('admin/print-options'))
                 ->with('error', 'Opsi cetak tidak ditemukan.');
         }
 
@@ -369,7 +229,7 @@ class PackageAndPrintOptionController extends BaseController
     {
         $option = $this->printOptionModel->find($id);
         if (!$option) {
-            return redirect()->to(base_url('admin/packages'))
+            return redirect()->to(base_url('admin/print-options'))
                 ->with('error', 'Opsi cetak tidak ditemukan.');
         }
 
@@ -388,7 +248,7 @@ class PackageAndPrintOptionController extends BaseController
             'extra_price' => (int) $this->request->getPost('extra_price'),
         ]);
 
-        return redirect()->to(base_url('admin/packages'))
+        return redirect()->to(base_url('admin/print-options'))
             ->with('success', 'Opsi cetak berhasil diperbarui.');
     }
 
@@ -399,23 +259,13 @@ class PackageAndPrintOptionController extends BaseController
     {
         $option = $this->printOptionModel->find($id);
         if (!$option) {
-            return redirect()->to(base_url('admin/packages'))
+            return redirect()->to(base_url('admin/print-options'))
                 ->with('error', 'Opsi cetak tidak ditemukan.');
         }
 
         $this->printOptionModel->delete($id);
 
-        return redirect()->to(base_url('admin/packages'))
+        return redirect()->to(base_url('admin/print-options'))
             ->with('success', 'Opsi cetak berhasil dihapus.');
-    }
-
-    // =========================================================================
-    // PRINT OPTION — Index (halaman khusus opsi cetak)
-    // =========================================================================
-    public function printOptions()
-    {
-        $printOptions = $this->printOptionModel->orderBy('extra_price', 'ASC')->findAll();
-
-        return redirect()->to(base_url('admin/packages'));
     }
 }

@@ -196,7 +196,7 @@
                                                 <?= esc(!empty($booking['customer_name']) ? $booking['customer_name'] : 'Pengunjung Kiosk') ?>
                                             </td>
                                             <td class="px-6 py-4 text-slate-600 text-sm text-center">
-                                                <?= esc(!empty($booking['package_name']) ? $booking['package_name'] : 'Paket Kiosk') ?>
+                                                <?= esc(!empty($booking['print_copies']) ? $booking['print_copies'] . ' Cetak' : 'Paket Kiosk') ?>
                                             </td>
                                             <td class="px-6 py-4 font-data-tabular text-slate-600 text-center">
                                                 <?= date('d M Y, H:i', strtotime($booking['created_at'] ?? 'now')) ?>
