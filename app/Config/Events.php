@@ -53,3 +53,29 @@ Events::on('pre_system', static function (): void {
         }
     }
 });
+
+/*
+ * --------------------------------------------------------------------
+ * Dynamic baseURL: auto-detect port dari HTTP request
+ * --------------------------------------------------------------------
+ * Port 8080 → Admin Panel   → http://localhost:8080
+ * Port 8081 → User Booking  → http://localhost:8081
+ *
+ * Ini memastikan semua link (base_url, redirect, form action)
+ * menggunakan port yang sama dengan request masuk.
+ * --------------------------------------------------------------------
+ */
+Events::on('pre_system', static function (): void {
+    if (is_cli()) {
+        return; // Lewati saat spark/CLI — pakai default dari App.php
+    }
+
+    $port = $_SERVER['SERVER_PORT'] ?? 8080;
+
+    // Hanya override untuk port yang dikenal
+    if (in_array((int) $port, [8080, 8081], true)) {
+        $app          = config('App');
+        $app->baseURL = 'http://localhost:' . $port . '/';
+    }
+});
+

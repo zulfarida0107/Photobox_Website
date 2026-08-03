@@ -127,7 +127,7 @@ class PackageAndPrintOptionController extends BaseController
     public function storePackage()
     {
         $rules = [
-            'name'        => 'required|min_length[3]|max_length[100]',
+            'name'        => 'required|min_length[3]|max_length[100]|is_unique[packages.name]',
             'photo_count' => 'required|is_natural_no_zero',
             'duration'    => 'required|is_natural_no_zero',
             'base_price'  => 'required|is_natural_no_zero',
@@ -185,7 +185,7 @@ class PackageAndPrintOptionController extends BaseController
         }
 
         $rules = [
-            'name'        => 'required|min_length[3]|max_length[100]',
+            'name'        => "required|min_length[3]|max_length[100]|is_unique[packages.name,id,{$id}]",
             'photo_count' => 'required|is_natural_no_zero',
             'duration'    => 'required|is_natural_no_zero',
             'base_price'  => 'required|is_natural_no_zero',
@@ -322,7 +322,7 @@ class PackageAndPrintOptionController extends BaseController
     public function storePrintOption()
     {
         $rules = [
-            'copies'      => 'required|is_natural_no_zero',
+            'copies'      => 'required|is_natural_no_zero|is_unique[print_options.copies]',
             'extra_price' => 'required|is_natural',
         ];
 
@@ -374,7 +374,7 @@ class PackageAndPrintOptionController extends BaseController
         }
 
         $rules = [
-            'copies'      => 'required|is_natural_no_zero',
+            'copies'      => "required|is_natural_no_zero|is_unique[print_options.copies,id,{$id}]",
             'extra_price' => 'required|is_natural',
         ];
 

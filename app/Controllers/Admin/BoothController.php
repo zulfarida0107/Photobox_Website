@@ -105,7 +105,7 @@ class BoothController extends BaseController
     public function store()
     {
         $rules = [
-            'name'       => 'required|min_length[3]|max_length[100]',
+            'name'       => 'required|min_length[3]|max_length[100]|is_unique[booths.name]',
             'ip_address' => 'permit_empty|valid_ip',
             'latitude'   => 'permit_empty|numeric',
             'longitude'  => 'permit_empty|numeric',
@@ -181,7 +181,7 @@ class BoothController extends BaseController
         }
 
         $rules = [
-            'name'       => 'required|min_length[3]|max_length[100]',
+            'name'       => "required|min_length[3]|max_length[100]|is_unique[booths.name,id,{$id}]",
             'ip_address' => 'permit_empty|valid_ip',
             'latitude'   => 'permit_empty|numeric',
             'longitude'  => 'permit_empty|numeric',
