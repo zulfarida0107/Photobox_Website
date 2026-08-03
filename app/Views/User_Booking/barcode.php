@@ -165,8 +165,22 @@
 <!-- END: MainHeader -->
 
             <!-- BEGIN: HeroSection -->
-            <main class="relative px-6 sm:px-8 pt-12 pb-12 overflow-hidden bg-white/40 backdrop-blur-sm flex items-center justify-center" data-purpose="hero-content">
+            <main class="relative px-6 sm:px-8 pt-12 pb-12 overflow-hidden bg-white/40 backdrop-blur-sm flex items-center justify-center flex-1" data-purpose="hero-content">
                 <div class="w-full max-w-[600px] mx-auto flex flex-col items-center text-center success-circle-animation">
+                    <!-- Alert Messages -->
+                    <?php if (session()->getFlashdata('success')): ?>
+                        <div class="w-full max-w-md bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl mb-6 text-sm font-semibold flex items-center gap-2 justify-center shadow-sm">
+                            <span class="material-symbols-outlined text-emerald-600">check_circle</span>
+                            <?= session()->getFlashdata('success') ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (session()->getFlashdata('error')): ?>
+                        <div class="w-full max-w-md bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl mb-6 text-sm font-semibold flex items-center gap-2 justify-center shadow-sm">
+                            <span class="material-symbols-outlined text-red-600">error</span>
+                            <?= session()->getFlashdata('error') ?>
+                        </div>
+                    <?php endif; ?>
+
                     <!-- Icon Graphic -->
                     <div class="relative w-32 h-32 mb-6">
                         <div class="absolute inset-0 border-[6px] border-[#d9f99d]/40 rounded-full scale-[1.4]"></div>
@@ -187,12 +201,12 @@
                     <!-- Booking Code Card -->
                     <div class="w-full bg-[#D9F99D] rounded-2xl p-6 mb-6 shadow-sm">
                         <p class="text-[10px] font-bold text-lime-900 tracking-widest uppercase mb-1">Kode Booking Anda</p>
-                        <h3 class="text-3xl md:text-4xl font-black text-slate-800 mb-4">FF-2024-889</h3>
+                        <h3 class="text-3xl md:text-4xl font-black text-slate-800 mb-4"><?= esc($booking['booking_code'] ?? 'FF-2024-889') ?></h3>
                         
-                        <!-- Barcode - Full tanpa tambahan -->
+                        <!-- Barcode -->
                         <div class="flex justify-center">
                             <div class="barcode-wrapper">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=BOOKING-FF-2024-889" alt="Barcode Booking">
+                                <img src="<?= esc($qr_code['image'] ?? 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($booking['booking_code'] ?? 'FF-2024-889')) ?>" alt="Barcode Booking">
                             </div>
                         </div>
                         
@@ -214,7 +228,7 @@
                                 </svg>
                             </div>
                             <p class="label">Tema Frame</p>
-                            <p class="value">Retro Vibes</p>
+                            <p class="value"><?= esc($booking['frame_name'] ?? 'Retro Vibes') ?></p>
                         </div>
                         <div class="detail-card">
                             <div class="icon">
@@ -223,7 +237,7 @@
                                 </svg>
                             </div>
                             <p class="label">Waktu Sesi</p>
-                            <p class="value">09 October 2024 • 12:00 - 14:00</p>
+                            <p class="value"><?= esc($booking['booking_date'] ?? date('d F Y')) ?> • <?= esc($booking['booking_time'] ?? '12:00 - 14:00') ?></p>
                         </div>
                     </div>
                     

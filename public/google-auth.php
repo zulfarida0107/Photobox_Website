@@ -10,8 +10,9 @@ if (!file_exists($oauthFile)) {
 
 $client = new Google\Client();
 $client->setAuthConfig($oauthFile);
-// Gunakan redirect URI ke file ini sendiri
-$redirectUri = 'http://localhost:8080/google-auth.php';
+// Gunakan redirect URI ke file ini sendiri secara dinamis
+$port = $_SERVER['SERVER_PORT'] ?? 8080;
+$redirectUri = 'http://localhost:' . $port . '/google-auth.php';
 $client->setRedirectUri($redirectUri);
 $client->addScope(Google\Service\Drive::DRIVE);
 $client->setAccessType('offline');

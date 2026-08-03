@@ -30,7 +30,7 @@ class GoogleAuthController extends BaseController
         $this->client->setPrompt('consent');
 
         $this->client->setRedirectUri(
-            'http://localhost:8080/api/google/callback'
+            base_url('api/google/callback')
         );
     }
 

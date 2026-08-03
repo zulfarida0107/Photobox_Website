@@ -218,7 +218,7 @@
 <!-- END: MainHeader -->
 
             <!-- BEGIN: HeroSection -->
-            <main class="relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm" data-purpose="hero-content">
+            <main class="relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm flex-1" data-purpose="hero-content">
                 <!-- Decorative Badges -->
                 <span class="absolute top-10 left-8 bg-brand-lightGreen text-[10px] font-bold px-2 py-0.5 rounded-full text-slate-700" style="background:#d9f99d;">LEVEL UP YOUR MEMORIES💖</span>
                 <span class="absolute top-24 right-1/4 bg-brand-lightGreen text-[10px] font-bold px-2 py-0.5 rounded-full text-slate-700" style="background:#d9f99d;">NO HD MISSES</span>

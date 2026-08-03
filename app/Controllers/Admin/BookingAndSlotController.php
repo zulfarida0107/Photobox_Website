@@ -74,11 +74,11 @@ class BookingAndSlotController extends BaseController
 
         // --- Booking berdasarkan periode ---
         $bookingBuilder = $this->bookingModel
-            ->select('bookings.*, customers.name AS customer_name, booths.name AS booth_name, packages.name AS package_name')
+            ->select('bookings.*, customers.name AS customer_name, booths.name AS booth_name, print_options.copies AS print_copies')
             ->join('customers', 'customers.id = bookings.customer_id', 'left')
             ->join('slots',     'slots.id = bookings.slot_id', 'left')
             ->join('booths',    'booths.id = bookings.booth_id', 'left')
-            ->join('packages',  'packages.id = bookings.package_id', 'left')
+            ->join('print_options',  'print_options.id = bookings.print_option_id', 'left')
             ->where('slots.slot_date >=', $dateStart)
             ->where('slots.slot_date <=', $dateEnd);
 
@@ -86,7 +86,7 @@ class BookingAndSlotController extends BaseController
             $bookingBuilder->groupStart()
                 ->like('bookings.booking_code', $keyword)
                 ->orLike('customers.name', $keyword)
-                ->orLike('packages.name', $keyword)
+                ->orLike('print_options.copies', $keyword)
                 ->groupEnd();
         }
 
@@ -158,11 +158,11 @@ class BookingAndSlotController extends BaseController
     public function show(string $id)
     {
         $booking = $this->bookingModel
-            ->select('bookings.*, customers.name AS customer_name, booths.name AS booth_name, packages.name AS package_name')
+            ->select('bookings.*, customers.name AS customer_name, booths.name AS booth_name, print_options.copies AS print_copies')
             ->join('customers', 'customers.id = bookings.customer_id', 'left')
             ->join('slots',     'slots.id = bookings.slot_id', 'left')
             ->join('booths',    'booths.id = bookings.booth_id', 'left')
-            ->join('packages',  'packages.id = bookings.package_id', 'left')
+            ->join('print_options',  'print_options.id = bookings.print_option_id', 'left')
             ->find($id);
 
         if (!$booking) {
@@ -179,9 +179,9 @@ class BookingAndSlotController extends BaseController
     public function edit(string $id)
     {
         $booking = $this->bookingModel
-            ->select('bookings.*, customers.name AS customer_name, customers.email AS customer_email, customers.phone AS customer_phone, packages.name AS package_name')
+            ->select('bookings.*, customers.name AS customer_name, customers.email AS customer_email, customers.phone AS customer_phone, print_options.copies AS print_copies')
             ->join('customers', 'customers.id = bookings.customer_id', 'left')
-            ->join('packages',  'packages.id = bookings.package_id',  'left')
+            ->join('print_options',  'print_options.id = bookings.print_option_id',  'left')
             ->find($id);
 
         if (!$booking) {
@@ -353,6 +353,86 @@ class BookingAndSlotController extends BaseController
     }
 
     // =========================================================================
+    // SLOT EDIT — Form edit slot
+    // =========================================================================
+    public function editSlot(string $id)
+    {
+        $slot = $this->slotModel->find($id);
+
+        if (!$slot) {
+            return redirect()->to(base_url('admin/bookings'))
+                ->with('error', 'Slot tidak ditemukan.');
+        }
+
+        $boothModel = new \App\Models\BoothModel();
+        $booths = $boothModel->where('status', 'active')->findAll();
+
+        return view('Admin/BookingAndSlot/SlotForm', [
+            'title'      => 'Edit Slot Operasional | Admin Panel',
+            'slot'       => $slot,
+            'booths'     => $booths,
+            'validation' => \Config\Services::validation(),
+        ]);
+    }
+
+    // =========================================================================
+    // SLOT UPDATE — Simpan perubahan slot
+    // =========================================================================
+    public function updateSlot(string $id)
+    {
+        $slot = $this->slotModel->find($id);
+
+        if (!$slot) {
+            return redirect()->to(base_url('admin/bookings'))
+                ->with('error', 'Slot tidak ditemukan.');
+        }
+
+        $rules = [
+            'start_time'   => 'required',
+            'max_bookings' => 'required|is_natural_no_zero',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()
+                ->with('errors', $this->validator->getErrors());
+        }
+
+        $this->slotModel->update($id, [
+            'start_time'   => $this->request->getPost('start_time'),
+            'max_bookings' => (int) $this->request->getPost('max_bookings'),
+        ]);
+
+        return redirect()->to(base_url('admin/bookings'))
+            ->with('success', 'Slot berhasil diperbarui.');
+    }
+
+    // =========================================================================
+    // SLOT DELETE — Hapus slot
+    // =========================================================================
+    public function deleteSlot(string $id)
+    {
+        $slot = $this->slotModel->find($id);
+
+        if (!$slot) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'success' => false, 'message' => 'Slot tidak ditemukan.'
+            ]);
+        }
+
+        // Cek apakah ada booking yang terikat ke slot ini
+        $hasBookings = $this->bookingModel->where('slot_id', $id)->countAllResults() > 0;
+        if ($hasBookings) {
+            return redirect()->to(base_url('admin/bookings'))
+                ->with('error', 'Slot tidak dapat dihapus karena masih ada booking yang terikat.');
+        }
+
+        $this->slotModel->delete($id);
+
+        return redirect()->to(base_url('admin/bookings'))
+            ->with('success', 'Slot berhasil dihapus.');
+    }
+
+    // =========================================================================
     // EXPORT — Ekspor data booking CSV
     // =========================================================================
     public function export()
@@ -375,11 +455,11 @@ class BookingAndSlotController extends BaseController
         }
 
         $bookingBuilder = $this->bookingModel
-            ->select('bookings.*, customers.name AS customer_name, booths.name AS booth_name, packages.name AS package_name')
+            ->select('bookings.*, customers.name AS customer_name, booths.name AS booth_name, print_options.copies AS print_copies')
             ->join('customers', 'customers.id = bookings.customer_id', 'left')
             ->join('slots',     'slots.id = bookings.slot_id', 'left')
             ->join('booths',    'booths.id = bookings.booth_id', 'left')
-            ->join('packages',  'packages.id = bookings.package_id', 'left')
+            ->join('print_options',  'print_options.id = bookings.print_option_id', 'left')
             ->where('slots.slot_date >=', $dateStart)
             ->where('slots.slot_date <=', $dateEnd);
 
@@ -388,7 +468,7 @@ class BookingAndSlotController extends BaseController
             $bookingBuilder->groupStart()
                 ->like('bookings.booking_code', $keyword)
                 ->orLike('customers.name', $keyword)
-                ->orLike('packages.name', $keyword)
+                ->orLike('print_options.copies', $keyword)
                 ->groupEnd();
         }
 
@@ -449,7 +529,7 @@ class BookingAndSlotController extends BaseController
                 $row['customer_name'] ?? '-',
                 $row['slot_id'],
                 $row['booth_name'] ?? '-',
-                $row['package_name'] ?? '-',
+                isset($row['print_copies']) ? $row['print_copies'] . ' Cetak' : '-',
                 $row['queue_number'],
                 strtoupper($row['status']),
                 $row['created_at'],

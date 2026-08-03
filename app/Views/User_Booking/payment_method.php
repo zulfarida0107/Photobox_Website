@@ -240,7 +240,7 @@
             <!-- END: MainHeader -->
 
             <!-- BEGIN: Main Content -->
-            <main class="main-content relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm">
+            <main class="main-content relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm flex-1">
                 
                 <?php if (session()->getFlashdata('success')): ?>
                     <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
@@ -259,7 +259,7 @@
                 </div>
 
                 <!-- FORM PEMBAYARAN -->
-                <form action="/payment/store" method="post" id="paymentForm">
+                <form action="/user-payment/store" method="post" id="paymentForm">
                     <?= csrf_field() ?>
                     
                     <!-- HIDDEN INPUTS -->
@@ -284,22 +284,34 @@
                                     </span>
                                 </div>
                                 <div class="space-y-4">
+                                    <!-- Lokasi Booth -->
                                     <div class="flex items-center space-x-4">
-                                        <div class="bg-indigo-600 p-3 rounded-xl shadow-md shadow-indigo-100">
-                                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                                            </svg>
+                                        <div class="bg-indigo-50 p-3 rounded-xl shadow-sm text-indigo-600">
+                                            <span class="material-symbols-outlined text-xl">store</span>
                                         </div>
                                         <div>
-                                            <p class="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest">Booth Terpilih</p>
-                                            <p class="text-slate-800 font-bold text-base"><?= $booth['name'] ?? 'Retro Vibes' ?></p>
+                                            <p class="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest">Lokasi Booth</p>
+                                            <p class="text-slate-800 font-bold text-base"><?= esc($booth['name'] ?? 'Booth Umum') ?></p>
                                         </div>
                                     </div>
+                                    <!-- Cetak & Tema -->
                                     <div class="flex items-center space-x-4">
-                                        <div class="bg-cyan-600 p-3 rounded-xl shadow-md shadow-cyan-100">
-                                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                                            </svg>
+                                        <div class="bg-emerald-50 p-3 rounded-xl shadow-sm text-emerald-600">
+                                            <span class="material-symbols-outlined text-white text-xl" style="color: #059669;">photo_library</span>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] font-extrabold text-emerald-500 uppercase tracking-widest">Cetak &amp; Tema</p>
+                                            <p class="text-slate-800 font-bold text-base">
+                                                <?= session()->get('selected_print_option_name') ?? '2 Cetak' ?>
+                                                <br>
+                                                <span class="text-sm font-normal text-slate-500">Tema: <?= session()->get('selected_frame_name') ?? 'Belum memilih tema' ?></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <!-- Jadwal Sesi -->
+                                    <div class="flex items-center space-x-4">
+                                        <div class="bg-cyan-50 p-3 rounded-xl shadow-sm text-cyan-600">
+                                            <span class="material-symbols-outlined text-xl">calendar_today</span>
                                         </div>
                                         <div>
                                             <p class="text-[10px] font-extrabold text-cyan-500 uppercase tracking-widest">Jadwal Sesi</p>
@@ -342,7 +354,7 @@
 
                     <!-- Bottom Action Buttons -->
                     <div class="mt-6 flex flex-col sm:flex-row gap-4">
-                        <a href="/booth" class="btn-back flex-1 text-center no-underline">
+                        <a href="<?= base_url('frame') ?>" class="btn-back flex-1 text-center no-underline">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                             </svg>

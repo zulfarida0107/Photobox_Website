@@ -147,14 +147,19 @@ class ScheduleController extends BaseController
         }
 
         // Simpan ke session untuk digunakan di halaman booth
+        $slotId = $this->request->getPost('slot_id');
+        $boothId = $this->request->getPost('booth_id');
+        
         session()->set('booking_date', $selectedDate);
         session()->set('booking_time', $selectedTime);
+        session()->set('slot_id', $slotId);
+        session()->set('booth_id', $boothId);
 
         // Log data untuk debugging
-        log_message('debug', 'Schedule submitted - Date: ' . $selectedDate . ', Time: ' . $selectedTime . ', Customer: ' . $customerId);
+        log_message('debug', 'Schedule submitted - Date: ' . $selectedDate . ', Time: ' . $selectedTime . ', Slot: ' . $slotId . ', Booth: ' . $boothId . ', Customer: ' . $customerId);
 
-        // Redirect ke halaman frame dengan pesan sukses
-        return redirect()->to('/frame')->with('success', 'Jadwal berhasil dipilih! Silakan pilih frame favorit Anda.');
+        // Redirect ke halaman pilih harga cetak dengan pesan sukses
+        return redirect()->to('/print-option')->with('success', 'Jadwal berhasil dipilih! Silakan pilih harga cetak Anda.');
     }
 
     public function getSlots()

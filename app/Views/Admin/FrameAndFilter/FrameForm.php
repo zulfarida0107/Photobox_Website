@@ -45,14 +45,14 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="layout_id" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Layout Frame *</label>
-                        <select name="layout_id" id="layout_id" required
+                        <label for="category" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kategori Frame *</label>
+                        <select name="category" id="category" required
                                 class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white">
-                            <option value="">-- Pilih Layout --</option>
-                            <?php if (!empty($layouts)): ?>
-                                <?php foreach ($layouts as $lay): ?>
-                                    <option value="<?= esc($lay['id']) ?>" <?= old('layout_id', $frame['layout_id'] ?? '') === $lay['id'] ? 'selected' : '' ?>>
-                                        <?= esc($lay['name']) ?> (<?= esc($lay['photo_count']) ?> Foto)
+                            <option value="">-- Pilih Kategori --</option>
+                            <?php if (!empty($categories)): ?>
+                                <?php foreach ($categories as $cat): ?>
+                                    <option value="<?= esc($cat['id']) ?>" <?= old('category', $frame['category'] ?? '') === $cat['id'] ? 'selected' : '' ?>>
+                                        <?= esc($cat['name']) ?>
                                     </option>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -60,18 +60,11 @@
                     </div>
 
                     <div>
-                        <label for="category_id" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kategori Frame</label>
-                        <select name="category_id" id="category_id"
-                                class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white">
-                            <option value="">-- Pilih Kategori (Opsional) --</option>
-                            <?php if (!empty($categories)): ?>
-                                <?php foreach ($categories as $cat): ?>
-                                    <option value="<?= esc($cat['id']) ?>" <?= old('category_id', $frame['category_id'] ?? '') === $cat['id'] ? 'selected' : '' ?>>
-                                        <?= esc($cat['name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </select>
+                        <label for="price" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Harga Tambahan (Opsional)</label>
+                        <input type="number" step="0.01" name="price" id="price"
+                               value="<?= esc(old('price', $frame['price'] ?? '0')) ?>"
+                               placeholder="Contoh: 0"
+                               class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
                     </div>
                 </div>
 

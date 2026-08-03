@@ -25,7 +25,7 @@ class FrameAndFilterController extends BaseController
     // =========================================================================
     public function index()
     {
-        $framePerPage     = 10;
+        $framePerPage     = 5;
         $currentFramePage = max(1, (int) ($this->request->getGet('page') ?? 1));
 
         $catPerPage       = 5;
@@ -40,18 +40,15 @@ class FrameAndFilterController extends BaseController
         $filterSearch = $this->request->getGet('filter_search') ?? '';
         $filterStatus = $this->request->getGet('filter_status') ?? '';
 
-        // --- Frame query builder + Join category name ---
-        $frameQuery = $this->frameModel
-            ->select('frames.*, frame_categories.name as category_name, frame_layouts.name as layout_name')
-            ->join('frame_categories', 'frame_categories.id = frames.category_id', 'left')
-            ->join('frame_layouts', 'frame_layouts.id = frames.layout_id', 'left');
+        // --- Frame query builder ---
+        $frameQuery = $this->frameModel->select('frames.*');
 
         if (!empty($search)) {
             $frameQuery->like('frames.name', $search);
         }
 
         if (!empty($category)) {
-            $frameQuery->where('frames.category_id', $category);
+            $frameQuery->where('frames.category', $category);
         }
 
         $totalFrames      = $frameQuery->countAllResults(false);
@@ -83,7 +80,7 @@ class FrameAndFilterController extends BaseController
         $categoriesPaginated = $catBuilder->orderBy('name', 'ASC')->limit($catPerPage, ($currentCatPage - 1) * $catPerPage)->get()->getResultArray();
 
         // --- Semua layout frame (Paginated) ---
-        $layoutPerPage       = 10;
+        $layoutPerPage       = 5;
         $currentLayoutPage   = max(1, (int) ($this->request->getGet('layout_page') ?? 1));
         $layoutSearch        = $this->request->getGet('layout_search') ?? '';
 
@@ -98,8 +95,17 @@ class FrameAndFilterController extends BaseController
         $totalLayoutPages   = max(1, (int) ceil($totalLayouts / $layoutPerPage));
         $layouts            = $layoutQuery->orderBy('name', 'ASC')->findAll($layoutPerPage, ($currentLayoutPage - 1) * $layoutPerPage);
 
-        // Kategori untuk dropdown filter/upload
-        $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
+        // Kategori dari Enum
+        $categories = [
+            ['id' => 'pastel', 'name' => 'Pastel'],
+            ['id' => 'cute', 'name' => 'Cute'],
+            ['id' => 'layout', 'name' => 'Layout'],
+            ['id' => 'minimalist', 'name' => 'Minimalist'],
+            ['id' => 'newspaper', 'name' => 'Newspaper'],
+            ['id' => 'magazine', 'name' => 'Magazine'],
+            ['id' => 'retro 90s', 'name' => 'Retro 90s'],
+            ['id' => 'y2k', 'name' => 'Y2K']
+        ];
         $allLayouts = $this->layoutModel->orderBy('name', 'ASC')->findAll();
 
         // --- Stats ---
@@ -154,8 +160,8 @@ class FrameAndFilterController extends BaseController
     {
         $rules = [
             'name'        => 'required|min_length[3]|max_length[100]|is_unique[frames.name]',
-            'category_id' => 'permit_empty|max_length[20]',
-            'layout_id'   => 'permit_empty|max_length[20]',
+            'category'    => 'permit_empty|in_list[pastel,cute,layout,minimalist,newspaper,magazine,retro 90s,y2k]',
+            'price'       => 'permit_empty|numeric',
             'frame_file'  => 'uploaded[frame_file]|max_size[frame_file,2048]|ext_in[frame_file,png,jpg,jpeg]',
         ];
 
@@ -167,12 +173,7 @@ class FrameAndFilterController extends BaseController
         $file = $this->request->getFile('frame_file');
         
         $name = $this->request->getPost('name');
-        $layoutId = $this->request->getPost('layout_id');
-        $photoCount = 0;
-        if ($layoutId) {
-            $layout = $this->frameModel->db->table('frame_layouts')->where('id', $layoutId)->get()->getRowArray();
-            $photoCount = $layout ? $layout['photo_count'] : 0;
-        }
+        $photoCount = 0; // Removed layout logic
 
         // Generate ID: frame_001
         $lastFrame = $this->frameModel->db->table('frames')
@@ -194,8 +195,8 @@ class FrameAndFilterController extends BaseController
         $this->frameModel->insert([
             'id'          => $newId,
             'name'        => $name,
-            'category_id' => $this->request->getPost('category_id') ?: null,
-            'layout_id'   => $layoutId ?: null,
+            'category'    => $this->request->getPost('category') ?: 'minimalist',
+            'price'       => $this->request->getPost('price') ?: 0,
             'file_path'   => 'uploads/frames/' . $newName,
         ]);
 
@@ -208,12 +209,19 @@ class FrameAndFilterController extends BaseController
     // =========================================================================
     public function createFrame()
     {
-        $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
-        $layouts    = $this->frameModel->db->table('frame_layouts')->orderBy('name', 'ASC')->get()->getResultArray();
+        $categories = [
+            ['id' => 'pastel', 'name' => 'Pastel'],
+            ['id' => 'cute', 'name' => 'Cute'],
+            ['id' => 'layout', 'name' => 'Layout'],
+            ['id' => 'minimalist', 'name' => 'Minimalist'],
+            ['id' => 'newspaper', 'name' => 'Newspaper'],
+            ['id' => 'magazine', 'name' => 'Magazine'],
+            ['id' => 'retro 90s', 'name' => 'Retro 90s'],
+            ['id' => 'y2k', 'name' => 'Y2K']
+        ];
         return view('Admin/FrameAndFilter/FrameForm', [
             'title'      => 'Unggah Frame Baru | Admin Panel',
             'categories' => $categories,
-            'layouts'    => $layouts,
             'validation' => \Config\Services::validation(),
         ]);
     }
@@ -229,14 +237,21 @@ class FrameAndFilterController extends BaseController
                 ->with('error', 'Frame tidak ditemukan.');
         }
 
-        $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
-        $layouts    = $this->frameModel->db->table('frame_layouts')->orderBy('name', 'ASC')->get()->getResultArray();
+        $categories = [
+            ['id' => 'pastel', 'name' => 'Pastel'],
+            ['id' => 'cute', 'name' => 'Cute'],
+            ['id' => 'layout', 'name' => 'Layout'],
+            ['id' => 'minimalist', 'name' => 'Minimalist'],
+            ['id' => 'newspaper', 'name' => 'Newspaper'],
+            ['id' => 'magazine', 'name' => 'Magazine'],
+            ['id' => 'retro 90s', 'name' => 'Retro 90s'],
+            ['id' => 'y2k', 'name' => 'Y2K']
+        ];
 
         return view('Admin/FrameAndFilter/FrameForm', [
             'title'      => 'Edit Frame | Admin Panel',
             'frame'      => $frame,
             'categories' => $categories,
-            'layouts'    => $layouts,
             'validation' => \Config\Services::validation(),
         ]);
     }
@@ -254,8 +269,8 @@ class FrameAndFilterController extends BaseController
 
         $rules = [
             'name'        => "required|min_length[3]|max_length[100]|is_unique[frames.name,id,{$id}]",
-            'category_id' => 'permit_empty|max_length[20]',
-            'layout_id'   => 'permit_empty|max_length[20]',
+            'category'    => 'permit_empty|in_list[pastel,cute,layout,minimalist,newspaper,magazine,retro 90s,y2k]',
+            'price'       => 'permit_empty|numeric',
         ];
 
         if (!$this->validate($rules)) {
@@ -264,18 +279,13 @@ class FrameAndFilterController extends BaseController
         }
 
         $name = $this->request->getPost('name');
-        $layoutId = $this->request->getPost('layout_id');
-        $photoCount = 0;
-        if ($layoutId) {
-            $layout = $this->frameModel->db->table('frame_layouts')->where('id', $layoutId)->get()->getRowArray();
-            $photoCount = $layout ? $layout['photo_count'] : 0;
-        }
+        $photoCount = 0; // Removed layout logic
         $safeName = strtolower(trim(preg_replace('/[^a-zA-Z0-9]+/', '_', $name), '_'));
 
         $updateData = [
             'name'        => $name,
-            'category_id' => $this->request->getPost('category_id') ?: null,
-            'layout_id'   => $layoutId ?: null,
+            'category'    => $this->request->getPost('category') ?: 'minimalist',
+            'price'       => $this->request->getPost('price') ?: 0,
             'is_active'   => 1, // aktifkan jika sebelumnya disync & nonaktif
         ];
 
@@ -519,8 +529,7 @@ class FrameAndFilterController extends BaseController
     {
         $db = $this->frameModel->db;
         
-        // Nullify the category_id on any frames belonging to this category
-        $db->table('frames')->where('category_id', $id)->update(['category_id' => null]);
+        // Categories are now enum in frames table, so no frames update needed here.
 
         $db->table('frame_categories')->where('id', $id)->delete();
 
@@ -643,8 +652,7 @@ class FrameAndFilterController extends BaseController
             unlink(FCPATH . $layout['image_path']);
         }
 
-        // Nullify layout_id on frames using this layout
-        $this->frameModel->db->table('frames')->where('layout_id', $id)->update(['layout_id' => null]);
+        // Layouts are no longer tied to frames via layout_id.
 
         $this->layoutModel->delete($id);
 

@@ -263,22 +263,23 @@
 <!-- END: MainHeader -->
 
             <!-- Main Content -->
-            <main class="flex-1 px-6 sm:px-8 py-10 md:py-16 bg-white/40 backdrop-blur-sm flex items-center justify-center">
-                <div class="content-wrapper success-circle-animation">
-                    
-                    <!-- Flash Messages -->
-                    <?php if (session()->getFlashdata('error')): ?>
-                        <div class="w-full bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">
-                            <?= session()->getFlashdata('error') ?>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <?php if (session()->getFlashdata('success')): ?>
-                        <div class="w-full bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded-xl mb-4 text-sm">
-                            <?= session()->getFlashdata('success') ?>
-                        </div>
-                    <?php endif; ?>
+            <main class="flex-1 px-6 sm:px-8 py-8 bg-white/40 backdrop-blur-sm flex flex-col items-center justify-start">
+                <!-- Flash Messages Banner (Di Atas) -->
+                <?php if (session()->getFlashdata('error')): ?>
+                    <div class="w-full max-w-lg bg-red-500 text-white px-5 py-3.5 rounded-2xl shadow-lg mb-6 flex items-center gap-3 text-sm font-semibold border border-red-400">
+                        <span class="material-symbols-outlined text-xl">error</span>
+                        <span class="flex-1"><?= session()->getFlashdata('error') ?></span>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if (session()->getFlashdata('success')): ?>
+                    <div class="w-full max-w-lg bg-emerald-500 text-white px-5 py-3.5 rounded-2xl shadow-lg mb-6 flex items-center gap-3 text-sm font-semibold border border-emerald-400">
+                        <span class="material-symbols-outlined text-xl">check_circle</span>
+                        <span class="flex-1"><?= session()->getFlashdata('success') ?></span>
+                    </div>
+                <?php endif; ?>
 
+                <div class="content-wrapper success-circle-animation my-auto">
                     <!-- Icon -->
                     <div class="icon-wrapper">
                         <div class="ring-1"></div>

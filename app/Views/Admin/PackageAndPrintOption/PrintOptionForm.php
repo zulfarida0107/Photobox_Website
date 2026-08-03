@@ -9,7 +9,7 @@
             <ol class="flex items-center space-x-2">
                 <li><a class="hover:text-blue-600 transition-colors" href="<?= base_url('admin/dashboard') ?>">Dashboard</a></li>
                 <li><span class="material-symbols-outlined text-[10px]">chevron_right</span></li>
-                <li><a class="hover:text-blue-600 transition-colors" href="<?= base_url('admin/packages') ?>">Paket &amp; Cetak</a></li>
+                <li><a class="hover:text-blue-600 transition-colors" href="<?= base_url('admin/print-options') ?>">Manajemen Cetak</a></li>
                 <li><span class="material-symbols-outlined text-[10px]">chevron_right</span></li>
                 <li><span class="text-blue-700 font-bold"><?= isset($option) ? 'Edit Opsi Cetak' : 'Tambah Opsi Cetak' ?></span></li>
             </ol>
@@ -62,7 +62,7 @@
                     </div>
 
                     <div class="pt-6 border-t border-slate-100 flex justify-end gap-3">
-                        <a href="<?= base_url('admin/packages') ?>" class="px-6 py-2 bg-slate-100 text-slate-600 rounded-lg font-bold text-sm hover:bg-slate-200 transition-colors">Batal</a>
+                        <a href="<?= base_url('admin/print-options') ?>" class="px-6 py-2 bg-slate-100 text-slate-600 rounded-lg font-bold text-sm hover:bg-slate-200 transition-colors">Batal</a>
                         <button type="submit" class="px-6 py-2 bg-blue-900 text-white rounded-lg font-bold text-sm hover:bg-blue-800 transition-colors shadow-sm flex items-center gap-2">
                             <span class="material-symbols-outlined text-[18px]">save</span> Simpan
                         </button>
