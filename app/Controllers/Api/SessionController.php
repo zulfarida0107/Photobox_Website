@@ -383,4 +383,101 @@ class SessionController extends BaseApiController
             );
         }
     }
+
+    public function captureDslr(string $sessionId): ResponseInterface
+    {
+        $session = $this->sessionModel->find($sessionId);
+        if ($session === null) {
+            return $this->failNotFound('Session tidak ditemukan.');
+        }
+
+        // Tentukan folder temporary publik
+        $tempFolder = FCPATH . 'uploads/temp/';
+        if (!is_dir($tempFolder)) {
+            mkdir($tempFolder, 0777, true);
+        }
+
+        $outputFile = $tempFolder . 'dslr_' . $sessionId . '_' . time() . '.jpg';
+        $outputFileWin = str_replace('/', '\\', $outputFile);
+
+        // Cek apakah web server digiCamControl aktif (port 5513)
+        $webServerUrl = 'http://127.0.0.1:5513';
+        $isWebServerActive = false;
+        
+        $connection = @fsockopen('127.0.0.1', 5513, $errno, $errstr, 0.5);
+        if ($connection) {
+            fclose($connection);
+            $isWebServerActive = true;
+        }
+
+        if ($isWebServerActive) {
+            // 1. Pemicu jepret via Web Server API (?slc=capture)
+            $captureUrl = $webServerUrl . '/?slc=capture';
+            $captureResult = @file_get_contents($captureUrl);
+            
+            // 2. Poll untuk nama file terakhir
+            $filename = '';
+            $pollUrl = $webServerUrl . '/?slc=get&param1=lastcaptured&param2=';
+            $maxPoll = 30; // maks 15 detik (30 * 500ms)
+            
+            for ($i = 0; $i < $maxPoll; $i++) {
+                usleep(500000); // 500ms
+                $res = @file_get_contents($pollUrl);
+                if ($res !== false) {
+                    $resClean = trim($res);
+                    if ($resClean !== '-' && !empty($resClean)) {
+                        $filename = $resClean;
+                        break;
+                    }
+                }
+            }
+            
+            if (empty($filename)) {
+                return $this->failServerError('Gagal mendeteksi file foto setelah trigger capture via Web Server. Pastikan kamera menyala dan terhubung di digiCamControl.');
+            }
+            
+            // 3. Download file gambar dari Web Server
+            $imageUrl = $webServerUrl . '/image/' . rawurlencode($filename);
+            $imageContent = @file_get_contents($imageUrl);
+            
+            if ($imageContent === false || empty($imageContent)) {
+                return $this->failServerError('Gagal mengunduh foto ' . $filename . ' dari web server digiCamControl.');
+            }
+            
+            // Simpan gambar ke folder temp
+            file_put_contents($outputFile, $imageContent);
+        } else {
+            // Tentukan path CameraControlCmd.exe
+            $cmdPath = 'C:\\Program Files (x86)\\digiCamControl\\CameraControlCmd.exe';
+            if (!file_exists($cmdPath)) {
+                $cmdPath = 'C:\\Program Files\\digiCamControl\\CameraControlCmd.exe';
+            }
+
+            if (!file_exists($cmdPath)) {
+                return $this->failServerError('Aplikasi digiCamControl tidak terdeteksi (Web Server mati dan CameraControlCmd.exe tidak ditemukan). Silakan jalankan digiCamControl.');
+            }
+
+            // Siapkan perintah cmd untuk digiCamControl
+            $cmd = '"' . $cmdPath . '" /capture /filename "' . $outputFileWin . '"';
+
+            // Jalankan perintah
+            $output = shell_exec($cmd);
+
+            // Verifikasi hasil file
+            if (!file_exists($outputFile) || filesize($outputFile) === 0) {
+                return $this->failServerError('Gagal menjepret foto dengan DSLR via CLI. Pastikan kamera menyala, terhubung via USB, dan tidak terkunci oleh aplikasi lain. Detail: ' . $output);
+            }
+        }
+
+        $fileUrl = base_url('uploads/temp/' . basename($outputFile));
+
+        return $this->respondOk([
+            'status' => true,
+            'message' => 'DSLR capture success',
+            'data' => [
+                'image_url' => $fileUrl,
+                'filename' => basename($outputFile),
+            ]
+        ]);
+    }
 }

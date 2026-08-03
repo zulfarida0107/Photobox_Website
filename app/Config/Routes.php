@@ -34,11 +34,17 @@ $routes->group('api', static function ($routes) {
     $routes->post('session/(:segment)/email', 'Api\\SessionController::submitEmail/$1');
     $routes->post('session/(:segment)/complete', 'Api\\SessionController::complete/$1');
 
+<<<<<<< Updated upstream
     // --- ROUTES Admin Panel dan Desktop ---
     $routes->post('session/(:segment)/upload', 'Api\\SessionController::upload/$1');
     $routes->post('session/(:segment)/upload-live', 'Api\\SessionController::uploadLive/$1');
 
     $routes->post('photo/session/(:segment)/upload', 'Api\\PhotoController::upload/$1');
+=======
+	$routes->post('session/(:segment)/upload', 'Api\\SessionController::upload/$1');
+	$routes->post('session/(:segment)/upload-live', 'Api\\SessionController::uploadLive/$1');
+	$routes->post('session/(:segment)/capture-dslr', 'Api\\SessionController::captureDslr/$1');
+>>>>>>> Stashed changes
 	$routes->get('frame/(:any)', 'Api\\FrameController::show/$1');
 	// --------------------------------------
 
