@@ -340,27 +340,40 @@ class SessionController extends BaseApiController
             return $this->failNotFound('Booking tidak ditemukan.');
         }
 
-        if ($booking['status'] !== 'paid') {
+        if ($booking['status'] !== 'paid' && $booking['status'] !== 'completed') {
             return $this->failValidation('Booking belum paid.');
         }
 
         try {
 
-            $driveService = new GoogleDriveService();
+            $driveLink = null;
+            try {
+                $driveService = new GoogleDriveService();
+                $driveLink = $driveService->uploadSessionPhotos($sessionId);
 
-            $driveLink = $driveService->uploadSessionPhotos($sessionId);
+                // Simpan drive_folder_url ke database agar admin bisa Resend nanti
+                $this->sessionModel->update($sessionId, [
+                    'drive_folder_url' => $driveLink,
+                ]);
+            } catch (\Throwable $driveException) {
+                log_message('error', 'Google Drive upload error: ' . $driveException->getMessage());
+                // Lanjut — email tetap dicoba via SMTP
+            }
 
-            $emailService = new EmailService();
-
-            $sent = $emailService->sendDriveLink(
-                $session['email_recipient'],
-                $driveLink
-            );
-
-            if (! $sent) {
-                throw new \RuntimeException(
-                    'Gagal mengirim email.'
+            // Kirim email via SMTP (terpisah dari Drive, melampirkan foto secara langsung)
+            try {
+                $emailService = new EmailService();
+                $sent = $emailService->sendDriveLink(
+                    $session['email_recipient'],
+                    $driveLink,
+                    $sessionId
                 );
+                if (! $sent) {
+                    log_message('error', 'SMTP gagal mengirim email untuk session_id: ' . $sessionId);
+                }
+            } catch (\Throwable $emailException) {
+                log_message('error', 'Email/SMTP error: ' . $emailException->getMessage());
+                // Tetap lanjut agar Kiosk tidak crash
             }
 
             $this->bookingModel->update($booking['id'], [

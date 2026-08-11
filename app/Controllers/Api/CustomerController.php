@@ -38,9 +38,9 @@ class CustomerController extends BaseApiController
         }
 
         // Fetch package details
-        $packageModel = new \App\Models\PackageModel();
-        $package = $packageModel->find($booking['package_id']);
-        $booking['package'] = $package;
+        $printOptionModel = new \App\Models\PrintOptionModel();
+        $printOption = $printOptionModel->find($booking['print_option_id']);
+        $booking['package'] = $printOption;
 
         return $this->respondOk([
             'message' => 'Booking valid.',
@@ -90,7 +90,7 @@ class CustomerController extends BaseApiController
         $customerModel = new \App\Models\CustomerModel();
         $slotModel = new \App\Models\SlotModel();
         $boothModel = new \App\Models\BoothModel();
-        $packageModel = new \App\Models\PackageModel();
+        $packageModel = new \App\Models\PrintOptionModel();
 
         try {
             // 1. Find or create default walk-in customer
@@ -111,7 +111,7 @@ class CustomerController extends BaseApiController
             if ($package === null) {
                 return $this->response->setStatusCode(500)->setJSON([
                     'status' => 500,
-                    'error' => 'Package tidak ditemukan di database.',
+                    'error' => 'Print Option tidak ditemukan di database.',
                 ]);
             }
 
@@ -150,7 +150,7 @@ class CustomerController extends BaseApiController
                 'customer_id' => $customer['id'],
                 'slot_id' => $slot['id'],
                 'booth_id' => $booth['id'],
-                'package_id' => $package['id'],
+                'print_option_id' => $package['id'],
                 'queue_number' => 1,
                 'status' => 'pending',
             ];

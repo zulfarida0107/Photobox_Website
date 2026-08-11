@@ -147,14 +147,10 @@ class UserBookingBridgeController extends BaseApiController
         ]);
     }
 
-    // =========================================================================
-    // GET /api/user/packages
-    // Ambil semua paket & harga yang tersedia, untuk ditampilkan di User_Booking.
-    // =========================================================================
     public function getPackages()
     {
-        $packages = $this->packageModel
-            ->orderBy('base_price', 'ASC')
+        $packages = $this->printOptionModel
+            ->orderBy('extra_price', 'ASC')
             ->findAll();
 
         return $this->respondOk([
@@ -193,11 +189,8 @@ class UserBookingBridgeController extends BaseApiController
     {
         $frames = $this->slotModel->db
             ->table('frames')
-            ->select('frames.*, frame_categories.name as category_name, frame_layouts.name as layout_name')
-            ->join('frame_categories', 'frame_categories.id = frames.category_id', 'left')
-            ->join('frame_layouts', 'frame_layouts.id = frames.layout_id', 'left')
-            ->where('frames.is_active', 1)
-            ->orderBy('frames.created_at', 'DESC')
+            ->where('is_active', 1)
+            ->orderBy('created_at', 'DESC')
             ->get()
             ->getResultArray();
 
@@ -217,16 +210,13 @@ class UserBookingBridgeController extends BaseApiController
     {
         $builder = $this->slotModel->db
             ->table('frames')
-            ->select('frames.*, frame_categories.name as category_name, frame_layouts.name as layout_name')
-            ->join('frame_categories', 'frame_categories.id = frames.category_id', 'left')
-            ->join('frame_layouts', 'frame_layouts.id = frames.layout_id', 'left')
-            ->where('frames.is_active', 1);
+            ->where('is_active', 1);
 
         if ($categoryId && $categoryId !== 'all') {
-            $builder->where('frames.category_id', $categoryId);
+            $builder->where('category', $categoryId);
         }
 
-        $frames = $builder->orderBy('frames.created_at', 'DESC')
+        $frames = $builder->orderBy('created_at', 'DESC')
             ->get()
             ->getResultArray();
 

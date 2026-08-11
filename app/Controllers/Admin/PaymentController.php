@@ -164,7 +164,7 @@ class PaymentController extends BaseController
 
         $this->paymentModel->update($id, ['status' => 'paid']);
 
-        return redirect()->to(base_url('admin/payments'))
+        return redirect()->to(base_url('admin/payments#table-payment'))
             ->with('success', "Pembayaran #{$id} berhasil diverifikasi sebagai Paid.");
     }
 
@@ -177,7 +177,7 @@ class PaymentController extends BaseController
             ->set(['status' => 'paid'])
             ->update();
 
-        return redirect()->to(base_url('admin/payments'))
+        return redirect()->to(base_url('admin/payments#table-payment'))
             ->with('success', 'Semua pembayaran pending/gagal berhasil diverifikasi massal.');
     }
 

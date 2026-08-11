@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Database\Migrations;
+
+use CodeIgniter\Database\Migration;
+
+class MoveLatLongToLocations extends Migration
+{
+    public function up()
+    {
+        // Add to locations
+        $this->forge->addColumn('locations', [
+            'latitude' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+                'null'       => true,
+            ],
+            'longitude' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+                'null'       => true,
+            ],
+            'preview_images' => [
+                'type'       => 'TEXT',
+                'null'       => true,
+            ],
+        ]);
+
+        // Remove from booths (ignore if not exists to prevent error)
+        $db = \Config\Database::connect();
+        if ($db->fieldExists('latitude', 'booths')) {
+            $this->forge->dropColumn('booths', 'latitude');
+        }
+        if ($db->fieldExists('longitude', 'booths')) {
+            $this->forge->dropColumn('booths', 'longitude');
+        }
+    }
+
+    public function down()
+    {
+        // Revert locations
+        $this->forge->dropColumn('locations', ['latitude', 'longitude', 'preview_images']);
+
+        // Revert booths
+        $this->forge->addColumn('booths', [
+            'latitude' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+                'null'       => true,
+            ],
+            'longitude' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+                'null'       => true,
+            ],
+        ]);
+    }
+}

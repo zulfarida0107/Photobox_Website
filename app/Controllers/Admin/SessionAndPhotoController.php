@@ -7,6 +7,8 @@ use App\Models\SessionModel;
 use App\Models\PhotoModel;
 use App\Models\FrameModel;
 use App\Models\FilterModel;
+use App\Services\EmailService;
+use App\Services\GoogleDriveService;
 
 class SessionAndPhotoController extends BaseController
 {
@@ -35,8 +37,9 @@ class SessionAndPhotoController extends BaseController
         // --- Query sesi dengan JOIN ke frames & filters ---
         $db = $this->sessionModel->db;
         $builder = $db->table('sessions s')
-            ->select('s.*, b.booking_code, fr.name AS frame_name, fi.name AS filter_name')
+            ->select('s.*, b.booking_code, fr.name AS frame_name, fi.name AS filter_name, c.email AS customer_email')
             ->join('bookings b',  'b.id = s.booking_id', 'left')
+            ->join('customers c', 'c.id = b.customer_id', 'left')
             ->join('frames fr',   'fr.id = s.frame_id',  'left')
             ->join('filters fi',  'fi.id = s.filter_id', 'left')
             ->orderBy('s.created_at', 'DESC');
@@ -98,15 +101,16 @@ class SessionAndPhotoController extends BaseController
     {
         $db = $this->sessionModel->db;
         $session = $db->table('sessions s')
-            ->select('s.*, b.booking_code, fr.name AS frame_name, fi.name AS filter_name')
+            ->select('s.*, b.booking_code, fr.name AS frame_name, fi.name AS filter_name, c.email AS customer_email')
             ->join('bookings b',  'b.id = s.booking_id', 'left')
+            ->join('customers c', 'c.id = b.customer_id', 'left')
             ->join('frames fr',   'fr.id = s.frame_id',  'left')
             ->join('filters fi',  'fi.id = s.filter_id', 'left')
             ->where('s.id', $id)
             ->get()->getRowArray();
 
         if (!$session) {
-            return redirect()->to(base_url('admin/sessions'))
+            return redirect()->to(base_url('admin/sessions#table-session'))
                 ->with('error', 'Sesi tidak ditemukan.');
         }
 
@@ -133,17 +137,61 @@ class SessionAndPhotoController extends BaseController
                 ->with('error', 'Sesi tidak ditemukan.');
         }
 
-        if (empty($session['email_recipient'])) {
-            return redirect()->to(base_url('admin/sessions'))
+        $db = $this->sessionModel->db;
+        $customerEmail = $db->table('bookings b')
+            ->select('c.email')
+            ->join('customers c', 'c.id = b.customer_id', 'left')
+            ->where('b.id', $session['booking_id'])
+            ->get()->getRowArray();
+        
+        $emailRecipient = $session['email_recipient'] ?? ($customerEmail['email'] ?? '');
+
+        if (empty($emailRecipient)) {
+            return redirect()->to(base_url('admin/sessions#table-session'))
                 ->with('error', 'Sesi ini tidak memiliki penerima email.');
         }
 
-        // Placeholder: integrasi email service (Mailer CI4)
-        // \Config\Services::email()->setTo($session['email_recipient'])...
-        // Untuk sekarang, hanya log / redirect dengan pesan sukses.
+        // Coba upload ke Drive dulu (atau gunakan drive_folder_url yang sudah ada)
+        $driveLink = $session['drive_folder_url'] ?? null;
 
-        return redirect()->to(base_url('admin/sessions'))
-            ->with('success', "Email galeri sesi #{$id} berhasil dikirim ulang ke {$session['email_recipient']}.");
+        if (empty($driveLink)) {
+            try {
+                $driveService = new GoogleDriveService();
+                $driveLink    = $driveService->uploadSessionPhotos($id);
+                $this->sessionModel->update($id, ['drive_folder_url' => $driveLink]);
+            } catch (\Throwable $driveErr) {
+                log_message('error', 'Resend Drive upload error: ' . $driveErr->getMessage());
+                $driveLink = null;
+            }
+        }
+
+        // Kirim email
+        if (!empty($emailRecipient)) {
+            try {
+                $emailService = new EmailService();
+                // Send specific params to email template
+                // Assuming it expects photos array
+                $photos = (new \App\Models\PhotoModel())->where('session_id', $id)->findAll();
+                
+                $emailParams = [
+                    'recipient'   => $emailRecipient,
+                    'subject'     => 'Your Photobox Session #' . $id,
+                    'messageBody' => 'Thank you for using Photobox! Here are your session results.',
+                    'driveLink'   => $driveLink,
+                ];
+                $emailService->sendEmail($emailParams);
+
+                return redirect()->to(base_url('admin/sessions#table-session'))
+                    ->with('success', 'Email galeri berhasil dikirim ulang ke ' . esc($emailRecipient) . '.');
+            } catch (\Throwable $e) {
+                log_message('error', 'Resend Email error: ' . $e->getMessage());
+                return redirect()->to(base_url('admin/sessions#table-session'))
+                    ->with('error', 'Gagal mengirim ulang email: ' . $e->getMessage());
+            }
+        }
+
+        return redirect()->to(base_url('admin/sessions#table-session'))
+            ->with('error', 'Gagal mengirim ulang email.');
     }
 
     // =========================================================================
@@ -151,16 +199,52 @@ class SessionAndPhotoController extends BaseController
     // =========================================================================
     public function resendAll()
     {
-        $sessions = $this->sessionModel
-            ->where('email_recipient IS NOT NULL')
-            ->where('email_recipient !=', '')
-            ->findAll();
+        $db = $this->sessionModel->db;
+        $sessions = $db->table('sessions s')
+            ->select('s.*, c.email AS customer_email')
+            ->join('bookings b', 'b.id = s.booking_id', 'left')
+            ->join('customers c', 'c.id = b.customer_id', 'left')
+            ->where("(s.email_recipient IS NOT NULL AND s.email_recipient != '') OR (c.email IS NOT NULL AND c.email != '')")
+            ->get()->getResultArray();
 
-        // Placeholder: loop kirim email
-        $count = count($sessions);
+        $emailService = new EmailService();
+        $successCount = 0;
+        $failCount    = 0;
 
-        return redirect()->to(base_url('admin/sessions'))
-            ->with('success', "Perintah kirim ulang email dikirim untuk {$count} sesi.");
+        foreach ($sessions as $sess) {
+            $driveLink = $sess['drive_folder_url'] ?? null;
+
+            if (empty($driveLink)) {
+                try {
+                    $driveService = new GoogleDriveService();
+                    $driveLink    = $driveService->uploadSessionPhotos($sess['id']);
+                    $this->sessionModel->update($sess['id'], ['drive_folder_url' => $driveLink]);
+                } catch (\Throwable $e) {
+                    log_message('error', 'ResendAll Drive error for ' . $sess['id'] . ': ' . $e->getMessage());
+                    $driveLink = null;
+                }
+            }
+
+            try {
+                $recipient = !empty($sess['email_recipient']) ? $sess['email_recipient'] : $sess['customer_email'];
+                $sent = $emailService->sendDriveLink($recipient, $driveLink, $sess['id']);
+                if ($sent) {
+                    $successCount++;
+                } else {
+                    $failCount++;
+                }
+            } catch (\Throwable $e) {
+                log_message('error', 'ResendAll email error for ' . $sess['id'] . ': ' . $e->getMessage());
+                $failCount++;
+            }
+        }
+
+        $msg = "Berhasil kirim ulang: {$successCount} email.";
+        if ($failCount > 0) {
+            $msg .= " Gagal: {$failCount} (cek log SMTP).";
+        }
+
+        return redirect()->to(base_url('admin/sessions#table-session'))->with('success', $msg);
     }
 
     // =========================================================================
@@ -177,8 +261,8 @@ class SessionAndPhotoController extends BaseController
         // Hapus file fisik semua foto dalam sesi ini
         $photos = $this->photoModel->where('session_id', $id)->findAll();
         foreach ($photos as $photo) {
-            if (!empty($photo['file_path']) && file_exists(FCPATH . $photo['file_path'])) {
-                unlink(FCPATH . $photo['file_path']);
+            if (!empty($photo['file_path']) && file_exists(WRITEPATH . $photo['file_path'])) {
+                unlink(WRITEPATH . $photo['file_path']);
             }
         }
 
@@ -186,8 +270,8 @@ class SessionAndPhotoController extends BaseController
         $this->photoModel->where('session_id', $id)->delete();
         $this->sessionModel->delete($id);
 
-        return redirect()->to(base_url('admin/sessions'))
-            ->with('success', "Sesi #{$id} dan seluruh fotonya berhasil dihapus.");
+        return redirect()->to(base_url('admin/sessions#table-session'))
+            ->with('success', 'Sesi beserta foto berhasil dihapus.');
     }
 
     // =========================================================================

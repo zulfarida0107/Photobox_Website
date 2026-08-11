@@ -36,7 +36,7 @@
         <!-- Page Header -->
         <div class="mb-6 flex items-center justify-between">
             <div>
-                <h2 class="font-h1 text-h1 text-on-surface">Detail Sesi #<?= esc($session['id']) ?></h2>
+                <h2 class="font-h1 text-h1 text-on-surface">Detail Sesi <span class="text-blue-600 font-mono">#<?= esc($session['id']) ?></span></h2>
                 <p class="font-body-sm text-body-sm text-on-surface-variant">Detail metadata sesi pemotretan dan daftar foto hasil jepretan.</p>
             </div>
             <div class="flex gap-2">
@@ -73,7 +73,7 @@
                     <div class="p-6 space-y-4">
                         <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-3">
                             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">ID Sesi</span>
-                            <span class="col-span-2 text-sm text-slate-800 font-mono">#<?= esc($session['id']) ?></span>
+                            <span class="col-span-2 text-sm text-blue-600 font-bold font-mono">#<?= esc($session['id']) ?></span>
                         </div>
                         <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-3">
                             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Kode Booking</span>

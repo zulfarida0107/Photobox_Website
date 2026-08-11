@@ -124,13 +124,13 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
             <!-- KIRI: Tabel Slot Operasional (5 Cols) -->
-            <section class="lg:col-span-5 flex flex-col h-full">
-                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex-1 flex flex-col">
+            <section id="table-operasional" class="lg:col-span-5 flex flex-col">
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
                     <!-- Table Header -->
                     <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-white">
                         <div class="flex items-center gap-2">
                             <div class="w-1 h-5 bg-primary rounded-full"></div>
-                            <h4 class="font-bold text-slate-800 text-sm">Slot Operasional</h4>
+                            <h4 class="font-bold text-slate-800 text-sm">Daftar Operasional</h4>
                             <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[11px] font-bold border border-blue-100">
                                 <?= $totalAvailableSlots ?? 0 ?> Tersedia
                             </span>
@@ -155,11 +155,11 @@
                     </div>
 
                     <!-- Table -->
-                    <div class="overflow-x-auto flex-1 max-h-[500px]">
+                    <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
                                 <tr>
-                                    <th class="px-3.5 py-2.5">SESI</th>
+                                    <th class="px-3.5 py-2.5 text-center">SESI</th>
                                     <th class="px-3.5 py-2.5 text-center">WAKTU</th>
                                     <th class="px-3.5 py-2.5 text-center">TERISI</th>
                                     <th class="px-3.5 py-2.5 text-center">AKSI</th>
@@ -195,13 +195,14 @@
                                             ];
                                         ?>
                                         <tr class="hover:bg-blue-50/50 transition-colors">
-                                            <td class="px-3.5 py-2.5">
+                                            <td class="px-3.5 py-2.5 text-center">
                                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border <?= $sesColors[$sesLabel] ?>">
                                                     <span class="material-symbols-outlined text-[12px]">schedule</span>
                                                     Sesi <?= $sesLabel ?>
                                                 </span>
                                             </td>
                                             <td class="px-3.5 py-2.5 text-center">
+                                                <div class="text-[10px] text-slate-500 font-semibold mb-0.5"><?= date('d M Y', strtotime($slot['slot_date'])) ?></div>
                                                 <div class="font-semibold text-slate-800 font-mono text-[11px]"><?= $startFmt ?> - <?= $endFmt ?></div>
                                             </td>
                                             <td class="px-3.5 py-2.5 text-center">
@@ -209,21 +210,15 @@
                                                 <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold border <?= $sc ?>"><?= $sl ?></span>
                                             </td>
                                             <td class="px-3.5 py-2.5 text-center">
-                                                <div class="flex items-center justify-center gap-1.5">
-                                                    <a href="<?= base_url('admin/slots/' . esc($slot['id']) . '/edit') ?>"
-                                                       class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-600 border border-blue-200 text-[10px] font-semibold hover:bg-blue-100 transition-colors">
-                                                        <span class="material-symbols-outlined text-[13px]">edit</span>
-                                                        Edit
+                                                <div class="flex items-center justify-center gap-1">
+                                                    <a href="<?= base_url('admin/slots/' . esc($slot['id']) . '/edit') ?>" title="Edit"
+                                                       class="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
+                                                        <span class="material-symbols-outlined text-[18px]">edit</span>
                                                     </a>
-                                                    <form method="post" action="<?= base_url('admin/slots/' . esc($slot['id']) . '/delete') ?>"
-                                                          onsubmit="return confirm('Hapus sesi <?= esc($sesLabel . ' ' . $startFmt) ?>? Tindakan ini tidak dapat dibatalkan.')">
-                                                        <?= csrf_field() ?>
-                                                        <button type="submit"
-                                                                class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-red-50 text-red-600 border border-red-200 text-[10px] font-semibold hover:bg-red-100 transition-colors">
-                                                            <span class="material-symbols-outlined text-[13px]">delete</span>
-                                                            Hapus
-                                                        </button>
-                                                    </form>
+                                                    <button type="button" title="Hapus" onclick="showDeleteSlotModal('<?= base_url('admin/slots/' . esc($slot['id']) . '/delete') ?>', 'sesi <?= esc($sesLabel . ' ' . $startFmt, 'js') ?>')"
+                                                            class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -237,24 +232,57 @@
                         </table>
                     </div>
 
-                    <!-- Footer Link -->
-                    <div class="p-3 bg-slate-50 border-t border-slate-200 text-center">
-                        <a href="<?= base_url('admin/slots') ?>" class="text-xs font-bold text-primary hover:underline flex items-center justify-center gap-1">
-                            <span class="material-symbols-outlined text-sm">calendar_month</span>
-                            Kelola Semua Kalender Slot
-                        </a>
+                    <!-- Pagination Slot -->
+                    <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                        <div class="text-[10px] text-slate-500 font-medium">
+                            Menampilkan <?= count($slots ?? []) ?> dari <?= $totalSlots ?> Operasional
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <?php 
+                            $qParams = $_GET; 
+                            $qParams['slot_page'] = max(1, ($slotPage ?? 1) - 1); 
+                            $prevUrl = base_url('admin/bookings') . '?' . http_build_query($qParams) . '#table-operasional'; 
+                            ?>
+                            <a href="<?= $prevUrl ?>" 
+                               class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-md hover:bg-slate-50 transition-colors text-slate-500 <?= ($slotPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-[12px]">chevron_left</span>
+                            </a>
+                            
+                            <?php
+                            $startPage = max(1, min(($slotPage ?? 1) - 2, ($totalSlotPages ?? 1) - 4));
+                            $endPage = min($totalSlotPages ?? 1, max(($slotPage ?? 1) + 2, 5));
+                            for ($i = $startPage; $i <= $endPage; $i++):
+                                $qParams['slot_page'] = $i;
+                                $pageUrl = base_url('admin/bookings') . '?' . http_build_query($qParams) . '#table-operasional';
+                            ?>
+                                <a href="<?= $pageUrl ?>" 
+                                   class="w-7 h-7 flex items-center justify-center border rounded-md text-[10px] font-bold transition-colors <?= $i == ($slotPage ?? 1) ? 'bg-primary text-white border-primary' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50' ?>">
+                                    <?= $i ?>
+                                </a>
+                            <?php endfor; ?>
+
+                            <?php 
+                            $qParams['slot_page'] = min($totalSlotPages ?? 1, ($slotPage ?? 1) + 1); 
+                            $nextUrl = base_url('admin/bookings') . '?' . http_build_query($qParams) . '#table-operasional'; 
+                            ?>
+                            <a href="<?= $nextUrl ?>" 
+                               class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-md hover:bg-slate-50 transition-colors text-slate-500 <?= ($slotPage ?? 1) >= ($totalSlotPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                            </a>
+                        </div>
                     </div>
+
                 </div>
             </section>
 
             <!-- KANAN: Tabel Booking Masuk (7 Cols) -->
-            <section class="lg:col-span-7 flex flex-col h-full">
-                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex-1 flex flex-col">
+            <section id="table-reservasi" class="lg:col-span-7 flex flex-col">
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
                     <!-- Table Header -->
                     <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-white">
                         <div class="flex items-center gap-2">
                             <div class="w-1 h-5 bg-primary rounded-full"></div>
-                            <h4 class="font-bold text-slate-800 text-sm">Daftar Booking Masuk</h4>
+                            <h4 class="font-bold text-slate-800 text-sm">Daftar Reservasi</h4>
                             <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-bold">
                                 Total: <?= $totalBookings ?? 0 ?>
                             </span>
@@ -288,12 +316,12 @@
                     </div>
 
                     <!-- Table -->
-                    <div class="overflow-x-auto flex-1">
+                    <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
                                 <tr>
-                                    <th class="px-4 py-3">KODE &amp; PELANGGAN</th>
-                                    <th class="px-4 py-3">SLOT / PAKET</th>
+                                    <th class="px-4 py-3 text-center">KODE &amp; PELANGGAN</th>
+                                    <th class="px-4 py-3 text-center">SLOT / PAKET</th>
                                     <th class="px-4 py-3 text-center">ANTREAN</th>
                                     <th class="px-4 py-3 text-center">STATUS</th>
                                     <th class="px-4 py-3 text-center">AKSI</th>
@@ -312,15 +340,13 @@
                                             $st = $statusMap[$bk['status']] ?? ['bg-slate-50 text-slate-600 border-slate-200', strtoupper($bk['status'])];
                                         ?>
                                         <tr class="hover:bg-blue-50/50 transition-colors">
-                                            <td class="px-4 py-3">
-                                                <div class="font-bold text-primary hover:underline cursor-pointer flex items-center gap-1"
-                                                     onclick="showBookingPreviewModal('<?= esc($bk['id'], 'js') ?>', '<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc(!empty($bk['print_copies']) ? $bk['print_copies'] . ' Cetak' : '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>', '<?= $bk['status'] ?>', <?= $bk['edit_count'] ?? 0 ?>)">
+                                            <td class="px-4 py-3 text-center">
+                                                <div class="font-bold text-blue-600">
                                                     <span><?= esc($bk['booking_code']) ?></span>
-                                                    <span class="material-symbols-outlined text-[14px] text-blue-400">info</span>
                                                 </div>
                                                 <div class="text-slate-700 font-medium mt-0.5"><?= esc($bk['customer_name'] ?? '-') ?></div>
                                             </td>
-                                            <td class="px-4 py-3">
+                                            <td class="px-4 py-3 text-center">
                                                 <div class="font-semibold text-slate-800">Slot #<?= esc($bk['slot_id']) ?></div>
                                                 <div class="text-[11px] text-slate-500 font-medium"><?= esc($bk['booth_name'] ?? 'Booth') ?> &bull; <?= esc(!empty($bk['print_copies']) ? $bk['print_copies'] . ' Cetak' : '-') ?></div>
                                             </td>
@@ -336,19 +362,18 @@
                                             </td>
                                             <td class="px-4 py-3 text-center">
                                                 <div class="flex justify-center items-center gap-1">
+                                                    <button type="button" onclick="showBookingPreviewModal('<?= esc($bk['id'], 'js') ?>', '<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc(!empty($bk['print_copies']) ? $bk['print_copies'] . ' Cetak' : '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>', '<?= $bk['status'] ?>', <?= $bk['edit_count'] ?? 0 ?>)"
+                                                            class="p-1.5 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors" title="Detail">
+                                                        <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                    </button>
                                                     <?php if (in_array($bk['status'], ['confirmed', 'pending'])): ?>
                                                         <a href="<?= base_url('admin/bookings/' . $bk['id'] . '/edit') ?>"
-                                                           class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" title="Edit Booking">
+                                                           class="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
                                                             <span class="material-symbols-outlined text-[18px]">edit</span>
                                                         </a>
                                                         <button type="button" onclick="showCancelBookingModal('<?= base_url('admin/bookings/' . $bk['id'] . '/cancel') ?>')"
-                                                                class="p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors" title="Batalkan Booking">
-                                                            <span class="material-symbols-outlined text-[18px]">cancel</span>
-                                                        </button>
-                                                    <?php else: ?>
-                                                        <button type="button" onclick="showBookingPreviewModal('<?= esc($bk['id'], 'js') ?>', '<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc(!empty($bk['print_copies']) ? $bk['print_copies'] . ' Cetak' : '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>', '<?= $bk['status'] ?>', <?= $bk['edit_count'] ?? 0 ?>)"
-                                                                class="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors" title="Detail & Riwayat">
-                                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                                class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
+                                                            <span class="material-symbols-outlined text-[18px]">delete</span>
                                                         </button>
                                                     <?php endif; ?>
                                                 </div>
@@ -367,25 +392,42 @@
                         </table>
                     </div>
 
-                    <!-- Pagination -->
-                    <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-                        <span class="text-xs text-slate-500 font-medium">
-                            Menampilkan <?= count($bookings ?? []) ?> dari <?= $totalBookings ?? 0 ?> booking
-                        </span>
+                    <!-- Pagination Booking -->
+                    <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                        <div class="text-[10px] text-slate-500 font-medium">
+                            Menampilkan <?= count($bookings ?? []) ?> dari <?= $totalBookings ?> Reservasi
+                        </div>
                         <div class="flex items-center gap-1">
-                            <a href="<?= base_url('admin/bookings?page=' . max(1, ($currentPage ?? 1) - 1) . '&period=' . esc($period ?? 'all') . '&q=' . urlencode($_GET['q'] ?? '') . '&status=' . urlencode($_GET['status'] ?? '')) ?>"
-                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-500 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
-                                <span class="material-symbols-outlined text-sm">chevron_left</span>
+                            <?php 
+                            $bParams = $_GET; 
+                            $bParams['page'] = max(1, ($currentPage ?? 1) - 1); 
+                            $prevUrlB = base_url('admin/bookings') . '?' . http_build_query($bParams) . '#table-reservasi'; 
+                            ?>
+                            <a href="<?= $prevUrlB ?>" 
+                               class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-md hover:bg-slate-50 transition-colors text-slate-500 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-[12px]">chevron_left</span>
                             </a>
-                            <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
-                                <a href="<?= base_url('admin/bookings?page=' . $i . '&period=' . esc($period ?? 'all') . '&q=' . urlencode($_GET['q'] ?? '') . '&status=' . urlencode($_GET['status'] ?? '')) ?>"
-                                   class="w-8 h-8 flex items-center justify-center border rounded-lg text-xs font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border-primary bg-primary text-white shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
+                            
+                            <?php
+                            $startPageB = max(1, min(($currentPage ?? 1) - 2, ($totalPages ?? 1) - 4));
+                            $endPageB = min($totalPages ?? 1, max(($currentPage ?? 1) + 2, 5));
+                            for ($i = $startPageB; $i <= $endPageB; $i++):
+                                $bParams['page'] = $i;
+                                $pageUrlB = base_url('admin/bookings') . '?' . http_build_query($bParams) . '#table-reservasi';
+                            ?>
+                                <a href="<?= $pageUrlB ?>" 
+                                   class="w-7 h-7 flex items-center justify-center border rounded-md text-[10px] font-bold transition-colors <?= $i == ($currentPage ?? 1) ? 'bg-primary text-white border-primary' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50' ?>">
                                     <?= $i ?>
                                 </a>
                             <?php endfor; ?>
-                            <a href="<?= base_url('admin/bookings?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&period=' . esc($period ?? 'all') . '&q=' . urlencode($_GET['q'] ?? '') . '&status=' . urlencode($_GET['status'] ?? '')) ?>"
-                               class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-500 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
-                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+
+                            <?php 
+                            $bParams['page'] = min($totalPages ?? 1, ($currentPage ?? 1) + 1); 
+                            $nextUrlB = base_url('admin/bookings') . '?' . http_build_query($bParams) . '#table-reservasi'; 
+                            ?>
+                            <a href="<?= $nextUrlB ?>" 
+                               class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-md hover:bg-slate-50 transition-colors text-slate-500 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-[12px]">chevron_right</span>
                             </a>
                         </div>
                     </div>
@@ -501,6 +543,46 @@
     </div>
 </div>
 
+<!-- Delete Slot Confirmation Modal -->
+<div id="deleteSlotModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="deleteSlotModalContent">
+        <!-- Modal Body -->
+        <div class="p-6 flex flex-col items-center text-center">
+            <!-- Warning Alert Icon -->
+            <div class="w-14 h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center p-3 mb-3">
+                <span class="material-symbols-outlined text-[28px]">warning</span>
+            </div>
+
+            <h3 class="text-base font-bold text-slate-800 mb-1">Konfirmasi Hapus Slot</h3>
+            <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+                Apakah Anda yakin ingin menghapus <span id="deleteSlotInfoText" class="font-bold"></span>?<br>Tindakan ini tidak dapat dibatalkan.
+            </p>
+            
+            <!-- Info Banner inside Modal -->
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 text-left mb-5 w-full flex items-start gap-2">
+                <span class="material-symbols-outlined text-blue-500 text-sm mt-0.5">info</span>
+                <div>
+                    <h5 class="text-xs font-bold text-blue-900">Informasi Penting</h5>
+                    <p class="text-[10px] text-blue-700 mt-0.5 leading-normal">
+                        Menghapus slot akan menghilangkan jadwal operasional ini dari daftar. Pastikan tidak ada pelanggan yang sudah memesan di sesi ini.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Form & Actions -->
+            <form id="deleteSlotForm" method="POST" class="w-full flex gap-3">
+                <?= csrf_field() ?>
+                <button type="button" onclick="closeDeleteSlotModal()" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition-colors">
+                    Batal
+                </button>
+                <button type="submit" class="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold text-xs rounded-lg transition-colors shadow-md">
+                    Hapus Slot
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     function showBookingPreviewModal(id, code, cust, slot, pkg, queue, badgeText, badgeClass, rawStatus, editCount) {
         const modal = document.getElementById('bookingPreviewModal');
@@ -566,6 +648,33 @@
     function closeCancelBookingModal() {
         const modal = document.getElementById('cancelBookingModal');
         const content = document.getElementById('cancelBookingModalContent');
+
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    function showDeleteSlotModal(actionUrl, slotInfo) {
+        const modal = document.getElementById('deleteSlotModal');
+        const content = document.getElementById('deleteSlotModalContent');
+        const form = document.getElementById('deleteSlotForm');
+        
+        form.action = actionUrl;
+        document.getElementById('deleteSlotInfoText').textContent = slotInfo;
+
+        // Show Modal
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeDeleteSlotModal() {
+        const modal = document.getElementById('deleteSlotModal');
+        const content = document.getElementById('deleteSlotModalContent');
 
         content.classList.remove('scale-100', 'opacity-100');
         content.classList.add('scale-95', 'opacity-0');

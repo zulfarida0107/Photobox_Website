@@ -25,7 +25,7 @@ class FrameAndFilterController extends BaseController
     // =========================================================================
     public function index()
     {
-        $framePerPage     = 5;
+        $framePerPage     = 10;
         $currentFramePage = max(1, (int) ($this->request->getGet('page') ?? 1));
 
         $catPerPage       = 5;
@@ -263,7 +263,7 @@ class FrameAndFilterController extends BaseController
     {
         $frame = $this->frameModel->find($id);
         if (!$frame) {
-            return redirect()->to(base_url('admin/frames'))
+            return redirect()->to(base_url('admin/frames#table-frame'))
                 ->with('error', 'Frame tidak ditemukan.');
         }
 
@@ -319,7 +319,7 @@ class FrameAndFilterController extends BaseController
 
         $this->frameModel->update($id, $updateData);
 
-        return redirect()->to(base_url('admin/frames'))
+        return redirect()->to(base_url('admin/frames#table-frame'))
             ->with('success', 'Frame berhasil diperbarui.');
     }
 
@@ -341,7 +341,7 @@ class FrameAndFilterController extends BaseController
 
         $this->frameModel->delete($id);
 
-        return redirect()->to(base_url('admin/frames'))
+        return redirect()->to(base_url('admin/frames#table-frame'))
             ->with('success', 'Frame berhasil dihapus.');
     }
 
@@ -381,7 +381,7 @@ class FrameAndFilterController extends BaseController
             'is_active' => (bool) $this->request->getPost('is_active'),
         ]);
 
-        return redirect()->to(base_url('admin/frames'))
+        return redirect()->to(base_url('admin/frames#table-frame'))
             ->with('success', 'Filter baru berhasil ditambahkan.');
     }
 

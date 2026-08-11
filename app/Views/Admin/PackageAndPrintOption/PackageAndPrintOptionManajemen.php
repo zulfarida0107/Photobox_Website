@@ -84,7 +84,7 @@
             </div>
 
             <!-- Tabel Opsi Cetak -->
-            <div class="w-full bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col flex-1">
+            <div id="table-print" class="w-full bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
                 <div class="px-6 pt-5 pb-3 border-b border-slate-100 bg-white">
                     <!-- Judul + Tombol Tambah -->
                     <div class="flex justify-between items-center mb-3">
@@ -189,21 +189,36 @@
                     </table>
                 </div>
                 <!-- Pagination Cetak -->
-                <div class="mt-auto p-6 bg-white text-slate-500 text-xs flex justify-between items-center border-t border-slate-100">
-                    <span>Menampilkan <?= count($printOptions ?? []) ?> dari <?= $totalPrintOptions ?? 0 ?> opsi</span>
+                <div class="mt-auto p-6 bg-white flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100">
+                    <span class="text-xs text-slate-500 font-medium">
+                        Menampilkan <?= count($printOptions ?? []) ?> dari <?= $totalPrintOptions ?? 0 ?> Cetak
+                    </span>
                     <div class="flex gap-2">
-                        <a href="<?= base_url('admin/print-options?opt_page=' . max(1, ($currentOptPage ?? 1) - 1) . '&sort_opt=' . ($sortOpt ?? 'termurah')) ?>"
+                        <a href="<?= base_url('admin/print-options?opt_page=' . max(1, ($currentOptPage ?? 1) - 1) . '&sort_opt=' . ($sortOpt ?? 'termurah')) ?>#table-print"
                            class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentOptPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                             <span class="material-symbols-outlined text-sm">chevron_left</span>
                         </a>
-                        <?php for ($i = 1; $i <= ($totalOptPages ?? 1); $i++): ?>
-                            <a href="<?= base_url('admin/print-options?opt_page=' . $i . '&sort_opt=' . ($sortOpt ?? 'termurah')) ?>"
-                               class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-colors <?= $i === ($currentOptPage ?? 1) ? 'border border-blue-900 bg-blue-900 text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
+                        <?php 
+                            $cPage = $currentOptPage ?? 1;
+                            $tPages = $totalOptPages ?? 1;
+                            $startPage = max(1, $cPage - 2);
+                            $endPage   = min($tPages, $cPage + 2);
+                            if ($endPage - $startPage + 1 < 5) {
+                                if ($startPage == 1) {
+                                    $endPage = min($tPages, 5);
+                                } elseif ($endPage == $tPages) {
+                                    $startPage = max(1, $tPages - 4);
+                                }
+                            }
+                        ?>
+                        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                            <a href="<?= base_url('admin/print-options?opt_page=' . $i . '&sort_opt=' . ($sortOpt ?? 'termurah')) ?>#table-print"
+                               class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-colors <?= $i === $cPage ? 'border border-blue-900 bg-blue-900 text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                                 <?= $i ?>
                             </a>
                         <?php endfor; ?>
-                        <a href="<?= base_url('admin/print-options?opt_page=' . min(($totalOptPages ?? 1), ($currentOptPage ?? 1) + 1) . '&sort_opt=' . ($sortOpt ?? 'termurah')) ?>"
-                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentOptPage ?? 1) >= ($totalOptPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                        <a href="<?= base_url('admin/print-options?opt_page=' . min($tPages, $cPage + 1) . '&sort_opt=' . ($sortOpt ?? 'termurah')) ?>#table-print"
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= $cPage >= $tPages ? 'opacity-40 pointer-events-none' : '' ?>">
                             <span class="material-symbols-outlined text-sm">chevron_right</span>
                         </a>
                     </div>
@@ -286,6 +301,14 @@
         <form method="post" action="<?= base_url('admin/print-options') ?>" class="p-6 space-y-5">
             <?= csrf_field() ?>
             <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nama Opsi Cetak</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[18px]">badge</span>
+                    <input type="text" name="name" required minlength="3" placeholder="Contoh: Paket Keluarga"
+                           class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                </div>
+            </div>
+            <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Jumlah Lembar (Copies)</label>
                 <div class="relative">
                     <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[18px]">file_copy</span>
@@ -325,6 +348,14 @@
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">ID Opsi</label>
                 <input type="text" id="editIdDisplay" readonly class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-400 outline-none" />
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nama Opsi Cetak</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[18px]">badge</span>
+                    <input type="text" name="name" id="editName" required minlength="3"
+                           class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                </div>
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Jumlah Lembar (Copies)</label>
@@ -450,14 +481,19 @@
     const editModalContent = document.getElementById('editModalContent');
     const editForm = document.getElementById('editForm');
     function openEditModal(id, name, copies, price) {
-        document.getElementById('editIdDisplay').value = '#' + id;
+        document.getElementById('editModal').classList.remove('hidden');
+        document.getElementById('editModal').classList.add('flex');
+        
+        setTimeout(() => {
+            document.getElementById('editModal').classList.remove('opacity-0');
+            document.getElementById('editModalContent').classList.remove('scale-95');
+        }, 10);
+
+        document.getElementById('editForm').action = `<?= base_url('admin/print-options') ?>/${id}/update`;
+        document.getElementById('editIdDisplay').value = id;
+        document.getElementById('editName').value = name;
         document.getElementById('editCopies').value = copies;
         document.getElementById('editPrice').value = price;
-        editForm.action = '<?= base_url('admin/print-options') ?>/' + id + '/update';
-        editModal.classList.remove('hidden'); editModal.classList.add('flex');
-        void editModal.offsetWidth;
-        editModal.classList.remove('opacity-0');
-        editModalContent.classList.remove('scale-95'); editModalContent.classList.add('scale-100');
     }
     function closeEditModal() {
         editModal.classList.add('opacity-0');

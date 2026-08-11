@@ -5,14 +5,12 @@ namespace App\Controllers\Api;
 use App\Models\BookingModel;
 use App\Models\FilterModel;
 use App\Models\FrameModel;
-use App\Models\PackageModel;
 use App\Models\PrintOptionModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class CatalogController extends BaseApiController
 {
     private BookingModel $bookingModel;
-    private PackageModel $packageModel;
     private PrintOptionModel $printOptionModel;
     private FrameModel $frameModel;
     private FilterModel $filterModel;
@@ -20,7 +18,6 @@ class CatalogController extends BaseApiController
     public function __construct()
     {
         $this->bookingModel = new BookingModel();
-        $this->packageModel = new PackageModel();
         $this->printOptionModel = new PrintOptionModel();
         $this->frameModel = new FrameModel();
         $this->filterModel = new FilterModel();
@@ -33,14 +30,9 @@ class CatalogController extends BaseApiController
             ? null
             : $this->bookingModel->where('booking_code', $bookingCode)->first();
 
-        $package = null;
-        if ($booking !== null) {
-            $package = $this->packageModel->find($booking['package_id']);
-        }
-
         $options = $this->printOptionModel->findAll();
         foreach ($options as &$option) {
-            $basePrice = (float) ($package['base_price'] ?? 0);
+            $basePrice = 0;
             $extraPrice = (float) ($option['extra_price'] ?? 0);
             $option['total_amount'] = number_format($basePrice + $extraPrice, 2, '.', '');
         }
@@ -54,10 +46,7 @@ class CatalogController extends BaseApiController
     public function listFrames(): ResponseInterface
     {
         $frames = $this->frameModel
-            ->select('frames.*, frame_categories.name as category, frame_layouts.name as layout_name, frame_layouts.photo_count as layout_photo_count, frame_layouts.aspect_ratio as layout_aspect_ratio, frame_layouts.slot_coordinates as layout_slot_coordinates')
-            ->join('frame_categories', 'frame_categories.id = frames.category_id', 'left')
-            ->join('frame_layouts', 'frame_layouts.id = frames.layout_id', 'left')
-            ->where('frames.is_active', 1)
+            ->where('is_active', 1)
             ->findAll();
 
         $db = \Config\Database::connect();
@@ -69,7 +58,19 @@ class CatalogController extends BaseApiController
 
         $categories = ['All'];
         foreach ($categoriesList as $cat) {
-            $categories[] = $cat['name'];
+            if (!empty($cat['name'])) {
+                $categories[] = $cat['name'];
+            }
+        }
+
+        foreach ($frames as &$frame) {
+            // Provide fallback layout fields for Kiosk if needed
+            $frame['layout_photo_count'] = 6;
+            
+            // Provide category_name to ensure case-insensitive matching in frontend works smoothly
+            if (isset($frame['category'])) {
+                $frame['category_name'] = ucfirst($frame['category']);
+            }
         }
 
         return $this->respondOk([

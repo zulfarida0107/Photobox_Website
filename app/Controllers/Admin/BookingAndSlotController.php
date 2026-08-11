@@ -64,13 +64,17 @@ class BookingAndSlotController extends BaseController
                 ->groupEnd();
         }
 
+        $slotPage = max(1, (int) ($this->request->getGet('slot_page') ?? 1));
+        $totalSlots = $slotsBuilder->countAllResults(false);
+        $totalSlotPages = max(1, (int) ceil($totalSlots / $perPage));
+
         $slots = $slotsBuilder->orderBy('slots.slot_date', 'ASC')
             ->orderBy('slots.start_time', 'ASC')
-            ->findAll();
+            ->findAll($perPage, ($slotPage - 1) * $perPage);
 
-        $totalAvailableSlots = array_reduce($slots, function ($carry, $slot) {
-            return $carry + ($slot['booked_count'] < $slot['max_bookings'] ? 1 : 0);
-        }, 0);
+        // We can just query the available slots count
+        $availableSlotsBuilder = clone $slotsBuilder;
+        $totalAvailableSlots = $availableSlotsBuilder->where('slots.booked_count < slots.max_bookings')->countAllResults(false);
 
         // --- Booking berdasarkan periode ---
         $bookingBuilder = $this->bookingModel
@@ -138,6 +142,9 @@ class BookingAndSlotController extends BaseController
             'totalBookings'       => $totalBookings,
             'currentPage'         => $currentPage,
             'totalPages'          => $totalPages,
+            'totalSlots'          => $totalSlots,
+            'slotPage'            => $slotPage,
+            'totalSlotPages'      => $totalSlotPages,
             'period'              => $period,
             'keyword'             => $keyword,
             'slotKeyword'         => $slotKeyword,
@@ -166,7 +173,7 @@ class BookingAndSlotController extends BaseController
             ->find($id);
 
         if (!$booking) {
-            return redirect()->to(base_url('admin/bookings'))
+            return redirect()->to(base_url('admin/bookings#table-reservasi'))
                 ->with('error', 'Booking tidak ditemukan.');
         }
 
@@ -185,12 +192,12 @@ class BookingAndSlotController extends BaseController
             ->find($id);
 
         if (!$booking) {
-            return redirect()->to(base_url('admin/bookings'))
+            return redirect()->to(base_url('admin/bookings#table-reservasi'))
                 ->with('error', 'Booking tidak ditemukan.');
         }
 
         if (($booking['edit_count'] ?? 0) >= 1) {
-            return redirect()->to(base_url('admin/bookings'))
+            return redirect()->to(base_url('admin/bookings#table-reservasi'))
                 ->with('error', 'Booking ini sudah pernah diubah sebelumnya dan tidak dapat diubah lagi.');
         }
 
@@ -216,12 +223,12 @@ class BookingAndSlotController extends BaseController
         $booking = $this->bookingModel->find($id);
 
         if (!$booking) {
-            return redirect()->to(base_url('admin/bookings'))
+            return redirect()->to(base_url('admin/bookings#table-reservasi'))
                 ->with('error', 'Booking tidak ditemukan.');
         }
 
         if (($booking['edit_count'] ?? 0) >= 1) {
-            return redirect()->to(base_url('admin/bookings'))
+            return redirect()->to(base_url('admin/bookings#table-reservasi'))
                 ->with('error', 'Booking ini sudah pernah diubah sebelumnya dan tidak dapat diubah lagi.');
         }
 
@@ -243,7 +250,7 @@ class BookingAndSlotController extends BaseController
             'edit_count'   => ($booking['edit_count'] ?? 0) + 1,
         ]);
 
-        return redirect()->to(base_url('admin/bookings'))
+        return redirect()->to(base_url('admin/bookings#table-reservasi'))
             ->with('success', 'Booking berhasil diperbarui.');
     }
 
@@ -255,7 +262,7 @@ class BookingAndSlotController extends BaseController
         $booking = $this->bookingModel->find($id);
 
         if (!$booking) {
-            return redirect()->to(base_url('admin/bookings'))
+            return redirect()->to(base_url('admin/bookings#table-reservasi'))
                 ->with('error', 'Booking tidak ditemukan.');
         }
 
@@ -269,38 +276,11 @@ class BookingAndSlotController extends BaseController
             ]);
         }
 
-        return redirect()->to(base_url('admin/bookings'))
+        return redirect()->to(base_url('admin/bookings#table-reservasi'))
             ->with('success', 'Booking berhasil dibatalkan.');
     }
 
-    // =========================================================================
-    // SLOTS INDEX — Daftar semua slot (kalender slot)
-    // =========================================================================
-    public function slots()
-    {
-        $currentPage = max(1, (int) ($this->request->getGet('page') ?? 1));
-        $perPage     = 10;
 
-        $slotsBuilder = $this->slotModel
-            ->select('slots.*, booths.name AS booth_name')
-            ->join('booths', 'booths.id = slots.booth_id', 'left');
-
-        $totalSlots  = $slotsBuilder->countAllResults(false);
-        $totalPages  = max(1, (int) ceil($totalSlots / $perPage));
-
-        $slots = $slotsBuilder
-            ->orderBy('slots.slot_date', 'ASC')
-            ->orderBy('slots.start_time', 'ASC')
-            ->findAll($perPage, ($currentPage - 1) * $perPage);
-
-        return view('Admin/BookingAndSlot/SlotKalender', [
-            'title'       => 'Kalender Slot | Admin Panel',
-            'slots'       => $slots,
-            'totalSlots'  => $totalSlots,
-            'currentPage' => $currentPage,
-            'totalPages'  => $totalPages,
-        ]);
-    }
 
     // =========================================================================
     // SLOT CREATE — Form slot baru
@@ -348,7 +328,7 @@ class BookingAndSlotController extends BaseController
             'booked_count' => 0,
         ]);
 
-        return redirect()->to(base_url('admin/bookings'))
+        return redirect()->to(base_url('admin/bookings#table-operasional'))
             ->with('success', 'Slot baru berhasil dibuat.');
     }
 
@@ -360,7 +340,7 @@ class BookingAndSlotController extends BaseController
         $slot = $this->slotModel->find($id);
 
         if (!$slot) {
-            return redirect()->to(base_url('admin/bookings'))
+            return redirect()->to(base_url('admin/bookings#table-operasional'))
                 ->with('error', 'Slot tidak ditemukan.');
         }
 
@@ -383,7 +363,7 @@ class BookingAndSlotController extends BaseController
         $slot = $this->slotModel->find($id);
 
         if (!$slot) {
-            return redirect()->to(base_url('admin/bookings'))
+            return redirect()->to(base_url('admin/bookings#table-operasional'))
                 ->with('error', 'Slot tidak ditemukan.');
         }
 
@@ -402,7 +382,7 @@ class BookingAndSlotController extends BaseController
             'max_bookings' => (int) $this->request->getPost('max_bookings'),
         ]);
 
-        return redirect()->to(base_url('admin/bookings'))
+        return redirect()->to(base_url('admin/bookings#table-operasional'))
             ->with('success', 'Slot berhasil diperbarui.');
     }
 
@@ -422,13 +402,13 @@ class BookingAndSlotController extends BaseController
         // Cek apakah ada booking yang terikat ke slot ini
         $hasBookings = $this->bookingModel->where('slot_id', $id)->countAllResults() > 0;
         if ($hasBookings) {
-            return redirect()->to(base_url('admin/bookings'))
+            return redirect()->to(base_url('admin/bookings#table-operasional'))
                 ->with('error', 'Slot tidak dapat dihapus karena masih ada booking yang terikat.');
         }
 
         $this->slotModel->delete($id);
 
-        return redirect()->to(base_url('admin/bookings'))
+        return redirect()->to(base_url('admin/bookings#table-operasional'))
             ->with('success', 'Slot berhasil dihapus.');
     }
 
@@ -539,3 +519,5 @@ class BookingAndSlotController extends BaseController
         exit;
     }
 }
+
+

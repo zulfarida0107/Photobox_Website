@@ -114,8 +114,8 @@ class AdminAccessController extends BaseController
             'role'     => $this->request->getPost('role'),
         ]);
 
-        return redirect()->to(base_url('admin/settings'))
-            ->with('success', "Admin {$newId} berhasil ditambahkan.");
+        return redirect()->to(base_url('admin/settings#table-admin'))
+            ->with('success', 'Admin berhasil ditambahkan.');
     }
 
     // =========================================================================
@@ -175,7 +175,7 @@ class AdminAccessController extends BaseController
 
         $this->adminModel->update($id, $updateData);
 
-        return redirect()->to(base_url('admin/settings'))
+        return redirect()->to(base_url('admin/settings#table-admin'))
             ->with('success', 'Data admin berhasil diperbarui.');
     }
 
@@ -186,13 +186,13 @@ class AdminAccessController extends BaseController
     {
         $admin = $this->adminModel->find($id);
         if (!$admin) {
-            return redirect()->to(base_url('admin/settings'))
+            return redirect()->to(base_url('admin/settings#table-admin'))
                 ->with('error', 'Admin tidak ditemukan.');
         }
 
         // Proteksi: admin tidak boleh menghapus dirinya sendiri
         if ($id === session()->get('adminId')) {
-            return redirect()->to(base_url('admin/settings'))
+            return redirect()->to(base_url('admin/settings#table-admin'))
                 ->with('error', 'Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif.');
         }
 
@@ -200,14 +200,14 @@ class AdminAccessController extends BaseController
         if (strtolower($admin['role']) === 'superadmin') {
             $superadminCount = $this->adminModel->where('role', 'superadmin')->countAllResults();
             if ($superadminCount <= 1) {
-                return redirect()->to(base_url('admin/settings'))
+                return redirect()->to(base_url('admin/settings#table-admin'))
                     ->with('error', 'Tidak dapat menghapus superadmin terakhir.');
             }
         }
 
         $this->adminModel->delete($id);
 
-        return redirect()->to(base_url('admin/settings'))
-            ->with('success', "Admin {$id} berhasil dihapus.");
+        return redirect()->to(base_url('admin/settings#table-admin'))
+            ->with('success', 'Admin berhasil dihapus.');
     }
 }

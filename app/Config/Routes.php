@@ -13,6 +13,7 @@ $routes->get('/', 'User_Booking\LandingPageController::index');
 
 // Handle global OPTIONS requests for CORS preflight
 $routes->options('(:any)', function() {});
+$routes->get('uploads/sessions/(:any)', 'Api\MediaController::showSessionFile/$1');
 
 // ============================================================
 // API ROUTES
@@ -40,6 +41,7 @@ $routes->group('api', static function ($routes) {
 
     $routes->post('photo/session/(:segment)/upload', 'Api\\PhotoController::upload/$1');
 	$routes->get('frame/(:any)', 'Api\\FrameController::show/$1');
+	$routes->get('uploads/sessions/(.*)', 'Api\\MediaController::showSessionFile/$1');
 	// --------------------------------------
 
     // --- ROUTES Integrasi User_Booking dan Admin ---
@@ -127,7 +129,9 @@ $routes->group('customer', static function ($routes) {
 // ============================================================
 $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 
-	// ---- Tab 1: Dashboard ----
+	// =========================================================================
+	// TAB 1: DASHBOARD
+	// =========================================================================
 	$routes->get('/',         'Admin\AdminDashboardController::index');
 	$routes->get('dashboard', 'Admin\AdminDashboardController::index');
 
@@ -136,7 +140,10 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->get('customer', function() { return redirect()->to(base_url('admin/customers')); });
 	$routes->get('payment',  function() { return redirect()->to(base_url('admin/payments')); });
 
-	// ---- Tab 2: Manajemen Pelanggan ----
+	// =========================================================================
+	// TAB 2: MANAJEMEN PELANGGAN
+	// =========================================================================
+	// --- Table: Pelanggan ---
 	$routes->get('customers',                    'Admin\CustomerController::index');
 	$routes->get('customers/create',             'Admin\CustomerController::create');
 	$routes->post('customers',                   'Admin\CustomerController::store');
@@ -145,37 +152,50 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->post('customers/(:segment)/update', 'Admin\CustomerController::update/$1');
 	$routes->post('customers/(:segment)/delete', 'Admin\CustomerController::destroy/$1');
 
-	// ---- Tab 3: Manajemen Reservasi & Slot ----
+	// =========================================================================
+	// TAB 3: MANAJEMEN RESERVASI & SLOT
+	// =========================================================================
+	// --- Table: Booking ---
 	$routes->get('bookings',                     'Admin\BookingAndSlotController::index');
 	$routes->get('bookings/export',              'Admin\BookingAndSlotController::export');
 	$routes->get('bookings/(:segment)',          'Admin\BookingAndSlotController::show/$1');
 	$routes->get('bookings/(:segment)/edit',     'Admin\BookingAndSlotController::edit/$1');
 	$routes->post('bookings/(:segment)/update',  'Admin\BookingAndSlotController::update/$1');
 	$routes->post('bookings/(:segment)/cancel',  'Admin\BookingAndSlotController::cancel/$1');
-	$routes->get('slots',                        'Admin\BookingAndSlotController::slots');
+
+	// --- Table: Slot Waktu ---
 	$routes->get('slots/create',                 'Admin\BookingAndSlotController::createSlot');
 	$routes->post('slots',                       'Admin\BookingAndSlotController::storeSlot');
 	$routes->get('slots/(:segment)/edit',        'Admin\BookingAndSlotController::editSlot/$1');
 	$routes->post('slots/(:segment)/update',     'Admin\BookingAndSlotController::updateSlot/$1');
 	$routes->post('slots/(:segment)/delete',     'Admin\BookingAndSlotController::deleteSlot/$1');
 
-	// ---- Tab 4: Manajemen Pembayaran ----
+	// =========================================================================
+	// TAB 4: MANAJEMEN PEMBAYARAN
+	// =========================================================================
+	// --- Table: Pembayaran ---
 	$routes->get('payments',                     'Admin\PaymentController::index');
 	$routes->post('payments/verify-bulk',        'Admin\PaymentController::verifyBulk');
 	$routes->post('payments/(:segment)/verify',  'Admin\PaymentController::verify/$1');
 	$routes->get('payments/(:segment)/invoice',  'Admin\PaymentController::invoice/$1');
 	$routes->get('payments/export',              'Admin\PaymentController::export');
 
-	// ---- Tab 5: Opsi Cetak ----
-	$routes->get('print-options',                    'Admin\PackageAndPrintOptionController::index');
-	$routes->get('print-options/export',             'Admin\PackageAndPrintOptionController::exportPrintOptions');
-	$routes->get('print-options/create',             'Admin\PackageAndPrintOptionController::createPrintOption');
-	$routes->post('print-options',                   'Admin\PackageAndPrintOptionController::storePrintOption');
-	$routes->get('print-options/(:segment)/edit',    'Admin\PackageAndPrintOptionController::editPrintOption/$1');
-	$routes->post('print-options/(:segment)/update', 'Admin\PackageAndPrintOptionController::updatePrintOption/$1');
-	$routes->post('print-options/(:segment)/delete', 'Admin\PackageAndPrintOptionController::deletePrintOption/$1');
+	// =========================================================================
+	// TAB 5: OPSI CETAK
+	// =========================================================================
+	// --- Table: Pilihan Cetak ---
+	$routes->get('print-options',                    'Admin\PrintOptionController::index');
+	$routes->get('print-options/export',             'Admin\PrintOptionController::exportPrintOptions');
+	$routes->get('print-options/create',             'Admin\PrintOptionController::createPrintOption');
+	$routes->post('print-options',                   'Admin\PrintOptionController::storePrintOption');
+	$routes->get('print-options/(:segment)/edit',    'Admin\PrintOptionController::editPrintOption/$1');
+	$routes->post('print-options/(:segment)/update', 'Admin\PrintOptionController::updatePrintOption/$1');
+	$routes->post('print-options/(:segment)/delete', 'Admin\PrintOptionController::deletePrintOption/$1');
 
-	// ---- Tab 6: Aset Desain (Frame & Filter) ----
+	// =========================================================================
+	// TAB 6: ASET DESAIN (FRAME & FILTER)
+	// =========================================================================
+	// --- Table: Frame ---
 	$routes->get('frames',                       'Admin\FrameAndFilterController::index');
 	$routes->get('frames/create',                'Admin\FrameAndFilterController::createFrame');
 	$routes->post('frames/sync',                 'Admin\FrameAndFilterController::syncAssets');
@@ -184,6 +204,8 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->post('frames/(:segment)/update',    'Admin\FrameAndFilterController::updateFrame/$1');
 	$routes->post('frames/(:segment)/toggle',    'Admin\FrameAndFilterController::toggleFrame/$1');
 	$routes->post('frames/(:segment)/delete',    'Admin\FrameAndFilterController::deleteFrame/$1');
+	
+	// --- Table: Filter ---
 	$routes->get('filters/create',               'Admin\FrameAndFilterController::createFilter');
 	$routes->post('filters',                     'Admin\FrameAndFilterController::storeFilter');
 	$routes->get('filters/(:segment)/edit',      'Admin\FrameAndFilterController::editFilter/$1');
@@ -191,17 +213,20 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->post('filters/(:segment)/toggle',   'Admin\FrameAndFilterController::toggleFilter/$1');
 	$routes->post('filters/(:segment)/delete',   'Admin\FrameAndFilterController::deleteFilter/$1');
 
-	// ---- Kategori Frame ----
+	// --- Table: Kategori Frame ---
 	$routes->post('categories',                  'Admin\FrameAndFilterController::storeCategory');
 	$routes->post('categories/(:segment)/update', 'Admin\FrameAndFilterController::updateCategory/$1');
 	$routes->post('categories/(:segment)/delete', 'Admin\FrameAndFilterController::deleteCategory/$1');
 
-	// ---- Layout Frame ----
+	// --- Table: Layout Frame ---
 	$routes->post('layouts',                     'Admin\FrameAndFilterController::storeLayout');
 	$routes->post('layouts/(:segment)/update',   'Admin\FrameAndFilterController::updateLayout/$1');
 	$routes->post('layouts/(:segment)/delete',   'Admin\FrameAndFilterController::deleteLayout/$1');
 
-	// ---- Tab 7: Mesin Booth ----
+	// =========================================================================
+	// TAB 7: MESIN BOOTH
+	// =========================================================================
+	// --- Table: Mesin Booth ---
 	$routes->get('booths',                      'Admin\BoothController::index');
 	$routes->get('booths/create',               'Admin\BoothController::create');
 	$routes->post('booths',                     'Admin\BoothController::store');
@@ -214,16 +239,40 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->post('booths/(:segment)/delete',   'Admin\BoothController::delete/$1');
 	$routes->post('booths/(:segment)/reset-session', 'Admin\BoothController::resetActiveSession/$1');
 
-	// ---- Tab 8: Sesi & Galeri Foto ----
+	// --- Table: Tema Booth ---
+	$routes->get('themes/(:segment)/edit',      'Admin\BoothController::editTheme/$1');
+	$routes->post('themes',                     'Admin\BoothController::storeTheme');
+	$routes->post('themes/(:segment)/update',   'Admin\BoothController::updateTheme/$1');
+	$routes->post('themes/(:segment)/delete',   'Admin\BoothController::deleteTheme/$1');
+
+	// --- Table: Lokasi Booth (Sementera Dinonaktifkan) ---
+	// FITUR LOKASI SEMENTARA DI-NONAKTIFKAN (FOKUS 1 TITIK)
+	// $routes->get('locations',                    'Admin\BoothController::locationsIndex');
+	// $routes->get('locations/create',             'Admin\BoothController::createLocation');
+	// $routes->post('locations',                  'Admin\BoothController::storeLocation');
+	// $routes->get('locations/(:segment)',          'Admin\BoothController::showLocation/$1');
+	// $routes->get('locations/(:segment)/edit',     'Admin\BoothController::editLocation/$1');
+	// $routes->post('locations/(:segment)/update', 'Admin\BoothController::updateLocation/$1');
+	// $routes->post('locations/(:segment)/delete', 'Admin\BoothController::deleteLocation/$1');
+
+	// =========================================================================
+	// TAB 8: SESI & GALERI FOTO
+	// =========================================================================
+	// --- Table: Sesi ---
 	$routes->get('sessions',                        'Admin\SessionAndPhotoController::index');
 	$routes->get('sessions/export',                 'Admin\SessionAndPhotoController::export');
 	$routes->get('sessions/resend-all',             'Admin\SessionAndPhotoController::resendAll');
 	$routes->get('sessions/(:segment)',             'Admin\SessionAndPhotoController::show/$1');
 	$routes->post('sessions/(:segment)/resend',     'Admin\SessionAndPhotoController::resend/$1');
 	$routes->post('sessions/(:segment)/delete',     'Admin\SessionAndPhotoController::deleteSession/$1');
+	
+	// --- Table: Foto ---
 	$routes->post('photos/(:segment)/delete',       'Admin\SessionAndPhotoController::deletePhoto/$1');
 
-	// ---- Tab 9: Pengaturan Akses (Admin) ----
+	// =========================================================================
+	// TAB 9: PENGATURAN AKSES (ADMIN)
+	// =========================================================================
+	// --- Table: Akses Admin ---
 	$routes->get('settings',                      'Admin\AdminAccessController::index');
 	$routes->get('settings/create',               'Admin\AdminAccessController::create');
 	$routes->post('settings',                     'Admin\AdminAccessController::store');

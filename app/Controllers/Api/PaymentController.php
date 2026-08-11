@@ -3,7 +3,6 @@
 namespace App\Controllers\Api;
 
 use App\Models\BookingModel;
-use App\Models\PackageModel;
 use App\Models\PaymentModel;
 use App\Models\PrintOptionModel;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -11,14 +10,12 @@ use CodeIgniter\HTTP\ResponseInterface;
 class PaymentController extends BaseApiController
 {
     private BookingModel $bookingModel;
-    private PackageModel $packageModel;
     private PrintOptionModel $printOptionModel;
     private PaymentModel $paymentModel;
 
     public function __construct()
     {
         $this->bookingModel = new BookingModel();
-        $this->packageModel = new PackageModel();
         $this->printOptionModel = new PrintOptionModel();
         $this->paymentModel = new PaymentModel();
     }
@@ -39,7 +36,8 @@ class PaymentController extends BaseApiController
         }
 
         if (in_array($booking['status'], ['cancelled', 'completed'], true)) {
-            return $this->failValidation('Booking tidak bisa diproses pembayaran lagi.');
+            $this->bookingModel->update($bookingId, ['status' => 'pending']);
+            $booking['status'] = 'pending';
         }
 
         $printOption = $this->printOptionModel->find($printOptionId);
@@ -67,8 +65,7 @@ class PaymentController extends BaseApiController
             }
         }
 
-        $package = $this->packageModel->find($booking['package_id']);
-        $basePrice = (float) ($package['base_price'] ?? 0);
+        $basePrice = 0;
         $extraPrice = (float) ($printOption['extra_price'] ?? 0);
         $amount = number_format($basePrice + $extraPrice, 2, '.', '');
 
@@ -98,13 +95,17 @@ class PaymentController extends BaseApiController
             $payment = $this->paymentModel->find($payment['id']);
         }
 
+        $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($payment['gateway_ref']);
+
         return $this->respondCreated([
             'message' => 'QR pembayaran berhasil dibuat (placeholder Midtrans).',
             'payment' => $payment,
+            'qrCode'  => $qrImageUrl,
             'midtrans' => [
                 'order_id' => $payment['id'],
                 'gross_amount' => $payment['amount'],
                 'qr_string' => $payment['gateway_ref'],
+                'qr_url'    => $qrImageUrl,
             ],
         ]);
     }
