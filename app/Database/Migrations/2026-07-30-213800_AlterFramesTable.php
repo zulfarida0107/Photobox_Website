@@ -15,6 +15,8 @@ class AlterFramesTable extends Migration
             $this->forge->dropColumn('frames', 'category_id');
         }
         if (in_array('layout_id', $fields)) {
+            // Drop foreign key constraint first
+            $this->db->query('ALTER TABLE frames DROP FOREIGN KEY fk_frames_layout_id');
             $this->forge->dropColumn('frames', 'layout_id');
         }
 

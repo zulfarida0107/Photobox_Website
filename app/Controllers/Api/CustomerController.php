@@ -37,10 +37,11 @@ class CustomerController extends BaseApiController
             return $this->failNotFound('Booking tidak ditemukan.');
         }
 
-        // Fetch package details
-        $packageModel = new \App\Models\PackageModel();
-        $package = $packageModel->find($booking['package_id']);
-        $booking['package'] = $package;
+        // Fetch print option details
+        $printOptionModel = new \App\Models\PrintOptionModel();
+        $printOption = $printOptionModel->find($booking['print_option_id'] ?? null);
+        $booking['print_option'] = $printOption;
+        $booking['package'] = $printOption; // Keep package key for frontend compatibility
 
         return $this->respondOk([
             'message' => 'Booking valid.',
@@ -90,7 +91,7 @@ class CustomerController extends BaseApiController
         $customerModel = new \App\Models\CustomerModel();
         $slotModel = new \App\Models\SlotModel();
         $boothModel = new \App\Models\BoothModel();
-        $packageModel = new \App\Models\PackageModel();
+        $printOptionModel = new \App\Models\PrintOptionModel();
 
         try {
             // 1. Find or create default walk-in customer
@@ -106,12 +107,12 @@ class CustomerController extends BaseApiController
                 $customer = $customerModel->find($customerId);
             }
 
-            // 2. Find first package
-            $package = $packageModel->first();
-            if ($package === null) {
+            // 2. Find first print option
+            $printOption = $printOptionModel->first();
+            if ($printOption === null) {
                 return $this->response->setStatusCode(500)->setJSON([
                     'status' => 500,
-                    'error' => 'Package tidak ditemukan di database.',
+                    'error' => 'Print option tidak ditemukan di database.',
                 ]);
             }
 
@@ -150,7 +151,7 @@ class CustomerController extends BaseApiController
                 'customer_id' => $customer['id'],
                 'slot_id' => $slot['id'],
                 'booth_id' => $booth['id'],
-                'package_id' => $package['id'],
+                'print_option_id' => $printOption['id'],
                 'queue_number' => 1,
                 'status' => 'pending',
             ];

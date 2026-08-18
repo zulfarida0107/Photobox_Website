@@ -97,14 +97,13 @@ class FrameAndFilterController extends BaseController
 
         // Kategori dari Enum
         $categories = [
-            ['id' => 'pastel', 'name' => 'Pastel'],
-            ['id' => 'cute', 'name' => 'Cute'],
-            ['id' => 'layout', 'name' => 'Layout'],
-            ['id' => 'minimalist', 'name' => 'Minimalist'],
-            ['id' => 'newspaper', 'name' => 'Newspaper'],
-            ['id' => 'magazine', 'name' => 'Magazine'],
-            ['id' => 'retro 90s', 'name' => 'Retro 90s'],
-            ['id' => 'y2k', 'name' => 'Y2K']
+            ['id' => 'Pastel', 'name' => 'Pastel'],
+            ['id' => 'Cute', 'name' => 'Cute'],
+            ['id' => 'Minimalist', 'name' => 'Minimalist'],
+            ['id' => 'Newspaper', 'name' => 'Newspaper'],
+            ['id' => 'Magazine', 'name' => 'Magazine'],
+            ['id' => 'Retro 90s', 'name' => 'Retro 90s'],
+            ['id' => 'Y2k', 'name' => 'Y2k']
         ];
         $allLayouts = $this->layoutModel->orderBy('name', 'ASC')->findAll();
 
@@ -160,7 +159,8 @@ class FrameAndFilterController extends BaseController
     {
         $rules = [
             'name'        => 'required|min_length[3]|max_length[100]|is_unique[frames.name]',
-            'category'    => 'permit_empty|in_list[pastel,cute,layout,minimalist,newspaper,magazine,retro 90s,y2k]',
+            'category'    => 'permit_empty|in_list[Pastel,Cute,Minimalist,Newspaper,Magazine,Retro 90s,Y2k]',
+            'layout_id'   => 'required',
             'price'       => 'permit_empty|numeric',
             'frame_file'  => 'uploaded[frame_file]|max_size[frame_file,2048]|ext_in[frame_file,png,jpg,jpeg]',
         ];
@@ -173,7 +173,14 @@ class FrameAndFilterController extends BaseController
         $file = $this->request->getFile('frame_file');
         
         $name = $this->request->getPost('name');
-        $photoCount = 0; // Removed layout logic
+        $layoutId = $this->request->getPost('layout_id');
+        $photoCount = 0;
+        if (!empty($layoutId)) {
+            $layout = $this->layoutModel->find($layoutId);
+            if ($layout) {
+                $photoCount = (int) ($layout['photo_count'] ?? 0);
+            }
+        }
 
         // Generate ID: frame_001
         $lastFrame = $this->frameModel->db->table('frames')
@@ -195,7 +202,8 @@ class FrameAndFilterController extends BaseController
         $this->frameModel->insert([
             'id'          => $newId,
             'name'        => $name,
-            'category'    => $this->request->getPost('category') ?: 'minimalist',
+            'category'    => $this->request->getPost('category') ?: 'Minimalist',
+            'layout_id'   => $layoutId,
             'price'       => $this->request->getPost('price') ?: 0,
             'file_path'   => 'uploads/frames/' . $newName,
         ]);
@@ -210,18 +218,19 @@ class FrameAndFilterController extends BaseController
     public function createFrame()
     {
         $categories = [
-            ['id' => 'pastel', 'name' => 'Pastel'],
-            ['id' => 'cute', 'name' => 'Cute'],
-            ['id' => 'layout', 'name' => 'Layout'],
-            ['id' => 'minimalist', 'name' => 'Minimalist'],
-            ['id' => 'newspaper', 'name' => 'Newspaper'],
-            ['id' => 'magazine', 'name' => 'Magazine'],
-            ['id' => 'retro 90s', 'name' => 'Retro 90s'],
-            ['id' => 'y2k', 'name' => 'Y2K']
+            ['id' => 'Pastel', 'name' => 'Pastel'],
+            ['id' => 'Cute', 'name' => 'Cute'],
+            ['id' => 'Minimalist', 'name' => 'Minimalist'],
+            ['id' => 'Newspaper', 'name' => 'Newspaper'],
+            ['id' => 'Magazine', 'name' => 'Magazine'],
+            ['id' => 'Retro 90s', 'name' => 'Retro 90s'],
+            ['id' => 'Y2k', 'name' => 'Y2k']
         ];
+        $layouts = $this->layoutModel->orderBy('name', 'ASC')->findAll();
         return view('Admin/FrameAndFilter/FrameForm', [
             'title'      => 'Unggah Frame Baru | Admin Panel',
             'categories' => $categories,
+            'layouts'    => $layouts,
             'validation' => \Config\Services::validation(),
         ]);
     }
@@ -238,20 +247,21 @@ class FrameAndFilterController extends BaseController
         }
 
         $categories = [
-            ['id' => 'pastel', 'name' => 'Pastel'],
-            ['id' => 'cute', 'name' => 'Cute'],
-            ['id' => 'layout', 'name' => 'Layout'],
-            ['id' => 'minimalist', 'name' => 'Minimalist'],
-            ['id' => 'newspaper', 'name' => 'Newspaper'],
-            ['id' => 'magazine', 'name' => 'Magazine'],
-            ['id' => 'retro 90s', 'name' => 'Retro 90s'],
-            ['id' => 'y2k', 'name' => 'Y2K']
+            ['id' => 'Pastel', 'name' => 'Pastel'],
+            ['id' => 'Cute', 'name' => 'Cute'],
+            ['id' => 'Minimalist', 'name' => 'Minimalist'],
+            ['id' => 'Newspaper', 'name' => 'Newspaper'],
+            ['id' => 'Magazine', 'name' => 'Magazine'],
+            ['id' => 'Retro 90s', 'name' => 'Retro 90s'],
+            ['id' => 'Y2k', 'name' => 'Y2k']
         ];
 
+        $layouts = $this->layoutModel->orderBy('name', 'ASC')->findAll();
         return view('Admin/FrameAndFilter/FrameForm', [
             'title'      => 'Edit Frame | Admin Panel',
             'frame'      => $frame,
             'categories' => $categories,
+            'layouts'    => $layouts,
             'validation' => \Config\Services::validation(),
         ]);
     }
@@ -269,7 +279,8 @@ class FrameAndFilterController extends BaseController
 
         $rules = [
             'name'        => "required|min_length[3]|max_length[100]|is_unique[frames.name,id,{$id}]",
-            'category'    => 'permit_empty|in_list[pastel,cute,layout,minimalist,newspaper,magazine,retro 90s,y2k]',
+            'category'    => 'permit_empty|in_list[Pastel,Cute,Minimalist,Newspaper,Magazine,Retro 90s,Y2k]',
+            'layout_id'   => 'required',
             'price'       => 'permit_empty|numeric',
         ];
 
@@ -279,12 +290,20 @@ class FrameAndFilterController extends BaseController
         }
 
         $name = $this->request->getPost('name');
-        $photoCount = 0; // Removed layout logic
+        $layoutId = $this->request->getPost('layout_id');
+        $photoCount = 0;
+        if (!empty($layoutId)) {
+            $layout = $this->layoutModel->find($layoutId);
+            if ($layout) {
+                $photoCount = (int) ($layout['photo_count'] ?? 0);
+            }
+        }
         $safeName = strtolower(trim(preg_replace('/[^a-zA-Z0-9]+/', '_', $name), '_'));
 
         $updateData = [
             'name'        => $name,
-            'category'    => $this->request->getPost('category') ?: 'minimalist',
+            'category'    => $this->request->getPost('category') ?: 'Minimalist',
+            'layout_id'   => $layoutId,
             'price'       => $this->request->getPost('price') ?: 0,
             'is_active'   => 1, // aktifkan jika sebelumnya disync & nonaktif
         ];
@@ -489,7 +508,7 @@ class FrameAndFilterController extends BaseController
 
         $db->table('frame_categories')->insert([
             'id'         => $newId,
-            'name'       => $this->request->getPost('name'),
+            'name'       => ucfirst($this->request->getPost('name')),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
@@ -514,7 +533,7 @@ class FrameAndFilterController extends BaseController
 
         $db = $this->frameModel->db;
         $db->table('frame_categories')->where('id', $id)->update([
-            'name'       => $this->request->getPost('name'),
+            'name'       => ucfirst($this->request->getPost('name')),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
 

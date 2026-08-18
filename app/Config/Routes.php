@@ -34,17 +34,18 @@ $routes->group('api', static function ($routes) {
     $routes->post('session/(:segment)/email', 'Api\\SessionController::submitEmail/$1');
     $routes->post('session/(:segment)/complete', 'Api\\SessionController::complete/$1');
 
-<<<<<<< Updated upstream
-    // --- ROUTES Admin Panel dan Desktop ---
+    // --- Google Auth ---
+    $routes->get('google/auth', 'GoogleAuthController::auth');
+    $routes->get('google/callback', 'GoogleAuthController::callback');
+
     $routes->post('session/(:segment)/upload', 'Api\\SessionController::upload/$1');
     $routes->post('session/(:segment)/upload-live', 'Api\\SessionController::uploadLive/$1');
+    $routes->post('session/(:segment)/capture-dslr', 'Api\\SessionController::captureDslr/$1');
+    $routes->get('session/photo/temp/(:any)', 'Api\\SessionController::getTempPhoto/$1');
+    $routes->post('session/liveview/start', 'Api\\SessionController::startLiveView');
+    $routes->post('session/liveview/stop', 'Api\\SessionController::stopLiveView');
 
     $routes->post('photo/session/(:segment)/upload', 'Api\\PhotoController::upload/$1');
-=======
-	$routes->post('session/(:segment)/upload', 'Api\\SessionController::upload/$1');
-	$routes->post('session/(:segment)/upload-live', 'Api\\SessionController::uploadLive/$1');
-	$routes->post('session/(:segment)/capture-dslr', 'Api\\SessionController::captureDslr/$1');
->>>>>>> Stashed changes
 	$routes->get('frame/(:any)', 'Api\\FrameController::show/$1');
 	// --------------------------------------
 
