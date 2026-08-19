@@ -15,8 +15,7 @@ $activeMap = [
     'bookings'      => 'bookings',
     'slots'         => 'bookings',      // slot masuk menu Reservasi
     'payments'      => 'payments',
-    'packages'      => 'packages',
-    'print-options' => 'packages',      // print-options masuk menu Paket & Cetak
+    'print-options' => 'print-options',
     'frames'        => 'frames',
     'filters'       => 'frames',        // filter masuk menu Aset Desain
     'booths'        => 'booths',
@@ -68,10 +67,10 @@ function sidebarClass(string $key, string $activeKey, string $clsActive, string 
             <span>Pembayaran</span>
         </a>
 
-        <a class="<?= sidebarClass('packages', $activeKey, $clsActive, $clsDefault) ?>"
-           href="<?= base_url('admin/packages') ?>">
+        <a class="<?= sidebarClass('print-options', $activeKey, $clsActive, $clsDefault) ?>"
+           href="<?= base_url('admin/print-options') ?>">
             <span class="material-symbols-outlined">print</span>
-            <span>Paket &amp; Cetak</span>
+            <span>Opsi Cetak</span>
         </a>
 
         <a class="<?= sidebarClass('frames', $activeKey, $clsActive, $clsDefault) ?>"

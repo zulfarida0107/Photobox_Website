@@ -20,14 +20,37 @@ class FrameController extends BaseController
     public function index()
     {
         $customerId = session()->get('customer_id');
-        
-        // Ambil data frame yang aktif
-        $frames = $this->frameModel->where('is_active', 1)->findAll();
-        
+        $db = \Config\Database::connect();
+
+        // Ambil daftar kategori dari tabel frame_categories
+        $categoryRows = $db->table('frame_categories')
+            ->select('name')
+            ->orderBy('name', 'ASC')
+            ->get()
+            ->getResultArray();
+        $categories = array_column($categoryRows, 'name');
+
+        $selectedCategory = $this->request->getGet('category');
+
+        // Ambil data frame yang aktif dari Admin
+        $builder = $db->table('frames')
+            ->select('frames.*')
+            ->where('frames.is_active', 1);
+
+        if (!empty($selectedCategory) && $selectedCategory !== 'all') {
+            $builder->where('frames.category', $selectedCategory);
+        }
+
+        $frames = $builder->orderBy('frames.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+
         $data = [
-            'title' => 'Pilih Tema Frame - CuitBox Studio',
-            'frames' => $frames,
-            'customer' => $customerId ? $this->customerModel->find($customerId) : null
+            'title'            => 'Pilih Tema Frame - CuitBox Studio',
+            'frames'           => $frames,
+            'categories'       => $categories,
+            'selectedCategory' => $selectedCategory,
+            'customer'         => $customerId ? $this->customerModel->find($customerId) : null
         ];
 
         return view('User_Booking/frame', $data);
@@ -50,6 +73,7 @@ class FrameController extends BaseController
         // Simpan pilihan frame ke session
         session()->set('selected_frame', $frameId);
         session()->set('selected_frame_name', $frame['name']);
+        session()->set('selected_frame_price', $frame['price'] ?? 0);
         
         // Redirect ke halaman berikutnya
         return redirect()->to('/user-payment')->with('success', 'Tema frame "' . $frame['name'] . '" berhasil dipilih!');

@@ -34,11 +34,43 @@ $routes->group('api', static function ($routes) {
     $routes->post('session/(:segment)/email', 'Api\\SessionController::submitEmail/$1');
     $routes->post('session/(:segment)/complete', 'Api\\SessionController::complete/$1');
 
+    // --- Google Auth ---
+    $routes->get('google/auth', 'GoogleAuthController::auth');
+    $routes->get('google/callback', 'GoogleAuthController::callback');
+
+    $routes->post('session/(:segment)/upload', 'Api\\SessionController::upload/$1');
+    $routes->get('session/settings', 'Api\\SessionController::getSettings');
+    $routes->post('session/(:segment)/upload-live', 'Api\\SessionController::uploadLive/$1');
+    $routes->post('session/(:segment)/capture-dslr', 'Api\\SessionController::captureDslr/$1');
+    $routes->get('session/photo/temp/(:any)', 'Api\\SessionController::getTempPhoto/$1');
+    $routes->post('session/liveview/start', 'Api\\SessionController::startLiveView');
+    $routes->post('session/liveview/stop', 'Api\\SessionController::stopLiveView');
+
     $routes->post('photo/session/(:segment)/upload', 'Api\\PhotoController::upload/$1');
-<<<<<<< HEAD
-=======
 	$routes->get('frame/(:any)', 'Api\\FrameController::show/$1');
->>>>>>> 809e25cbdcf9b46ae7d84d91ea5cae63ea09a3e1
+	// --------------------------------------
+
+    // --- ROUTES Integrasi User_Booking dan Admin ---
+    // Slot & Jadwal
+    $routes->get('user/slots', 'User_Booking\UserBookingBridgeController::getSlots');
+    $routes->get('user/slots/(:segment)', 'User_Booking\UserBookingBridgeController::getSlotsByDate/$1');
+    // Booth
+    $routes->get('user/booths', 'User_Booking\UserBookingBridgeController::getBooths');
+    // Paket & Harga
+    $routes->get('user/packages', 'User_Booking\UserBookingBridgeController::getPackages');
+    // Frame & Kategori Aset Desain Admin
+    $routes->get('user/categories', 'User_Booking\UserBookingBridgeController::getCategories');
+    $routes->get('user/frames', 'User_Booking\UserBookingBridgeController::getFrames');
+    $routes->get('user/frames/(:segment)', 'User_Booking\UserBookingBridgeController::getFramesByCategory/$1');
+    // Status & Detail Booking (by booking_code)
+    $routes->get('user/booking/(:segment)', 'User_Booking\UserBookingBridgeController::getBookingStatus/$1');
+    // Buat booking baru dari User_Booking
+    $routes->post('user/booking/create', 'User_Booking\UserBookingBridgeController::createBooking');
+    // Konfirmasi pembayaran dari User_Booking ke Admin
+    $routes->post('user/payment/confirm', 'User_Booking\UserBookingBridgeController::confirmPayment');
+    // Status pembayaran
+    $routes->get('user/payment/(:segment)/status', 'User_Booking\UserBookingBridgeController::getPaymentStatus/$1');
+    // --------------------------------------
 });
 
 // ============================================================
@@ -131,6 +163,9 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->get('slots',                        'Admin\BookingAndSlotController::slots');
 	$routes->get('slots/create',                 'Admin\BookingAndSlotController::createSlot');
 	$routes->post('slots',                       'Admin\BookingAndSlotController::storeSlot');
+	$routes->get('slots/(:segment)/edit',        'Admin\BookingAndSlotController::editSlot/$1');
+	$routes->post('slots/(:segment)/update',     'Admin\BookingAndSlotController::updateSlot/$1');
+	$routes->post('slots/(:segment)/delete',     'Admin\BookingAndSlotController::deleteSlot/$1');
 
 	// ---- Tab 4: Manajemen Pembayaran ----
 	$routes->get('payments',                     'Admin\PaymentController::index');
@@ -139,15 +174,9 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->get('payments/(:segment)/invoice',  'Admin\PaymentController::invoice/$1');
 	$routes->get('payments/export',              'Admin\PaymentController::export');
 
-	// ---- Tab 5: Paket & Cetak ----
-	$routes->get('packages',                         'Admin\PackageAndPrintOptionController::index');
-	$routes->get('packages/create',                  'Admin\PackageAndPrintOptionController::createPackage');
-	$routes->post('packages',                        'Admin\PackageAndPrintOptionController::storePackage');
-	$routes->get('packages/export',                  'Admin\PackageAndPrintOptionController::exportPackages');
-	$routes->get('packages/(:segment)/edit',         'Admin\PackageAndPrintOptionController::editPackage/$1');
-	$routes->post('packages/(:segment)/update',      'Admin\PackageAndPrintOptionController::updatePackage/$1');
-	$routes->post('packages/(:segment)/delete',      'Admin\PackageAndPrintOptionController::deletePackage/$1');
-	$routes->get('print-options',                    'Admin\PackageAndPrintOptionController::printOptions');
+	// ---- Tab 5: Opsi Cetak ----
+	$routes->get('print-options',                    'Admin\PackageAndPrintOptionController::index');
+	$routes->get('print-options/export',             'Admin\PackageAndPrintOptionController::exportPrintOptions');
 	$routes->get('print-options/create',             'Admin\PackageAndPrintOptionController::createPrintOption');
 	$routes->post('print-options',                   'Admin\PackageAndPrintOptionController::storePrintOption');
 	$routes->get('print-options/(:segment)/edit',    'Admin\PackageAndPrintOptionController::editPrintOption/$1');
@@ -157,6 +186,7 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	// ---- Tab 6: Aset Desain (Frame & Filter) ----
 	$routes->get('frames',                       'Admin\FrameAndFilterController::index');
 	$routes->get('frames/create',                'Admin\FrameAndFilterController::createFrame');
+	$routes->post('frames/sync',                 'Admin\FrameAndFilterController::syncAssets');
 	$routes->post('frames',                      'Admin\FrameAndFilterController::storeFrame');
 	$routes->get('frames/(:segment)/edit',       'Admin\FrameAndFilterController::editFrame/$1');
 	$routes->post('frames/(:segment)/update',    'Admin\FrameAndFilterController::updateFrame/$1');
@@ -213,11 +243,7 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 // ============================================================
 // USER BOOKING ROUTES (Customer Online Booking & Landing Page)
 // ============================================================
-<<<<<<< HEAD
-$routes->get('index', 'User_Booking\LandingPageController::index');
-=======
 $routes->get('landing', 'User_Booking\LandingPageController::index');
->>>>>>> 809e25cbdcf9b46ae7d84d91ea5cae63ea09a3e1
 
 $routes->get('register', 'User_Booking\RegisterController::index');
 $routes->post('register/store', 'User_Booking\RegisterController::store');
@@ -229,44 +255,44 @@ $routes->get('login', 'User_Booking\LoginController::index');
 $routes->post('login/auth', 'User_Booking\LoginController::auth');
 $routes->get('logout', 'User_Booking\LoginController::logout');
 
+// Lupa Password
+$routes->get('forgot-password', 'User_Booking\LoginController::forgotPassword');
+$routes->post('forgot-password/process', 'User_Booking\LoginController::processForgotPassword');
+
 $routes->get('schedule', 'User_Booking\ScheduleController::index');
 $routes->post('schedule', 'User_Booking\ScheduleController::store');
 $routes->get('schedule/getSlots', 'User_Booking\ScheduleController::getSlots');
 $routes->post('schedule/book', 'User_Booking\ScheduleController::book');
 $routes->post('schedule/submit', 'User_Booking\ScheduleController::submitSchedule');
 
-<<<<<<< HEAD
-// Frame Routes
-$routes->get('frame', 'User_Booking\FrameController::index');
-$routes->post('frame/store', 'User_Booking\FrameController::store');
-=======
 $routes->get('booth', 'User_Booking\BoothController::index');
 $routes->post('booth/store', 'User_Booking\BoothController::store');
->>>>>>> 809e25cbdcf9b46ae7d84d91ea5cae63ea09a3e1
 
 $routes->get('user-payment', 'User_Booking\PaymentMethodController::index');
 $routes->post('user-payment/store', 'User_Booking\PaymentMethodController::store');
 $routes->get('user-payment/detail/(:any)', 'User_Booking\PaymentMethodController::detail/$1');
 $routes->post('user-payment/confirm', 'User_Booking\PaymentMethodController::confirm');
 $routes->get('user-payment/success/(:any)', 'User_Booking\PaymentMethodController::success/$1');
-<<<<<<< HEAD
-$routes->post('user-payment/confirm', 'User_Booking\PaymentMethodController::confirm');
-=======
->>>>>>> 809e25cbdcf9b46ae7d84d91ea5cae63ea09a3e1
 
 $routes->get('StatusBooking', 'User_Booking\StatusBookingController::index');
 $routes->post('StatusBooking/store', 'User_Booking\StatusBookingController::store');
+$routes->get('statusbooking', 'User_Booking\StatusBookingController::index');  // alias lowercase
+
+// Pilihan Harga Cetak (Setelah schedule)
+$routes->get('print-option', 'User_Booking\PrintOptionController::index');
+$routes->post('print-option/store', 'User_Booking\PrintOptionController::store');
+
+// Frame pilihan (Tambahan — diperlukan setelah halaman schedule)
+$routes->get('frame', 'User_Booking\FrameController::index');
+$routes->post('frame/store', 'User_Booking\FrameController::store');
+
+
+// Booking Summary (setelah pilih frame)
+$routes->get('booking/summary', 'User_Booking\PaymentMethodController::index');
 
 $routes->get('barcode', 'User_Booking\BarcodeController::index');
 $routes->get('barcode/generate/(:any)', 'User_Booking\BarcodeController::generate/$1');
 $routes->get('barcode/scan', 'User_Booking\BarcodeController::scan');
 $routes->post('barcode/verify', 'User_Booking\BarcodeController::verify');
+$routes->post('frame/send-email', 'User_Booking\BarcodeController::sendEmail');
 
-<<<<<<< HEAD
-// Routes untuk Help & Language
-$routes->get('help', 'User_Booking\HelpController::index');
-$routes->post('help/send', 'User_Booking\HelpController::send');
-$routes->get('language/change/(:any)', 'User_Booking\LanguageController::change/$1');
-
-=======
->>>>>>> 809e25cbdcf9b46ae7d84d91ea5cae63ea09a3e1

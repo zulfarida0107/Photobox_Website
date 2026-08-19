@@ -57,7 +57,7 @@
                         </div>
                         <div>
                             <span class="text-slate-400 font-semibold uppercase tracking-wider block mb-1">Paket Terpilih</span>
-                            <span class="text-slate-950 font-bold text-sm"><?= esc($booking['package_name'] ?? '-') ?></span>
+                            <span class="text-slate-950 font-bold text-sm"><?= esc(!empty($booking['print_copies']) ? $booking['print_copies'] . ' Cetak' : '-') ?></span>
                         </div>
                     </div>
                 </div>

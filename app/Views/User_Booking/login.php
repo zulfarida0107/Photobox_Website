@@ -839,7 +839,7 @@
                                 <input type="checkbox" id="remember" name="remember">
                                 <label for="remember">Ingat saya</label>
                             </div>
-                            <a href="#" class="forgot-link">Lupa password?</a>
+                            <a href="<?= base_url('forgot-password') ?>" class="forgot-link">Lupa password?</a>
                         </div>
                         
                         <!-- Submit Button -->

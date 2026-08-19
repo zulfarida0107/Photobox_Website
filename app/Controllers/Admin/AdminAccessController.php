@@ -81,7 +81,7 @@ class AdminAccessController extends BaseController
     public function store()
     {
         $rules = [
-            'name'     => 'required|min_length[3]|max_length[100]',
+            'name'     => 'required|min_length[3]|max_length[100]|is_unique[admins.name]',
             'email'    => 'required|valid_email|is_unique[admins.email]',
             'password' => 'required|min_length[8]',
             'role'     => 'required|in_list[superadmin,staff]',
@@ -148,7 +148,7 @@ class AdminAccessController extends BaseController
         }
 
         $rules = [
-            'name'  => 'required|min_length[3]|max_length[100]',
+            'name'  => "required|min_length[3]|max_length[100]|is_unique[admins.name,id,{$id}]",
             'email' => "required|valid_email|is_unique[admins.email,id,{$id}]",
             'role'  => 'required|in_list[superadmin,staff]',
         ];

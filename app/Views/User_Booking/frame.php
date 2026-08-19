@@ -40,6 +40,7 @@
             border-radius: 0;
             overflow: hidden;
         }
+        /* Page wrapper: full height, footer pushed to bottom */
         .page-wrapper {
             min-height: 100vh;
             display: flex;
@@ -47,10 +48,16 @@
             justify-content: center;
             padding: 0;
         }
-        @media (min-width: 640px) {
-            .page-wrapper {
-                padding: 0;
-            }
+        .main-container-rounded {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        main.main-content {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
         }
         .header-bg {
             background: rgba(255, 255, 255, 0.9);
@@ -60,176 +67,151 @@
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(20px);
         }
+        /* === Frame Card: Full-image, all corners visible === */
         .theme-card {
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
             border-radius: 16px;
-            border: 2px solid transparent;
+            overflow: hidden;
             cursor: pointer;
             position: relative;
+            border: 2.5px solid transparent;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+            background: #fff;
         }
         .theme-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(30, 41, 59, 0.08);
+            transform: translateY(-6px) scale(1.015);
+            box-shadow: 0 20px 44px rgba(30, 41, 59, 0.16);
         }
         .theme-card.selected {
             border-color: #22c55e;
-            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15), 0 20px 40px rgba(30, 41, 59, 0.08);
+            box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.25), 0 20px 44px rgba(30, 41, 59, 0.14);
         }
+        /* Image shows fully — no crop, all corners visible */
+        .frame-card-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        .theme-card:hover .frame-card-img {
+            transform: scale(1.04);
+        }
+        /* Gradient overlay at bottom */
+        .frame-card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.18) 50%, transparent 100%);
+            pointer-events: none;
+            transition: background 0.3s;
+        }
+        .theme-card:hover .frame-card-overlay {
+            background: linear-gradient(to top, rgba(0,0,0,0.90) 0%, rgba(0,0,0,0.3) 55%, transparent 100%);
+        }
+        /* Selected green tint */
+        .selected-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(34, 197, 94, 0.12);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .theme-card.selected .selected-overlay { opacity: 1; }
+        /* Info block at bottom */
+        .frame-card-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 18px 16px 18px;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+        /* Category pill */
+        .category-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.28);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 999px;
+            width: fit-content;
+        }
+        /* Frame name */
+        .frame-card-name {
+            color: #fff;
+            font-weight: 800;
+            font-size: 1rem;
+            line-height: 1.3;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+        /* Pilih Tema button */
         .cta-button-gradient {
             background: linear-gradient(90deg, #d9f99d 0%, #bef264 100%);
-            box-shadow: 0 10px 15px -3px rgba(190, 242, 100, 0.4);
-            transition: all 0.3s ease;
+            color: #1e293b;
+            font-weight: 800;
+            font-size: 13px;
             border-radius: 9999px;
+            padding: 10px 0;
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(190, 242, 100, 0.45);
             position: relative;
             z-index: 10;
         }
         .cta-button-gradient:hover {
-            transform: scale(1.02);
-            box-shadow: 0 15px 25px -5px rgba(190, 242, 100, 0.5);
+            transform: scale(1.03);
+            box-shadow: 0 10px 28px rgba(190, 242, 100, 0.65);
         }
-        .cta-button-gradient:active {
-            transform: scale(0.98);
-        }
-        .card-image {
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
-        }
-        .theme-card .check-mark {
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .theme-card.selected .check-mark {
-            opacity: 1;
-        }
-        .theme-card .card-overlay {
+        .cta-button-gradient:active { transform: scale(0.97); }
+        /* Check badge */
+        .check-mark {
             position: absolute;
-            inset: 0;
-            background: rgba(34, 197, 94, 0.05);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            border-radius: 16px;
-            pointer-events: none;
-            z-index: 1;
-        }
-        .theme-card.selected .card-overlay {
-            opacity: 1;
-        }
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            max-width: 400px;
-            width: 100%;
-        }
-        .toast {
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            animation: slideInRight 0.5s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .toast-success {
-            background: #10b981;
-            color: white;
-        }
-        .toast-error {
-            background: #ef4444;
-            color: white;
-        }
-        .toast-info {
-            background: #3b82f6;
-            color: white;
-        }
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        .toast-close {
-            margin-left: auto;
-            cursor: pointer;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 24px;
-            height: 24px;
+            top: 14px;
+            right: 14px;
+            background: #22c55e;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: background 0.3s;
+            padding: 5px;
+            z-index: 6;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 2px 8px rgba(34,197,94,0.4);
         }
-        .toast-close:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        .card-content {
-            position: relative;
-            z-index: 2;
-        }
-        .card-content > * {
-            position: relative;
-            z-index: 2;
-        }
-        form {
-            position: relative;
-            z-index: 5;
-        }
+        .theme-card.selected .check-mark { opacity: 1; }
+        /* Vertical grid — uniform cards */
         .frame-grid {
             display: grid;
-            grid-template-columns: repeat(1, 1fr);
-            gap: 24px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
         }
         @media (min-width: 640px) {
-            .frame-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .frame-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }
         }
         @media (min-width: 1024px) {
-            .frame-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
+            .frame-grid { grid-template-columns: repeat(5, 1fr); gap: 20px; }
         }
-        .frame-grid .theme-card {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        .frame-grid .theme-card .card-image {
-            height: 180px;
-        }
-        @media (min-width: 768px) {
-            .frame-grid .theme-card .card-image {
-                height: 200px;
-            }
-        }
-        /* Price tag styling */
-        .price-tag {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 9999px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-        .price-tag-light {
-            background: #d1fae5;
-            color: #065f46;
-            padding: 4px 12px;
-            border-radius: 9999px;
-            font-size: 12px;
-            font-weight: 700;
-        }
+        form { position: relative; z-index: 5; }
+        /* Toast */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px; width: 100%; }
+        .toast { padding: 16px 20px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); animation: slideInRight 0.5s ease; display: flex; align-items: center; gap: 12px; }
+        .toast-success { background: #10b981; color: white; }
+        .toast-error { background: #ef4444; color: white; }
+        .toast-info { background: #3b82f6; color: white; }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast-close { margin-left: auto; cursor: pointer; background: rgba(255,255,255,0.2); border: none; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background 0.3s; }
+        .toast-close:hover { background: rgba(255,255,255,0.3); }
     </style>
 </head>
 <body>
@@ -253,63 +235,78 @@
 <!-- END: MainHeader -->
 
             <!-- Main Content -->
-            <main class="relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm">
-                <div class="text-center mb-8">
+            <main class="main-content relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm flex-1">
+                <div class="text-center mb-6">
                     <h2 class="text-2xl font-extrabold mb-1 text-slate-800">Pilih Tema Frame Fotomu</h2>
                     <p class="text-[10px] text-slate-600 font-medium max-w-2xl mx-auto">Pilih Tema yang paling Tepat Sesuai dengan momen serumu.</p>
+                </div>
+
+                <!-- Tab Kategori Aset Desain (Ambil Realtime dari Admin) -->
+                <div class="flex flex-wrap justify-center gap-2 mb-8">
+                    <a href="<?= base_url('frame') ?>" 
+                       class="px-4 py-2 rounded-full text-xs font-bold transition-all shadow-sm <?= (empty($selectedCategory) || $selectedCategory === 'all') ? 'bg-slate-900 text-white shadow-md' : 'bg-white/80 text-slate-700 hover:bg-white hover:shadow' ?>">
+                        Semua Tema
+                    </a>
+                    <?php if (!empty($categories) && is_array($categories)): ?>
+                        <?php foreach ($categories as $cat): ?>
+                            <a href="<?= base_url('frame?category=' . urlencode($cat)) ?>" 
+                               class="px-4 py-2 rounded-full text-xs font-bold transition-all shadow-sm <?= (isset($selectedCategory) && $selectedCategory == $cat) ? 'bg-slate-900 text-white shadow-md' : 'bg-white/80 text-slate-700 hover:bg-white hover:shadow' ?>">
+                                <?= esc(ucwords($cat === 'y2k' ? 'Y2K' : $cat)) ?>
+                            </a>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
 
                 <div class="frame-grid">
                     <?php if (!empty($frames) && is_array($frames)): ?>
                         <?php foreach ($frames as $index => $frame): ?>
-                            <div class="theme-card bg-white/90 overflow-hidden flex flex-col group shadow-sm hover:shadow-xl <?= $index === 0 ? 'selected border-2 border-green-500' : '' ?>" 
-                                 data-card="<?= $frame['id'] ?>" 
+                            <div class="theme-card <?= $index === 0 ? 'selected' : '' ?>"
+                                 data-card="<?= $frame['id'] ?>"
                                  data-frame-id="<?= $frame['id'] ?>">
-                                <div class="card-overlay"></div>
-                                <div class="relative overflow-hidden card-image">
-                                    <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                                         src="<?= $frame['file_path'] ?? 'https://via.placeholder.com/400x300/1e293b/ffffff?text=' . urlencode($frame['name']) ?>" 
-                                         alt="<?= $frame['name'] ?>"
-                                         onerror="this.src='https://via.placeholder.com/400x300/1e293b/ffffff?text=' + encodeURIComponent('<?= $frame['name'] ?>')"/>
-                                    
-                                    <?php if (isset($frame['price']) && $frame['price'] >= 70000): ?>
-                                        <div class="absolute top-4 right-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
-                                            ⭐ PREMIUM
-                                        </div>
-                                    <?php endif; ?>
-                                    
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                                    <div class="absolute bottom-4 right-4 bg-green-500 text-white rounded-full p-1 check-mark shadow-lg">
-                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                        </svg>
-                                    </div>
+
+                                <!-- Full-bleed image -->
+                                <img class="frame-card-img"
+                                     src="<?= esc($frame['file_path'] ?? '') ?>"
+                                     alt="<?= esc($frame['name']) ?>"
+                                     onerror="this.src='https://placehold.co/400x360/1e293b/ffffff?text=<?= urlencode($frame['name']) ?>'" />
+
+                                <!-- Dark gradient overlay -->
+                                <div class="frame-card-overlay"></div>
+
+                                <!-- Green selected tint -->
+                                <div class="selected-overlay"></div>
+
+                                <!-- Checkmark badge (top-right) -->
+                                <div class="check-mark">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                    </svg>
                                 </div>
-                                
-                                <div class="p-6 flex flex-col flex-grow card-content">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <h3 class="text-lg font-bold text-slate-800"><?= $frame['name'] ?></h3>
-                                        <span class="price-tag-light">
-                                            Rp <?= number_format($frame['price'] ?? 0, 0, ',', '.') ?>
-                                        </span>
-                                    </div>
-                                    <p class="text-sm text-slate-500 mb-4">
-                                        <span class="material-symbols-outlined text-sm align-middle">photo_library</span>
-                                        Tema Eksklusif
-                                    </p>
-                                    
-                                    <form action="<?= base_url('frame/store') ?>" method="post" class="w-full mt-auto">
+
+                                <!-- Info overlay at bottom -->
+                                <div class="frame-card-info">
+                                    <!-- Category label -->
+                                    <span class="category-label">
+                                        <span class="material-symbols-outlined" style="font-size:11px">label</span>
+                                        <?= esc(ucwords(($frame['category'] ?? '') === 'y2k' ? 'Y2K' : ($frame['category'] ?? 'Umum'))) ?>
+                                    </span>
+
+                                    <!-- Frame name -->
+                                    <p class="frame-card-name"><?= esc($frame['name']) ?></p>
+
+                                    <!-- Pilih Tema button -->
+                                    <form action="<?= base_url('frame/store') ?>" method="post">
                                         <?= csrf_field() ?>
                                         <input type="hidden" name="frame_id" value="<?= $frame['id'] ?>">
-                                        <button type="submit" class="cta-button-gradient w-full text-slate-800 font-extrabold text-sm py-3 transition-all">
-                                            Pilih Tema - Rp <?= number_format($frame['price'] ?? 0, 0, ',', '.') ?>
+                                        <button type="submit" class="cta-button-gradient">
+                                            Pilih Tema
                                         </button>
                                     </form>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <div class="col-span-full text-center py-12">
+                        <div class="col-span-full text-center py-16">
                             <p class="text-slate-600">Belum ada tema frame tersedia. Silakan cek kembali nanti.</p>
                         </div>
                     <?php endif; ?>

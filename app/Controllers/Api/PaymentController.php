@@ -3,7 +3,6 @@
 namespace App\Controllers\Api;
 
 use App\Models\BookingModel;
-use App\Models\PackageModel;
 use App\Models\PaymentModel;
 use App\Models\PrintOptionModel;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -11,14 +10,12 @@ use CodeIgniter\HTTP\ResponseInterface;
 class PaymentController extends BaseApiController
 {
     private BookingModel $bookingModel;
-    private PackageModel $packageModel;
     private PrintOptionModel $printOptionModel;
     private PaymentModel $paymentModel;
 
     public function __construct()
     {
         $this->bookingModel = new BookingModel();
-        $this->packageModel = new PackageModel();
         $this->printOptionModel = new PrintOptionModel();
         $this->paymentModel = new PaymentModel();
     }
@@ -67,8 +64,7 @@ class PaymentController extends BaseApiController
             }
         }
 
-        $package = $this->packageModel->find($booking['package_id']);
-        $basePrice = (float) ($package['base_price'] ?? 0);
+        $basePrice = 0.00;
         $extraPrice = (float) ($printOption['extra_price'] ?? 0);
         $amount = number_format($basePrice + $extraPrice, 2, '.', '');
 

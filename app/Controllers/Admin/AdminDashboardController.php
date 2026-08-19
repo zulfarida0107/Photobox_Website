@@ -36,9 +36,9 @@ class AdminDashboardController extends BaseController
         $totalPages         = max(1, (int) ceil($totalBookingsCount / $perPage));
 
         $recentBookings = $bookingModel
-            ->select('bookings.*, customers.name AS customer_name, packages.name AS package_name')
+            ->select('bookings.*, customers.name AS customer_name, print_options.copies AS print_copies')
             ->join('customers', 'customers.id = bookings.customer_id', 'left')
-            ->join('packages',  'packages.id = bookings.package_id',  'left')
+            ->join('print_options',  'print_options.id = bookings.print_option_id',  'left')
             ->orderBy('bookings.created_at', 'DESC')
             ->findAll($perPage, ($currentPage - 1) * $perPage);
 

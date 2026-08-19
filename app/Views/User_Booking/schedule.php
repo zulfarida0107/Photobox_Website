@@ -308,7 +308,7 @@
 <!-- END: MainHeader -->
 
             <!-- BEGIN: HeroSection -->
-            <main class="relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm">
+            <main class="relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm flex-1">
                 <div class="text-center mb-8">
                     <h2 class="text-2xl font-extrabold mb-1 text-slate-800">Booking Session</h2>
                     <p class="text-[10px] text-slate-600 font-medium">Pilih Tanggal &amp; Waktu Sesi Fotobox</p>
@@ -376,57 +376,9 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                             
                             <!-- Time Slot Categories -->
                             <div class="space-y-4 flex-1" id="time-slots-container">
-                                <!-- A. PAGI -->
-                                <div>
-                                    <p class="text-[10px] font-bold tracking-wider session-label">A. PAGI</p>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <button class="time-slot available p-3 rounded-xl text-left" data-time="09:00 - 11:00" data-slot="09:00">
-                                            <div class="text-xs font-bold time-text">08:00 - 10:00</div>
-                                            <div class="text-[9px] text-slate-400 status-text">Tersedia</div>
-                                        </button>
-                                        <button class="time-slot available p-3 rounded-xl text-left" data-time="11:00 - 13:00" data-slot="11:00">
-                                            <div class="text-xs font-bold time-text">10:00 - 12:00</div>
-                                            <div class="text-[9px] text-slate-400 status-text">Tersedia</div>
-                                        </button>
-                                    </div>
-                                </div>
-                                <!-- B. SIANG -->
-                                <div>
-                                    <p class="text-[10px] font-bold tracking-wider session-label">B. SIANG</p>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <button class="time-slot available p-3 rounded-xl text-left" data-time="13:00 - 15:00" data-slot="13:00">
-                                            <div class="text-xs font-bold time-text">12:00 - 14:00</div>
-                                            <div class="text-[9px] text-slate-400 status-text">Tersedia</div>
-                                        </button>
-                                        <button class="time-slot available p-3 rounded-xl text-left" data-time="15:00 - 17:00" data-slot="15:00">
-                                            <div class="text-xs font-bold time-text">14:00 - 16:00</div>
-                                            <div class="text-[9px] text-slate-400 status-text">Tersedia</div>
-                                        </button>
-                                    </div>
-                                </div>
-                                <!-- C. SORE -->
-                                <div>
-                                    <p class="text-[10px] font-bold tracking-wider session-label">C. SORE</p>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <button class="time-slot available p-3 rounded-xl text-left" data-time="17:00 - 19:00" data-slot="17:00" disabled>
-                                            <div class="text-xs font-bold time-text">16:00 - 18:00</div>
-                                            <div class="text-[9px] text-slate-300 status-text">Tersedia</div>
-                                        </button>
-                                        <button class="time-slot available p-3 rounded-xl text-left" data-time="19:00 - 21:00" data-slot="19:00">
-                                            <div class="text-xs font-bold time-text">18:00 - 20:00</div>
-                                            <div class="text-[9px] text-slate-400 status-text">Tersedia</div>
-                                        </button>
-                                    </div>
-                                </div>
-                                <!-- D. MALAM -->
-                                <div>
-                                    <p class="text-[10px] font-bold tracking-wider session-label">D. MALAM</p>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <button class="time-slot available p-3 rounded-xl text-left" data-time="21:00 - 23:00" data-slot="21:00">
-                                            <div class="text-xs font-bold time-text">20:00 - 22:00</div>
-                                            <div class="text-[9px] text-slate-400 status-text">Tersedia</div>
-                                        </button>
-                                    </div>
+                                <!-- Slot akan dimuat dari database Admin secara dinamis -->
+                                <div class="col-span-full text-center py-8 text-sm text-slate-400 italic">
+                                    Memuat sesi operasional...
                                 </div>
                             </div>
                             
@@ -445,6 +397,8 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                                     <!-- Hidden fields -->
                                     <input type="hidden" name="selected_date" id="selected_date" value="">
                                     <input type="hidden" name="selected_time" id="selected_time" value="">
+                                    <input type="hidden" name="slot_id" id="slot_id" value="">
+                                    <input type="hidden" name="booth_id" id="booth_id" value="">
                                     
                                     <!-- Button Lanjutkan ke frame -->
                                     <button type="submit" class="btn-primary" id="submitScheduleBtn">
@@ -486,44 +440,28 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
     <!-- ===== JAVASCRIPT ===== -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ===== AUTO-DETECT TANGGAL & JAM HARI INI =====
             const now = new Date();
-            const currentHour = now.getHours();
-            const currentMinute = now.getMinutes();
-            
             const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             
-            // ===== VARIABLES =====
             let currentDate = new Date();
             let selectedDate = new Date();
-            let selectedTime = '13:00 - 15:00';
+            let selectedTime = '';
             
             const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
             
-            // ===== TIME SLOTS DEFINITION =====
-            const timeSlotsData = [
-                { start: 9, end: 11, label: '09:00 - 11:00', category: 'PAGI' },
-                { start: 11, end: 13, label: '11:00 - 13:00', category: 'PAGI' },
-                { start: 13, end: 15, label: '13:00 - 15:00', category: 'SIANG' },
-                { start: 15, end: 17, label: '15:00 - 17:00', category: 'SIANG' },
-                { start: 17, end: 19, label: '17:00 - 19:00', category: 'SORE' },
-                { start: 19, end: 21, label: '19:00 - 21:00', category: 'SORE' },
-                { start: 21, end: 23, label: '21:00 - 23:00', category: 'MALAM' }
-            ];
-            
-            // ===== DOM ELEMENTS =====
             const calendarGrid = document.getElementById('calendar-grid');
             const monthYearLabel = document.getElementById('month-year-label');
             const selectedDateDisplay = document.getElementById('selected-date-display');
             const confirmationDisplay = document.getElementById('confirmation-display');
             const selectedDateInput = document.getElementById('selected_date');
             const selectedTimeInput = document.getElementById('selected_time');
+            const slotIdInput = document.getElementById('slot_id');
+            const boothIdInput = document.getElementById('booth_id');
             const submitBtn = document.getElementById('submitScheduleBtn');
             const scheduleForm = document.getElementById('scheduleForm');
             const btnBack = document.getElementById('btn-back');
             const currentTimeDisplay = document.getElementById('current-time-display');
             
-            // ===== UPDATE CURRENT TIME DISPLAY =====
             function updateCurrentTime() {
                 const now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
@@ -539,71 +477,219 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                 }
             }
             
-            // Update time every minute
             updateCurrentTime();
             setInterval(updateCurrentTime, 60000);
             
-            // ===== HELPER FUNCTIONS =====
             function formatDate(date) {
                 return date.getDate() + ' ' + monthNames[date.getMonth()] + ' ' + date.getFullYear();
             }
             
-            function isToday(date) {
-                const today = new Date();
-                return date.getDate() === today.getDate() &&
-                       date.getMonth() === today.getMonth() &&
-                       date.getFullYear() === today.getFullYear();
-            }
-            
-            function isPastDate(date) {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const checkDate = new Date(date);
-                checkDate.setHours(0, 0, 0, 0);
-                return checkDate < today;
-            }
-            
             function isTimeSlotPast(timeLabel) {
-                if (!isToday(selectedDate)) return false;
+                const today = new Date();
+                if (selectedDate.toDateString() !== today.toDateString()) return false;
                 
                 const parts = timeLabel.split(' - ');
                 const startHour = parseInt(parts[0].split(':')[0]);
                 const startMinute = parseInt(parts[0].split(':')[1] || 0);
                 
-                const now = new Date();
-                const currentHour = now.getHours();
-                const currentMinute = now.getMinutes();
+                const currentHour = today.getHours();
+                const currentMinute = today.getMinutes();
                 
-                // Jika jam mulai <= jam sekarang, berarti slot sudah lewat
                 if (startHour < currentHour) return true;
                 if (startHour === currentHour && startMinute <= currentMinute) return true;
                 return false;
             }
             
-            function updateHiddenFields() {
-                const dateStr = formatDate(selectedDate);
-                const timeStr = selectedTime;
-                
-                if (selectedDateInput) {
-                    selectedDateInput.value = dateStr;
-                }
-                if (selectedTimeInput) {
-                    selectedTimeInput.value = timeStr;
-                }
-                
-                // Update confirmation display
-                if (selectedTime && confirmationDisplay) {
-                    confirmationDisplay.textContent = dateStr + ' | ' + selectedTime + ' WIB';
-                } else if (confirmationDisplay) {
-                    confirmationDisplay.textContent = dateStr + ' | Pilih waktu';
-                }
-            }
-            
             function updateConfirmation() {
-                updateHiddenFields();
+                const dateStr = formatDate(selectedDate);
+                if (selectedDateInput) selectedDateInput.value = dateStr;
+                
+                if (selectedTime) {
+                    if (selectedTimeInput) selectedTimeInput.value = selectedTime;
+                    if (confirmationDisplay) confirmationDisplay.textContent = dateStr + ' | ' + selectedTime + ' WIB';
+                } else {
+                    if (selectedTimeInput) selectedTimeInput.value = '';
+                    if (confirmationDisplay) confirmationDisplay.textContent = dateStr + ' | Pilih waktu';
+                }
             }
             
-            // ===== CALENDAR LOGIC =====
+            function fetchSlotsForDate(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const dateString = `${year}-${month}-${day}`;
+                
+                const container = document.getElementById('time-slots-container');
+                if (container && container.children.length > 0) {
+                    container.style.transition = 'opacity 0.15s ease';
+                    container.style.opacity = '0.5';
+                }
+                
+                fetch(`/api/user/slots/${dateString}`)
+                    .then(response => response.json())
+                    .then(res => {
+                        if (container) container.style.opacity = '1';
+                        if (res.status === 'success' && res.data.length > 0) {
+                            renderDynamicSlots(res.data);
+                        } else {
+                            if (container) {
+                                container.innerHTML = '<div class="col-span-full text-center py-8 text-sm text-slate-500 italic">Tidak ada sesi operasional tersedia untuk tanggal ini.</div>';
+                            }
+                            selectedTime = '';
+                            if (selectedTimeInput) selectedTimeInput.value = '';
+                            if (slotIdInput) slotIdInput.value = '';
+                            if (boothIdInput) boothIdInput.value = '';
+                            updateConfirmation();
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error fetching slots:', err);
+                        if (container) {
+                            container.style.opacity = '1';
+                            container.innerHTML = '<div class="col-span-full text-center py-8 text-sm text-red-500">Gagal memuat data sesi.</div>';
+                        }
+                    });
+            }
+            
+            function renderDynamicSlots(slots) {
+                const container = document.getElementById('time-slots-container');
+                container.innerHTML = '';
+                
+                const categories = {
+                    'PAGI': [],
+                    'SIANG': [],
+                    'SORE': [],
+                    'MALAM': []
+                };
+                
+                slots.forEach(slot => {
+                    const startHour = parseInt(slot.start_time.split(':')[0]);
+                    const timeLabel = slot.start_time.substring(0, 5);
+                    const endHour = (startHour + 1) % 24;
+                    const endTimeLabel = `${String(endHour).padStart(2, '0')}:00`;
+                    const fullTimeRange = `${timeLabel} - ${endTimeLabel}`;
+                    
+                    let category = 'MALAM';
+                    if (startHour < 12) category = 'PAGI';
+                    else if (startHour < 15) category = 'SIANG';
+                    else if (startHour < 18) category = 'SORE';
+                    
+                    // Gunakan is_available dan is_past langsung dari API (sudah dihitung server)
+                    categories[category].push({
+                        id: slot.id,
+                        booth_id: slot.booth_id,
+                        booth_name: slot.booth_name || 'Booth',
+                        time: fullTimeRange,
+                        start_time: timeLabel,
+                        available: slot.is_available,
+                        isPast: slot.is_past,
+                        remaining: slot.remaining
+                    });
+                });
+                
+                let hasAnySlots = false;
+                let foundSelected = false;
+
+                Object.keys(categories).forEach(catName => {
+                    const list = categories[catName];
+                    if (list.length === 0) return;
+                    hasAnySlots = true;
+                    
+                    const catDiv = document.createElement('div');
+                    catDiv.className = 'mb-4';
+                    catDiv.innerHTML = `<p class="text-[10px] font-bold tracking-wider session-label mb-2">Sesi ${catName}</p>`;
+                    
+                    const gridDiv = document.createElement('div');
+                    gridDiv.className = 'grid grid-cols-2 gap-3';
+                    
+                    list.forEach(slot => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        
+                        let btnClass = 'time-slot p-3 rounded-xl text-left ';
+                        let statusText = 'Tersedia';
+                        let isDisabled = false;
+                        
+                        if (slot.isPast) {
+                            btnClass += 'past-time ';
+                            statusText = 'Lewat';
+                            isDisabled = true;
+                        } else if (!slot.available) {
+                            btnClass += 'full ';
+                            statusText = slot.remaining === 0 ? 'Penuh' : 'Tidak Tersedia';
+                            isDisabled = true;
+                        } else {
+                            btnClass += 'available ';
+                        }
+                        
+                        const isThisSelected = (selectedTime === slot.time && !isDisabled);
+                        if (isThisSelected) {
+                            btnClass += 'selected ';
+                            statusText = 'Terpilih';
+                            foundSelected = true;
+                        }
+                        
+                        btn.className = btnClass;
+                        btn.disabled = isDisabled;
+                        if (isThisSelected) {
+                            btn.style.background = '#bef264';
+                            btn.style.borderColor = '#bef264';
+                        }
+                        
+                        btn.innerHTML = `
+                            <div class="text-xs font-bold time-text">${slot.time}</div>
+                            <div class="text-[9px] text-slate-400 status-text flex justify-between gap-1 items-center mt-1">
+                                <span>${statusText}</span>
+                                <span class="text-slate-500">${slot.booth_name}</span>
+                            </div>
+                        `;
+                        
+                        btn.addEventListener('click', function() {
+                            document.querySelectorAll('.time-slot').forEach(s => {
+                                s.classList.remove('selected');
+                                s.style.background = 'white';
+                                s.style.borderColor = '#e2e8f0';
+                                const st = s.querySelector('.status-text span');
+                                if (st && !s.classList.contains('full') && !s.classList.contains('past-time')) {
+                                    st.textContent = 'Tersedia';
+                                }
+                            });
+                            
+                            this.classList.add('selected');
+                            this.style.background = '#bef264';
+                            this.style.borderColor = '#bef264';
+                            
+                            const st = this.querySelector('.status-text span');
+                            if (st) st.textContent = 'Terpilih';
+                            
+                            selectedTime = slot.time;
+                            if (selectedTimeInput) selectedTimeInput.value = slot.time;
+                            if (slotIdInput) slotIdInput.value = slot.id;
+                            if (boothIdInput) boothIdInput.value = slot.booth_id;
+                            
+                            updateConfirmation();
+                        });
+                        
+                        gridDiv.appendChild(btn);
+                    });
+                    
+                    catDiv.appendChild(gridDiv);
+                    container.appendChild(catDiv);
+                });
+                
+                if (!hasAnySlots) {
+                    container.innerHTML = '<div class="col-span-full text-center py-8 text-sm text-slate-500 italic">Tidak ada sesi operasional tersedia untuk tanggal ini.</div>';
+                }
+
+                if (!foundSelected && selectedTime) {
+                    selectedTime = '';
+                    if (selectedTimeInput) selectedTimeInput.value = '';
+                    if (slotIdInput) slotIdInput.value = '';
+                    if (boothIdInput) boothIdInput.value = '';
+                    updateConfirmation();
+                }
+            }
+            
             function renderCalendar() {
                 const year = currentDate.getFullYear();
                 const month = currentDate.getMonth();
@@ -615,18 +701,16 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                 
                 let html = '';
                 
-                // Empty cells before first day
                 for (let i = 0; i < firstDay; i++) {
                     html += '<div class="date-cell empty py-1"></div>';
                 }
                 
-                // Date cells
                 for (let day = 1; day <= daysInMonth; day++) {
                     const dateObj = new Date(year, month, day);
                     const isSelected = (dateObj.getDate() === selectedDate.getDate() && 
                                        dateObj.getMonth() === selectedDate.getMonth() && 
                                        dateObj.getFullYear() === selectedDate.getFullYear());
-                    const isPast = isPastDate(dateObj);
+                    const isPast = dateObj < todayDate;
                     
                     let classes = 'date-cell py-1';
                     if (isSelected) classes += ' selected-date';
@@ -637,7 +721,6 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                 
                 calendarGrid.innerHTML = html;
                 
-                // Add click event to date cells (only for non-disabled)
                 document.querySelectorAll('.date-cell:not(.empty):not(.disabled)').forEach(cell => {
                     cell.addEventListener('click', function() {
                         const day = parseInt(this.dataset.day);
@@ -646,69 +729,20 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                         
                         selectedDate = new Date(year, month, day);
                         selectedDateDisplay.textContent = formatDate(selectedDate);
+                        
+                        document.querySelectorAll('.date-cell').forEach(c => c.classList.remove('selected-date'));
+                        this.classList.add('selected-date');
+                        
                         updateConfirmation();
-                        renderCalendar();
-                        updateTimeSlotsStatus();
+                        fetchSlotsForDate(selectedDate);
                     });
                 });
             }
             
-            // ===== UPDATE TIME SLOTS STATUS =====
-            function updateTimeSlotsStatus() {
-                const allSlots = document.querySelectorAll('.time-slot');
-                
-                allSlots.forEach(slot => {
-                    // Skip jika slot sudah full
-                    if (slot.classList.contains('full')) return;
-                    
-                    const timeLabel = slot.dataset.time;
-                    const isPast = isTimeSlotPast(timeLabel);
-                    
-                    // Reset classes
-                    slot.classList.remove('past-time');
-                    
-                    if (isPast && isToday(selectedDate)) {
-                        slot.classList.add('past-time');
-                        slot.disabled = true;
-                        const statusText = slot.querySelector('.status-text');
-                        if (statusText) {
-                            statusText.textContent = 'Lewat';
-                            statusText.className = 'text-[9px] text-slate-400 status-text';
-                        }
-                    } else {
-                        slot.disabled = false;
-                        const statusText = slot.querySelector('.status-text');
-                        if (statusText && !slot.classList.contains('selected')) {
-                            statusText.textContent = 'Tersedia';
-                            statusText.className = 'text-[9px] text-slate-400 status-text';
-                        }
-                    }
-                });
-                
-                // Jika slot yang dipilih sudah lewat, reset pilihan
-                const selectedSlot = document.querySelector('.time-slot.selected');
-                if (selectedSlot && selectedSlot.classList.contains('past-time')) {
-                    selectedSlot.classList.remove('selected');
-                    selectedSlot.style.background = 'white';
-                    selectedSlot.style.borderColor = '#e2e8f0';
-                    
-                    // Cari slot tersedia pertama
-                    const firstAvailable = document.querySelector('.time-slot:not(.full):not(.past-time)');
-                    if (firstAvailable) {
-                        firstAvailable.click();
-                    } else {
-                        selectedTime = '';
-                        updateConfirmation();
-                    }
-                }
-            }
-            
-            // Month navigation
             document.getElementById('prev-month').addEventListener('click', function() {
                 const newDate = new Date(currentDate);
                 newDate.setMonth(newDate.getMonth() - 1);
                 
-                // Tidak bisa ke bulan sebelum bulan ini
                 const today = new Date();
                 if (newDate.getFullYear() < today.getFullYear() || 
                     (newDate.getFullYear() === today.getFullYear() && newDate.getMonth() < today.getMonth())) {
@@ -717,90 +751,31 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                 
                 currentDate = newDate;
                 renderCalendar();
-                updateTimeSlotsStatus();
             });
             
             document.getElementById('next-month').addEventListener('click', function() {
                 currentDate.setMonth(currentDate.getMonth() + 1);
                 renderCalendar();
-                updateTimeSlotsStatus();
             });
             
-            // ===== TIME SLOT LOGIC =====
-            const timeSlots = document.querySelectorAll('.time-slot:not(.full)');
-            
-            timeSlots.forEach(slot => {
-                slot.addEventListener('click', function() {
-                    // Jika slot sudah lewat atau full, tidak bisa dipilih
-                    if (this.classList.contains('past-time') || this.classList.contains('full')) {
-                        return;
-                    }
-                    
-                    // Reset all time slots
-                    timeSlots.forEach(s => {
-                        s.classList.remove('selected');
-                        s.style.background = 'white';
-                        s.style.borderColor = '#e2e8f0';
-                        if (!s.classList.contains('full') && !s.classList.contains('past-time')) {
-                            const statusText = s.querySelector('.status-text');
-                            if (statusText) {
-                                statusText.className = 'text-[9px] text-slate-400 status-text';
-                                statusText.textContent = 'Tersedia';
-                            }
-                        }
-                        const timeText = s.querySelector('.time-text');
-                        if (timeText) {
-                            timeText.className = 'text-xs font-bold time-text';
-                            timeText.style.color = '#1e293b';
-                        }
-                    });
-                    
-                    // Select current slot
-                    this.classList.add('selected');
-                    this.style.background = '#bef264';
-                    this.style.borderColor = '#bef264';
-                    
-                    const statusText = this.querySelector('.status-text');
-                    if (statusText) {
-                        statusText.className = 'text-[9px] font-bold status-text';
-                        statusText.style.color = '#1e293b';
-                        statusText.textContent = 'Terpilih';
-                    }
-                    
-                    const timeText = this.querySelector('.time-text');
-                    if (timeText) {
-                        timeText.className = 'text-xs font-bold time-text';
-                        timeText.style.color = '#1e293b';
-                    }
-                    
-                    const timeLabel = this.querySelector('.time-text');
-                    if (timeLabel) {
-                        selectedTime = timeLabel.textContent;
-                        updateConfirmation();
-                    }
-                });
-            });
-            
-            // ===== BACK BUTTON LOGIC =====
             if (btnBack) {
                 btnBack.addEventListener('click', function() {
                     window.location.href = '<?= base_url('register') ?>';
                 });
             }
             
-            // ===== FORM SUBMIT VALIDATION =====
             if (scheduleForm) {
                 scheduleForm.addEventListener('submit', function(e) {
                     const dateVal = selectedDateInput ? selectedDateInput.value : '';
                     const timeVal = selectedTimeInput ? selectedTimeInput.value : '';
+                    const slotVal = slotIdInput ? slotIdInput.value : '';
                     
-                    if (!dateVal || !timeVal) {
+                    if (!dateVal || !timeVal || !slotVal) {
                         e.preventDefault();
-                        alert('Silakan pilih tanggal dan waktu sesi terlebih dahulu!');
+                        alert('Silakan pilih tanggal dan waktu sesi yang tersedia terlebih dahulu!');
                         return false;
                     }
                     
-                    // Loading state
                     if (submitBtn) {
                         submitBtn.innerHTML = '<span>Memproses...</span>';
                         submitBtn.disabled = true;
@@ -810,56 +785,10 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                 });
             }
             
-            // ===== AUTO-SELECT TIME SLOT BERDASARKAN JAM SEKARANG =====
-            function getRecommendedTimeSlot() {
-                const now = new Date();
-                const hour = now.getHours();
-                const minute = now.getMinutes();
-                
-                // Cari slot yang jam mulai-nya >= jam sekarang + 1 jam
-                for (let slot of timeSlotsData) {
-                    // Jika slot mulai >= jam sekarang + 1 (buffer 1 jam)
-                    if (slot.start > hour + 1 || (slot.start === hour + 1 && minute === 0)) {
-                        return slot.label;
-                    }
-                }
-                
-                // Jika semua slot sudah lewat, pilih slot pertama yang tersedia untuk besok
-                return timeSlotsData[0].label;
-            }
-            
-            function setDefaultTimeSlot() {
-                const recommendedTime = getRecommendedTimeSlot();
-                
-                // Cari slot dengan waktu yang direkomendasikan
-                let defaultSlot = document.querySelector(`.time-slot[data-time="${recommendedTime}"]`);
-                
-                // Jika slot tidak ada atau full/past, cari slot pertama yang tersedia
-                if (!defaultSlot || defaultSlot.classList.contains('full') || defaultSlot.classList.contains('past-time')) {
-                    defaultSlot = document.querySelector('.time-slot:not(.full):not(.past-time)');
-                }
-                
-                if (defaultSlot) {
-                    defaultSlot.click();
-                } else {
-                    // Jika tidak ada slot tersedia sama sekali
-                    const firstSlot = document.querySelector('.time-slot:not(.full)');
-                    if (firstSlot) {
-                        firstSlot.click();
-                    }
-                }
-            }
-            
-            // ===== INITIAL RENDER =====
             renderCalendar();
             selectedDateDisplay.textContent = formatDate(selectedDate);
             updateConfirmation();
-            
-            // Update time slots status
-            setTimeout(() => {
-                updateTimeSlotsStatus();
-                setDefaultTimeSlot();
-            }, 200);
+            fetchSlotsForDate(selectedDate);
         });
     </script>
 </body>

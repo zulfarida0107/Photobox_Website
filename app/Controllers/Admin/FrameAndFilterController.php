@@ -25,10 +25,10 @@ class FrameAndFilterController extends BaseController
     // =========================================================================
     public function index()
     {
-        $framePerPage     = 10;
+        $framePerPage     = 5;
         $currentFramePage = max(1, (int) ($this->request->getGet('page') ?? 1));
 
-        $catPerPage       = 10;
+        $catPerPage       = 5;
         $currentCatPage   = max(1, (int) ($this->request->getGet('cat_page') ?? 1));
 
         $filterPerPage    = 5; // limit to match Panduan Aset
@@ -40,18 +40,15 @@ class FrameAndFilterController extends BaseController
         $filterSearch = $this->request->getGet('filter_search') ?? '';
         $filterStatus = $this->request->getGet('filter_status') ?? '';
 
-        // --- Frame query builder + Join category name ---
-        $frameQuery = $this->frameModel
-            ->select('frames.*, frame_categories.name as category_name, frame_layouts.name as layout_name')
-            ->join('frame_categories', 'frame_categories.id = frames.category_id', 'left')
-            ->join('frame_layouts', 'frame_layouts.id = frames.layout_id', 'left');
+        // --- Frame query builder ---
+        $frameQuery = $this->frameModel->select('frames.*');
 
         if (!empty($search)) {
             $frameQuery->like('frames.name', $search);
         }
 
         if (!empty($category)) {
-            $frameQuery->where('frames.category_id', $category);
+            $frameQuery->where('frames.category', $category);
         }
 
         $totalFrames      = $frameQuery->countAllResults(false);
@@ -83,7 +80,7 @@ class FrameAndFilterController extends BaseController
         $categoriesPaginated = $catBuilder->orderBy('name', 'ASC')->limit($catPerPage, ($currentCatPage - 1) * $catPerPage)->get()->getResultArray();
 
         // --- Semua layout frame (Paginated) ---
-        $layoutPerPage       = 10;
+        $layoutPerPage       = 5;
         $currentLayoutPage   = max(1, (int) ($this->request->getGet('layout_page') ?? 1));
         $layoutSearch        = $this->request->getGet('layout_search') ?? '';
 
@@ -98,8 +95,16 @@ class FrameAndFilterController extends BaseController
         $totalLayoutPages   = max(1, (int) ceil($totalLayouts / $layoutPerPage));
         $layouts            = $layoutQuery->orderBy('name', 'ASC')->findAll($layoutPerPage, ($currentLayoutPage - 1) * $layoutPerPage);
 
-        // Kategori untuk dropdown filter/upload
-        $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
+        // Kategori dari Enum
+        $categories = [
+            ['id' => 'Pastel', 'name' => 'Pastel'],
+            ['id' => 'Cute', 'name' => 'Cute'],
+            ['id' => 'Minimalist', 'name' => 'Minimalist'],
+            ['id' => 'Newspaper', 'name' => 'Newspaper'],
+            ['id' => 'Magazine', 'name' => 'Magazine'],
+            ['id' => 'Retro 90s', 'name' => 'Retro 90s'],
+            ['id' => 'Y2k', 'name' => 'Y2k']
+        ];
         $allLayouts = $this->layoutModel->orderBy('name', 'ASC')->findAll();
 
         // --- Stats ---
@@ -153,9 +158,10 @@ class FrameAndFilterController extends BaseController
     public function storeFrame()
     {
         $rules = [
-            'name'        => 'required|min_length[3]|max_length[100]',
-            'category_id' => 'permit_empty|max_length[20]',
-            'layout_id'   => 'permit_empty|max_length[20]',
+            'name'        => 'required|min_length[3]|max_length[100]|is_unique[frames.name]',
+            'category'    => 'permit_empty|in_list[Pastel,Cute,Minimalist,Newspaper,Magazine,Retro 90s,Y2k]',
+            'layout_id'   => 'required',
+            'price'       => 'permit_empty|numeric',
             'frame_file'  => 'uploaded[frame_file]|max_size[frame_file,2048]|ext_in[frame_file,png,jpg,jpeg]',
         ];
 
@@ -164,19 +170,41 @@ class FrameAndFilterController extends BaseController
                 ->with('error', implode(' ', $this->validator->getErrors()));
         }
 
-        $file     = $this->request->getFile('frame_file');
-        $newName  = $file->getRandomName();
-        $file->move(FCPATH . 'uploads/frames/', $newName);
+        $file = $this->request->getFile('frame_file');
+        
+        $name = $this->request->getPost('name');
+        $layoutId = $this->request->getPost('layout_id');
+        $photoCount = 0;
+        if (!empty($layoutId)) {
+            $layout = $this->layoutModel->find($layoutId);
+            if ($layout) {
+                $photoCount = (int) ($layout['photo_count'] ?? 0);
+            }
+        }
 
-        // Generate ID: FRM-XXX
-        $count = $this->frameModel->countAll();
-        $newId = sprintf('FRM-%03d', $count + 1);
+        // Generate ID: frame_001
+        $lastFrame = $this->frameModel->db->table('frames')
+                        ->like('id', 'frame_', 'after')
+                        ->orderBy('id', 'DESC')
+                        ->get()->getRowArray();
+        $num = 1;
+        if ($lastFrame && preg_match('/frame_(\d+)/', $lastFrame['id'], $matches)) {
+            $num = (int)$matches[1] + 1;
+        }
+        $newId = sprintf('frame_%03d', $num);
+
+        $safeName = strtolower(trim(preg_replace('/[^a-zA-Z0-9]+/', '_', $name), '_'));
+        $ext = $file->getExtension();
+        $newName = "frame_cuitbox_{$safeName}_{$photoCount}.{$ext}";
+
+        $file->move(FCPATH . 'uploads/frames/', $newName);
 
         $this->frameModel->insert([
             'id'          => $newId,
-            'name'        => $this->request->getPost('name'),
-            'category_id' => $this->request->getPost('category_id') ?: null,
-            'layout_id'   => $this->request->getPost('layout_id') ?: null,
+            'name'        => $name,
+            'category'    => $this->request->getPost('category') ?: 'Minimalist',
+            'layout_id'   => $layoutId,
+            'price'       => $this->request->getPost('price') ?: 0,
             'file_path'   => 'uploads/frames/' . $newName,
         ]);
 
@@ -189,8 +217,16 @@ class FrameAndFilterController extends BaseController
     // =========================================================================
     public function createFrame()
     {
-        $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
-        $layouts    = $this->frameModel->db->table('frame_layouts')->orderBy('name', 'ASC')->get()->getResultArray();
+        $categories = [
+            ['id' => 'Pastel', 'name' => 'Pastel'],
+            ['id' => 'Cute', 'name' => 'Cute'],
+            ['id' => 'Minimalist', 'name' => 'Minimalist'],
+            ['id' => 'Newspaper', 'name' => 'Newspaper'],
+            ['id' => 'Magazine', 'name' => 'Magazine'],
+            ['id' => 'Retro 90s', 'name' => 'Retro 90s'],
+            ['id' => 'Y2k', 'name' => 'Y2k']
+        ];
+        $layouts = $this->layoutModel->orderBy('name', 'ASC')->findAll();
         return view('Admin/FrameAndFilter/FrameForm', [
             'title'      => 'Unggah Frame Baru | Admin Panel',
             'categories' => $categories,
@@ -210,9 +246,17 @@ class FrameAndFilterController extends BaseController
                 ->with('error', 'Frame tidak ditemukan.');
         }
 
-        $categories = $this->frameModel->db->table('frame_categories')->orderBy('name', 'ASC')->get()->getResultArray();
-        $layouts    = $this->frameModel->db->table('frame_layouts')->orderBy('name', 'ASC')->get()->getResultArray();
+        $categories = [
+            ['id' => 'Pastel', 'name' => 'Pastel'],
+            ['id' => 'Cute', 'name' => 'Cute'],
+            ['id' => 'Minimalist', 'name' => 'Minimalist'],
+            ['id' => 'Newspaper', 'name' => 'Newspaper'],
+            ['id' => 'Magazine', 'name' => 'Magazine'],
+            ['id' => 'Retro 90s', 'name' => 'Retro 90s'],
+            ['id' => 'Y2k', 'name' => 'Y2k']
+        ];
 
+        $layouts = $this->layoutModel->orderBy('name', 'ASC')->findAll();
         return view('Admin/FrameAndFilter/FrameForm', [
             'title'      => 'Edit Frame | Admin Panel',
             'frame'      => $frame,
@@ -233,10 +277,35 @@ class FrameAndFilterController extends BaseController
                 ->with('error', 'Frame tidak ditemukan.');
         }
 
+        $rules = [
+            'name'        => "required|min_length[3]|max_length[100]|is_unique[frames.name,id,{$id}]",
+            'category'    => 'permit_empty|in_list[Pastel,Cute,Minimalist,Newspaper,Magazine,Retro 90s,Y2k]',
+            'layout_id'   => 'required',
+            'price'       => 'permit_empty|numeric',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()
+                ->with('error', implode(' ', $this->validator->getErrors()));
+        }
+
+        $name = $this->request->getPost('name');
+        $layoutId = $this->request->getPost('layout_id');
+        $photoCount = 0;
+        if (!empty($layoutId)) {
+            $layout = $this->layoutModel->find($layoutId);
+            if ($layout) {
+                $photoCount = (int) ($layout['photo_count'] ?? 0);
+            }
+        }
+        $safeName = strtolower(trim(preg_replace('/[^a-zA-Z0-9]+/', '_', $name), '_'));
+
         $updateData = [
-            'name'        => $this->request->getPost('name'),
-            'category_id' => $this->request->getPost('category_id') ?: null,
-            'layout_id'   => $this->request->getPost('layout_id') ?: null,
+            'name'        => $name,
+            'category'    => $this->request->getPost('category') ?: 'Minimalist',
+            'layout_id'   => $layoutId,
+            'price'       => $this->request->getPost('price') ?: 0,
+            'is_active'   => 1, // aktifkan jika sebelumnya disync & nonaktif
         ];
 
         // Ganti file jika ada upload baru
@@ -251,9 +320,20 @@ class FrameAndFilterController extends BaseController
             if (!empty($frame['file_path']) && file_exists(FCPATH . $frame['file_path'])) {
                 unlink(FCPATH . $frame['file_path']);
             }
-            $newName = $file->getRandomName();
+            $ext = $file->getExtension();
+            $newName = "frame_cuitbox_{$safeName}_{$photoCount}.{$ext}";
             $file->move(FCPATH . 'uploads/frames/', $newName);
             $updateData['file_path'] = 'uploads/frames/' . $newName;
+        } else {
+            // Rename file jika nama/layout berubah
+            if (!empty($frame['file_path']) && file_exists(FCPATH . $frame['file_path'])) {
+                $ext = pathinfo($frame['file_path'], PATHINFO_EXTENSION);
+                $expectedName = "frame_cuitbox_{$safeName}_{$photoCount}.{$ext}";
+                if (basename($frame['file_path']) !== $expectedName) {
+                    rename(FCPATH . $frame['file_path'], FCPATH . 'uploads/frames/' . $expectedName);
+                    $updateData['file_path'] = 'uploads/frames/' . $expectedName;
+                }
+            }
         }
 
         $this->frameModel->update($id, $updateData);
@@ -301,7 +381,7 @@ class FrameAndFilterController extends BaseController
     public function storeFilter()
     {
         $rules = [
-            'name'      => 'required|min_length[3]|max_length[100]',
+            'name'      => 'required|min_length[3]|max_length[100]|is_unique[filters.name]',
             'css_value' => 'required|max_length[255]',
         ];
 
@@ -354,7 +434,7 @@ class FrameAndFilterController extends BaseController
         }
 
         $rules = [
-            'name'      => 'required|min_length[3]|max_length[100]',
+            'name'      => "required|min_length[3]|max_length[100]|is_unique[filters.name,id,{$id}]",
             'css_value' => 'required|max_length[255]',
         ];
 
@@ -414,7 +494,7 @@ class FrameAndFilterController extends BaseController
     public function storeCategory()
     {
         $rules = [
-            'name' => 'required|min_length[3]|max_length[100]',
+            'name' => 'required|min_length[3]|max_length[100]|is_unique[frame_categories.name]',
         ];
 
         if (!$this->validate($rules)) {
@@ -428,7 +508,7 @@ class FrameAndFilterController extends BaseController
 
         $db->table('frame_categories')->insert([
             'id'         => $newId,
-            'name'       => $this->request->getPost('name'),
+            'name'       => ucfirst($this->request->getPost('name')),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
@@ -443,7 +523,7 @@ class FrameAndFilterController extends BaseController
     public function updateCategory(string $id)
     {
         $rules = [
-            'name' => 'required|min_length[3]|max_length[100]',
+            'name' => "required|min_length[3]|max_length[100]|is_unique[frame_categories.name,id,{$id}]",
         ];
 
         if (!$this->validate($rules)) {
@@ -453,7 +533,7 @@ class FrameAndFilterController extends BaseController
 
         $db = $this->frameModel->db;
         $db->table('frame_categories')->where('id', $id)->update([
-            'name'       => $this->request->getPost('name'),
+            'name'       => ucfirst($this->request->getPost('name')),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
@@ -468,8 +548,7 @@ class FrameAndFilterController extends BaseController
     {
         $db = $this->frameModel->db;
         
-        // Nullify the category_id on any frames belonging to this category
-        $db->table('frames')->where('category_id', $id)->update(['category_id' => null]);
+        // Categories are now enum in frames table, so no frames update needed here.
 
         $db->table('frame_categories')->where('id', $id)->delete();
 
@@ -502,7 +581,7 @@ class FrameAndFilterController extends BaseController
     {
         $rules = [
             'id'           => 'required|min_length[3]|max_length[50]|is_unique[frame_layouts.id]',
-            'name'         => 'required|min_length[3]|max_length[100]',
+            'name'         => 'required|min_length[3]|max_length[100]|is_unique[frame_layouts.name]',
             'photo_count'  => 'required|numeric',
             'aspect_ratio' => 'permit_empty|max_length[20]',
             'layout_image' => 'permit_empty|max_size[layout_image,2048]|ext_in[layout_image,png,jpg,jpeg]',
@@ -545,7 +624,7 @@ class FrameAndFilterController extends BaseController
         }
 
         $rules = [
-            'name'         => 'required|min_length[3]|max_length[100]',
+            'name'         => "required|min_length[3]|max_length[100]|is_unique[frame_layouts.name,id,{$id}]",
             'photo_count'  => 'required|numeric',
             'aspect_ratio' => 'permit_empty|max_length[20]',
             'layout_image' => 'permit_empty|max_size[layout_image,2048]|ext_in[layout_image,png,jpg,jpeg]',
@@ -592,11 +671,97 @@ class FrameAndFilterController extends BaseController
             unlink(FCPATH . $layout['image_path']);
         }
 
-        // Nullify layout_id on frames using this layout
-        $this->frameModel->db->table('frames')->where('layout_id', $id)->update(['layout_id' => null]);
+        // Layouts are no longer tied to frames via layout_id.
 
         $this->layoutModel->delete($id);
 
         return redirect()->to(base_url('admin/frames'))->with('success', 'Layout frame berhasil dihapus.');
+    }
+
+    // =========================================================================
+    // SYNC ASSETS — Auto-Sync Files from Folders
+    // =========================================================================
+    public function syncAssets()
+    {
+        $now = date('Y-m-d H:i:s');
+        
+        // 1. Sync Layouts
+        $layoutDir = FCPATH . 'uploads/layouts/';
+        if (is_dir($layoutDir)) {
+            $files = array_diff(scandir($layoutDir), ['.', '..', 'index.html']);
+            foreach ($files as $file) {
+                if (is_file($layoutDir . $file)) {
+                    $path = 'uploads/layouts/' . $file;
+                    $exists = $this->frameModel->db->table('frame_layouts')->where('image_path', $path)->countAllResults();
+                    if ($exists == 0) {
+                        $name = pathinfo($file, PATHINFO_FILENAME);
+                        $this->frameModel->db->table('frame_layouts')->insert([
+                            'id' => 'layout_' . substr(md5($file), 0, 8),
+                            'name' => ucwords(str_replace('_', ' ', $name)),
+                            'photo_count' => 0,
+                            'aspect_ratio' => '1:1',
+                            'image_path' => $path,
+                            'created_at' => $now,
+                            'updated_at' => $now
+                        ]);
+                    }
+                }
+            }
+        }
+
+        // 2. Sync Frames
+        $frameDir = FCPATH . 'uploads/frames/';
+        if (is_dir($frameDir)) {
+            $lastFrame = $this->frameModel->db->table('frames')
+                            ->like('id', 'frame_', 'after')
+                            ->orderBy('id', 'DESC')
+                            ->get()->getRowArray();
+            $num = 1;
+            if ($lastFrame && preg_match('/frame_(\d+)/', $lastFrame['id'], $matches)) {
+                $num = (int)$matches[1] + 1;
+            }
+
+            $files = array_diff(scandir($frameDir), ['.', '..', 'index.html']);
+            foreach ($files as $file) {
+                if (is_file($frameDir . $file)) {
+                    $path = 'uploads/frames/' . $file;
+                    $exists = $this->frameModel->where('file_path', $path)->countAllResults();
+                    if ($exists == 0) {
+                        $newId = sprintf('frame_%03d', $num);
+
+                        $rawName = pathinfo($file, PATHINFO_FILENAME);
+                        if (is_numeric(substr($rawName, 0, 8))) {
+                            $name = 'Synced Frame ' . $num;
+                        } else {
+                            $name = ucwords(str_replace(['_', 'cuitbox'], [' ', ''], $rawName));
+                        }
+                        
+                        $safeName = strtolower(trim(preg_replace('/[^a-zA-Z0-9]+/', '_', $name), '_'));
+                        $ext = pathinfo($file, PATHINFO_EXTENSION);
+                        $newName = "frame_cuitbox_{$safeName}_0.{$ext}";
+                        
+                        // Cek jika nama baru bentrok
+                        if (file_exists($frameDir . $newName) && $newName !== $file) {
+                            $newName = "frame_cuitbox_{$safeName}_{$num}_0.{$ext}";
+                        }
+
+                        rename($frameDir . $file, $frameDir . $newName);
+                        $newPath = 'uploads/frames/' . $newName;
+
+                        $this->frameModel->insert([
+                            'id' => $newId,
+                            'name' => trim($name) ?: 'New Frame',
+                            'file_path' => $newPath,
+                            'is_active' => 0, // nonaktif agar tidak crash kiosk
+                            'created_at' => $now,
+                            'updated_at' => $now
+                        ]);
+                        $num++;
+                    }
+                }
+            }
+        }
+
+        return redirect()->to(base_url('admin/frames'))->with('success', 'Sinkronisasi file berhasil dilakukan. File baru diubah statusnya menjadi Nonaktif.');
     }
 }

@@ -42,11 +42,15 @@
         </script>
 
         <!-- Page Header -->
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
             <div>
                 <h2 class="font-h1 text-h1 text-on-surface">Manajemen Aset Desain</h2>
                 <p class="font-body-sm text-body-sm text-on-surface-variant">Kelola aset desain seperti frame foto dan filter warna.</p>
             </div>
+            <button type="button" onclick="openSyncConfirmModal()" class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-blue-800 transition-colors shadow-sm">
+                <span class="material-symbols-outlined text-[16px]">sync</span>
+                Sinkronisasi Seluruh Aset
+            </button>
         </div>
 
         <!-- Bento Stats Grid -->
@@ -132,10 +136,8 @@
                                 <tr>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">ID Frame</th>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Nama Frame</th>
-                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Layout</th>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Kategori</th>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Preview</th>
-                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Status</th>
                                     <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -145,12 +147,9 @@
                                         <tr class="hover:bg-slate-50 transition-colors group">
                                             <td class="px-6 py-4 font-mono text-xs font-semibold text-slate-900">#<?= esc($frame['id']) ?></td>
                                             <td class="px-6 py-4 text-sm font-semibold text-slate-700"><?= esc($frame['name']) ?></td>
-                                            <td class="px-6 py-4 text-xs font-medium text-slate-600">
-                                                <?= esc($frame['layout_name'] ?? 'Tanpa Layout') ?>
-                                            </td>
                                             <td class="px-6 py-4">
                                                 <span class="inline-flex items-center px-2 py-1 rounded bg-blue-50 text-blue-700 text-[10px] font-bold tracking-wide uppercase">
-                                                    <?= esc($frame['category_name'] ?? 'Uncategorized') ?>
+                                                    <?= esc(ucfirst($frame['category'] ?? 'Minimalist')) ?>
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 flex justify-center">
@@ -166,36 +165,31 @@
                                                     <?php endif; ?>
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4">
-                                                <?php if ($frame['is_active']): ?>
-                                                    <span class="inline-flex items-center px-2 py-1 rounded bg-green-100 text-green-700 text-[10px] font-bold tracking-wide">AKTIF</span>
-                                                <?php else: ?>
-                                                    <span class="inline-flex items-center px-2 py-1 rounded bg-slate-100 text-slate-500 text-[10px] font-bold tracking-wide">NONAKTIF</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="px-6 py-4 flex justify-center items-center gap-2">
-                                                <button type="button"
-                                                        class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Lihat Preview"
-                                                        onclick="showPreviewModal('<?= esc($frame['id'], 'js') ?>', '<?= esc($frame['name'], 'js') ?>', '<?= esc($frame['category_name'] ?? 'Uncategorized', 'js') ?>', '<?= base_url($frame['file_path']) ?>', '<?= date('d M Y, H:i', strtotime($frame['created_at'])) ?>')">
-                                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                                </button>
-                                                <a href="<?= base_url('admin/frames/' . $frame['id'] . '/edit') ?>"
-                                                   class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
-                                                    <span class="material-symbols-outlined text-[18px]">edit</span>
-                                                </a>
-                                                <form action="<?= base_url('admin/frames/' . $frame['id'] . '/toggle') ?>" method="post" class="inline">
-                                                    <?= csrf_field() ?>
-                                                    <button type="submit" class="transition-transform hover:scale-110" title="Toggle Status Aktif">
-                                                        <span class="material-symbols-outlined text-[24px] <?= $frame['is_active'] ? 'text-green-500' : 'text-slate-300' ?>">
-                                                            <?= $frame['is_active'] ? 'toggle_on' : 'toggle_off' ?>
-                                                        </span>
+                                            <td class="px-6 py-4 align-middle">
+                                                <div class="flex justify-center items-center gap-2">
+                                                    <button type="button"
+                                                            class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Lihat Preview"
+                                                            onclick="showPreviewModal('<?= esc($frame['id'], 'js') ?>', '<?= esc($frame['name'], 'js') ?>', '<?= esc(ucfirst($frame['category'] ?? 'Minimalist'), 'js') ?>', '<?= base_url($frame['file_path']) ?>', '<?= date('d M Y, H:i', strtotime($frame['created_at'])) ?>')">
+                                                        <span class="material-symbols-outlined text-[18px]">visibility</span>
                                                     </button>
-                                                </form>
-                                                <button type="button"
-                                                        class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
-                                                        onclick="openUniversalDeleteModal('<?= base_url('admin/frames/' . $frame['id'] . '/delete') ?>', 'Apakah Anda yakin ingin menghapus frame ini?<br>Tindakan ini tidak dapat dibatalkan.')">
-                                                    <span class="material-symbols-outlined text-[18px]">delete</span>
-                                                </button>
+                                                    <a href="<?= base_url('admin/frames/' . $frame['id'] . '/edit') ?>"
+                                                       class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                                                    </a>
+                                                    <form action="<?= base_url('admin/frames/' . $frame['id'] . '/toggle') ?>" method="post" class="inline">
+                                                        <?= csrf_field() ?>
+                                                        <button type="submit" class="transition-transform hover:scale-110" title="Toggle Status Aktif">
+                                                            <span class="material-symbols-outlined text-[24px] <?= $frame['is_active'] ? 'text-green-500' : 'text-slate-300' ?>">
+                                                                <?= $frame['is_active'] ? 'toggle_on' : 'toggle_off' ?>
+                                                            </span>
+                                                        </button>
+                                                    </form>
+                                                    <button type="button"
+                                                            class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus"
+                                                            onclick="openUniversalDeleteModal('<?= base_url('admin/frames/' . $frame['id'] . '/delete') ?>', 'Apakah Anda yakin ingin menghapus frame ini?<br>Tindakan ini tidak dapat dibatalkan.')">
+                                                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -212,16 +206,32 @@
                     <!-- Pagination Frame -->
                     <div class="mt-auto p-6 bg-white border-t border-slate-100 flex items-center justify-between">
                         <span class="text-xs text-slate-500 font-medium">
-                            Menampilkan <?= count($frames ?? []) ?> dari <?= $totalFrames ?? 0 ?> frame
+                            Menampilkan <?= count($frames ?? []) ?> dari <?= $totalFrames ?? 0 ?> Frame
                         </span>
                         <div class="flex gap-2">
                             <a href="<?= base_url('admin/frames?page=' . max(1, ($currentFramePage ?? 1) - 1) . '&search=' . urlencode($search ?? '') . '&category=' . urlencode($selectedCategory ?? '')) ?>"
                                class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentFramePage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_left</span>
                             </a>
-                            <div class="w-8 h-8 flex items-center justify-center bg-primary text-white font-bold text-xs rounded-lg shadow-sm">
-                                <?= $currentFramePage ?? 1 ?>
-                            </div>
+                            <?php 
+                                $startP = max(1, ($currentFramePage ?? 1) - 2);
+                                $endP = min(($totalFramePages ?? 1), ($currentFramePage ?? 1) + 2);
+                                if ($endP - $startP < 4) {
+                                    if ($startP == 1) $endP = min(($totalFramePages ?? 1), 5);
+                                    if ($endP == ($totalFramePages ?? 1)) $startP = max(1, ($totalFramePages ?? 1) - 4);
+                                }
+                                for($p = $startP; $p <= $endP; $p++):
+                            ?>
+                                <?php if($p == ($currentFramePage ?? 1)): ?>
+                                    <div class="w-8 h-8 flex items-center justify-center bg-primary text-white font-bold text-xs rounded-lg shadow-sm">
+                                        <?= $p ?>
+                                    </div>
+                                <?php else: ?>
+                                    <a href="<?= base_url('admin/frames?page=' . $p . '&search=' . urlencode($search ?? '') . '&category=' . urlencode($selectedCategory ?? '')) ?>" class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-500 font-bold text-xs">
+                                        <?= $p ?>
+                                    </a>
+                                <?php endif; ?>
+                            <?php endfor; ?>
                             <a href="<?= base_url('admin/frames?page=' . min(($totalFramePages ?? 1), ($currentFramePage ?? 1) + 1) . '&search=' . urlencode($search ?? '') . '&category=' . urlencode($selectedCategory ?? '')) ?>"
                                class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentFramePage ?? 1) >= ($totalFramePages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_right</span>
@@ -239,10 +249,10 @@
                             <div class="w-1 h-6 bg-primary rounded-full"></div>
                             <h4 class="font-bold text-lg text-slate-800">Daftar Layout Frame</h4>
                         </div>
-                        <button type="button" onclick="openAddCategoryModal()"
+                        <button type="button" onclick="openAddLayoutModal()"
                                 class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-blue-800 transition-colors whitespace-nowrap">
-                            <span class="material-symbols-outlined text-[16px]">category</span>
-                            Tambah Kategori
+                            <span class="material-symbols-outlined text-[16px]">grid_on</span>
+                            Tambah Layout
                         </button>
                     </div>
                     
@@ -279,8 +289,7 @@
                                         <tr class="hover:bg-slate-50 transition-colors group">
                                             <td class="px-6 py-4 font-mono text-xs font-semibold text-slate-900">#<?= esc($ly['id']) ?></td>
                                             <td class="px-6 py-4 flex justify-center">
-                                                <div class="w-12 h-16 rounded border border-slate-200 bg-slate-50 overflow-hidden shadow-sm flex items-center justify-center p-1 cursor-pointer hover:border-primary transition-all"
-                                                     onclick="showPreviewLayoutModal('<?= esc($ly['id'], 'js') ?>', '<?= esc($ly['name'], 'js') ?>', '<?= !empty($ly['image_path']) ? base_url($ly['image_path']) : '' ?>')">
+                                                <div class="w-12 h-16 rounded border border-slate-200 bg-slate-50 overflow-hidden shadow-sm flex items-center justify-center p-1">
                                                     <?php if (!empty($ly['image_path'])): ?>
                                                         <img alt="<?= esc($ly['name']) ?> diagram"
                                                              class="max-w-full max-h-full object-contain"
@@ -299,21 +308,23 @@
                                             <td class="px-6 py-4 text-xs font-mono font-medium text-slate-600">
                                                 <?= esc($ly['aspect_ratio'] ?? '1:1') ?>
                                             </td>
-                                            <td class="px-6 py-4 flex justify-center items-center gap-2">
-                                                <button type="button"
-                                                        class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Lihat Diagram Layout"
-                                                        onclick="showPreviewLayoutModal('<?= esc($ly['id'], 'js') ?>', '<?= esc($ly['name'], 'js') ?>', '<?= esc($ly['photo_count'], 'js') ?>', '<?= esc($ly['aspect_ratio'] ?? '1:1', 'js') ?>', '<?= !empty($ly['image_path']) ? base_url($ly['image_path']) : '' ?>')">
-                                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                                </button>
-                                                <button type="button"
-                                                        onclick="openEditLayoutModal('<?= esc($ly['id'], 'js') ?>', '<?= esc($ly['name'], 'js') ?>', '<?= esc($ly['photo_count'], 'js') ?>', '<?= esc($ly['aspect_ratio'] ?? '', 'js') ?>', '<?= esc($ly['slot_coordinates'] ?? '', 'js') ?>', '<?= !empty($ly['image_path']) ? base_url($ly['image_path']) : '' ?>')"
-                                                        class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit Layout">
-                                                    <span class="material-symbols-outlined text-[18px]">edit</span>
-                                                </button>
-                                                <button type="button" class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Layout"
-                                                        onclick="openUniversalDeleteModal('<?= base_url('admin/layouts/' . $ly['id'] . '/delete') ?>', 'Apakah Anda yakin ingin menghapus layout ini?<br>Frame yang menggunakan layout ini akan diubah menjadi tanpa layout.')">
-                                                    <span class="material-symbols-outlined text-[18px]">delete</span>
-                                                </button>
+                                            <td class="px-6 py-4 align-middle">
+                                                <div class="flex justify-center items-center gap-2">
+                                                    <button type="button"
+                                                            class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Lihat Diagram Layout"
+                                                            onclick="showPreviewLayoutModal('<?= esc($ly['id'], 'js') ?>', '<?= esc($ly['name'], 'js') ?>', '<?= esc($ly['photo_count'], 'js') ?>', '<?= esc($ly['aspect_ratio'] ?? '1:1', 'js') ?>', '<?= !empty($ly['image_path']) ? base_url($ly['image_path']) : '' ?>')">
+                                                        <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                    </button>
+                                                    <button type="button"
+                                                            onclick="openEditLayoutModal('<?= esc($ly['id'], 'js') ?>', '<?= esc($ly['name'], 'js') ?>', '<?= esc($ly['photo_count'], 'js') ?>', '<?= esc($ly['aspect_ratio'] ?? '', 'js') ?>', '<?= esc($ly['slot_coordinates'] ?? '', 'js') ?>', '<?= !empty($ly['image_path']) ? base_url($ly['image_path']) : '' ?>')"
+                                                            class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit Layout">
+                                                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                                                    </button>
+                                                    <button type="button" class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Layout"
+                                                            onclick="openUniversalDeleteModal('<?= base_url('admin/layouts/' . $ly['id'] . '/delete') ?>', 'Apakah Anda yakin ingin menghapus layout ini?<br>Frame yang menggunakan layout ini akan diubah menjadi tanpa layout.')">
+                                                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -330,16 +341,32 @@
                     <!-- Pagination Kategori -->
                     <div class="mt-auto p-4 bg-white border-t border-slate-100 flex items-center justify-between">
                         <span class="text-xs text-slate-500 font-medium">
-                            Menampilkan <?= count($categoriesPaginated ?? []) ?> dari <?= $totalCategories ?? 0 ?> Kategori
+                            Menampilkan <?= count($layouts ?? []) ?> dari <?= $totalLayouts ?? 0 ?> Layout
                         </span>
                         <div class="flex gap-2">
                             <a href="<?= base_url('admin/frames?layout_page=' . max(1, ($currentLayoutPage ?? 1) - 1)) ?>"
                                class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentLayoutPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_left</span>
                             </a>
-                            <div class="w-8 h-8 flex items-center justify-center bg-primary text-white font-bold text-xs rounded-lg shadow-sm">
-                                <?= $currentLayoutPage ?? 1 ?>
-                            </div>
+                            <?php 
+                                $startP = max(1, ($currentLayoutPage ?? 1) - 2);
+                                $endP = min(($totalLayoutPages ?? 1), ($currentLayoutPage ?? 1) + 2);
+                                if ($endP - $startP < 4) {
+                                    if ($startP == 1) $endP = min(($totalLayoutPages ?? 1), 5);
+                                    if ($endP == ($totalLayoutPages ?? 1)) $startP = max(1, ($totalLayoutPages ?? 1) - 4);
+                                }
+                                for($p = $startP; $p <= $endP; $p++):
+                            ?>
+                                <?php if($p == ($currentLayoutPage ?? 1)): ?>
+                                    <div class="w-8 h-8 flex items-center justify-center bg-primary text-white font-bold text-xs rounded-lg shadow-sm">
+                                        <?= $p ?>
+                                    </div>
+                                <?php else: ?>
+                                    <a href="<?= base_url('admin/frames?layout_page=' . $p) ?>" class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-500 font-bold text-xs">
+                                        <?= $p ?>
+                                    </a>
+                                <?php endif; ?>
+                            <?php endfor; ?>
                             <a href="<?= base_url('admin/frames?layout_page=' . min(($totalLayoutPages ?? 1), ($currentLayoutPage ?? 1) + 1)) ?>"
                                class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentLayoutPage ?? 1) >= ($totalLayoutPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_right</span>
@@ -437,16 +464,18 @@
                                         <tr class="hover:bg-slate-50 transition-colors group">
                                             <td class="px-4 py-3.5 font-mono text-xs font-semibold text-slate-900 text-center">#<?= esc($cat['id']) ?></td>
                                             <td class="px-4 py-3.5 text-xs font-semibold text-slate-700 text-center"><?= esc($cat['name']) ?></td>
-                                            <td class="px-4 py-3.5 flex justify-center items-center gap-2">
-                                                <button type="button" 
-                                                        onclick="openEditCategoryModal('<?= esc($cat['id'], 'js') ?>', '<?= esc($cat['name'], 'js') ?>')"
-                                                        class="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
-                                                    <span class="material-symbols-outlined text-[16px]">edit</span>
-                                                </button>
-                                                <button type="button" class="p-1 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Kategori"
-                                                        onclick="openUniversalDeleteModal('<?= base_url('admin/categories/' . $cat['id'] . '/delete') ?>', 'Apakah Anda yakin ingin menghapus kategori ini?<br>Semua frame dalam kategori ini akan diubah menjadi uncategorized.')">
-                                                    <span class="material-symbols-outlined text-[16px]">delete</span>
-                                                </button>
+                                            <td class="px-4 py-3.5 align-middle">
+                                                <div class="flex justify-center items-center gap-2">
+                                                    <button type="button" 
+                                                            onclick="openEditCategoryModal('<?= esc($cat['id'], 'js') ?>', '<?= esc($cat['name'], 'js') ?>')"
+                                                            class="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                                        <span class="material-symbols-outlined text-[16px]">edit</span>
+                                                    </button>
+                                                    <button type="button" class="p-1 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus Kategori"
+                                                            onclick="openUniversalDeleteModal('<?= base_url('admin/categories/' . $cat['id'] . '/delete') ?>', 'Apakah Anda yakin ingin menghapus kategori ini?<br>Semua frame dalam kategori ini akan diubah menjadi uncategorized.')">
+                                                        <span class="material-symbols-outlined text-[16px]">delete</span>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -462,17 +491,33 @@
                     </div>
                     <!-- Pagination Kategori -->
                     <div class="mt-auto p-4 bg-white border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-[10px] text-slate-400 font-bold uppercase">
-                            <?= count($categoriesPaginated ?? []) ?>/<?= $totalCategories ?? 0 ?> Cat
+                        <span class="text-xs text-slate-500 font-medium">
+                            Menampilkan <?= count($categoriesPaginated ?? []) ?> dari <?= $totalCategories ?? 0 ?> Kategori
                         </span>
                         <div class="flex gap-1.5">
                             <a href="<?= base_url('admin/frames?cat_page=' . max(1, ($currentCatPage ?? 1) - 1)) ?>"
                                class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentCatPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_left</span>
                             </a>
-                            <div class="w-7 h-7 flex items-center justify-center bg-primary text-white font-bold text-[10px] rounded-lg shadow-sm">
-                                <?= $currentCatPage ?? 1 ?>
-                            </div>
+                            <?php 
+                                $startP = max(1, ($currentCatPage ?? 1) - 2);
+                                $endP = min(($totalCategoryPages ?? 1), ($currentCatPage ?? 1) + 2);
+                                if ($endP - $startP < 4) {
+                                    if ($startP == 1) $endP = min(($totalCategoryPages ?? 1), 5);
+                                    if ($endP == ($totalCategoryPages ?? 1)) $startP = max(1, ($totalCategoryPages ?? 1) - 4);
+                                }
+                                for($p = $startP; $p <= $endP; $p++):
+                            ?>
+                                <?php if($p == ($currentCatPage ?? 1)): ?>
+                                    <div class="w-7 h-7 flex items-center justify-center bg-primary text-white font-bold text-[10px] rounded-lg shadow-sm">
+                                        <?= $p ?>
+                                    </div>
+                                <?php else: ?>
+                                    <a href="<?= base_url('admin/frames?cat_page=' . $p) ?>" class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-500 font-bold text-[10px]">
+                                        <?= $p ?>
+                                    </a>
+                                <?php endif; ?>
+                            <?php endfor; ?>
                             <a href="<?= base_url('admin/frames?cat_page=' . min(($totalCategoryPages ?? 1), ($currentCatPage ?? 1) + 1)) ?>"
                                class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentCatPage ?? 1) >= ($totalCategoryPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_right</span>
@@ -507,7 +552,57 @@
             </div>
         </div>
     </div>
+    <!-- Modal Konfirmasi Sinkronisasi Custom -->
+    <div id="syncConfirmModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/40 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div id="syncConfirmModalContent" class="bg-white rounded-3xl p-10 max-w-lg w-full mx-4 border border-slate-100 transform scale-95 opacity-0 transition-all duration-300 flex flex-col items-center text-center">
+            
+            <div class="w-20 h-20 rounded-2xl bg-blue-50/70 flex items-center justify-center mb-6">
+                <span class="material-symbols-outlined text-[32px] text-blue-500">sync</span>
+            </div>
+            
+            <h3 class="text-2xl font-black text-slate-900 mb-3">Sinkronisasi Aset</h3>
+            <p class="text-[16px] text-slate-500 leading-relaxed mb-8">
+                Mulai sinkronisasi file lokal?<br>Seluruh folder Aset (Frame & Layout) akan dipindai. File baru akan otomatis masuk dan diset nonaktif.
+            </p>
+            
+            <div class="flex gap-4 w-full">
+                <button onclick="closeSyncModal()" class="flex-1 py-3.5 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold text-base rounded-2xl transition-all">Batal</button>
+                <form method="post" action="<?= base_url('admin/frames/sync') ?>" class="flex-1">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="w-full py-3.5 bg-primary hover:bg-blue-700 text-white font-bold text-base rounded-2xl transition-all shadow-none">Mulai Sinkronisasi</button>
+                </form>
+            </div>
+        </div>
+    </div>
     <script>
+        function openSyncConfirmModal() {
+            const modal = document.getElementById('syncConfirmModal');
+            const content = document.getElementById('syncConfirmModalContent');
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeSyncModal() {
+            const modal = document.getElementById('syncConfirmModal');
+            const content = document.getElementById('syncConfirmModalContent');
+            
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
         function openUniversalDeleteModal(actionUrl, message = 'Apakah Anda yakin ingin menghapus data ini?<br>Tindakan ini tidak dapat dibatalkan.') {
             const modal = document.getElementById('deleteConfirmModal');
             const content = document.getElementById('deleteConfirmModalContent');
@@ -726,11 +821,7 @@
                 <input type="file" name="layout_image" id="layout_image_input" accept="image/png,image/jpeg"
                        class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-600 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
             </div>
-            <div>
-                <label for="slot_coordinates_input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Koordinat Slot (JSON)</label>
-                <textarea name="slot_coordinates" id="slot_coordinates_input" rows="3" placeholder='[{"slot":1,"x":35,"y":35,"w":295,"h":285}]'
-                          class="w-full border border-slate-200 rounded-lg px-4 py-2 text-xs font-mono focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white"></textarea>
-            </div>
+
             <div class="flex gap-3 pt-3 border-t border-slate-100">
                 <button type="button" onclick="closeAddLayoutModal()" class="flex-1 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-lg transition-colors">
                     Batal
@@ -785,11 +876,7 @@
                 <input type="file" name="layout_image" id="edit_layout_image_input" accept="image/png,image/jpeg"
                        class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-600 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
             </div>
-            <div>
-                <label for="edit_slot_coordinates_input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Koordinat Slot (JSON)</label>
-                <textarea name="slot_coordinates" id="edit_slot_coordinates_input" rows="3"
-                          class="w-full border border-slate-200 rounded-lg px-4 py-2 text-xs font-mono focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white"></textarea>
-            </div>
+
             <div class="flex gap-3 pt-3 border-t border-slate-100">
                 <button type="button" onclick="closeEditLayoutModal()" class="flex-1 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-lg transition-colors">
                     Batal
@@ -810,9 +897,6 @@
                 <span class="material-symbols-outlined text-emerald-600">visibility</span>
                 Detail &amp; Preview Layout
             </h4>
-            <button type="button" onclick="closePreviewLayoutModal()" class="text-slate-400 hover:text-slate-600">
-                <span class="material-symbols-outlined text-[20px]">close</span>
-            </button>
         </div>
         <div class="p-6 flex flex-col items-center">
             <div class="w-full h-80 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex items-center justify-center p-4 mb-5 shadow-inner">
@@ -872,7 +956,7 @@
         document.getElementById('edit_layout_name_input').value = name;
         document.getElementById('edit_photo_count_input').value = photoCount;
         document.getElementById('edit_aspect_ratio_input').value = aspectRatio;
-        document.getElementById('edit_slot_coordinates_input').value = slotCoordinates;
+
 
         modal.classList.remove('hidden');
         setTimeout(() => {
@@ -899,6 +983,7 @@
         document.getElementById('modalLayoutAspectRatio').textContent = aspectRatio || '1:1';
 
         const imgEl = document.getElementById('modalLayoutImage');
+
         if (imagePath) {
             imgEl.src = imagePath;
             imgEl.classList.remove('hidden');
