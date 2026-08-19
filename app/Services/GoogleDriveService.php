@@ -135,7 +135,18 @@ class GoogleDriveService
             }
         }
 
-        $mime = mime_content_type($localPath) ?: 'image/jpeg';
+        $mime = mime_content_type($localPath);
+        if (!$mime || $mime === 'application/octet-stream') {
+            if (str_ends_with(strtolower($fileName), '.mp4')) {
+                $mime = 'video/mp4';
+            } elseif (str_ends_with(strtolower($fileName), '.webm')) {
+                $mime = 'video/webm';
+            } elseif (str_ends_with(strtolower($fileName), '.png')) {
+                $mime = 'image/png';
+            } else {
+                $mime = 'image/jpeg';
+            }
+        }
         $metadata = new DriveFile([
             'name'     => $fileName,
             'parents'  => [$folderId],

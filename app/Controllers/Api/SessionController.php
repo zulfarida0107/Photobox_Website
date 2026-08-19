@@ -138,7 +138,10 @@ class SessionController extends BaseApiController
         // simpan video transisi jika ada
         $finalVideoTransition = $this->request->getFile('final_video_transition');
         if ($finalVideoTransition && $finalVideoTransition->isValid()) {
-            $ext = $finalVideoTransition->getExtension();
+            $ext = $finalVideoTransition->getExtension() ?: 'mp4';
+            if ($ext === 'tmp' || empty($ext)) {
+                $ext = 'mp4';
+            }
             $transitionFilename = 'final_video_transition.' . $ext;
             $finalVideoTransition->move(
                 $folder,
@@ -157,7 +160,10 @@ class SessionController extends BaseApiController
         // simpan video loop jika ada
         $finalVideoLoop = $this->request->getFile('final_video_loop');
         if ($finalVideoLoop && $finalVideoLoop->isValid()) {
-            $ext = $finalVideoLoop->getExtension();
+            $ext = $finalVideoLoop->getExtension() ?: 'mp4';
+            if ($ext === 'tmp' || empty($ext)) {
+                $ext = 'mp4';
+            }
             $loopFilename = 'final_video_loop.' . $ext;
             $finalVideoLoop->move(
                 $folder,
