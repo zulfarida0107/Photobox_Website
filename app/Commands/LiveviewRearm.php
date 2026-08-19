@@ -1,13 +1,6 @@
 <?php
 /**
  * PENTING: File ini HARUS diletakkan di folder app/Commands/LiveviewRearm.php
- * (bukan di folder Controllers/Api), mengikuti pola yang sama seperti command
- * "session:complete" yang sudah ada di project kamu (dipanggil dari
- * SessionController::complete()).
- *
- * Cara register: CodeIgniter 4 otomatis mendeteksi command baru di
- * app/Commands/ tanpa perlu registrasi manual tambahan, selama namespace
- * dan lokasi file sudah benar.
  */
 
 namespace App\Commands;
@@ -23,8 +16,8 @@ class LiveviewRearm extends BaseCommand
 
     public function run(array $params)
     {
-        // Tunggu 2 detik agar digiCamControl selesai memproses jepretan & transfer USB secara penuh
-        usleep(2000000);
+        // Tunggu 1.5 detik agar digiCamControl selesai memproses jepretan & transfer USB secara penuh
+        usleep(1500000);
 
         $webServerUrl = 'http://127.0.0.1:5513';
 
@@ -37,56 +30,64 @@ class LiveviewRearm extends BaseCommand
         fclose($connection);
 
         $checkFrame = function (float $timeoutSeconds): bool {
-            $verifyConnection = @fsockopen('127.0.0.1', 5514, $verrno, $verrstr, 0.5);
-            if (!$verifyConnection) {
+            $socket = @fsockopen('127.0.0.1', 5514, $errno, $errstr, 0.5);
+            if (!$socket) {
                 return false;
             }
-            fclose($verifyConnection);
-
-            $verifyCtx = stream_context_create(['http' => ['timeout' => $timeoutSeconds]]);
-            $frame = @file_get_contents('http://127.0.0.1:5514/live', false, $verifyCtx);
-
-            return $frame !== false && strlen($frame) > 500 && strpos($frame, "\xFF\xD8") !== false;
+            
+            $seconds = floor($timeoutSeconds);
+            $microseconds = ($timeoutSeconds - $seconds) * 1000000;
+            stream_set_timeout($socket, (int)$seconds, (int)$microseconds);
+            
+            $request = "GET /live HTTP/1.1\r\nHost: 127.0.0.1:5514\r\nConnection: close\r\n\r\n";
+            fwrite($socket, $request);
+            
+            $data = '';
+            $startTime = microtime(true);
+            while (!feof($socket) && strlen($data) < 8192) {
+                $chunk = fread($socket, 1024);
+                if ($chunk === false || $chunk === '') {
+                    break;
+                }
+                $data .= $chunk;
+                
+                if ((microtime(true) - $startTime) > $timeoutSeconds) {
+                    break;
+                }
+            }
+            fclose($socket);
+            
+            return strlen($data) > 500 && strpos($data, "\xFF\xD8") !== false;
         };
 
         // 1. Cek dulu TANPA toggle
-        if ($checkFrame(0.8)) {
+        if ($checkFrame(0.5)) {
             CLI::write('liveview:rearm - live view sudah aktif tanpa perlu toggle.', 'green');
             log_message('info', 'liveview:rearm - live view sudah aktif tanpa perlu toggle.');
             return;
         }
 
-        // 2. Jika belum aktif, lakukan toggle Hide -> Show SEKALI
-        CLI::write('liveview:rearm - live view mati. Melakukan toggle...', 'yellow');
+        // 2. Jika belum aktif, lakukan reset penuh Hide -> Show dengan jeda 1.5 detik
+        CLI::write('liveview:rearm - live view mati. Melakukan reset (Hide -> Show)...', 'yellow');
         $this->httpGet($webServerUrl . '/?CMD=LiveViewWnd_Hide', 1.5);
-        usleep(150000); // 150ms jeda
+        
+        // Jeda 1.5 detik agar digiCamControl menutup window dan membebaskan port
+        usleep(1500000); 
+        
         $this->httpGet($webServerUrl . '/?CMD=LiveViewWnd_Show', 1.5);
 
-        // Tunggu 1.2 detik agar kamera entry-level menginisialisasi port 5514 stream via USB
-        usleep(1200000);
-
-        if ($checkFrame(1.0)) {
-            CLI::write('liveview:rearm - berhasil pulih setelah toggle.', 'green');
-            log_message('info', 'liveview:rearm - berhasil pulih setelah toggle.');
-            return;
+        // Lakukan polling selama 5 detik (10 * 500ms) untuk memberi waktu kamera membuka cermin
+        for ($i = 1; $i <= 10; $i++) {
+            usleep(500000); // 500ms
+            if ($checkFrame(0.5)) {
+                CLI::write("liveview:rearm - berhasil pulih setelah reset (percobaan ke-$i).", 'green');
+                log_message('info', "liveview:rearm - berhasil pulih setelah reset (percobaan ke-$i).");
+                return;
+            }
         }
 
-        // 3. Jika masih gagal, tunggu sedikit lagi dan coba sekali lagi toggle
-        CLI::write('liveview:rearm - belum pulih. Mencoba sekali lagi...', 'yellow');
-        $this->httpGet($webServerUrl . '/?CMD=LiveViewWnd_Hide', 1.5);
-        usleep(150000);
-        $this->httpGet($webServerUrl . '/?CMD=LiveViewWnd_Show', 1.5);
-
-        usleep(1500000); // Tunggu 1.5 detik
-
-        if ($checkFrame(1.2)) {
-            CLI::write('liveview:rearm - berhasil pulih pada percobaan kedua.', 'green');
-            log_message('info', 'liveview:rearm - berhasil pulih pada percobaan kedua.');
-            return;
-        }
-
-        CLI::write('liveview:rearm - gagal memulihkan live view.', 'red');
-        log_message('error', 'liveview:rearm - gagal memulihkan live view setelah dua kali coba.');
+        CLI::write('liveview:rearm - gagal memulihkan live view setelah semua percobaan.', 'red');
+        log_message('error', 'liveview:rearm - gagal memulihkan live view setelah semua percobaan.');
     }
 
     private function httpGet(string $url, float $timeout = 3.0): ?string

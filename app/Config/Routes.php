@@ -39,6 +39,7 @@ $routes->group('api', static function ($routes) {
     $routes->get('google/callback', 'GoogleAuthController::callback');
 
     $routes->post('session/(:segment)/upload', 'Api\\SessionController::upload/$1');
+    $routes->get('session/settings', 'Api\\SessionController::getSettings');
     $routes->post('session/(:segment)/upload-live', 'Api\\SessionController::uploadLive/$1');
     $routes->post('session/(:segment)/capture-dslr', 'Api\\SessionController::captureDslr/$1');
     $routes->get('session/photo/temp/(:any)', 'Api\\SessionController::getTempPhoto/$1');

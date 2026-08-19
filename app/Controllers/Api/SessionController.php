@@ -392,9 +392,16 @@ class SessionController extends BaseApiController
      */
     private function rearmDslrLiveView(): bool
     {
+        $cameraDriver = getenv('camera.driver') ?: 'digicamcontrol';
+        if ($cameraDriver === 'python_direct') {
+            // Dalam mode direct python, live view di-manage secara internal oleh driver server port 5515
+            return true;
+        }
+
         $webServerUrl = 'http://127.0.0.1:5513';
 
         $connection = @fsockopen('127.0.0.1', 5513, $errno, $errstr, 0.5);
+
         if (!$connection) {
             log_message('warning', 'rearmDslrLiveView: port 5513 tidak terjangkau.');
             return false;
@@ -486,16 +493,20 @@ class SessionController extends BaseApiController
         $outputFile = $tempFolder . 'dslr_' . $sessionId . '_' . time() . '.jpg';
         $outputFileWin = str_replace('/', '\\', $outputFile);
 
-        // Cek apakah web server digiCamControl aktif (port 5513)
-        $webServerUrl = 'http://127.0.0.1:5513';
+        // Cek apakah web server kamera aktif berdasarkan driver di .env
+        $cameraDriver = getenv('camera.driver') ?: 'digicamcontrol';
+        $cameraPort = ($cameraDriver === 'python_direct') ? 5515 : 5513;
+        
+        $webServerUrl = 'http://127.0.0.1:' . $cameraPort;
         $isWebServerActive = false;
         
-        $connection = @fsockopen('127.0.0.1', 5513, $errno, $errstr, 0.5);
+        $connection = @fsockopen('127.0.0.1', $cameraPort, $errno, $errstr, 0.5);
         if ($connection) {
             fclose($connection);
             $isWebServerActive = true;
         }
         $mark('check_webserver_active');
+
 
         if ($isWebServerActive) {
             $ctx = stream_context_create([
@@ -507,32 +518,42 @@ class SessionController extends BaseApiController
             // Dapatkan nama file jepretan sebelumnya sebelum memicu shutter
             $lastCapturedUrl = $webServerUrl . '/?slc=get&param1=lastcaptured&param2=';
             $previousFilename = '';
-            $prevRes = $this->httpGet($lastCapturedUrl, 3.0);
-            if ($prevRes !== null) {
-                $previousFilename = trim($prevRes);
+            $localDir = 'C:\\digiCamControl\\';
+            $existingFiles = [];
+            if (is_dir($localDir)) {
+                $files = glob($localDir . '*.jpg');
+                if ($files !== false) {
+                    foreach ($files as $f) {
+                        $existingFiles[basename($f)] = true;
+                    }
+                }
             }
             $mark('get_previous_filename');
 
-            // 1. Pemicu jepret via Web Server API (?slc=capture)
-            $captureUrl = $webServerUrl . '/?slc=capture';
+            // 1. Pemicu jepret via Web Server API (?CMD=CaptureNoAf untuk bypass autofocus)
+            $captureUrl = $webServerUrl . '/?CMD=CaptureNoAf';
             $captureResult = $this->httpGet($captureUrl, 5.0);
             $mark('trigger_shutter_command'); // waktu kirim command shutter (BUKAN waktu kamera selesai jepret)
             
-            // 2. Poll untuk nama file terakhir yang baru (harus berbeda dengan file sebelumnya)
+            // 2. Poll direktori lokal untuk mendeteksi file JPEG baru (jauh lebih cepat daripada HTTP curl)
             $filename = '';
-            $maxPoll = 500; // maks 15 detik (500 * 30ms)
+            $maxPoll = 150; // maks 7.5 detik (150 * 50ms)
             
             for ($i = 0; $i < $maxPoll; $i++) {
-                $res = $this->httpGet($lastCapturedUrl, 3.0);
-                if ($res !== null) {
-                    $resClean = trim($res);
-                    // Harus tidak empty, bukan "-", dan tidak sama dengan jepretan sebelumnya
-                    if ($resClean !== '-' && !empty($resClean) && $resClean !== $previousFilename) {
-                        $filename = $resClean;
-                        break;
+                if (is_dir($localDir)) {
+                    $files = glob($localDir . '*.jpg');
+                    if ($files !== false) {
+                        foreach ($files as $f) {
+                            $base = basename($f);
+                            if (!isset($existingFiles[$base]) && file_exists($f) && filesize($f) > 10240) {
+                                usleep(50000); // Jeda 50ms agar digiCamControl selesai menulis file sepenuhnya
+                                $filename = $base;
+                                break 2;
+                            }
+                        }
                     }
                 }
-                usleep(30000); // 30ms (0.03 detik) untuk respon lebih instan
+                usleep(50000); // 50ms poll interval
             }
             $mark('poll_wait_for_camera'); // INI biasanya paling makan waktu -- murni nunggu kamera fisik selesai jepret+proses+lapor
             
@@ -540,9 +561,8 @@ class SessionController extends BaseApiController
                 return $this->failServerError('Gagal mendeteksi file foto setelah trigger capture via Web Server. Pastikan kamera menyala dan terhubung di digiCamControl.');
             }
             
-            // 3. Ambil file gambar (Coba salin langsung dari folder lokal C:\digiCamControl terlebih dahulu untuk performa & keandalan)
-            $filenameOnly = basename($filename);
-            $localFilePath = 'C:\\digiCamControl\\' . $filenameOnly;
+            // 3. Ambil file gambar (Salin langsung dari folder lokal C:\digiCamControl)
+            $localFilePath = $localDir . $filename;
             $fileAcquired = false;
 
             if (file_exists($localFilePath)) {
@@ -553,7 +573,7 @@ class SessionController extends BaseApiController
             }
 
             if (!$fileAcquired) {
-                // Fallback ke download dari Web Server
+                // Fallback ke download dari Web Server jika penyalinan lokal gagal
                 $imageUrl = $webServerUrl . '/image/' . rawurlencode($filename);
                 $imageContent = $this->httpGet($imageUrl, 5.0);
                 
@@ -566,7 +586,7 @@ class SessionController extends BaseApiController
             $mark('acquire_file_from_camera'); // waktu copy lokal ATAU download dari webserver
 
             if (!$fileAcquired) {
-                return $this->failServerError('Gagal mengambil foto ' . $filenameOnly . ' baik dari folder lokal C:\\digiCamControl maupun via download dari Web Server.');
+                return $this->failServerError('Gagal mengambil foto ' . $filename . ' baik dari folder lokal C:\\digiCamControl maupun via download dari Web Server.');
             }
         } else {
             // Tentukan path CameraControlCmd.exe
@@ -609,47 +629,11 @@ class SessionController extends BaseApiController
         }
         $mark('dispatch_liveview_rearm_async'); // seharusnya nyaris 0ms karena async
 
-        // Generate lower resolution preview (GD library) untuk "Nice Shot"
-        // yang instan.
-        $previewUrl = $fileUrl; // Fallback ke URL asli kalau resize gagal / dilewati
-        try {
-            if (extension_loaded('gd') && file_exists($outputFile)) {
-                $srcImg = @imagecreatefromjpeg($outputFile);
-                if ($srcImg) {
-                    $srcW = imagesx($srcImg);
-                    $srcH = imagesy($srcImg);
-
-                    // Kalau sumbernya sudah cukup kecil (mis. setting kamera
-                    // sudah S2/Small), resize cuma nambah overhead
-                    // decode+encode tanpa manfaat -- langsung pakai file
-                    // asli sebagai preview, skip GD sepenuhnya.
-                    if ($srcW <= 1000) {
-                        imagedestroy($srcImg);
-                        log_message('info', "DSLR Capture: sumber sudah kecil ({$srcW}px), skip resize preview.");
-                    } else {
-                        $targetW = 800;
-                        $targetH = (int) ($srcH * ($targetW / $srcW));
-
-                        $previewImg = imagecreatetruecolor($targetW, $targetH);
-                        imagecopyresampled($previewImg, $srcImg, 0, 0, 0, 0, $targetW, $targetH, $srcW, $srcH);
-
-                        $previewFile = $tempFolder . 'prev_' . basename($outputFile);
-                        @imagejpeg($previewImg, $previewFile, 60); // quality 60, masih terlihat bagus di layar kiosk
-
-                        imagedestroy($srcImg);
-                        imagedestroy($previewImg);
-
-                        if (file_exists($previewFile)) {
-                            $previewUrl = base_url('uploads/temp/' . basename($previewFile));
-                        }
-                    }
-                }
-            }
-        } catch (\Throwable $e) {
-            log_message('error', 'Gagal membuat pratinjau DSLR: ' . $e->getMessage());
-            // $previewUrl tetap fallback ke $fileUrl, jadi tidak ada foto
-            // yang hilang walau resize gagal -- cuma lebih lambat.
-        }
+        // DI-BYPASS UNTUK KECEPATAN MAKSIMAL:
+        // Karena Cuitbox berjalan secara lokal (Electron), browser dapat merender gambar asli
+        // 6MB+ secara instan (hardware-accelerated). Kita bypass pembuatan pratinjau GD 
+        // untuk menghemat CPU (menghilangkan jeda decode/encode ~400ms).
+        $previewUrl = $fileUrl; 
         $mark('generate_preview');
 
         $totalMs = array_sum($timings);
@@ -686,10 +670,12 @@ class SessionController extends BaseApiController
     public function startLiveView()
     {
         $webServerUrl = 'http://127.0.0.1:5513';
+        log_message('info', 'startLiveView: Dipanggil.');
         
         // 1. Cek koneksi port 5513 dengan timeout cepat (0.5s) agar PHP tidak hang
         $connection = @fsockopen('127.0.0.1', 5513, $errno, $errstr, 0.5);
         if (!$connection) {
+            log_message('error', 'startLiveView: Gagal konek ke port 5513 (Web Server Offline). Error: ' . $errstr . ' (' . $errno . ')');
             return $this->respondOk([
                 'status' => false,
                 'message' => 'digiCamControl web server is offline (port 5513). Live view cannot start.',
@@ -698,11 +684,15 @@ class SessionController extends BaseApiController
         }
         fclose($connection);
 
+        log_message('info', 'startLiveView: Melakukan reset Live View (Hide -> Show)...');
+        $this->httpGet($webServerUrl . '/?CMD=LiveViewWnd_Hide', 1.5);
+        usleep(1500000); // Jeda 1.5s agar digiCamControl menutup window dan membebaskan port
         $res = $this->httpGet($webServerUrl . '/?CMD=LiveViewWnd_Show', 1.5);
         
-        // Wait 300ms, then minimize all digiCamControl windows so it stays in background
-        usleep(300000);
-        $this->httpGet($webServerUrl . '/?CMD=All_Minimize', 1.5);
+        // Jangan minimize digiCamControl agar Windows tidak menangguhkan (suspend) rendering live view-nya.
+        // Biarkan jendela tetap terbuka di latar belakang (di belakang fullscreen Cuitbox).
+
+        log_message('info', 'startLiveView: Live view berhasil di-reset. Response Show = "' . ($res ?? 'NULL') . '"');
 
         return $this->respondOk([
             'status' => true,
@@ -733,4 +723,15 @@ class SessionController extends BaseApiController
             'response' => $res
         ]);
     }
+
+    public function getSettings(): ResponseInterface
+    {
+        $cameraDriver = getenv('camera.driver') ?: 'digicamcontrol';
+        $liveviewPort = ($cameraDriver === 'python_direct') ? 5515 : 5514;
+        return $this->respondOk([
+            'camera_driver' => $cameraDriver,
+            'liveview_port' => $liveviewPort
+        ]);
+    }
 }
+
