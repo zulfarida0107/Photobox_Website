@@ -4,19 +4,19 @@ namespace App\Controllers\User_Booking;
 
 use App\Controllers\BaseController;
 use App\Models\SlotModel;
-use App\Models\BoothModel;
+use App\Models\FrameModel;
 use App\Models\CustomerModel;
 
 class ScheduleController extends BaseController
 {
     protected $slotModel;
-    protected $boothModel;
+    protected $frameModel;
     protected $customerModel;
 
     public function __construct()
     {
         $this->slotModel = new SlotModel();
-        $this->boothModel = new BoothModel();
+        $this->frameModel = new FrameModel();
         $this->customerModel = new CustomerModel();
     }
 
@@ -26,7 +26,7 @@ class ScheduleController extends BaseController
         
         $data = [
             'title' => 'Schedule Booking - CuitBox Studio',
-            'booths' => $this->boothModel->findAll(),
+            'frames' => $this->frameModel->findAll(),
             'customer' => $customerId ? $this->customerModel->find($customerId) : null
         ];
 
@@ -153,8 +153,8 @@ class ScheduleController extends BaseController
         // Log data untuk debugging
         log_message('debug', 'Schedule submitted - Date: ' . $selectedDate . ', Time: ' . $selectedTime . ', Customer: ' . $customerId);
 
-        // Redirect ke halaman booth dengan pesan sukses
-        return redirect()->to('/booth')->with('success', 'Jadwal berhasil dipilih! Silakan pilih booth favorit Anda.');
+        // Redirect ke halaman frame dengan pesan sukses
+        return redirect()->to('/frame')->with('success', 'Jadwal berhasil dipilih! Silakan pilih frame favorit Anda.');
     }
 
     public function getSlots()

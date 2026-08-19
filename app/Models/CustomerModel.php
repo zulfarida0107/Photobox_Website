@@ -15,6 +15,7 @@ class CustomerModel extends Model
 		'id',
 		'name',
 		'email',
+		'password',
 		'phone',
 		'status',
 	];

@@ -7,12 +7,24 @@ use CodeIgniter\Config\BaseConfig;
 class Cors extends BaseConfig
 {
     public array $default = [
-        'allowedOrigins' => ['*'],
+        'allowedOrigins' => [
+            'http://localhost:5173',
+        ],
+
         'allowedOriginsPatterns' => [],
-        'supportsCredentials' => false,
-        'allowedHeaders' => ['*'],
+
+        'allowedHeaders' => [
+            '*',
+        ],
+
+        'allowedMethods' => [
+            '*',
+        ],
+
         'exposedHeaders' => [],
-        'allowedMethods' => ['*'],
+
         'maxAge' => 7200,
+
+        'supportsCredentials' => false,
     ];
 }

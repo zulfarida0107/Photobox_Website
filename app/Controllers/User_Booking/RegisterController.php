@@ -16,12 +16,33 @@ class RegisterController extends Controller
         return view('User_Booking/register', $data);
     }
 
+    // ✅ METHOD CEK EMAIL VIA AJAX
+    public function checkEmail()
+    {
+        $email = $this->request->getPost('email');
+        
+        if (empty($email)) {
+            return $this->response->setJSON(['exists' => false, 'message' => 'Email tidak boleh kosong']);
+        }
+        
+        $customerModel = new CustomerModel();
+        $user = $customerModel->where('email', $email)->first();
+        
+        if ($user) {
+            return $this->response->setJSON([
+                'exists' => true, 
+                'message' => 'Email sudah terdaftar! Silakan <a href="' . base_url('login') . '" class="text-blue-600 font-semibold hover:underline" style="color: #2563eb !important; font-weight: 600 !important; text-decoration: underline !important;">Masuk di sini</a> atau gunakan email lain.'
+            ]);
+        } else {
+            return $this->response->setJSON(['exists' => false, 'message' => 'Email tersedia']);
+        }
+    }
+
     public function store()
     {
-        $rules = [
+        $rules = [ 
             'name' => 'required|min_length[4]|max_length[100]',
             'email' => 'required|valid_email|is_unique[customers.email]',
-            // ✅ PERBAIKI: Hapus <max_length 12=""></max_length>
             'phone' => 'permit_empty|min_length[11]|max_length[12]|regex_match[/^[0-9]+$/]',
             'password' => [
                 'required',
@@ -53,8 +74,6 @@ class RegisterController extends Controller
         ];
 
         if (!$this->validate($rules, $messages)) {
-            // Debug: tampilkan errors
-            // dd($this->validator->getErrors());
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
@@ -66,6 +85,27 @@ class RegisterController extends Controller
 
         $customerModel = new CustomerModel();
         
+<<<<<<< HEAD
+        // ===== GENERATE ID DENGAN CEK DUPLIKAT =====
+        // Ambil ID terakhir
+        $lastCustomer = $customerModel->orderBy('id', 'DESC')->first();
+        
+        if ($lastCustomer && isset($lastCustomer['id'])) {
+            // Ambil angka dari ID (C0001 -> 0001 -> 1)
+            $idNumber = (int) substr($lastCustomer['id'], 1);
+            $newId = 'C' . str_pad($idNumber + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $newId = 'C0001';
+        }
+        
+        // ===== CEK APAKAH ID SUDAH ADA =====
+        // Jika ID sudah ada, generate ulang sampai ditemukan ID yang unik
+        $counter = 0;
+        while ($customerModel->find($newId)) {
+            $counter++;
+            $newId = 'C' . str_pad($idNumber + 1 + $counter, 4, '0', STR_PAD_LEFT);
+        }
+=======
         // Generate ID Customer secara aman & unik
         $existingCustomers = $customerModel->like('id', 'C', 'after')->findAll();
         $maxNum = 0;
@@ -82,26 +122,36 @@ class RegisterController extends Controller
             $newId = 'C' . str_pad($newIdNum, 4, '0', STR_PAD_LEFT);
             $newIdNum++;
         } while ($customerModel->find($newId) !== null);
+>>>>>>> 809e25cbdcf9b46ae7d84d91ea5cae63ea09a3e1
 
         // Gabungkan kode negara + nomor telepon
         $countryCode = $this->request->getPost('country_code') ?? '+62';
         $phoneNumber = $this->request->getPost('phone') ?? '';
         $fullPhone = $countryCode . $phoneNumber;
+        $email = $this->request->getPost('email');
 
         $data = [
             'id' => $newId,
             'name' => $this->request->getPost('name'),
-            'email' => $this->request->getPost('email'),
+            'email' => $email,
+            'password' => password_hash($password, PASSWORD_DEFAULT),
             'phone' => $fullPhone,
-            'status' => 'active',
-            'password' => password_hash($password, PASSWORD_DEFAULT)
+            'status' => 'active'
         ];
 
         try {
             $customerModel->insert($data);
             
-            // ✅ Redirect ke schedule setelah registrasi berhasil
-            return redirect()->to('/schedule')->with('success', 'Akun berhasil dibuat! Silahkan pilih jadwal booking Anda.');
+            // Set session setelah registrasi berhasil
+            session()->set([
+                'customer_id' => $newId,
+                'customer_name' => $this->request->getPost('name'),
+                'customer_email' => $email,
+                'customer_phone' => $fullPhone,
+                'isLoggedIn' => true
+            ]);
+            
+            return redirect()->to('/schedule')->with('success', 'Akun berhasil dibuat! Selamat datang, ' . $this->request->getPost('name') . '!');
             
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -111,9 +161,7 @@ class RegisterController extends Controller
     // Method untuk handle POST dari landing page
     public function fromLanding()
     {
-        // Cek apakah ada data dari landing
         if ($this->request->getPost('from_landing')) {
-            // Bisa tambahkan logic khusus jika perlu
             session()->setFlashdata('info', 'Silahkan lengkapi data registrasi Anda');
         }
         
