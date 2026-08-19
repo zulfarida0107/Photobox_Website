@@ -14,8 +14,10 @@ class FrameModel extends Model
         'name',
         'category_id',
         'file_path',
-        'photo_count',
-        'is_active'
+        'Price', 
+        'is_active',
+        'created_at',
+        'updated_at',
     ];
     protected $useTimestamps = true;
     protected $createdField = 'created_at';

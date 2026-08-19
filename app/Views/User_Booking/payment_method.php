@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Selesaikan Pembayaran - CuitBox Studio</title>
+    <title>Payment Method - CuitBox Studio</title>
     <!-- Tailwind CSS v3 CDN -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <!-- Google Fonts -->
@@ -84,7 +84,7 @@
             cursor: not-allowed;
             transform: none !important;
         }
-        .btn-back {
+        .btn-secondary {
             background: #1e293b;
             transition: all 0.3s ease;
             border-radius: 16px;
@@ -100,11 +100,11 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             width: 100%;
         }
-        .btn-back:hover {
+        .btn-secondary:hover {
             background: #334155;
             transform: scale(1.02);
         }
-        .btn-back:active {
+        .btn-secondary:active {
             transform: scale(0.98);
         }
         .material-symbols-outlined {
@@ -208,27 +208,79 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        /* Main content agar footer menempel di bawah */
         .main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
         }
+        .payment-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        }
+        .method-option {
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .method-option:hover {
+            border-color: #bef264;
+            background: rgba(190, 242, 100, 0.05);
+        }
+        .method-option.active {
+            border-color: #bef264;
+            background: rgba(190, 242, 100, 0.1);
+            box-shadow: 0 0 0 4px rgba(190, 242, 100, 0.2);
+        }
+        .method-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #bef264;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .method-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        .method-icon.qris { background: #dbeafe; color: #2563eb; }
+        .method-icon.bca { background: #fef3c7; color: #d97706; }
+        .method-icon.bni { background: #e0e7ff; color: #4f46e5; }
+        .method-icon.mandiri { background: #fce4ec; color: #dc2626; }
+        .method-icon.gopay { background: #d1fae5; color: #059669; }
+        .method-icon.ovo { background: #ede9fe; color: #7c3aed; }
+        .method-icon.dana { background: #dbeafe; color: #2563eb; }
+        .method-icon.shopeepay { background: #fee2e2; color: #ef4444; }
     </style>
 </head>
 <body>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <!-- BEGIN: Page Wrapper -->
     <div class="page-wrapper">
         <!-- BEGIN: MainContainer with Gradient -->
         <div class="w-full main-container-rounded gradient-bg flex flex-col min-h-screen">
 
             <!-- BEGIN: MainHeader -->
-            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">
+            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100">
                 <div class="flex items-center">
                     <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
                 </div>
                 <div class="flex items-center space-x-2 sm:space-x-4 text-slate-600">
-                    <!-- Help Button -->
                     <a href="<?= base_url('help') ?>" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all relative group" aria-label="Help">
                         <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
@@ -240,47 +292,53 @@
             <!-- END: MainHeader -->
 
             <!-- BEGIN: Main Content -->
-            <main class="main-content relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm">
+            <main class="main-content relative px-6 sm:px-8 py-8 overflow-hidden bg-white/40 backdrop-blur-sm">
                 
+                <!-- Flash Messages -->
                 <?php if (session()->getFlashdata('success')): ?>
-                    <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                    <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl">
                         <?= session()->getFlashdata('success') ?>
                     </div>
                 <?php endif; ?>
                 <?php if (session()->getFlashdata('error')): ?>
-                    <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                    <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl">
                         <?= session()->getFlashdata('error') ?>
                     </div>
                 <?php endif; ?>
 
-                <div class="text-center mb-8">
-                    <h2 class="text-2xl font-extrabold mb-1 text-slate-800">Pembayaran Booking CuitBox Studio</h2>
-                    <p class="text-[10px] text-slate-600 font-medium">Segera lakukan pembayaran untuk Booking Photo Anda.</p>
-                </div>
-
-                <!-- FORM PEMBAYARAN -->
-                <form action="/payment/store" method="post" id="paymentForm">
-                    <?= csrf_field() ?>
+               
+    <!-- HIDDEN INPUTS -->
+    <?php 
+    $bookingId = $booking['id'] ?? session()->get('booking_id') ?? 1;
+    $amount = $booking['total_amount'] ?? 45000;
+    $paymentId = 'PAY' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+    ?>
+    <input type="hidden" name="payment_id" value="<?= $paymentId ?>">
+    <input type="hidden" name="booking_id" value="<?= $bookingId ?>">
+    <input type="hidden" name="amount" value="<?= $amount ?>">
+    <input type="hidden" name="status" value="success">
+    
                     
                     <!-- HIDDEN INPUTS -->
                     <?php 
                     $bookingId = $booking['id'] ?? session()->get('booking_id') ?? 1;
                     $amount = $booking['total_amount'] ?? 45000;
+                    $paymentId = 'PAY' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
                     ?>
-                    <input type="hidden" name="payment_id" value="<?= 'PAY' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT) ?>">
+                    <input type="hidden" name="payment_id" value="<?= $paymentId ?>">
                     <input type="hidden" name="booking_id" value="<?= $bookingId ?>">
                     <input type="hidden" name="amount" value="<?= $amount ?>">
                     <input type="hidden" name="status" value="success">
-                    <input type="hidden" name="payment_method" value="QRIS">
 
                     <div class="flex flex-col lg:flex-row gap-6">
-                        <!-- Left Column -->
+                        <!-- Left Column - Detail Booking & Payment Method -->
                         <div class="flex-1">
-                            <div class="bg-white/90 rounded-2xl p-6 shadow-sm">
+                            <!-- Detail Booking -->
+                            <div class="payment-card mb-6">
                                 <div class="flex justify-between items-start mb-6">
                                     <h3 class="text-lg font-bold text-slate-800">Detail Booking</h3>
                                     <span class="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-3 py-1 rounded-md border border-indigo-100">
-                                        ID #<?= $booking['booking_code'] ?? 'GPB-8829' ?>
+                                        #<?= $booking['booking_code'] ?? 'BK-' . date('Ymd') ?>
                                     </span>
                                 </div>
                                 <div class="space-y-4">
@@ -292,7 +350,7 @@
                                         </div>
                                         <div>
                                             <p class="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest">Booth Terpilih</p>
-                                            <p class="text-slate-800 font-bold text-base"><?= $booth['name'] ?? 'Retro Vibes' ?></p>
+                                            <p class="text-slate-800 font-bold text-base"><?= $frame['name'] ?? 'Premium Booth' ?></p>
                                         </div>
                                     </div>
                                     <div class="flex items-center space-x-4">
@@ -303,7 +361,7 @@
                                         </div>
                                         <div>
                                             <p class="text-[10px] font-extrabold text-cyan-500 uppercase tracking-widest">Jadwal Sesi</p>
-                                            <p class="text-slate-800 font-bold text-base"><?= $booking['booking_date'] ?? 'Sabtu, 24 Mei 2024' ?> • <?= $booking['booking_time'] ?? '19:00 WIB' ?></p>
+                                            <p class="text-slate-800 font-bold text-base"><?= $booking['booking_date'] ?? date('d F Y') ?> • <?= $booking['booking_time'] ?? date('H:i') ?> WIB</p>
                                         </div>
                                     </div>
                                 </div>
@@ -313,39 +371,141 @@
                                     <span class="text-2xl font-black text-indigo-700">Rp <?= number_format($amount, 0, ',', '.') ?></span>
                                 </div>
                             </div>
+
+                            <!-- Pilih Metode Pembayaran -->
+                            <div class="payment-card">
+                                <h4 class="text-sm font-bold text-slate-700 mb-4">Pilih Metode Pembayaran</h4>
+                                <div class="space-y-3">
+                                    <!-- QRIS -->
+                                    <label class="method-option active" id="method-qris">
+                                        <input type="radio" name="payment_method" value="QRIS" checked>
+                                        <div class="method-icon qris">
+                                            <span class="material-symbols-outlined">qr_code_scanner</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-bold text-slate-800 text-sm">QRIS</p>
+                                            <p class="text-xs text-slate-500">Scan QR Code dengan aplikasi m-banking atau e-wallet</p>
+                                        </div>
+                                        <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">Rekomendasi</span>
+                                    </label>
+
+                                    <!-- Bank Transfer -->
+                                    <label class="method-option" id="method-bca">
+                                        <input type="radio" name="payment_method" value="BCA">
+                                        <div class="method-icon bca">
+                                            <span class="material-symbols-outlined">account_balance</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-bold text-slate-800 text-sm">BCA Transfer</p>
+                                            <p class="text-xs text-slate-500">Transfer via BCA Mobile atau ATM</p>
+                                        </div>
+                                    </label>
+
+                                    <label class="method-option" id="method-bni">
+                                        <input type="radio" name="payment_method" value="BNI">
+                                        <div class="method-icon bni">
+                                            <span class="material-symbols-outlined">account_balance</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-bold text-slate-800 text-sm">BNI Transfer</p>
+                                            <p class="text-xs text-slate-500">Transfer via BNI Mobile atau ATM</p>
+                                        </div>
+                                    </label>
+
+                                    <label class="method-option" id="method-mandiri">
+                                        <input type="radio" name="payment_method" value="Mandiri">
+                                        <div class="method-icon mandiri">
+                                            <span class="material-symbols-outlined">account_balance</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-bold text-slate-800 text-sm">Mandiri Transfer</p>
+                                            <p class="text-xs text-slate-500">Transfer via Livin' atau ATM</p>
+                                        </div>
+                                    </label>
+
+                                    <!-- E-Wallet -->
+                                    <label class="method-option" id="method-gopay">
+                                        <input type="radio" name="payment_method" value="GoPay">
+                                        <div class="method-icon gopay">
+                                            <span class="material-symbols-outlined">payments</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-bold text-slate-800 text-sm">GoPay</p>
+                                            <p class="text-xs text-slate-500">Bayar dengan GoPay</p>
+                                        </div>
+                                    </label>
+
+                                    <label class="method-option" id="method-ovo">
+                                        <input type="radio" name="payment_method" value="OVO">
+                                        <div class="method-icon ovo">
+                                            <span class="material-symbols-outlined">payments</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-bold text-slate-800 text-sm">OVO</p>
+                                            <p class="text-xs text-slate-500">Bayar dengan OVO</p>
+                                        </div>
+                                    </label>
+
+                                    <label class="method-option" id="method-dana">
+                                        <input type="radio" name="payment_method" value="DANA">
+                                        <div class="method-icon dana">
+                                            <span class="material-symbols-outlined">payments</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-bold text-slate-800 text-sm">DANA</p>
+                                            <p class="text-xs text-slate-500">Bayar dengan DANA</p>
+                                        </div>
+                                    </label>
+
+                                    <label class="method-option" id="method-shopeepay">
+                                        <input type="radio" name="payment_method" value="ShopeePay">
+                                        <div class="method-icon shopeepay">
+                                            <span class="material-symbols-outlined">payments</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="font-bold text-slate-800 text-sm">ShopeePay</p>
+                                            <p class="text-xs text-slate-500">Bayar dengan ShopeePay</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Right Column: QR Code -->
                         <div class="flex-1">
-                            <div class="bg-white/90 rounded-2xl p-6 shadow-sm flex flex-col items-center">
+                            <div class="payment-card flex flex-col items-center sticky top-8">
+                                <h4 class="text-sm font-bold text-slate-700 mb-4 text-center">Scan QRIS untuk Pembayaran</h4>
                                 <div class="barcode-wrapper">
                                     <div class="barcode-container">
-                                        <img alt="QR Code Barcode" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PAYMENT-<?= date('Ymd') ?>-CUITBOX-<?= $bookingId ?>" class="w-40 h-40">
+                                        <img alt="QR Code" 
+                                             src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=PAYMENT-<?= date('Ymd') ?>-CUITBOX-<?= $bookingId ?>" 
+                                             class="w-48 h-48">
                                     </div>
                                 </div>
-                                <div class="bg-indigo-50/50 w-full rounded-2xl p-4 mt-4 mb-4 text-center border border-indigo-100/50">
-                                    <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1">Scan Qris dan Lakukan Pembayaran</p>
+                                <div class="bg-indigo-50/80 w-full rounded-2xl p-4 mt-6 text-center border border-indigo-100/50">
+                                    <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1">Total Pembayaran</p>
                                     <p class="text-2xl font-black text-slate-800">Rp <?= number_format($amount, 0, ',', '.') ?></p>
                                 </div>
-                                <div class="w-full bg-[#D9F99D] rounded-2xl py-3 flex items-center justify-center space-x-2 text-slate-800 font-bold mb-3" id="timer-container">
+
+                                <!-- Timer -->
+                                <div class="w-full bg-[#D9F99D] rounded-2xl py-3 flex items-center justify-center space-x-2 text-slate-800 font-bold mt-4" id="timer-container">
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                                     </svg>
                                     <span class="text-sm" id="timer-display">Sesi berakhir dalam: 05:00</span>
                                 </div>
-                                <p class="text-[10px] text-slate-700 text-center leading-relaxed font-medium">
-                                    *Dapat dibayar melalui semua aplikasi m-banking dan e-wallet.
+                                
+                                <p class="text-[10px] text-slate-700 text-center leading-relaxed font-medium mt-3">
+                                    *Dapat dibayar melalui semua aplikasi m-banking dan e-wallet yang mendukung QRIS
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Bottom Action Buttons -->
-                    <div class="mt-6 flex flex-col sm:flex-row gap-4">
-                        <a href="/booth" class="btn-back flex-1 text-center no-underline">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                            </svg>
+                    <!-- Tombol Konfirmasi Pembayaran -->
+                    <div class="w-full mt-8 flex flex-col sm:flex-row gap-4">
+                        <a href="<?= base_url('frame') ?>" class="btn-secondary flex-1">
+                            <span class="material-symbols-outlined">arrow_back</span>
                             Kembali
                         </a>
                         <button type="submit" class="btn-primary flex-1" id="confirmPaymentBtn">
@@ -356,6 +516,7 @@
                         </button>
                     </div>
                 </form>
+                <!-- END FORM -->
             </main>
             <!-- END: Main Content -->
 
@@ -378,11 +539,10 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // COUNTDOWN TIMER
+            // ========== COUNTDOWN TIMER ==========
             let totalSeconds = 300;
             const timerDisplay = document.getElementById('timer-display');
             const timerContainer = document.getElementById('timer-container');
-            let timerInterval;
             
             function formatTime(seconds) {
                 const mins = Math.floor(seconds / 60);
@@ -420,10 +580,26 @@
                 totalSeconds--;
             }
             
-            timerInterval = setInterval(updateTimer, 1000);
+            const timerInterval = setInterval(updateTimer, 1000);
             updateTimer();
 
-            // TOAST NOTIFICATION
+            // ========== METHOD SELECTION ==========
+            const methodOptions = document.querySelectorAll('.method-option');
+            methodOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove active from all
+                    methodOptions.forEach(opt => opt.classList.remove('active'));
+                    // Add active to clicked
+                    this.classList.add('active');
+                    // Check radio
+                    const radio = this.querySelector('input[type="radio"]');
+                    if (radio) {
+                        radio.checked = true;
+                    }
+                });
+            });
+
+            // ========== TOAST NOTIFICATION ==========
             window.showToast = function(message, type = 'success') {
                 const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
@@ -445,7 +621,7 @@
                 }, 5000);
             };
 
-            // FLASH MESSAGES
+            // ========== FLASH MESSAGES ==========
             <?php if (session()->getFlashdata('success')): ?>
                 showToast('<?= session()->getFlashdata('success') ?>', 'success');
             <?php endif; ?>
@@ -453,6 +629,26 @@
             <?php if (session()->getFlashdata('error')): ?>
                 showToast('<?= session()->getFlashdata('error') ?>', 'error');
             <?php endif; ?>
+
+            // ========== FORM SUBMIT ==========
+            const form = document.getElementById('paymentForm');
+            const submitBtn = document.getElementById('confirmPaymentBtn');
+            
+            form.addEventListener('submit', function(e) {
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.7';
+                document.getElementById('btnText').textContent = 'Memproses...';
+                document.getElementById('btnIcon').style.display = 'none';
+                
+                // Add loading spinner
+                const spinner = document.createElement('span');
+                spinner.className = 'spinner';
+                spinner.style.display = 'inline-block';
+                submitBtn.prepend(spinner);
+                
+                return true;
+            });
         });
     </script>
 </body>
