@@ -13,13 +13,18 @@ class GoogleDrive extends BaseConfig
     {
         parent::__construct();
 
-        $this->oauthCredentials = ROOTPATH . env(
-            'google.drive.oauth',
-            'writable/google/oauth.json'
-        );
+        $configuredPath = env('google.drive.oauth', 'writable/google/oauth.json');
+        if (file_exists($configuredPath)) {
+            $this->oauthCredentials = $configuredPath;
+        } elseif (file_exists(WRITEPATH . 'google/oauth.json')) {
+            $this->oauthCredentials = WRITEPATH . 'google/oauth.json';
+        } else {
+            $this->oauthCredentials = rtrim(ROOTPATH, '/\\') . DIRECTORY_SEPARATOR . ltrim($configuredPath, '/\\');
+        }
 
         $this->folderId = env(
-            'google.drive.folderId'
+            'google.drive.folderId',
+            ''
         );
     }
 }

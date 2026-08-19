@@ -85,27 +85,6 @@ class RegisterController extends Controller
 
         $customerModel = new CustomerModel();
         
-<<<<<<< HEAD
-        // ===== GENERATE ID DENGAN CEK DUPLIKAT =====
-        // Ambil ID terakhir
-        $lastCustomer = $customerModel->orderBy('id', 'DESC')->first();
-        
-        if ($lastCustomer && isset($lastCustomer['id'])) {
-            // Ambil angka dari ID (C0001 -> 0001 -> 1)
-            $idNumber = (int) substr($lastCustomer['id'], 1);
-            $newId = 'C' . str_pad($idNumber + 1, 4, '0', STR_PAD_LEFT);
-        } else {
-            $newId = 'C0001';
-        }
-        
-        // ===== CEK APAKAH ID SUDAH ADA =====
-        // Jika ID sudah ada, generate ulang sampai ditemukan ID yang unik
-        $counter = 0;
-        while ($customerModel->find($newId)) {
-            $counter++;
-            $newId = 'C' . str_pad($idNumber + 1 + $counter, 4, '0', STR_PAD_LEFT);
-        }
-=======
         // Generate ID Customer secara aman & unik
         $existingCustomers = $customerModel->like('id', 'C', 'after')->findAll();
         $maxNum = 0;
@@ -122,7 +101,6 @@ class RegisterController extends Controller
             $newId = 'C' . str_pad($newIdNum, 4, '0', STR_PAD_LEFT);
             $newIdNum++;
         } while ($customerModel->find($newId) !== null);
->>>>>>> 809e25cbdcf9b46ae7d84d91ea5cae63ea09a3e1
 
         // Gabungkan kode negara + nomor telepon
         $countryCode = $this->request->getPost('country_code') ?? '+62';

@@ -48,23 +48,25 @@ class GoogleDriveService
 
         $client->setAccessToken($token);
 
-        // Refresh access token otomatis
+        // Refresh access token otomatis jika expired
         if ($client->isAccessTokenExpired()) {
-
-            if (! $client->getRefreshToken()) {
+            $refreshToken = $client->getRefreshToken() ?: ($token['refresh_token'] ?? null);
+            if (! $refreshToken) {
                 throw new \RuntimeException(
                     'Refresh token tidak tersedia. Jalankan OAuth kembali.'
                 );
             }
 
-            $client->fetchAccessTokenWithRefreshToken(
-                $client->getRefreshToken()
-            );
+            $client->fetchAccessTokenWithRefreshToken($refreshToken);
+            $mergedToken = array_merge($token, $client->getAccessToken() ?: []);
+            if (!empty($refreshToken) && empty($mergedToken['refresh_token'])) {
+                $mergedToken['refresh_token'] = $refreshToken;
+            }
 
             file_put_contents(
                 $tokenPath,
                 json_encode(
-                    $client->getAccessToken(),
+                    $mergedToken,
                     JSON_PRETTY_PRINT
                 )
             );
@@ -80,22 +82,39 @@ class GoogleDriveService
     {
         $config = config(\Config\GoogleDrive::class);
 
-        $folder = new DriveFile([
+        $params = [
             'name'     => $folderName,
             'mimeType' => 'application/vnd.google-apps.folder',
-            'parents'  => [
-                $config->folderId
-            ]
-        ]);
+        ];
+        if (!empty($config->folderId)) {
+            $params['parents'] = [$config->folderId];
+        }
 
-        $createdFolder = $this->drive->files->create(
-            $folder,
-            [
-                'fields' => 'id'
-            ]
-        );
+        $folder = new DriveFile($params);
 
-        return $createdFolder->id;
+        try {
+            $createdFolder = $this->drive->files->create(
+                $folder,
+                [
+                    'fields' => 'id'
+                ]
+            );
+            return $createdFolder->id;
+        } catch (\Throwable $e) {
+            // Jika parent folderId tidak ditemukan di akun Google ini, buat langsung di root Drive
+            if (!empty($params['parents'])) {
+                unset($params['parents']);
+                $folder = new DriveFile($params);
+                $createdFolder = $this->drive->files->create(
+                    $folder,
+                    [
+                        'fields' => 'id'
+                    ]
+                );
+                return $createdFolder->id;
+            }
+            throw $e;
+        }
     }
 
     public function uploadFile(
@@ -105,27 +124,35 @@ class GoogleDriveService
     ): string {
 
         if (! file_exists($localPath)) {
-            throw new \RuntimeException(
-                "File tidak ditemukan: {$localPath}"
-            );
+            if (file_exists(FCPATH . $localPath)) {
+                $localPath = FCPATH . $localPath;
+            } elseif (file_exists(WRITEPATH . $localPath)) {
+                $localPath = WRITEPATH . $localPath;
+            } else {
+                throw new \RuntimeException(
+                    "File tidak ditemukan: {$localPath}"
+                );
+            }
         }
 
+        $mime = mime_content_type($localPath) ?: 'image/jpeg';
         $metadata = new DriveFile([
-            'name'    => $fileName,
-            'parents' => [$folderId],
+            'name'     => $fileName,
+            'parents'  => [$folderId],
+            'mimeType' => $mime,
         ]);
 
         $file = $this->drive->files->create(
             $metadata,
             [
                 'data'       => file_get_contents($localPath),
-                'mimeType'   => mime_content_type($localPath),
+                'mimeType'   => $mime,
                 'uploadType' => 'multipart',
                 'fields'     => 'id',
             ]
         );
 
-        return $file->id;
+        return (string) (is_object($file) ? ($file->id ?? '') : '');
     }
 
     public function uploadSessionPhotos(string $sessionId): string
@@ -156,6 +183,12 @@ class GoogleDriveService
         foreach ($photos as $photo) {
 
             $localPath = WRITEPATH . $photo['file_path'];
+            if (!file_exists($localPath)) {
+                $localPath = FCPATH . $photo['file_path'];
+            }
+            if (!file_exists($localPath)) {
+                continue;
+            }
 
             try {
 
