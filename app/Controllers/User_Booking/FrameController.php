@@ -76,6 +76,6 @@ class FrameController extends BaseController
         session()->set('selected_frame_price', $frame['price'] ?? 0);
         
         // Redirect ke halaman berikutnya
-        return redirect()->to('/booking/summary')->with('success', 'Tema frame "' . $frame['name'] . '" berhasil dipilih!');
+        return redirect()->to('/user-payment')->with('success', 'Tema frame "' . $frame['name'] . '" berhasil dipilih!');
     }
 }

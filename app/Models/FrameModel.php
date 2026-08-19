@@ -6,6 +6,24 @@ use CodeIgniter\Model;
 
 class FrameModel extends Model
 {
+<<<<<<< HEAD
+    protected $table = 'frames';
+    protected $primaryKey = 'id';
+    protected $returnType = 'array';
+    protected $allowedFields = [
+        'id',
+        'name',
+        'category_id',
+        'file_path',
+        'Price', 
+        'is_active',
+        'created_at',
+        'updated_at',
+    ];
+    protected $useTimestamps = true;
+    protected $createdField = 'created_at';
+    protected $updatedField = 'updated_at';
+=======
 	protected $table = 'frames';
 	protected $primaryKey = 'id';
 	protected $useAutoIncrement = false;
@@ -27,4 +45,5 @@ class FrameModel extends Model
 	protected $dateFormat = 'datetime';
 	protected $createdField = 'created_at';
 	protected $updatedField = 'updated_at';
+>>>>>>> 809e25cbdcf9b46ae7d84d91ea5cae63ea09a3e1
 }
