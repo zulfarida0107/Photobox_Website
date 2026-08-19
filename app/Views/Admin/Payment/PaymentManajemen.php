@@ -18,36 +18,32 @@
         </nav>
 
         <!-- Header Section -->
-        <!-- Header Section -->
-        <div class="flex justify-between items-end mb-6">
+        <div class="flex justify-between items-center mb-6">
             <div>
                 <h2 class="font-h1 text-h1 text-on-surface mb-1">Manajemen Pembayaran</h2>
                 <p class="font-body-sm text-body-sm text-on-surface-variant">Pantau dan kelola semua transaksi masuk secara real-time.</p>
             </div>
-            <div class="flex gap-3">
-<<<<<<< Updated upstream
-=======
+            <div class="flex items-center gap-3">
                 <a href="<?= base_url('admin/payments/export?status=' . ($filterStatus ?? '') . '&period=' . ($filterPeriod ?? 'all')) ?>"
                    class="flex items-center gap-2 border border-blue-700 text-blue-700 bg-white px-4 py-2 rounded font-label-bold text-label-bold hover:bg-blue-50 transition-colors shadow-sm">
                     <span class="material-symbols-outlined text-[18px]">cloud_download</span>
                     Ekspor Laporan
                 </a>
->>>>>>> Stashed changes
                 <form action="<?= base_url('admin/payments/verify-bulk') ?>" method="post" class="inline">
-                    <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded font-semibold text-sm hover:bg-primary-container transition-colors shadow-sm">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-blue-800 transition-colors shadow-sm">
                         <span class="material-symbols-outlined text-[18px]">verified_user</span>
                         Verifikasi Massal
                     </button>
                 </form>
-                <a href="<?= base_url('admin/payments/export') ?>" onclick="showExportNotif()"
-                   class="bg-white border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg font-label-bold text-label-bold flex items-center gap-2 hover:bg-blue-50 hover:border-blue-700 hover:text-blue-700 transition-colors shadow-sm whitespace-nowrap">
+                <a href="<?= base_url('admin/payments/export?status=' . ($filterStatus ?? '') . '&period=' . ($filterPeriod ?? 'all')) ?>" onclick="showExportNotif()"
+                   class="flex items-center gap-2 px-4 py-2 bg-white border border-blue-600 text-blue-600 rounded-lg font-bold text-xs hover:bg-blue-50 transition-colors shadow-sm whitespace-nowrap">
                     <span class="material-symbols-outlined text-[18px]">cloud_download</span>
                     Ekspor Laporan
                 </a>
             </div>
         </div>
 
-        <!-- Bento Stats Grid -->
         <!-- Bento Stats Grid -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <!-- Total Pendapatan -->
@@ -137,31 +133,24 @@
                             </select>
                         </div>
                         <!-- Filter Periode -->
-<<<<<<< Updated upstream
-                        <div class="relative bg-white border border-slate-200 rounded-lg text-sm">
-                            <select name="period" class="px-4 py-2 border-none bg-transparent focus:ring-0 text-sm font-bold text-slate-700 cursor-pointer outline-none animate-none pr-8" onchange="document.getElementsByName('payment_date')[0].value=''; this.form.submit()">
-                                <option value="7"  <?= ($filterPeriod ?? '7')  === '7'  ? 'selected' : '' ?>>7 Hari Terakhir</option>
-                                <option value="30" <?= ($filterPeriod ?? '')   === '30' ? 'selected' : '' ?>>30 Hari Terakhir</option>
-                                <option value="month" <?= ($filterPeriod ?? '') === 'month' ? 'selected' : '' ?>>Bulan Ini</option>
-=======
-                        <div class="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded text-sm">
-                            <span class="material-symbols-outlined text-slate-400 text-sm">calendar_month</span>
-                            <span class="text-slate-600 font-medium">Waktu:</span>
-                            <select name="period" class="border-none bg-transparent p-0 focus:ring-0 text-sm font-bold text-primary" onchange="this.form.submit()">
+                        <div class="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs shadow-sm">
+                            <span class="material-symbols-outlined text-slate-400 text-sm flex-shrink-0">calendar_month</span>
+                            <span class="text-slate-600 font-medium whitespace-nowrap">Waktu:</span>
+                            <select name="period" class="border-none bg-transparent py-0 pl-1 pr-3 focus:ring-0 text-xs font-bold text-primary cursor-pointer outline-none" onchange="this.form.submit()">
                                 <option value="all"   <?= ($filterPeriod ?? 'all') === 'all'   ? 'selected' : '' ?>>Semua Waktu</option>
                                 <option value="7"     <?= ($filterPeriod ?? '')    === '7'     ? 'selected' : '' ?>>7 Hari Terakhir</option>
                                 <option value="30"    <?= ($filterPeriod ?? '')    === '30'    ? 'selected' : '' ?>>30 Hari Terakhir</option>
                                 <option value="month" <?= ($filterPeriod ?? '')    === 'month' ? 'selected' : '' ?>>Bulan Ini</option>
->>>>>>> Stashed changes
                             </select>
                         </div>
                         <!-- Pilih Tanggal Langsung -->
-                        <div class="relative bg-white border border-slate-200 rounded-lg text-sm flex items-center">
+                        <div class="relative bg-white border border-slate-200 rounded-lg text-xs flex items-center px-2.5 py-1.5 shadow-sm cursor-pointer hover:bg-slate-50 transition-colors" onclick="const input = this.querySelector('input'); if(input && input.showPicker) input.showPicker();">
+                            <span class="material-symbols-outlined text-slate-400 text-sm mr-1.5 flex-shrink-0 pointer-events-none">calendar_today</span>
                             <input type="date" name="payment_date" value="<?= esc($paymentDate ?? '') ?>"
-                                   class="px-3 py-1.5 border-none bg-transparent focus:ring-0 text-xs font-bold text-slate-700 cursor-pointer outline-none transition-all"
+                                   class="border-none bg-transparent focus:ring-0 text-xs font-bold text-slate-700 cursor-pointer outline-none transition-all p-0 w-[125px]"
                                    onchange="this.form.submit()"/>
                         </div>
-                        <?php if (!empty($keyword) || !empty($filterStatus) || ($filterPeriod ?? '7') !== '7' || !empty($paymentDate)): ?>
+                        <?php if (!empty($keyword) || !empty($filterStatus) || ($filterPeriod ?? 'all') !== 'all' || !empty($paymentDate)): ?>
                             <a href="<?= base_url('admin/payments') ?>" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-lg flex items-center transition-colors">
                                 Reset
                             </a>

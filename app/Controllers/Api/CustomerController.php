@@ -37,6 +37,11 @@ class CustomerController extends BaseApiController
             return $this->failNotFound('Booking tidak ditemukan.');
         }
 
+        // Fetch package details
+        $packageModel = new \App\Models\PackageModel();
+        $package = $packageModel->find($booking['package_id']);
+        $booking['package'] = $package;
+
         return $this->respondOk([
             'message' => 'Booking valid.',
             'booking' => $booking,

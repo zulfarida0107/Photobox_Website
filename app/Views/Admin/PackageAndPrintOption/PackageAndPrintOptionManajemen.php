@@ -246,7 +246,7 @@
                                     <tr class="hover:bg-slate-50 transition-colors group">
                                         <td class="px-5 py-4">
                                             <p class="font-bold text-slate-800 text-sm"><?= esc($opt['name'] ?? 'Opsi Cetak') ?></p>
-                                            <p class="text-[11px] text-slate-400 font-mono mt-0.5"><?= esc($opt['id']) ?></p>
+                                            <p class="text-sm font-semibold text-slate-500 mt-0.5"><?= esc($opt['id']) ?></p>
                                         </td>
                                         <td class="px-5 py-4 text-center">
                                             <span class="text-xs font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full inline-flex items-center gap-1">
@@ -254,7 +254,7 @@
                                             </span>
                                         </td>
                                         <td class="px-5 py-4 text-right font-bold text-slate-700">
-                                            Rp <?= number_format(($opt['extra_price'] ?? 0) / 1000, 0) ?>k
+                                            Rp <?= number_format($opt['extra_price'] ?? 0, 0, ',', '.') ?>
                                         </td>
                                         <td class="px-5 py-4 text-center">
                                             <div class="flex justify-center gap-2 ">

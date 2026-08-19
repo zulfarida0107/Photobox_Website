@@ -35,6 +35,10 @@ $routes->group('api', static function ($routes) {
     $routes->post('session/(:segment)/complete', 'Api\\SessionController::complete/$1');
 
     $routes->post('photo/session/(:segment)/upload', 'Api\\PhotoController::upload/$1');
+<<<<<<< HEAD
+=======
+	$routes->get('frame/(:any)', 'Api\\FrameController::show/$1');
+>>>>>>> 809e25cbdcf9b46ae7d84d91ea5cae63ea09a3e1
 });
 
 // ============================================================
@@ -209,7 +213,11 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 // ============================================================
 // USER BOOKING ROUTES (Customer Online Booking & Landing Page)
 // ============================================================
+<<<<<<< HEAD
 $routes->get('index', 'User_Booking\LandingPageController::index');
+=======
+$routes->get('landing', 'User_Booking\LandingPageController::index');
+>>>>>>> 809e25cbdcf9b46ae7d84d91ea5cae63ea09a3e1
 
 $routes->get('register', 'User_Booking\RegisterController::index');
 $routes->post('register/store', 'User_Booking\RegisterController::store');
@@ -227,16 +235,24 @@ $routes->get('schedule/getSlots', 'User_Booking\ScheduleController::getSlots');
 $routes->post('schedule/book', 'User_Booking\ScheduleController::book');
 $routes->post('schedule/submit', 'User_Booking\ScheduleController::submitSchedule');
 
+<<<<<<< HEAD
 // Frame Routes
 $routes->get('frame', 'User_Booking\FrameController::index');
 $routes->post('frame/store', 'User_Booking\FrameController::store');
+=======
+$routes->get('booth', 'User_Booking\BoothController::index');
+$routes->post('booth/store', 'User_Booking\BoothController::store');
+>>>>>>> 809e25cbdcf9b46ae7d84d91ea5cae63ea09a3e1
 
 $routes->get('user-payment', 'User_Booking\PaymentMethodController::index');
 $routes->post('user-payment/store', 'User_Booking\PaymentMethodController::store');
 $routes->get('user-payment/detail/(:any)', 'User_Booking\PaymentMethodController::detail/$1');
 $routes->post('user-payment/confirm', 'User_Booking\PaymentMethodController::confirm');
 $routes->get('user-payment/success/(:any)', 'User_Booking\PaymentMethodController::success/$1');
+<<<<<<< HEAD
 $routes->post('user-payment/confirm', 'User_Booking\PaymentMethodController::confirm');
+=======
+>>>>>>> 809e25cbdcf9b46ae7d84d91ea5cae63ea09a3e1
 
 $routes->get('StatusBooking', 'User_Booking\StatusBookingController::index');
 $routes->post('StatusBooking/store', 'User_Booking\StatusBookingController::store');
@@ -246,8 +262,11 @@ $routes->get('barcode/generate/(:any)', 'User_Booking\BarcodeController::generat
 $routes->get('barcode/scan', 'User_Booking\BarcodeController::scan');
 $routes->post('barcode/verify', 'User_Booking\BarcodeController::verify');
 
+<<<<<<< HEAD
 // Routes untuk Help & Language
 $routes->get('help', 'User_Booking\HelpController::index');
 $routes->post('help/send', 'User_Booking\HelpController::send');
 $routes->get('language/change/(:any)', 'User_Booking\LanguageController::change/$1');
 
+=======
+>>>>>>> 809e25cbdcf9b46ae7d84d91ea5cae63ea09a3e1

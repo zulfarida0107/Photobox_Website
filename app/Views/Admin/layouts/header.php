@@ -15,7 +15,7 @@
         <div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onclick="openModal('modalProfile')">
             <div class="text-right hidden sm:block">
                 <p class="text-xs font-bold text-on-surface leading-none">Admin CuitBox Studio</p>
-                <p class="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Super Admin</p>
+                <p class="text-[10px] text-slate-500 uppercase tracking-wider mt-1"><?= esc(strtolower(session()->get('adminRole') ?? '') === 'superadmin' ? 'Super Admin' : 'Staff') ?></p>
             </div>
             <img id="dashboard-profile-img" alt="Admin Profile" class="w-10 h-10 rounded-full border border-slate-100 object-cover"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuDru5yG0kfgrAexiefmfPXrmbf__ddiHYCNse2EGwIxmzqDZQcLg1eAYw22ws1eruImLu7Qldg3CG24mWnx9DCff9YDE9XZ-hDvImkrF230qHqOc86k-j-F1anq2ljfObxwH5H9hH2-DvMUhbdIyghqBUFEDI2QsmbH3YT2XgrMzqIVSj5naElgHfhhqx5y9cKHG1ZXlcAh5jNsuwiIcvAhYUwbXl4Ls23yVAqUlT49ChvMnedJES1cV1aToIn3pmWztakJyeDOrWyn" />
@@ -38,6 +38,15 @@
 }
 .modal-content {
     transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0 !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
 }
 </style>
 
@@ -176,7 +185,10 @@
             </div>
             
             <div class="flex items-center gap-3">
-                <input type="date" id="notif-date-picker" class="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent cursor-pointer hover:bg-slate-50 transition-colors shadow-sm" title="Pilih Tanggal" />
+                <div class="relative bg-white border border-slate-200 rounded-lg text-sm flex items-center px-3 py-2 shadow-sm cursor-pointer hover:bg-slate-50 transition-colors" onclick="const input = this.querySelector('input'); if(input && input.showPicker) input.showPicker();">
+                    <span class="material-symbols-outlined text-slate-400 text-base mr-2 flex-shrink-0 pointer-events-none">calendar_today</span>
+                    <input type="date" id="notif-date-picker" class="w-full border-none bg-transparent focus:ring-0 text-xs font-bold text-slate-700 cursor-pointer outline-none transition-all p-0" title="Pilih Tanggal" />
+                </div>
                 
                 <div class="relative inline-block">
                     <select id="notif-time-filter" class="pl-4 pr-8 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent cursor-pointer hover:bg-slate-50 transition-colors shadow-sm">
@@ -268,11 +280,11 @@
                 <div class="space-y-3">
                     <div class="notif-item flex items-start gap-4 p-4 bg-white border border-slate-100 shadow-sm transition-all rounded-xl relative" data-label="sistem">
                         <div class="absolute right-4 top-4 text-xs text-slate-400">23:00</div>
-                        <div class="p-3 bg-blue-100 text-blue-600 rounded-xl"><span class="material-symbols-outlined">settings_suggest</span></div>
+                        <div class="p-3 bg-slate-100 text-slate-600 rounded-xl flex-shrink-0"><span class="material-symbols-outlined">settings_suggest</span></div>
                         <div class="flex-1 pr-24">
                             <h3 class="font-bold text-slate-900 flex items-center gap-2 mb-1">
                                 Pembaruan Sistem Selesai
-                                <span class="px-2 py-0.5 bg-blue-600 text-white text-[10px] font-bold rounded uppercase">Sistem</span>
+                                <span class="px-2 py-0.5 bg-slate-600 text-white text-[10px] font-bold rounded uppercase">Sistem</span>
                             </h3>
                             <p class="text-sm text-slate-500">Maintenance mingguan berhasil dilaksanakan. Seluruh layanan kembali online dengan performa optimal.</p>
                         </div>
@@ -301,30 +313,26 @@
                     <div class="relative group mx-auto md:mx-0 w-32 h-32 flex-shrink-0">
                         <div class="w-full h-full rounded-2xl overflow-hidden border border-slate-100 shadow-sm bg-white p-1.5">
                             <img id="modal-profile-img" alt="Current profile" class="w-full h-full object-cover rounded-xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgzPXgOYOFnUaa01GpekBQj1KlquZyBSw9tRg9K6QBvo0jvb-7uJ3A44o1y_G3VBfpwSvg-nP_lTdAy9xLYSuRL5ZF-fmflDtaZMb07vXrzDCvgTLyhTRoqFJ0dJndmn09KlhnAlH9Fz7IJ3pkNDWjS009yTI18hpvsuGnT6ruezfsRUWNtj8WefpyGfGwbX7ug1sSf3MST3l_QQfeBK9zHgjYgFBNSOAVWMOH_mdTapP4nU5zXr5eFYJZts2Jc3QwGYgXdJkM_BBl"/>
-                            <script>
-                                (function() {
-                                    const savedImg = localStorage.getItem('adminProfileImg');
-                                    if (savedImg) document.getElementById('modal-profile-img').src = savedImg;
-                                })();
-                            </script>
                         </div>
-                        <label class="absolute -bottom-2 -right-2 bg-[#003d9b] text-white p-1.5 rounded-lg shadow-md hover:scale-105 transition-transform cursor-pointer">
-                            <input type="file" id="profile-upload" class="hidden" accept="image/*">
-                            <span class="material-symbols-outlined text-sm">photo_camera</span>
-                        </label>
                     </div>
-                    <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">NAMA LENGKAP</label>
-                            <input class="w-full rounded-lg border border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 text-sm py-2.5 px-3 text-slate-700 outline-none" type="text" value="Admin User"/>
+                    <div class="flex-1 w-full">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">NAMA LENGKAP</label>
+                                <input class="w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-500 font-medium text-sm py-2.5 px-3 outline-none cursor-not-allowed" readonly type="text" value="<?= esc(session()->get('adminName') ?? 'Admin User') ?>"/>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">PERAN</label>
+                                <input class="w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-500 font-medium text-sm py-2.5 px-3 outline-none cursor-not-allowed" readonly type="text" value="<?= esc(strtolower(session()->get('adminRole') ?? '') === 'superadmin' ? 'Super Admin' : 'Staff') ?>"/>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">ALAMAT EMAIL</label>
+                                <input class="w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-500 font-medium text-sm py-2.5 px-3 outline-none cursor-not-allowed" readonly type="email" value="<?= esc(session()->get('adminEmail') ?? 'admin@cuitboxstudio.com') ?>"/>
+                            </div>
                         </div>
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">PERAN</label>
-                            <input class="w-full rounded-lg border border-slate-200 text-sm py-2.5 px-3 bg-white text-slate-700 outline-none" readonly type="text" value="Super Admin"/>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">ALAMAT EMAIL</label>
-                            <input class="w-full rounded-lg border border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 text-sm py-2.5 px-3 text-slate-700 outline-none" type="email" value="admin@photobox.com"/>
+                        <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs flex items-center gap-2">
+                            <span class="material-symbols-outlined text-amber-600 text-base flex-shrink-0">info</span>
+                            <span>Informasi profil bersifat ter-kunci. Perubahan data akun hanya dapat dilakukan melalui menu <a href="<?= base_url('admin/settings') ?>" class="font-bold underline hover:text-amber-900">Pengaturan Akses</a>.</span>
                         </div>
                     </div>
                 </div>
@@ -467,49 +475,166 @@
         }
     }, 1000);
 
-    // Notification Filtering Logic
+    // Notification Controller & Filtering Logic
     document.addEventListener('DOMContentLoaded', () => {
         const filterBtns = document.querySelectorAll('.notif-filter-btn');
         const timeFilter = document.getElementById('notif-time-filter');
-        const btnLihatLebih = document.getElementById('btn-lihat-lebih-banyak');
+        const datePicker = document.getElementById('notif-date-picker');
         let currentLabel = 'semua';
-        let showAllHistory = false; // logic default limit to hari ini & kemarin
 
-        function filterNotifs() {
-            if(!timeFilter) return;
-            const currentTime = timeFilter.value;
+        // Helper to format ISO timestamp into Indonesian real-time Date & Time
+        function formatNotifTimeStr(timestamp) {
+            const itemDate = new Date(timestamp);
+            if (isNaN(itemDate.getTime())) return 'Baru saja';
+
+            const now = new Date();
+            const diffMs = now.getTime() - itemDate.getTime();
+            const diffSec = Math.floor(diffMs / 1000);
+            const diffMin = Math.floor(diffSec / 60);
+
+            const isToday = now.toDateString() === itemDate.toDateString();
+
+            const yesterday = new Date(now);
+            yesterday.setDate(now.getDate() - 1);
+            const isYesterday = yesterday.toDateString() === itemDate.toDateString();
+
+            const hh = String(itemDate.getHours()).padStart(2, '0');
+            const mm = String(itemDate.getMinutes()).padStart(2, '0');
+            const timeOnly = `${hh}:${mm}`;
+
+            if (isToday) {
+                if (diffMin < 1) return 'Baru saja';
+                if (diffMin < 60) return `${diffMin} menit yang lalu`;
+                return `Hari ini, ${timeOnly}`;
+            } else if (isYesterday) {
+                return `Kemarin, ${timeOnly}`;
+            } else {
+                const monthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                const dd = String(itemDate.getDate()).padStart(2, '0');
+                const mmm = monthsShort[itemDate.getMonth()];
+                const yyyy = itemDate.getFullYear();
+                return `${dd} ${mmm} ${yyyy}, ${timeOnly}`;
+            }
+        }
+
+        // ── Render Export Notifications ──────────────────────────
+        window.renderExportNotifications = function() {
+            const container = document.getElementById('notif-hari-ini-list');
+            if (!container) return;
             
-            document.querySelectorAll('.notif-section').forEach(section => {
-                const sectionTime = section.getAttribute('data-time');
-                let timeMatch = false;
+            // Remove previously rendered dynamic export items
+            document.querySelectorAll('.dynamic-export-item').forEach(el => el.remove());
+            
+            let exports = JSON.parse(localStorage.getItem('export_reports') || '[]');
+            exports.forEach(item => {
+                const itemDateObj = new Date(item.time);
+                const formattedTime = formatNotifTimeStr(item.time);
+                const isoDate = !isNaN(itemDateObj.getTime()) ? itemDateObj.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+                const ts = !isNaN(itemDateObj.getTime()) ? itemDateObj.getTime() : Date.now();
+
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'dynamic-export-item notif-item flex items-start gap-4 p-4 bg-white border border-slate-100 shadow-sm transition-all rounded-xl relative hover:bg-slate-50 cursor-pointer';
+                itemDiv.setAttribute('data-label', 'laporan');
+                itemDiv.setAttribute('data-timestamp', ts);
+                itemDiv.setAttribute('data-date', isoDate);
                 
-                // Logic timeline
-                if (currentTime === 'semua') timeMatch = true;
-                else if (currentTime === 'hari-ini' && sectionTime === 'hari-ini') timeMatch = true;
-                else if (currentTime === 'kemarin' && (sectionTime === 'hari-ini' || sectionTime === 'kemarin')) timeMatch = true;
-                else if (currentTime === 'satu-minggu' && (sectionTime === 'hari-ini' || sectionTime === 'kemarin' || sectionTime === 'satu-minggu')) timeMatch = true;
-                else if (currentTime === 'satu-bulan' && (sectionTime !== 'satu-tahun')) timeMatch = true;
-                else if (currentTime === 'satu-tahun') timeMatch = true;
+                itemDiv.innerHTML = `
+                    <div class="absolute right-4 top-4 text-xs text-slate-400 font-medium">${formattedTime}</div>
+                    <div class="p-3 bg-blue-100 text-blue-600 rounded-xl flex-shrink-0"><span class="material-symbols-outlined">cloud_download</span></div>
+                    <div class="flex-grow pr-32 text-left">
+                        <h3 class="font-bold text-slate-900 flex items-center gap-2 mb-1">
+                            Laporan Berhasil Diekspor
+                            <span class="px-2 py-0.5 bg-blue-600 text-white text-[10px] font-bold rounded uppercase">Laporan</span>
+                        </h3>
+                        <p class="text-sm text-slate-500">Laporan ${item.name} telah diunduh dalam format Excel (CSV).</p>
+                    </div>
+                `;
+                container.insertBefore(itemDiv, container.firstChild);
+            });
+
+            sortAndFilterNotifs();
+        }
+
+        // Sort all notifications from newest to oldest & filter based on user inputs
+        function sortAndFilterNotifs() {
+            const container = document.getElementById('notif-container');
+            if (!container) return;
+
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+
+            const yesterday = new Date(now);
+            yesterday.setDate(now.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+            const sevenDaysAgo = new Date(now);
+            sevenDaysAgo.setDate(now.getDate() - 7);
+
+            const thirtyDaysAgo = new Date(now);
+            thirtyDaysAgo.setDate(now.getDate() - 30);
+
+            const oneYearAgo = new Date(now);
+            oneYearAgo.setDate(now.getDate() - 365);
+
+            const selectedDate = datePicker ? datePicker.value : '';
+            const currentTimeFilter = timeFilter ? timeFilter.value : 'semua';
+
+            // Sort all items inside each section by data-timestamp DESC
+            const sections = document.querySelectorAll('.notif-section');
+            sections.forEach(section => {
+                const listContainer = section.querySelector('.space-y-3') || section;
+                const items = Array.from(listContainer.querySelectorAll('.notif-item'));
                 
-                // Block older sections if showAllHistory is false
-                if (!showAllHistory && sectionTime !== 'hari-ini' && sectionTime !== 'kemarin') {
-                    timeMatch = false;
-                }
-                
+                items.sort((a, b) => {
+                    const tsA = parseInt(a.getAttribute('data-timestamp') || '0', 10);
+                    const tsB = parseInt(b.getAttribute('data-timestamp') || '0', 10);
+                    return tsB - tsA; // Descending (newest first)
+                });
+
+                items.forEach(item => listContainer.appendChild(item));
+            });
+
+            // Apply Filters
+            sections.forEach(section => {
                 let hasVisibleItem = false;
-                
-                section.querySelectorAll('.notif-item').forEach(item => {
-                    const label = item.getAttribute('data-label');
+                const items = section.querySelectorAll('.notif-item');
+
+                items.forEach(item => {
+                    const label = item.getAttribute('data-label') || '';
+                    const itemDate = item.getAttribute('data-date') || todayStr;
+                    const itemTs = parseInt(item.getAttribute('data-timestamp') || '0', 10);
+
+                    // 1. Label / Category filter
                     const labelMatch = (currentLabel === 'semua' || currentLabel === label);
-                    
-                    if (timeMatch && labelMatch) {
+
+                    // 2. Date Picker filter (if user selected a specific date)
+                    let datePickerMatch = true;
+                    if (selectedDate !== '') {
+                        datePickerMatch = (itemDate === selectedDate);
+                    }
+
+                    // 3. Time Filter dropdown
+                    let timeFilterMatch = true;
+                    if (currentTimeFilter === 'hari-ini') {
+                        timeFilterMatch = (itemDate === todayStr);
+                    } else if (currentTimeFilter === 'kemarin') {
+                        timeFilterMatch = (itemDate === todayStr || itemDate === yesterdayStr);
+                    } else if (currentTimeFilter === 'satu-minggu') {
+                        timeFilterMatch = (itemTs >= sevenDaysAgo.getTime());
+                    } else if (currentTimeFilter === 'satu-bulan') {
+                        timeFilterMatch = (itemTs >= thirtyDaysAgo.getTime());
+                    } else if (currentTimeFilter === 'satu-tahun') {
+                        timeFilterMatch = (itemTs >= oneYearAgo.getTime());
+                    }
+
+                    if (labelMatch && datePickerMatch && timeFilterMatch) {
                         item.style.display = 'flex';
                         hasVisibleItem = true;
                     } else {
                         item.style.display = 'none';
                     }
                 });
-                
+
                 if (hasVisibleItem) {
                     section.style.display = 'block';
                 } else {
@@ -518,6 +643,35 @@
             });
         }
 
+        // Init default timestamps for static HTML items if missing
+        const nowTs = Date.now();
+        const todayStr = new Date().toISOString().split('T')[0];
+        const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+        document.querySelectorAll('.notif-item').forEach((item, index) => {
+            if (!item.hasAttribute('data-timestamp')) {
+                let ts = nowTs - (index * 600000);
+                let dStr = todayStr;
+                const sectionTime = item.closest('.notif-section')?.getAttribute('data-time');
+                if (sectionTime === 'kemarin') {
+                    ts = Date.now() - 86400000 - (index * 600000);
+                    dStr = yesterdayStr;
+                } else if (sectionTime === 'satu-bulan') {
+                    ts = Date.now() - (30 * 86400000);
+                    dStr = '2026-05-24';
+                }
+                item.setAttribute('data-timestamp', ts);
+                item.setAttribute('data-date', dStr);
+
+                // Update time text element
+                const timeEl = item.querySelector('.absolute.right-4');
+                if (timeEl && !item.classList.contains('dynamic-export-item')) {
+                    timeEl.textContent = formatNotifTimeStr(ts);
+                }
+            }
+        });
+
+        // Event Listeners for Filter Tabs
         filterBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 filterBtns.forEach(b => {
@@ -531,42 +685,25 @@
                 if(target.querySelector('.indicator')) target.querySelector('.indicator').classList.remove('hidden');
                 
                 currentLabel = target.getAttribute('data-filter');
-                filterNotifs();
+                sortAndFilterNotifs();
             });
         });
 
         if(timeFilter) {
             timeFilter.addEventListener('change', () => {
-                if(timeFilter.value !== 'hari-ini' && timeFilter.value !== 'kemarin') {
-                    showAllHistory = true;
-                    if(btnLihatLebih) btnLihatLebih.parentElement.style.display = 'none';
-                }
-                filterNotifs();
-            });
-            filterNotifs();
-        }
-        
-        if(btnLihatLebih) {
-            btnLihatLebih.addEventListener('click', () => {
-                showAllHistory = true;
-                if(timeFilter) timeFilter.value = 'semua';
-                filterNotifs();
-                btnLihatLebih.parentElement.style.display = 'none';
+                sortAndFilterNotifs();
             });
         }
-        
-        const datePicker = document.getElementById('notif-date-picker');
+
         if(datePicker) {
-            datePicker.addEventListener('change', (e) => {
-                if(e.target.value) {
-                    showAllHistory = true;
-                    if(timeFilter) timeFilter.value = 'semua';
-                    if(btnLihatLebih) btnLihatLebih.parentElement.style.display = 'none';
-                    filterNotifs();
+            datePicker.addEventListener('change', () => {
+                if (datePicker.value && timeFilter) {
+                    timeFilter.value = 'semua';
                 }
+                sortAndFilterNotifs();
             });
         }
-        
+
         // Profile Modal Logic
         const profileUpload = document.getElementById('profile-upload');
         const modalProfileImg = document.getElementById('modal-profile-img');
@@ -574,26 +711,12 @@
         const btnBatalProfil = document.getElementById('btn-batal-profil');
         const btnSimpanProfil = document.getElementById('btn-simpan-profil');
         
-        // Load from LocalStorage if exists
         const savedImg = localStorage.getItem('adminProfileImg');
         if(savedImg) {
             if(dashboardProfileImg) dashboardProfileImg.src = savedImg;
             if(modalProfileImg) modalProfileImg.src = savedImg;
         }
-        
-        if(profileUpload) {
-            profileUpload.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if(file) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        modalProfileImg.src = event.target.result;
-                    }
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-        
+
         const toggleEmail = document.getElementById('toggle-email');
         const togglePush = document.getElementById('toggle-push');
         const toggleSecurity = document.getElementById('toggle-security');
@@ -658,44 +781,7 @@
                 alert("Pengaturan profil berhasil disimpan!");
             });
         }
-        
-        // ── Export Notifications Handler ──────────────────────────
-        window.renderExportNotifications = function() {
-            const container = document.getElementById('notif-hari-ini-list');
-            if (!container) return;
-            
-            // Remove previously rendered dynamic export items
-            document.querySelectorAll('.dynamic-export-item').forEach(el => el.remove());
-            
-            let exports = JSON.parse(localStorage.getItem('export_reports') || '[]');
-            exports.forEach(item => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'dynamic-export-item notif-item flex items-start gap-4 p-4 bg-white border border-slate-100 shadow-sm transition-all rounded-xl relative';
-                itemDiv.setAttribute('data-label', 'laporan');
-                
-                const timeDiff = Math.round((Date.now() - new Date(item.time).getTime()) / 60000);
-                let timeStr = 'Baru saja';
-                if (timeDiff >= 1 && timeDiff < 60) {
-                    timeStr = timeDiff + ' menit yang lalu';
-                } else if (timeDiff >= 60) {
-                    timeStr = Math.round(timeDiff/60) + ' jam yang lalu';
-                }
-                
-                itemDiv.innerHTML = `
-                    <div class="absolute right-4 top-4 text-xs text-slate-400">${timeStr}</div>
-                    <div class="p-3 bg-blue-100 text-blue-600 rounded-xl"><span class="material-symbols-outlined">cloud_download</span></div>
-                    <div class="flex-grow pr-24 text-left">
-                        <h3 class="font-bold text-slate-900 flex items-center gap-2 mb-1">
-                            Laporan Berhasil Diekspor
-                            <span class="px-2 py-0.5 bg-blue-600 text-white text-[10px] font-bold rounded uppercase">Laporan</span>
-                        </h3>
-                        <p class="text-sm text-slate-500">Laporan ${item.name} telah diunduh dalam format Excel (CSV).</p>
-                    </div>
-                `;
-                container.insertBefore(itemDiv, container.firstChild);
-            });
-        }
-        
+
         renderExportNotifications();
 
         // Notif Badge Logic
@@ -714,6 +800,7 @@
             btnNotifIcon.addEventListener('click', () => {
                 notifBadge.classList.add('hidden');
                 localStorage.setItem('notifsRead', 'true');
+                sortAndFilterNotifs();
             });
         }
     });

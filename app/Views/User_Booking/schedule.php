@@ -317,13 +317,18 @@
                     </div>
                 </div>
                 
+<?php
+$monthsIndo = ['01'=>'Januari', '02'=>'Februari', '03'=>'Maret', '04'=>'April', '05'=>'Mei', '06'=>'Juni', '07'=>'Juli', '08'=>'Agustus', '09'=>'September', '10'=>'Oktober', '11'=>'November', '12'=>'Desember'];
+$currentMonthYearPhp = $monthsIndo[date('m')] . ' ' . date('Y');
+$currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y');
+?>
                 <!-- Content Layout: Calendar & Session -->
                 <div class="flex flex-col md:flex-row gap-6">
                     <!-- Left Column: Calendar -->
                     <section class="flex-1">
                         <div class="calendar-card p-6">
                             <div class="flex items-center justify-between mb-6">
-                                <h2 class="text-lg font-bold" id="month-year-label">Oktober 2024</h2>
+                                <h2 class="text-lg font-bold" id="month-year-label"><?= $currentMonthYearPhp ?></h2>
                                 <div class="flex space-x-2">
                                     <button class="p-1 rounded-full bg-slate-100 hover:bg-slate-200 transition-all" id="prev-month">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -367,7 +372,7 @@
                                 </div>
                                 <h2 class="text-lg font-bold">Sesi Tersedia</h2>
                             </div>
-                            <p class="text-sm font-medium mb-4">Tanggal Terpilih: <span class="font-bold" id="selected-date-display">-</span></p>
+                            <p class="text-sm font-medium mb-4">Tanggal Terpilih: <span class="font-bold" id="selected-date-display"><?= $currentDateFullPhp ?></span></p>
                             
                             <!-- Time Slot Categories -->
                             <div class="space-y-4 flex-1" id="time-slots-container">
@@ -489,8 +494,8 @@
             const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             
             // ===== VARIABLES =====
-            let currentDate = new Date(todayDate);
-            let selectedDate = new Date(todayDate);
+            let currentDate = new Date();
+            let selectedDate = new Date();
             let selectedTime = '13:00 - 15:00';
             
             const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];

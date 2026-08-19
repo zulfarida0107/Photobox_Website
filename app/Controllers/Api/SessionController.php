@@ -110,6 +110,10 @@ class SessionController extends BaseApiController
             $capturedPhotos = $this->request->getFileMultiple('captured_photos[]');
         }
 
+        if (!is_array($capturedPhotos)) {
+            $capturedPhotos = [];
+        }
+
         $folder = WRITEPATH . 'uploads/sessions/' . $sessionId;
 
         if (!is_dir($folder)) {
@@ -127,9 +131,47 @@ class SessionController extends BaseApiController
             'id'            => $this->makeId('pho_'),
             'session_id'    => $sessionId,
             'file_path'     => 'uploads/sessions/' . $sessionId . '/final.png',
-            'drive_file_id' => null,
+            'drive_file_id' => '',
             'shot_number'   => 0,
         ]);
+
+        // simpan video transisi jika ada
+        $finalVideoTransition = $this->request->getFile('final_video_transition');
+        if ($finalVideoTransition && $finalVideoTransition->isValid()) {
+            $ext = $finalVideoTransition->getExtension();
+            $transitionFilename = 'final_video_transition.' . $ext;
+            $finalVideoTransition->move(
+                $folder,
+                $transitionFilename,
+                true
+            );
+            $this->photoModel->insert([
+                'id'            => $this->makeId('pho_'),
+                'session_id'    => $sessionId,
+                'file_path'     => 'uploads/sessions/' . $sessionId . '/' . $transitionFilename,
+                'drive_file_id' => '',
+                'shot_number'   => 999, // 999 for transition video
+            ]);
+        }
+
+        // simpan video loop jika ada
+        $finalVideoLoop = $this->request->getFile('final_video_loop');
+        if ($finalVideoLoop && $finalVideoLoop->isValid()) {
+            $ext = $finalVideoLoop->getExtension();
+            $loopFilename = 'final_video_loop.' . $ext;
+            $finalVideoLoop->move(
+                $folder,
+                $loopFilename,
+                true
+            );
+            $this->photoModel->insert([
+                'id'            => $this->makeId('pho_'),
+                'session_id'    => $sessionId,
+                'file_path'     => 'uploads/sessions/' . $sessionId . '/' . $loopFilename,
+                'drive_file_id' => '',
+                'shot_number'   => 998, // 998 for loop video
+            ]);
+        }
 
         $savedCaptures = [];
 
@@ -154,7 +196,7 @@ class SessionController extends BaseApiController
                 'id'            => $this->makeId('pho_'),
                 'session_id'    => $sessionId,
                 'file_path'     => 'uploads/sessions/' . $sessionId . '/' . $filename,
-                'drive_file_id' => null,
+                'drive_file_id' => '',
                 'shot_number'   => $index + 1,
             ]);
 
@@ -173,6 +215,78 @@ class SessionController extends BaseApiController
             'final_image'     => 'final.png',
             'captured_count'  => count($savedCaptures),
             'captured_files'  => $savedCaptures,
+            'photos_saved'    => $this->photoModel
+                ->where('session_id', $sessionId)
+                ->countAllResults(),
+        ]);
+    }
+
+    public function uploadLive(string $sessionId): ResponseInterface
+    {
+        $session = $this->sessionModel->find($sessionId);
+
+        if ($session === null) {
+            return $this->failNotFound('Session tidak ditemukan.');
+        }
+
+        // Hapus metadata live photo lama jika user upload ulang
+        $this->photoModel
+            ->where('session_id', $sessionId)
+            ->where('shot_number >=', 100)
+            ->delete();
+
+        // live photos (secret videos)
+        $livePhotos = $this->request->getFileMultiple('live_photos');
+        if (empty($livePhotos)) {
+            $livePhotos = $this->request->getFileMultiple('live_photos[]');
+        }
+        if (!is_array($livePhotos)) {
+            $livePhotos = [];
+        }
+
+        $folder = WRITEPATH . 'uploads/sessions/' . $sessionId;
+        if (!is_dir($folder)) {
+            mkdir($folder, 0777, true);
+        }
+
+        $savedLivePhotos = [];
+        foreach ($livePhotos as $index => $livePhoto) {
+            if (!$livePhoto || !$livePhoto->isValid()) {
+                continue;
+            }
+
+            $liveFilename = 'live_' .
+                ($index + 1) .
+                '.' .
+                $livePhoto->getExtension();
+
+            $livePhoto->move(
+                $folder,
+                $liveFilename,
+                true
+            );
+
+            $this->photoModel->insert([
+                'id'            => $this->makeId('pho_'),
+                'session_id'    => $sessionId,
+                'file_path'     => 'uploads/sessions/' . $sessionId . '/' . $liveFilename,
+                'drive_file_id' => '',
+                'shot_number'   => 100 + ($index + 1),
+            ]);
+
+            $savedLivePhotos[] = $liveFilename;
+        }
+
+        // logging untuk debugging
+        log_message('debug', '=== SESSION LIVE UPLOAD ===');
+        log_message('debug', 'Session : ' . $sessionId);
+        log_message('debug', 'Live    : ' . count($savedLivePhotos));
+
+        return $this->respondOk([
+            'message'         => 'Upload live photo berhasil.',
+            'session_id'      => $sessionId,
+            'live_count'      => count($savedLivePhotos),
+            'live_files'      => $savedLivePhotos,
             'photos_saved'    => $this->photoModel
                 ->where('session_id', $sessionId)
                 ->countAllResults(),
@@ -208,6 +322,8 @@ class SessionController extends BaseApiController
 
     public function complete(string $sessionId): ResponseInterface
     {
+        set_time_limit(300);
+
         $session = $this->sessionModel->find($sessionId);
 
         if ($session === null) {

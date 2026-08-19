@@ -759,7 +759,7 @@
                         <!-- Login Link -->
                         <div class="text-center mt-4 sm:mt-6">
                             <p class="text-slate-500 text-sm">
-                                Sudah punya akun? <a class="text-blue-500 font-semibold hover:text-blue-600 hover:underline transition-colors" href="<?= base_url('login') ?>">Masuk di sini</a>
+                                Sudah punya akun? <a class="text-blue-500 font-semibold hover:text-blue-600 hover:underline transition-colors" href="#">Masuk di sini</a>
                             </p>
                         </div>
                     </form>
