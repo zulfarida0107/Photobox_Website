@@ -1,5 +1,5 @@
 <?php
-$path = "public/uploads/frames/frame_cuitbox_beats_code_vol_01_4.png";
+$path = "public/uploads/frames/frame_cuitbox_creation_2026_6.png";
 if (!file_exists($path)) {
     die("File not found\n");
 }

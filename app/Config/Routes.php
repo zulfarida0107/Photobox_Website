@@ -11,6 +11,7 @@ use CodeIgniter\Router\RouteCollection;
 // ============================================================
 $routes->get('/', 'User_Booking\LandingPageController::index');
 
+
 // Handle global OPTIONS requests for CORS preflight
 $routes->options('(:any)', function() {});
 
