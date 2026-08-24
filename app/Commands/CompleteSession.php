@@ -21,6 +21,7 @@ class CompleteSession extends BaseCommand
 
     public function run(array $params)
     {
+        ini_set('memory_limit', '512M');
         $sessionId = $params[0] ?? null;
 
         if (empty($sessionId)) {

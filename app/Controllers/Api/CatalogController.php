@@ -45,11 +45,14 @@ class CatalogController extends BaseApiController
 
     public function listFrames(): ResponseInterface
     {
-        $frames = $this->frameModel
-            ->where('is_active', 1)
-            ->findAll();
-
         $db = \Config\Database::connect();
+        $frames = $db->table('frames f')
+            ->select('f.*, l.photo_count as layout_photo_count, l.slot_coordinates as layout_slot_coordinates')
+            ->join('frame_layouts l', 'l.id = f.layout_id', 'left')
+            ->where('f.is_active', 1)
+            ->get()
+            ->getResultArray();
+
         $categoriesList = $db->table('frame_categories')
             ->select('name')
             ->orderBy('name', 'ASC')

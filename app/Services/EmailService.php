@@ -11,6 +11,7 @@ class EmailService
         string $folderLink,
         $attachments = []
     ): bool {
+        ini_set('memory_limit', '512M');
         $config = config(\Config\Email::class);
         $config->protocol = 'smtp';
         $config->SMTPHost = 'smtp.gmail.com';
@@ -25,7 +26,7 @@ class EmailService
         $config->charset = 'UTF-8';
         $config->newline = "\r\n";
         $config->CRLF = "\r\n";
-        $config->SMTPTimeout = 15;
+        $config->SMTPTimeout = 120;
 
         $email = new \CodeIgniter\Email\Email($config);
         $email->clear(true);
