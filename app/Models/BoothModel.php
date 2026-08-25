@@ -13,7 +13,10 @@ class BoothModel extends Model
 	protected $protectFields = true;
 	protected $allowedFields = [
 		'id',
+		'location_id',
 		'name',
+		'capacity',
+		'image',
 		'ip_address',
 		'latitude',
 		'longitude',

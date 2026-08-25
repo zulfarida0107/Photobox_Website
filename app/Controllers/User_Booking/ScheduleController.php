@@ -23,11 +23,32 @@ class ScheduleController extends BaseController
     public function index()
     {
         $customerId = session()->get('customer_id');
+        $boothId = $this->request->getGet('booth_id') ?? session()->get('selected_booth_id');
         
+        $boothModel = new \App\Models\BoothModel();
+        $selectedBooth = null;
+        if ($boothId) {
+            $selectedBooth = $boothModel->find($boothId);
+        }
+        
+        if (!$selectedBooth) {
+            // Ambil booth aktif pertama sebagai default atau redirect ke pilih booth
+            $firstBooth = $boothModel->where('status !=', 'maintenance')->first();
+            if ($firstBooth) {
+                session()->set('selected_booth_id', $firstBooth['id']);
+                session()->set('selected_booth_name', $firstBooth['name']);
+                session()->set('selected_booth_price', $firstBooth['price'] ?? 0);
+                $selectedBooth = $firstBooth;
+            } else {
+                return redirect()->to('/booth')->with('info', 'Silakan pilih booth terlebih dahulu.');
+            }
+        }
+
         $data = [
-            'title' => 'Schedule Booking - CuitBox Studio',
-            'frames' => $this->frameModel->findAll(),
-            'customer' => $customerId ? $this->customerModel->find($customerId) : null
+            'title'         => 'Schedule Booking - CuitBox Studio',
+            'frames'        => $this->frameModel->findAll(),
+            'customer'      => $customerId ? $this->customerModel->find($customerId) : null,
+            'selectedBooth' => $selectedBooth
         ];
 
         return view('User_Booking/schedule', $data);

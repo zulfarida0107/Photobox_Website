@@ -15,12 +15,12 @@ class EmailService
         $config = config(\Config\Email::class);
         $config->protocol = 'smtp';
         $config->SMTPHost = 'smtp.gmail.com';
-        $config->SMTPUser = 'cuitbox.studio@gmail.com';
+        $config->SMTPUser = 'cuitboxstudio@gmail.com';
         $config->SMTPPass = 'mmnyzpjjpcvdxrio';
         $config->SMTPPort = 465;
         $config->SMTPCrypto = 'ssl';
         $config->SMTPAuthMethod = 'login';
-        $config->fromEmail = 'cuitbox.studio@gmail.com';
+        $config->fromEmail = 'cuitboxstudio@gmail.com';
         $config->fromName = 'CuitBox Photo Booth';
         $config->mailType = 'html';
         $config->charset = 'UTF-8';

@@ -116,14 +116,8 @@ class PaymentMethodController extends BaseController
         }
 
         // Jika booking_id tidak ada, ambil dari session
-        if (empty($bookingId) || !is_numeric($bookingId)) {
+        if (empty($bookingId)) {
             $bookingId = $this->session->get('booking_id');
-            
-            if (empty($bookingId)) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', 'Session booking tidak ditemukan. Silahkan pilih frame terlebih dahulu.');
-            }
         }
 
         // Cek apakah booking ada di database
@@ -208,7 +202,7 @@ class PaymentMethodController extends BaseController
             $paymentData = [
                 'id' => $paymentId,
                 'booking_id' => $bookingId,
-                'print_option_id' => $selectedPrintOptionId,  // Data dari Daftar Cetak Admin
+                'print_option_id' => $printOptionId,  // Data dari Daftar Cetak Admin
                 'amount' => $amount,
                 'gateway_ref' => 'PAY-' . strtoupper(uniqid()),
                 'status' => 'success',
@@ -237,7 +231,7 @@ class PaymentMethodController extends BaseController
 
         // Redirect ke halaman status booking
         return redirect()->to('/StatusBooking?payment_id=' . $paymentId . '&booking_id=' . $bookingId)
-            ->with('success', '✅ Pembayaran berhasil dikonfirmasi!');
+            ->with('success', 'Pembayaran berhasil dikonfirmasi!');
     }
 
     /**
@@ -334,7 +328,7 @@ class PaymentMethodController extends BaseController
 
         // Redirect ke halaman status booking
         return redirect()->to('/StatusBooking?payment_id=' . $paymentId . '&booking_id=' . $bookingId)
-            ->with('success', '✅ Pembayaran berhasil dikonfirmasi!');
+            ->with('success', 'Pembayaran berhasil dikonfirmasi!');
     }
 
     public function detail($bookingCode = null)

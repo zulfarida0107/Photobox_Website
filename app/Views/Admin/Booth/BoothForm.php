@@ -48,11 +48,38 @@
                 <?php endif; ?>
 
                 <div>
-                    <label for="name" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Booth / Lokasi *</label>
+                    <label for="name" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Booth *</label>
                     <input type="text" name="name" id="name" required
                            value="<?= esc(old('name', $booth['name'] ?? '')) ?>"
-                           placeholder="Contoh: Booth CuitBox - Grand Indonesia"
+                           placeholder="Contoh: Booth CuitBox Pastel A"
                            class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="location_id" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Lokasi Cabang / Mall (Opsional)</label>
+                        <select name="location_id" id="location_id"
+                                class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white">
+                            <option value="">-- Tanpa Lokasi Tertentu / Pusat --</option>
+                            <?php if (!empty($locations)): ?>
+                                <?php foreach ($locations as $loc): ?>
+                                    <option value="<?= esc($loc['id']) ?>" <?= old('location_id', $booth['location_id'] ?? '') === $loc['id'] ? 'selected' : '' ?>>
+                                        <?= esc($loc['name']) ?> <?= !empty($loc['city']) ? '(' . esc($loc['city']) . ')' : '' ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="capacity" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kapasitas Orang (Opsional)</label>
+                        <div class="relative">
+                            <input type="number" name="capacity" id="capacity" min="1" max="30"
+                                   value="<?= esc(old('capacity', $booth['capacity'] ?? 4)) ?>"
+                                   placeholder="Contoh: 4"
+                                   class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white pr-16" />
+                            <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-semibold">Orang</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
@@ -61,23 +88,6 @@
                            value="<?= esc(old('ip_address', $booth['ip_address'] ?? '')) ?>"
                            placeholder="Contoh: 192.168.1.50"
                            class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="latitude" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Latitude (Opsional)</label>
-                        <input type="text" name="latitude" id="latitude"
-                               value="<?= esc(old('latitude', $booth['latitude'] ?? '')) ?>"
-                               placeholder="Contoh: -6.175392"
-                               class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
-                    </div>
-                    <div>
-                        <label for="longitude" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Longitude (Opsional)</label>
-                        <input type="text" name="longitude" id="longitude"
-                               value="<?= esc(old('longitude', $booth['longitude'] ?? '')) ?>"
-                               placeholder="Contoh: 106.827153"
-                               class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
-                    </div>
                 </div>
 
                 <?php if (isset($booth)): ?>

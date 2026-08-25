@@ -140,21 +140,38 @@
         }
         .toast-container {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 9999;
-            max-width: 400px;
-            width: 100%;
+            max-width: 340px;
+            width: calc(100% - 32px);
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .toast {
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            animation: slideInRight 0.5s ease;
+            padding: 10px 16px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            animation: slideInDown 0.35s ease;
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: center;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            line-height: 1.35;
+            pointer-events: auto;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        .toast:active {
+            cursor: grabbing;
         }
         .toast-success {
             background: #10b981;
@@ -168,33 +185,15 @@
             background: #3b82f6;
             color: white;
         }
-        @keyframes slideInRight {
+        @keyframes slideInDown {
             from {
-                transform: translateX(100%);
+                transform: translateY(-20px) scale(0.95);
                 opacity: 0;
             }
             to {
-                transform: translateX(0);
+                transform: translateY(0) scale(1);
                 opacity: 1;
             }
-        }
-        .toast-close {
-            margin-left: auto;
-            cursor: pointer;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: background 0.3s;
-        }
-        .toast-close:hover {
-            background: rgba(255,255,255,0.3);
         }
         .spinner {
             display: inline-block;
@@ -307,18 +306,10 @@
                 <?php endif; ?>
 
                
-    <!-- HIDDEN INPUTS -->
-    <?php 
-    $bookingId = $booking['id'] ?? session()->get('booking_id') ?? 1;
-    $amount = $booking['total_amount'] ?? 45000;
-    $paymentId = 'PAY' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
-    ?>
-    <input type="hidden" name="payment_id" value="<?= $paymentId ?>">
-    <input type="hidden" name="booking_id" value="<?= $bookingId ?>">
-    <input type="hidden" name="amount" value="<?= $amount ?>">
-    <input type="hidden" name="status" value="success">
-    
-                    
+                <!-- BEGIN FORM -->
+                <form action="<?= base_url('user-payment/store') ?>" method="post" id="paymentForm">
+                    <?= csrf_field() ?>
+
                     <!-- HIDDEN INPUTS -->
                     <?php 
                     $bookingId = $booking['id'] ?? session()->get('booking_id') ?? 1;
@@ -329,6 +320,7 @@
                     <input type="hidden" name="booking_id" value="<?= $bookingId ?>">
                     <input type="hidden" name="amount" value="<?= $amount ?>">
                     <input type="hidden" name="status" value="success">
+                    <input type="hidden" name="payment_method" value="QRIS">
 
                     <div class="flex flex-col lg:flex-row gap-6">
                         <!-- Left Column - Detail Booking & Payment Method -->
@@ -358,11 +350,9 @@
                                             <span class="material-symbols-outlined text-white text-xl" style="color: #059669;">photo_library</span>
                                         </div>
                                         <div>
-                                            <p class="text-[10px] font-extrabold text-emerald-500 uppercase tracking-widest">Cetak &amp; Tema</p>
+                                            <p class="text-[10px] font-extrabold text-emerald-500 uppercase tracking-widest">Pilihan Cetak</p>
                                             <p class="text-slate-800 font-bold text-base">
                                                 <?= session()->get('selected_print_option_name') ?? '2 Cetak' ?>
-                                                <br>
-                                                <span class="text-sm font-normal text-slate-500">Tema: <?= session()->get('selected_frame_name') ?? 'Belum memilih tema' ?></span>
                                             </p>
                                         </div>
                                     </div>
@@ -381,104 +371,6 @@
                                 <div class="flex justify-between items-center">
                                     <span class="text-lg font-bold text-slate-800">Total Tagihan</span>
                                     <span class="text-2xl font-black text-indigo-700">Rp <?= number_format($amount, 0, ',', '.') ?></span>
-                                </div>
-                            </div>
-
-                            <!-- Pilih Metode Pembayaran -->
-                            <div class="payment-card">
-                                <h4 class="text-sm font-bold text-slate-700 mb-4">Pilih Metode Pembayaran</h4>
-                                <div class="space-y-3">
-                                    <!-- QRIS -->
-                                    <label class="method-option active" id="method-qris">
-                                        <input type="radio" name="payment_method" value="QRIS" checked>
-                                        <div class="method-icon qris">
-                                            <span class="material-symbols-outlined">qr_code_scanner</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <p class="font-bold text-slate-800 text-sm">QRIS</p>
-                                            <p class="text-xs text-slate-500">Scan QR Code dengan aplikasi m-banking atau e-wallet</p>
-                                        </div>
-                                        <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">Rekomendasi</span>
-                                    </label>
-
-                                    <!-- Bank Transfer -->
-                                    <label class="method-option" id="method-bca">
-                                        <input type="radio" name="payment_method" value="BCA">
-                                        <div class="method-icon bca">
-                                            <span class="material-symbols-outlined">account_balance</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <p class="font-bold text-slate-800 text-sm">BCA Transfer</p>
-                                            <p class="text-xs text-slate-500">Transfer via BCA Mobile atau ATM</p>
-                                        </div>
-                                    </label>
-
-                                    <label class="method-option" id="method-bni">
-                                        <input type="radio" name="payment_method" value="BNI">
-                                        <div class="method-icon bni">
-                                            <span class="material-symbols-outlined">account_balance</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <p class="font-bold text-slate-800 text-sm">BNI Transfer</p>
-                                            <p class="text-xs text-slate-500">Transfer via BNI Mobile atau ATM</p>
-                                        </div>
-                                    </label>
-
-                                    <label class="method-option" id="method-mandiri">
-                                        <input type="radio" name="payment_method" value="Mandiri">
-                                        <div class="method-icon mandiri">
-                                            <span class="material-symbols-outlined">account_balance</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <p class="font-bold text-slate-800 text-sm">Mandiri Transfer</p>
-                                            <p class="text-xs text-slate-500">Transfer via Livin' atau ATM</p>
-                                        </div>
-                                    </label>
-
-                                    <!-- E-Wallet -->
-                                    <label class="method-option" id="method-gopay">
-                                        <input type="radio" name="payment_method" value="GoPay">
-                                        <div class="method-icon gopay">
-                                            <span class="material-symbols-outlined">payments</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <p class="font-bold text-slate-800 text-sm">GoPay</p>
-                                            <p class="text-xs text-slate-500">Bayar dengan GoPay</p>
-                                        </div>
-                                    </label>
-
-                                    <label class="method-option" id="method-ovo">
-                                        <input type="radio" name="payment_method" value="OVO">
-                                        <div class="method-icon ovo">
-                                            <span class="material-symbols-outlined">payments</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <p class="font-bold text-slate-800 text-sm">OVO</p>
-                                            <p class="text-xs text-slate-500">Bayar dengan OVO</p>
-                                        </div>
-                                    </label>
-
-                                    <label class="method-option" id="method-dana">
-                                        <input type="radio" name="payment_method" value="DANA">
-                                        <div class="method-icon dana">
-                                            <span class="material-symbols-outlined">payments</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <p class="font-bold text-slate-800 text-sm">DANA</p>
-                                            <p class="text-xs text-slate-500">Bayar dengan DANA</p>
-                                        </div>
-                                    </label>
-
-                                    <label class="method-option" id="method-shopeepay">
-                                        <input type="radio" name="payment_method" value="ShopeePay">
-                                        <div class="method-icon shopeepay">
-                                            <span class="material-symbols-outlined">payments</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <p class="font-bold text-slate-800 text-sm">ShopeePay</p>
-                                            <p class="text-xs text-slate-500">Bayar dengan ShopeePay</p>
-                                        </div>
-                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -516,7 +408,7 @@
 
                     <!-- Tombol Konfirmasi Pembayaran -->
                     <div class="w-full mt-8 flex flex-col sm:flex-row gap-4">
-                        <a href="<?= base_url('frame') ?>" class="btn-secondary flex-1">
+                        <a href="<?= base_url('print-option') ?>" class="btn-secondary flex-1">
                             <span class="material-symbols-outlined">arrow_back</span>
                             Kembali
                         </a>
@@ -595,42 +487,84 @@
             const timerInterval = setInterval(updateTimer, 1000);
             updateTimer();
 
-            // ========== METHOD SELECTION ==========
-            const methodOptions = document.querySelectorAll('.method-option');
-            methodOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    // Remove active from all
-                    methodOptions.forEach(opt => opt.classList.remove('active'));
-                    // Add active to clicked
-                    this.classList.add('active');
-                    // Check radio
-                    const radio = this.querySelector('input[type="radio"]');
-                    if (radio) {
-                        radio.checked = true;
-                    }
-                });
-            });
+
 
             // ========== TOAST NOTIFICATION ==========
             window.showToast = function(message, type = 'success') {
-                const container = document.getElementById('toastContainer');
+                const container = document.getElementById('toastContainer') || (() => {
+                    const div = document.createElement('div');
+                    div.id = 'toastContainer';
+                    div.className = 'toast-container';
+                    document.body.appendChild(div);
+                    return div;
+                })();
+
                 const toast = document.createElement('div');
-                const icons = { success: '✅', error: '❌', info: 'ℹ️' };
                 toast.className = `toast toast-${type}`;
-                toast.innerHTML = `
-                    <span class="text-xl">${icons[type] || 'ℹ️'}</span>
-                    <span class="flex-1">${message}</span>
-                    <button class="toast-close" onclick="this.parentElement.remove()">×</button>
-                `;
+                toast.innerHTML = `<span>${message}</span>`;
                 container.appendChild(toast);
                 
-                setTimeout(() => {
-                    if (toast.parentElement) {
-                        toast.style.opacity = '0';
-                        toast.style.transition = 'opacity 0.5s ease';
-                        setTimeout(() => toast.remove(), 500);
+                function dismissToast() {
+                    toast.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+                    toast.style.transform = 'translateY(-40px)';
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 250);
+                }
+
+                // Auto dismiss after 4s
+                let autoTimer = setTimeout(dismissToast, 4000);
+
+                // Swipe Up to dismiss logic (Touch & Drag)
+                let startY = 0;
+                let isDragging = false;
+
+                const onStart = (clientY) => {
+                    clearTimeout(autoTimer);
+                    startY = clientY;
+                    isDragging = true;
+                    toast.style.transition = 'none';
+                };
+
+                const onMove = (clientY) => {
+                    if (!isDragging) return;
+                    const diffY = clientY - startY;
+                    if (diffY < 0) { // Dragging upwards
+                        toast.style.transform = `translateY(${diffY}px)`;
+                        toast.style.opacity = `${Math.max(0, 1 + diffY / 50)}`;
                     }
-                }, 5000);
+                };
+
+                const onEnd = (clientY) => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    const diffY = clientY - startY;
+                    if (diffY < -15) { // Swiped up
+                        dismissToast();
+                    } else {
+                        toast.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+                        toast.style.transform = 'translateY(0)';
+                        toast.style.opacity = '1';
+                        autoTimer = setTimeout(dismissToast, 3000);
+                    }
+                };
+
+                // Touch events (Mobile)
+                toast.addEventListener('touchstart', (e) => onStart(e.touches[0].clientY), { passive: true });
+                toast.addEventListener('touchmove', (e) => onMove(e.touches[0].clientY), { passive: true });
+                toast.addEventListener('touchend', (e) => onEnd(e.changedTouches[0].clientY));
+
+                // Mouse events (Desktop testing)
+                toast.addEventListener('mousedown', (e) => {
+                    onStart(e.clientY);
+                    const moveHandler = (ev) => onMove(ev.clientY);
+                    const upHandler = (ev) => {
+                        onEnd(ev.clientY);
+                        document.removeEventListener('mousemove', moveHandler);
+                        document.removeEventListener('mouseup', upHandler);
+                    };
+                    document.addEventListener('mousemove', moveHandler);
+                    document.addEventListener('mouseup', upHandler);
+                });
             };
 
             // ========== FLASH MESSAGES ==========

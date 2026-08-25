@@ -130,7 +130,7 @@ class RegisterController extends Controller
                 'isLoggedIn' => true
             ]);
             
-            return redirect()->to('/schedule')->with('success', 'Akun berhasil dibuat! Selamat datang, ' . $this->request->getPost('name') . '!');
+            return redirect()->to('/booth')->with('success', 'Akun berhasil dibuat! Selamat datang, ' . $this->request->getPost('name') . '!');
             
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());

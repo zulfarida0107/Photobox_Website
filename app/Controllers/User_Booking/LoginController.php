@@ -60,8 +60,8 @@ class LoginController extends Controller
                 'isLoggedIn' => true
             ]);
 
-            // Redirect ke schedule dengan pesan sukses
-            return redirect()->to('/schedule')->with('success', 'Selamat datang kembali, ' . $user['name'] . '!');
+            // Redirect ke booth dengan pesan sukses
+            return redirect()->to('/booth')->with('success', 'Selamat datang kembali, ' . $user['name'] . '!');
         } else {
             return redirect()->back()->withInput()->with('error', 'Email atau password salah.');
         }
@@ -120,9 +120,7 @@ class LoginController extends Controller
         // Send email
         $emailConfig = config('Email');
         $emailService = \Config\Services::email();
-        $emailService->initialize($emailConfig);
-        
-        $emailService->setFrom('cuitbox.studio@gmail.com', 'CuitBox Studio');
+        $emailService->setFrom('cuitboxstudio@gmail.com', 'CuitBox Studio');
         $emailService->setCRLF("\r\n");
         $emailService->setNewline("\r\n");
         $emailService->setMailType('html');

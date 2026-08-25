@@ -141,9 +141,11 @@ class CustomerController extends BaseApiController
                 $slot = $slotModel->find($slotId);
             }
 
-            // 5. Generate booking ID & code
-            $bookingId = 'BK-' . strtoupper(bin2hex(random_bytes(5)));
-            $bookingCode = $bookingId;
+            // 5. Generate booking ID & 6-digit numeric booking code
+            $bookingId = 'BK' . date('YmdHis') . rand(10, 99);
+            do {
+                $bookingCode = (string) rand(100000, 999999);
+            } while ($this->bookingModel->where('booking_code', $bookingCode)->first() !== null);
 
             $bookingData = [
                 'id' => $bookingId,

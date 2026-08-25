@@ -273,9 +273,8 @@
                 <?php endif; ?>
                 
                 <?php if (session()->getFlashdata('success')): ?>
-                    <div class="w-full max-w-lg bg-emerald-500 text-white px-5 py-3.5 rounded-2xl shadow-lg mb-6 flex items-center gap-3 text-sm font-semibold border border-emerald-400">
-                        <span class="material-symbols-outlined text-xl">check_circle</span>
-                        <span class="flex-1"><?= session()->getFlashdata('success') ?></span>
+                    <div class="w-full max-w-lg bg-emerald-500 text-white px-5 py-3 rounded-2xl shadow-lg mb-6 flex items-center justify-center text-center text-sm font-semibold border border-emerald-400">
+                        <span><?= session()->getFlashdata('success') ?></span>
                     </div>
                 <?php endif; ?>
 
@@ -290,11 +289,8 @@
                     <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 mb-2">
                         Booking Berhasil!
                     </h2>
-                    <p class="text-slate-500 text-sm md:text-base leading-relaxed mb-1">
-                        Kode booking Anda telah dikirim ke email Anda.
-                    </p>
-                    <p class="text-slate-600 text-sm md:text-base font-semibold mb-6">
-                        Tim CuitBox sudah menyimpan jadwal booking photo Anda!
+                    <p class="text-slate-500 text-sm md:text-base leading-relaxed mb-6">
+                        Kode booking Anda telah dikirimkan ke email terdaftar
                     </p>
                     
                     <!-- Informasi Booking -->

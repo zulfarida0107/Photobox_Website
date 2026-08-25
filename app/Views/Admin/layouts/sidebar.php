@@ -19,6 +19,7 @@ $activeMap = [
     'frames'        => 'frames',
     'filters'       => 'frames',        // filter masuk menu Aset Desain
     'booths'        => 'booths',
+    'locations'     => 'booths',
     'sessions'      => 'sessions',
     'photos'        => 'sessions',      // photo masuk menu Galeri Sesi
     'settings'      => 'settings',
