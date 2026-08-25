@@ -181,6 +181,10 @@
             height: 48px;
         }
 
+        #password, #confirm_password {
+            padding-right: 48px !important;
+        }
+
         .input-field-bg:focus {
             background-color: #ffffff;
             border-color: #60a5fa;
@@ -518,7 +522,7 @@
 <!-- END: MainHeader -->
             
             <!-- BEGIN: ContentArea -->
-            <div class="flex-1 flex flex-col lg:flex-row items-center p-6 sm:p-8 lg:p-12 xl:p-16 gap-8 lg:gap-12 xl:gap-16 bg-white/40 backdrop-blur-sm" data-purpose="main-content-area">
+            <div class="flex-1 flex flex-col lg:flex-row items-center px-8 pt-6 pb-12 sm:px-12 sm:pt-8 sm:pb-16 lg:p-12 xl:p-16 gap-8 lg:gap-12 xl:gap-16 bg-white/40 backdrop-blur-sm" data-purpose="main-content-area">
                 
                 <!-- BEGIN: LeftColumn (Image Card) -->
                 <div class="w-full lg:w-1/2 flex justify-center items-center" data-purpose="hero-image-column">
@@ -703,7 +707,7 @@
                                     required
                                 >
                                 <button 
-                                    class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" 
+                                    class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" 
                                     type="button" 
                                     onclick="togglePassword('password')"
                                 >
@@ -733,7 +737,7 @@
                                     required
                                 >
                                 <button 
-                                    class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" 
+                                    class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" 
                                     type="button" 
                                     onclick="togglePassword('confirm_password')"
                                 >
@@ -794,6 +798,25 @@
             if (!input) return;
             const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
             input.setAttribute('type', type);
+            
+            // Ubah ikon mata / mata_strip
+            const button = input.nextElementSibling;
+            if (button && button.tagName === 'BUTTON') {
+                const icon = button.querySelector('svg');
+                if (icon) {
+                    if (type === 'text') {
+                        icon.innerHTML = `
+                            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 012.442-4.558M9.879 9.879a3 3 0 004.242 4.242M2.458 12C3.732 7.943 7.523 5 12 5c1.93 0 3.751.542 5.298 1.488M21 12l-.768 1.123M18 9l.768-1.123" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                            <path d="M19.5 19.5l-15-15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                        `;
+                    } else {
+                        icon.innerHTML = `
+                            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                            <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                        `;
+                    }
+                }
+            }
         }
 
         // ===== FOCUS FIRST INPUT =====

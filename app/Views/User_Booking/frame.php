@@ -203,15 +203,13 @@
             .frame-grid { grid-template-columns: repeat(5, 1fr); gap: 20px; }
         }
         form { position: relative; z-index: 5; }
-        /* Toast */
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px; width: 100%; }
-        .toast { padding: 16px 20px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); animation: slideInRight 0.5s ease; display: flex; align-items: center; gap: 12px; }
+        .toast-container { position: fixed; top: 28px; left: 50%; transform: translateX(-50%); z-index: 9999; max-width: 340px; width: calc(100% - 32px); pointer-events: none; display: flex; flex-direction: column; align-items: center; }
+        .toast { padding: 10px 16px; border-radius: 10px; margin-bottom: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); animation: slideInDown 0.35s ease; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: 600; line-height: 1.35; pointer-events: auto; cursor: grab; user-select: none; touch-action: none; transition: transform 0.2s ease, opacity 0.2s ease; }
+        .toast:active { cursor: grabbing; }
         .toast-success { background: #10b981; color: white; }
         .toast-error { background: #ef4444; color: white; }
         .toast-info { background: #3b82f6; color: white; }
-        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .toast-close { margin-left: auto; cursor: pointer; background: rgba(255,255,255,0.2); border: none; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background 0.3s; }
-        .toast-close:hover { background: rgba(255,255,255,0.3); }
+        @keyframes slideInDown { from { transform: translateY(-20px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -339,18 +337,70 @@
 
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            toast.innerHTML = `
-                <span>${message}</span>
-                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
-            `;
+            toast.innerHTML = `<span>${message}</span>`;
             container.appendChild(toast);
-            setTimeout(() => {
-                if (toast.parentElement) {
-                    toast.style.opacity = '0';
-                    toast.style.transition = 'opacity 0.5s ease';
-                    setTimeout(() => toast.remove(), 500);
+
+            function dismissToast() {
+                toast.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+                toast.style.transform = 'translateY(-40px)';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 250);
+            }
+
+            // Auto dismiss after 4s
+            let autoTimer = setTimeout(dismissToast, 4000);
+
+            // Swipe Up to dismiss logic (Touch & Drag)
+            let startY = 0;
+            let isDragging = false;
+
+            const onStart = (clientY) => {
+                clearTimeout(autoTimer);
+                startY = clientY;
+                isDragging = true;
+                toast.style.transition = 'none';
+            };
+
+            const onMove = (clientY) => {
+                if (!isDragging) return;
+                const diffY = clientY - startY;
+                if (diffY < 0) { // Dragging upwards
+                    toast.style.transform = `translateY(${diffY}px)`;
+                    toast.style.opacity = `${Math.max(0, 1 + diffY / 50)}`;
                 }
-            }, 5000);
+            };
+
+            const onEnd = (clientY) => {
+                if (!isDragging) return;
+                isDragging = false;
+                const diffY = clientY - startY;
+                if (diffY < -15) { // Swiped up by more than 15px
+                    dismissToast();
+                } else {
+                    toast.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+                    toast.style.transform = 'translateY(0)';
+                    toast.style.opacity = '1';
+                    autoTimer = setTimeout(dismissToast, 3000);
+                }
+            };
+
+            // Touch events (Mobile)
+            toast.addEventListener('touchstart', (e) => onStart(e.touches[0].clientY), { passive: true });
+            toast.addEventListener('touchmove', (e) => onMove(e.touches[0].clientY), { passive: true });
+            toast.addEventListener('touchend', (e) => onEnd(e.changedTouches[0].clientY));
+
+            // Mouse events (Desktop testing)
+            toast.addEventListener('mousedown', (e) => {
+                onStart(e.clientY);
+                const moveHandler = (ev) => onMove(ev.clientY);
+                const upHandler = (ev) => {
+                    onEnd(ev.clientY);
+                    document.removeEventListener('mousemove', moveHandler);
+                    document.removeEventListener('mouseup', upHandler);
+                };
+                document.addEventListener('mousemove', moveHandler);
+                document.addEventListener('mouseup', upHandler);
+            });
         }
 
         // Card selection

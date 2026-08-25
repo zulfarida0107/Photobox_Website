@@ -84,22 +84,68 @@ class UserBookingBridgeController extends BaseApiController
         $isToday   = ($date === $today);
         $nowTime   = date('H:i:s');
 
+        // Cek apakah tanggal ini diblokir/libur oleh Admin
+        $blockedDateModel = new \App\Models\BlockedDateModel();
+        if ($blockedDateModel->isBlocked($date)) {
+            $blocked = $blockedDateModel->where('blocked_date', $date)->first();
+            return $this->respondOk([
+                'status'  => 'success',
+                'message' => 'Tanggal ini tidak tersedia untuk booking.',
+                'reason'  => $blocked['reason'] ?? 'Libur',
+                'blocked' => true,
+                'data'    => [],
+                'total'   => 0,
+            ]);
+        }
+
         // Ambil jam-jam operasional unik dari slot yang ada di Admin
         // Tidak filter berdasarkan slot_date — ambil semua slot yang terdaftar
         // lalu deduplicate per (start_time, booth_id) dengan subquery agar aman di MySQL strict mode
         $db = \Config\Database::connect();
-        $rawSlots = $db->query("
-            SELECT s.id, s.start_time, s.booth_id, b.name AS booth_name,
-                   s.max_bookings, s.booked_count,
-                   (s.max_bookings - s.booked_count) AS remaining
-            FROM slots s
-            LEFT JOIN booths b ON b.id = s.booth_id
-            WHERE b.status != 'maintenance'
-            AND s.id IN (
-                SELECT MIN(id) FROM slots GROUP BY start_time, booth_id
-            )
-            ORDER BY s.start_time ASC
-        ")->getResultArray();
+        
+        // Cek apakah ada slot operasional khusus yang didaftarkan untuk tanggal ini
+        $specificSlotsCount = $db->query("SELECT COUNT(*) AS total FROM slots WHERE slot_date = ?", [$date])->getRowArray();
+        
+        if ((int)($specificSlotsCount['total'] ?? 0) > 0) {
+            // Jika ada slot khusus untuk tanggal ini, gunakan slot tersebut (berfungsi sebagai override / meliburkan hari)
+            $rawSlots = $db->query("
+                SELECT s.id, s.start_time, s.booth_id, b.name AS booth_name,
+                       s.max_bookings, s.booked_count,
+                       (s.max_bookings - s.booked_count) AS remaining
+                FROM slots s
+                LEFT JOIN booths b ON b.id = s.booth_id
+                WHERE b.status != 'maintenance'
+                  AND s.slot_date = ?
+                ORDER BY s.start_time ASC
+            ", [$date])->getResultArray();
+        } else {
+            // Jika tidak ada, gunakan slot template default (2099-12-31)
+            $rawSlots = $db->query("
+                SELECT s.id, s.start_time, s.booth_id, b.name AS booth_name,
+                       s.max_bookings,
+                       (
+                           SELECT COUNT(*) 
+                           FROM bookings bk 
+                           WHERE bk.slot_id = s.id 
+                             AND DATE(bk.created_at) = ? 
+                             AND bk.status != 'cancelled'
+                       ) AS booked_count,
+                       (
+                           s.max_bookings - (
+                               SELECT COUNT(*) 
+                               FROM bookings bk 
+                               WHERE bk.slot_id = s.id 
+                                 AND DATE(bk.created_at) = ? 
+                                 AND bk.status != 'cancelled'
+                           )
+                       ) AS remaining
+                FROM slots s
+                LEFT JOIN booths b ON b.id = s.booth_id
+                WHERE b.status != 'maintenance'
+                  AND s.slot_date = '2099-12-31'
+                ORDER BY s.start_time ASC
+            ", [$date, $date])->getResultArray();
+        }
 
         $result = [];
         foreach ($rawSlots as $slot) {
@@ -107,11 +153,17 @@ class UserBookingBridgeController extends BaseApiController
             $remaining = max(0, (int)$slot['remaining']);
             $isAvailable = $remaining > 0 && !$isPast;
 
+            // Calculate end time consistent with Admin Panel
+            $startHour = (int) date('H', strtotime($slot['start_time']));
+            $dur = ($startHour >= 19) ? 10800 : 7200; // Malam = 3 jam, lainnya = 2 jam
+            $endTime = date('H:i:s', strtotime($slot['start_time']) + $dur);
+
             $result[] = [
                 'id'           => $slot['id'],
                 'booth_id'     => $slot['booth_id'],
                 'booth_name'   => $slot['booth_name'] ?? 'Booth',
                 'start_time'   => $slot['start_time'],
+                'end_time'     => $endTime,
                 'max_bookings' => $slot['max_bookings'],
                 'booked_count' => $slot['booked_count'],
                 'remaining'    => $remaining,

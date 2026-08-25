@@ -46,7 +46,8 @@ class PrintOptionController extends BaseController
         session()->set('selected_print_option_name', $printOption['copies'] . ' Cetak');
         session()->set('selected_print_option_price', $printOption['extra_price']);
 
-        // Redirect ke halaman pilih tema frame
-        return redirect()->to('/frame')->with('success', 'Paket "' . $printOption['copies'] . ' Cetak" berhasil dipilih!');
+        // Alur baru: Jadwal > Print > QRIS > Kode (Frame di-bypass)
+        // return redirect()->to('/frame')->with('success', 'Paket "' . $printOption['copies'] . ' Cetak" berhasil dipilih!');
+        return redirect()->to('/user-payment')->with('success', 'Paket "' . $printOption['copies'] . ' Cetak" berhasil dipilih!');
     }
 }

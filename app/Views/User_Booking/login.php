@@ -8,6 +8,9 @@
     <!-- Tailwind CSS v3 CDN -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect">
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
@@ -28,6 +31,49 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: linear-gradient(135deg, #bae6fd 0%, #fbcfe8 100%);
             min-height: 100vh;
+        }
+        
+        /* Custom SweetAlert2 Styling to match CuitBox Studio */
+        .custom-swal-popup {
+            width: 300px !important;
+            padding: 16px !important;
+            border-radius: 16px !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
+        }
+        .swal2-title {
+            font-size: 18px !important;
+            margin-top: 12px !important;
+            color: #1e293b !important;
+        }
+        .swal2-html-container {
+            font-size: 12px !important;
+            margin: 8px 0 16px 0 !important;
+            line-height: 1.5 !important;
+            color: #64748b !important;
+        }
+        .custom-swal-btn {
+            border-radius: 9999px !important;
+            padding: 8px 24px !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+        }
+        .swal2-confirm.custom-swal-btn {
+            color: #1e293b !important; /* dark slate text */
+        }
+        .swal2-icon {
+            font-size: 10px !important;
+            margin: 12px auto 0 !important;
+        }
+        .swal2-icon.swal2-success {
+            border-color: #84cc16 !important;
+            color: #84cc16 !important;
+        }
+        .swal2-icon.swal2-success [class^='swal2-success-line'] {
+            background-color: #84cc16 !important;
+        }
+        .swal2-icon.swal2-success .swal2-success-ring {
+            border-color: rgba(132, 204, 22, 0.3) !important;
         }
         
         /* ===== LAYOUT ===== */
@@ -51,7 +97,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 24px;
+            justify-content: center;
+            padding: 24px 32px 48px 32px;
             background: rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(4px);
         }
@@ -59,6 +106,7 @@
         @media (min-width: 1024px) {
             .content-area {
                 flex-direction: row;
+                justify-content: center;
                 padding: 48px 64px;
                 gap: 48px;
             }
@@ -386,7 +434,7 @@
         .input-field {
             background-color: #f8f7fa;
             border: 2px solid transparent;
-            border-radius: 16px;
+            border-radius: 16px !important;
             padding: 12px 16px;
             width: 100%;
             font-size: 14px;
@@ -429,9 +477,13 @@
             position: relative;
         }
         
+        .password-wrapper .input-field {
+            padding-right: 48px;
+        }
+        
         .password-toggle {
             position: absolute;
-            right: 12px;
+            right: 18px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
@@ -559,7 +611,7 @@
         /* ===== RESPONSIVE ===== */
         @media (max-width: 640px) {
             .content-area {
-                padding: 16px;
+                padding: 24px 32px 48px 32px;
                 gap: 24px;
             }
             
@@ -767,23 +819,59 @@
                         </p>
                     </div>
 
-                    <!-- Alert Messages -->
+                    <!-- Alert Messages (SweetAlert2) -->
                     <?php if (session()->getFlashdata('success')): ?>
-                        <div class="alert alert-success">
-                            <span class="icon">✓</span> <?= session()->getFlashdata('success') ?>
-                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: '<?= esc(session()->getFlashdata('success')) ?>',
+                                    confirmButtonColor: '#d9f99d',
+                                    confirmButtonText: 'Oke',
+                                    customClass: {
+                                        popup: 'custom-swal-popup',
+                                        confirmButton: 'custom-swal-btn'
+                                    }
+                                });
+                            });
+                        </script>
                     <?php endif; ?>
 
                     <?php if (session()->getFlashdata('error')): ?>
-                        <div class="alert alert-error">
-                            <span class="icon">✕</span> <?= session()->getFlashdata('error') ?>
-                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal!',
+                                    text: '<?= esc(session()->getFlashdata('error')) ?>',
+                                    confirmButtonColor: '#ef4444',
+                                    confirmButtonText: 'Coba Lagi',
+                                    customClass: {
+                                        popup: 'custom-swal-popup',
+                                        confirmButton: 'custom-swal-btn'
+                                    }
+                                });
+                            });
+                        </script>
                     <?php endif; ?>
-                    
+
                     <?php if (session()->getFlashdata('info')): ?>
-                        <div class="alert alert-info" style="background-color: #cce5ff; color: #004085; border: 1px solid #b8daff;">
-                            <span class="icon">ℹ</span> <?= session()->getFlashdata('info') ?>
-                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Informasi',
+                                    text: '<?= esc(session()->getFlashdata('info')) ?>',
+                                    confirmButtonColor: '#3b82f6',
+                                    confirmButtonText: 'Mengerti',
+                                    customClass: {
+                                        popup: 'custom-swal-popup',
+                                        confirmButton: 'custom-swal-btn'
+                                    }
+                                });
+                            });
+                        </script>
                     <?php endif; ?>
                     
                     <!-- Form Login -->
@@ -891,24 +979,27 @@
     <script>
         function togglePassword(fieldId) {
             const input = document.getElementById(fieldId);
-            const icon = document.querySelector('.password-toggle svg');
             if (!input) return;
             
             const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
             input.setAttribute('type', type);
             
-            // Change icon
-            if (icon) {
-                if (type === 'text') {
-                    icon.innerHTML = `
-                        <path d="M17.94 17.94A10.07 10.07 0 0112 20c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 012.442-4.558M9.879 9.879a3 3 0 004.242 4.242M2.458 12C3.732 7.943 7.523 5 12 5c1.93 0 3.751.542 5.298 1.488M21 12l-.768 1.123M18 9l.768-1.123" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                        <path d="M19.5 19.5l-15-15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                    `;
-                } else {
-                    icon.innerHTML = `
-                        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                    `;
+            // Ubah ikon mata / mata_strip
+            const button = input.nextElementSibling;
+            if (button && button.tagName === 'BUTTON') {
+                const icon = button.querySelector('svg');
+                if (icon) {
+                    if (type === 'text') {
+                        icon.innerHTML = `
+                            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 012.442-4.558M9.879 9.879a3 3 0 004.242 4.242M2.458 12C3.732 7.943 7.523 5 12 5c1.93 0 3.751.542 5.298 1.488M21 12l-.768 1.123M18 9l.768-1.123" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                            <path d="M19.5 19.5l-15-15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                        `;
+                    } else {
+                        icon.innerHTML = `
+                            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                            <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                        `;
+                    }
                 }
             }
         }

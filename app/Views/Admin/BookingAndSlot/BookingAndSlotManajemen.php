@@ -245,6 +245,113 @@
                         </a>
                     </div>
                 </div>
+
+                <!-- ====== TABEL TANGGAL LIBUR ====== -->
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm mt-6">
+                    <!-- Header -->
+                    <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-white">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1 h-5 bg-primary rounded-full"></div>
+                            <h4 class="font-bold text-slate-800 text-sm">Tanggal Libur & Pemeliharaan</h4>
+                            <span class="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[11px] font-bold border border-rose-100">
+                                <?= count($blockedDates ?? []) ?> Terdaftar
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Form Tambah -->
+                    <div class="p-3.5 bg-slate-50/50 border-b border-slate-200">
+                        <form action="<?= base_url('admin/blocked-dates') ?>" method="POST" class="flex flex-col sm:flex-row gap-2">
+                            <?= csrf_field() ?>
+                            <div class="relative flex-1">
+                                <input type="date" name="blocked_date" required min="<?= date('Y-m-d') ?>"
+                                       class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all text-slate-700 font-medium cursor-pointer">
+                            </div>
+                            <div class="relative flex-[1.5]">
+                                <input type="text" name="reason" placeholder="Alasan libur (cth: Maintenance, Libur Nasional)" maxlength="255"
+                                       class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all text-slate-700">
+                            </div>
+                            <button type="submit"
+                                    class="bg-primary text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 hover:bg-primary-container transition-colors shadow-sm whitespace-nowrap justify-center">
+                                <span class="material-symbols-outlined text-[16px]">add_circle</span>
+                                Tambah Libur
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tabel -->
+                    <div class="overflow-x-auto flex-1 max-h-[300px]">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider sticky top-0 bg-slate-50 z-10">
+                                <tr>
+                                    <th class="px-3.5 py-2.5">TANGGAL</th>
+                                    <th class="px-3.5 py-2.5">KETERANGAN / ALASAN</th>
+                                    <th class="px-3.5 py-2.5 text-center">STATUS</th>
+                                    <th class="px-3.5 py-2.5 text-center">AKSI</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-xs">
+                                <?php if (!empty($blockedDates)): ?>
+                                    <?php
+                                        $dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                                        $monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                                    ?>
+                                    <?php foreach ($blockedDates as $bd): ?>
+                                        <?php
+                                            $ts = strtotime($bd['blocked_date']);
+                                            $w = (int) date('w', $ts);
+                                            $j = date('j', $ts);
+                                            $n = (int) date('n', $ts);
+                                            $y = date('Y', $ts);
+                                            $fmtDate = $dayNames[$w] . ', ' . $j . ' ' . $monthNames[$n] . ' ' . $y;
+                                            $isPast = $bd['blocked_date'] < date('Y-m-d');
+                                        ?>
+                                        <tr class="hover:bg-blue-50/50 transition-colors">
+                                            <td class="px-3.5 py-2.5">
+                                                <div class="font-semibold text-slate-800 text-[11px] flex items-center gap-1.5">
+                                                    <span class="material-symbols-outlined text-slate-400 text-[15px]">event_busy</span>
+                                                    <?= esc($fmtDate) ?>
+                                                </div>
+                                            </td>
+                                            <td class="px-3.5 py-2.5">
+                                                <div class="text-slate-600 text-[11px] font-medium"><?= esc($bd['reason'] ?: 'Libur Operasional') ?></div>
+                                            </td>
+                                            <td class="px-3.5 py-2.5 text-center">
+                                                <?php if ($isPast): ?>
+                                                    <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold border bg-slate-100 text-slate-500 border-slate-200">
+                                                        Selesai
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold border bg-rose-50 text-rose-700 border-rose-200">
+                                                        Aktif Libur
+                                                    </span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="px-3.5 py-2.5 text-center">
+                                                <form method="post" action="<?= base_url('admin/blocked-dates/' . esc($bd['id']) . '/delete') ?>"
+                                                      onsubmit="return confirm('Hapus tanggal libur <?= esc($fmtDate) ?>?')" class="inline">
+                                                    <?= csrf_field() ?>
+                                                    <button type="submit"
+                                                            class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-red-50 text-red-600 border border-red-200 text-[10px] font-semibold hover:bg-red-100 transition-colors">
+                                                        <span class="material-symbols-outlined text-[13px]">delete</span>
+                                                        Hapus
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-8 text-center text-xs text-slate-400">
+                                            <span class="material-symbols-outlined text-2xl text-slate-300 mb-1 block">event_available</span>
+                                            Belum ada tanggal libur yang dikonfigurasi.
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </section>
 
             <!-- KANAN: Tabel Booking Masuk (7 Cols) -->

@@ -218,16 +218,20 @@
 <!-- END: MainHeader -->
 
             <!-- BEGIN: HeroSection -->
-            <main class="relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm flex-1" data-purpose="hero-content">
-                <!-- Decorative Badges -->
-                <span class="absolute top-10 left-8 bg-brand-lightGreen text-[10px] font-bold px-2 py-0.5 rounded-full text-slate-700" style="background:#d9f99d;">LEVEL UP YOUR MEMORIES💖</span>
-                <span class="absolute top-24 right-1/4 bg-brand-lightGreen text-[10px] font-bold px-2 py-0.5 rounded-full text-slate-700" style="background:#d9f99d;">NO HD MISSES</span>
-                <span class="absolute top-36 right-1/4 bg-brand-lightGreen text-[10px] font-bold px-2 py-0.5 rounded-full text-slate-700" style="background:#d9f99d;">STUDENT DISCOUNT -30% 💖</span>
+            <main class="relative px-6 sm:px-8 pt-10 pb-8 bg-white/40 backdrop-blur-sm" data-purpose="hero-content">
+                <!-- Decorative Badges (Hidden on mobile/tablet to avoid overlaps, absolutely positioned on large screens) -->
+                <span class="hidden lg:inline-block absolute top-10 right-8 bg-brand-lightGreen text-[10px] font-bold px-2 py-0.5 rounded-full text-slate-700" style="background:#d9f99d;">NO HD MISSES</span>
+                <span class="hidden lg:inline-block absolute top-24 right-1/4 bg-brand-lightGreen text-[10px] font-bold px-2 py-0.5 rounded-full text-slate-700" style="background:#d9f99d;">ALL SOFTFILES INCLUDED</span>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                     <!-- Hero Text -->
                     <div class="z-10">
-                        <h1 class="text-4xl md:text-2xl font-extrabold leading-tight mb-10">
+                        <!-- LEVEL UP YOUR MEMORIES Badge in normal document flow to avoid overlaps -->
+                        <div class="mb-4 inline-block">
+                            <span class="bg-brand-lightGreen text-[10px] font-bold px-3 py-1 rounded-full text-slate-700" style="background:#d9f99d;">LEVEL UP YOUR MEMORIES</span>
+                        </div>
+
+                        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-6">
                             Capture Every <span class="moment-highlight">Moment</span><br> With Love or Best Friends Forever
                         </h1>
                         <p class="text-slate-500 text-sm max-w-sm mb-8 leading-relaxed">
@@ -243,7 +247,7 @@
                             </button>
                         </form>
 
-                        <div class="flex gap-12 border-t border-slate-300 pt-8 mt-8">
+                        <div class="flex gap-8 sm:gap-12 border-t border-slate-300 pt-8 mt-8">
                             <div>
                                 <div class="text-2xl font-extrabold">15k+</div>
                                 <div class="text-[10px] text-slate-400 uppercase tracking-widest">Moments</div>
@@ -282,8 +286,8 @@
             <!-- END: MarqueeBanner -->
 
             <!-- BEGIN: ThemeSelection -->
-            <section class="py-16 px-6 sm:px-8 flex-grow" data-purpose="theme-grid">
-                <div class="text-center mb-12">
+            <section class="py-8 sm:py-16 px-6 sm:px-8" data-purpose="theme-grid">
+                <div class="text-center mb-8 sm:mb-12">
                     <span class="moment-highlight">CuitBox Studio</span>
                     <p class="text-[20px] text-slate-800 font-medium">This is a Memory Photobox💖</p>
                 </div>

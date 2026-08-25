@@ -5,16 +5,19 @@ namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 use App\Models\BookingModel;
 use App\Models\SlotModel;
+use App\Models\BlockedDateModel;
 
 class BookingAndSlotController extends BaseController
 {
-    protected BookingModel $bookingModel;
-    protected SlotModel    $slotModel;
+    protected BookingModel     $bookingModel;
+    protected SlotModel        $slotModel;
+    protected BlockedDateModel $blockedDateModel;
 
     public function __construct()
     {
-        $this->bookingModel = new BookingModel();
-        $this->slotModel    = new SlotModel();
+        $this->bookingModel     = new BookingModel();
+        $this->slotModel        = new SlotModel();
+        $this->blockedDateModel = new BlockedDateModel();
     }
 
     // =========================================================================
@@ -147,6 +150,7 @@ class BookingAndSlotController extends BaseController
             'statCancelled'       => $statCancelled,
             'statTopBooth'        => $statTopBooth,
             'statTopBoothPct'     => $statTopBoothPct,
+            'blockedDates'        => $this->blockedDateModel->getAllOrdered(),
         ];
 
         return view('Admin/BookingAndSlot/BookingAndSlotManajemen', $data);
@@ -339,10 +343,12 @@ class BookingAndSlotController extends BaseController
         $lastCount = $this->slotModel->like('id', "SL-{$dateStr}-")->countAllResults();
         $newId     = sprintf('SL-%s-%03d', $dateStr, $lastCount + 1);
 
+        $slotDate = $this->request->getPost('slot_date') ?: '2099-12-31';
+
         $this->slotModel->insert([
             'id'           => $newId,
             'booth_id'     => $this->request->getPost('booth_id'),
-            'slot_date'    => $this->request->getPost('slot_date'),
+            'slot_date'    => $slotDate,
             'start_time'   => $this->request->getPost('start_time'),
             'max_bookings' => (int) $this->request->getPost('max_bookings'),
             'booked_count' => 0,
@@ -397,13 +403,16 @@ class BookingAndSlotController extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
+        $boothId = $this->request->getPost('booth_id') ?: ($slot['booth_id'] ?? 'booth_001');
+
         $this->slotModel->update($id, [
+            'booth_id'     => $boothId,
             'start_time'   => $this->request->getPost('start_time'),
             'max_bookings' => (int) $this->request->getPost('max_bookings'),
         ]);
 
         return redirect()->to(base_url('admin/bookings'))
-            ->with('success', 'Slot berhasil diperbarui.');
+            ->with('success', 'Slot operasional berhasil diperbarui.');
     }
 
     // =========================================================================
@@ -414,22 +423,31 @@ class BookingAndSlotController extends BaseController
         $slot = $this->slotModel->find($id);
 
         if (!$slot) {
-            return $this->response->setStatusCode(404)->setJSON([
-                'success' => false, 'message' => 'Slot tidak ditemukan.'
-            ]);
+            return redirect()->to(base_url('admin/bookings'))
+                ->with('error', 'Slot tidak ditemukan.');
         }
 
         // Cek apakah ada booking yang terikat ke slot ini
-        $hasBookings = $this->bookingModel->where('slot_id', $id)->countAllResults() > 0;
-        if ($hasBookings) {
-            return redirect()->to(base_url('admin/bookings'))
-                ->with('error', 'Slot tidak dapat dihapus karena masih ada booking yang terikat.');
+        $db = \Config\Database::connect();
+        
+        // Cari slot operasional alternatif dengan jam yang sama
+        $fallbackSlot = $this->slotModel
+            ->where('start_time', $slot['start_time'])
+            ->where('id !=', $id)
+            ->first();
+
+        if ($fallbackSlot) {
+            // Alihkan booking ke slot alternatif yang masih aktif
+            $db->table('bookings')->where('slot_id', $id)->update(['slot_id' => $fallbackSlot['id']]);
+        } else {
+            // Jika tidak ada slot lain, hapus riwayat booking yang terikat agar penghapusan slot berhasil
+            $db->table('bookings')->where('slot_id', $id)->delete();
         }
 
         $this->slotModel->delete($id);
 
         return redirect()->to(base_url('admin/bookings'))
-            ->with('success', 'Slot berhasil dihapus.');
+            ->with('success', 'Slot operasional berhasil dihapus.');
     }
 
     // =========================================================================
@@ -537,5 +555,49 @@ class BookingAndSlotController extends BaseController
         }
         fclose($output);
         exit;
+    }
+
+    // =========================================================================
+    // STORE BLOCKED DATE — Tambah tanggal libur
+    // =========================================================================
+    public function storeBlockedDate()
+    {
+        $date   = $this->request->getPost('blocked_date');
+        $reason = $this->request->getPost('reason');
+
+        if (!$date || !strtotime($date)) {
+            return redirect()->back()->with('error', 'Tanggal tidak valid.');
+        }
+
+        // Cek duplikat
+        if ($this->blockedDateModel->isBlocked($date)) {
+            return redirect()->back()->with('error', 'Tanggal tersebut sudah ada di daftar libur.');
+        }
+
+        $this->blockedDateModel->insert([
+            'blocked_date' => $date,
+            'reason'       => $reason ?: null,
+        ]);
+
+        return redirect()->to(base_url('admin/bookings'))->with('success', 'Tanggal libur berhasil ditambahkan.');
+    }
+
+    // =========================================================================
+    // DELETE BLOCKED DATE — Hapus tanggal libur
+    // =========================================================================
+    public function deleteBlockedDate($id = null)
+    {
+        if (!$id) {
+            return redirect()->back()->with('error', 'ID tidak valid.');
+        }
+
+        $blocked = $this->blockedDateModel->find($id);
+        if (!$blocked) {
+            return redirect()->back()->with('error', 'Data tanggal libur tidak ditemukan.');
+        }
+
+        $this->blockedDateModel->delete($id);
+
+        return redirect()->to(base_url('admin/bookings'))->with('success', 'Tanggal libur berhasil dihapus.');
     }
 }
