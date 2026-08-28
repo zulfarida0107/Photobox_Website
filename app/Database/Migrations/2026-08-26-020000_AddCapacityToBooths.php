@@ -8,7 +8,7 @@ class AddCapacityToBooths extends Migration
 {
     public function up()
     {
-         = [
+        $fields = [
             'capacity' => [
                 'type'       => 'INT',
                 'constraint' => 5,
@@ -19,11 +19,11 @@ class AddCapacityToBooths extends Migration
             ],
         ];
 
-        ->forge->addColumn('booths', );
+        $this->forge->addColumn('booths', $fields);
     }
 
     public function down()
     {
-        ->forge->dropColumn('booths', 'capacity');
+        $this->forge->dropColumn('booths', 'capacity');
     }
 }

@@ -25,7 +25,8 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
-        'adminAuth'     => \App\Filters\AuthFilter::class,
+        'adminAuth'      => \App\Filters\AuthFilter::class,
+        'superadminAuth' => \App\Filters\SuperadminFilter::class,
     ];
 
     public array $required = [

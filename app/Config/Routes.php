@@ -7,9 +7,22 @@ use CodeIgniter\Router\RouteCollection;
  */
 
 // ============================================================
-// HOME / DEFAULT ROUTE (Customer Landing Page & Online Booking)
+// HOME / DEFAULT ROUTE
+// Port 8080 -> Admin Panel (app/Views/Admin)
+// Port 8081 -> User Booking (app/Views/User_Booking)
 // ============================================================
-$routes->get('/', 'User_Booking\LandingPageController::index');
+$serverPort = $_SERVER['SERVER_PORT'] ?? '8080';
+
+if ($serverPort == '8080') {
+    $routes->get('/', function () {
+        if (session()->get('isLoggedIn')) {
+            return redirect()->to(base_url('admin/dashboard'));
+        }
+        return redirect()->to(base_url('admin/login'));
+    });
+} else {
+    $routes->get('/', 'User_Booking\LandingPageController::index');
+}
 
 
 // Handle global OPTIONS requests for CORS preflight
@@ -182,41 +195,6 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->get('payments/(:segment)/invoice',  'Admin\PaymentController::invoice/$1');
 	$routes->get('payments/export',              'Admin\PaymentController::export');
 
-	// ---- Tab 5: Opsi Cetak ----
-	$routes->get('print-options',                    'Admin\PackageAndPrintOptionController::index');
-	$routes->get('print-options/export',             'Admin\PackageAndPrintOptionController::exportPrintOptions');
-	$routes->get('print-options/create',             'Admin\PackageAndPrintOptionController::createPrintOption');
-	$routes->post('print-options',                   'Admin\PackageAndPrintOptionController::storePrintOption');
-	$routes->get('print-options/(:segment)/edit',    'Admin\PackageAndPrintOptionController::editPrintOption/$1');
-	$routes->post('print-options/(:segment)/update', 'Admin\PackageAndPrintOptionController::updatePrintOption/$1');
-	$routes->post('print-options/(:segment)/delete', 'Admin\PackageAndPrintOptionController::deletePrintOption/$1');
-
-	// ---- Tab 6: Aset Desain (Frame & Filter) ----
-	$routes->get('frames',                       'Admin\FrameAndFilterController::index');
-	$routes->get('frames/create',                'Admin\FrameAndFilterController::createFrame');
-	$routes->post('frames/sync',                 'Admin\FrameAndFilterController::syncAssets');
-	$routes->post('frames',                      'Admin\FrameAndFilterController::storeFrame');
-	$routes->get('frames/(:segment)/edit',       'Admin\FrameAndFilterController::editFrame/$1');
-	$routes->post('frames/(:segment)/update',    'Admin\FrameAndFilterController::updateFrame/$1');
-	$routes->post('frames/(:segment)/toggle',    'Admin\FrameAndFilterController::toggleFrame/$1');
-	$routes->post('frames/(:segment)/delete',    'Admin\FrameAndFilterController::deleteFrame/$1');
-	$routes->get('filters/create',               'Admin\FrameAndFilterController::createFilter');
-	$routes->post('filters',                     'Admin\FrameAndFilterController::storeFilter');
-	$routes->get('filters/(:segment)/edit',      'Admin\FrameAndFilterController::editFilter/$1');
-	$routes->post('filters/(:segment)/update',   'Admin\FrameAndFilterController::updateFilter/$1');
-	$routes->post('filters/(:segment)/toggle',   'Admin\FrameAndFilterController::toggleFilter/$1');
-	$routes->post('filters/(:segment)/delete',   'Admin\FrameAndFilterController::deleteFilter/$1');
-
-	// ---- Kategori Frame ----
-	$routes->post('categories',                  'Admin\FrameAndFilterController::storeCategory');
-	$routes->post('categories/(:segment)/update', 'Admin\FrameAndFilterController::updateCategory/$1');
-	$routes->post('categories/(:segment)/delete', 'Admin\FrameAndFilterController::deleteCategory/$1');
-
-	// ---- Layout Frame ----
-	$routes->post('layouts',                     'Admin\FrameAndFilterController::storeLayout');
-	$routes->post('layouts/(:segment)/update',   'Admin\FrameAndFilterController::updateLayout/$1');
-	$routes->post('layouts/(:segment)/delete',   'Admin\FrameAndFilterController::deleteLayout/$1');
-
 	// ---- Tab 7: Mesin Booth & Lokasi Cabang ----
 	$routes->get('booths',                      'Admin\BoothController::index');
 	$routes->get('booths/create',               'Admin\BoothController::create');
@@ -246,13 +224,53 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->post('sessions/(:segment)/delete',     'Admin\SessionAndPhotoController::deleteSession/$1');
 	$routes->post('photos/(:segment)/delete',       'Admin\SessionAndPhotoController::deletePhoto/$1');
 
-	// ---- Tab 9: Pengaturan Akses (Admin) ----
-	$routes->get('settings',                      'Admin\AdminAccessController::index');
-	$routes->get('settings/create',               'Admin\AdminAccessController::create');
-	$routes->post('settings',                     'Admin\AdminAccessController::store');
-	$routes->get('settings/(:segment)/edit',      'Admin\AdminAccessController::edit/$1');
-	$routes->post('settings/(:segment)/update',   'Admin\AdminAccessController::update/$1');
-	$routes->post('settings/(:segment)/delete',   'Admin\AdminAccessController::delete/$1');
+	// ============================================================
+	// RUTE KHUSUS SUPERADMIN (Master Data, Harga, Desain, Akses)
+	// ============================================================
+	$routes->group('', ['filter' => 'superadminAuth'], static function ($routes) {
+		// ---- Tab 5: Opsi Cetak & Harga ----
+		$routes->get('print-options',                    'Admin\PackageAndPrintOptionController::index');
+		$routes->get('print-options/export',             'Admin\PackageAndPrintOptionController::exportPrintOptions');
+		$routes->get('print-options/create',             'Admin\PackageAndPrintOptionController::createPrintOption');
+		$routes->post('print-options',                   'Admin\PackageAndPrintOptionController::storePrintOption');
+		$routes->get('print-options/(:segment)/edit',    'Admin\PackageAndPrintOptionController::editPrintOption/$1');
+		$routes->post('print-options/(:segment)/update', 'Admin\PackageAndPrintOptionController::updatePrintOption/$1');
+		$routes->post('print-options/(:segment)/delete', 'Admin\PackageAndPrintOptionController::deletePrintOption/$1');
+
+		// ---- Tab 6: Aset Desain (Frame & Filter) ----
+		$routes->get('frames',                       'Admin\FrameAndFilterController::index');
+		$routes->get('frames/create',                'Admin\FrameAndFilterController::createFrame');
+		$routes->post('frames/sync',                 'Admin\FrameAndFilterController::syncAssets');
+		$routes->post('frames',                      'Admin\FrameAndFilterController::storeFrame');
+		$routes->get('frames/(:segment)/edit',       'Admin\FrameAndFilterController::editFrame/$1');
+		$routes->post('frames/(:segment)/update',    'Admin\FrameAndFilterController::updateFrame/$1');
+		$routes->post('frames/(:segment)/toggle',    'Admin\FrameAndFilterController::toggleFrame/$1');
+		$routes->post('frames/(:segment)/delete',    'Admin\FrameAndFilterController::deleteFrame/$1');
+		$routes->get('filters/create',               'Admin\FrameAndFilterController::createFilter');
+		$routes->post('filters',                     'Admin\FrameAndFilterController::storeFilter');
+		$routes->get('filters/(:segment)/edit',      'Admin\FrameAndFilterController::editFilter/$1');
+		$routes->post('filters/(:segment)/update',   'Admin\FrameAndFilterController::updateFilter/$1');
+		$routes->post('filters/(:segment)/toggle',   'Admin\FrameAndFilterController::toggleFilter/$1');
+		$routes->post('filters/(:segment)/delete',   'Admin\FrameAndFilterController::deleteFilter/$1');
+
+		// ---- Kategori Frame ----
+		$routes->post('categories',                  'Admin\FrameAndFilterController::storeCategory');
+		$routes->post('categories/(:segment)/update', 'Admin\FrameAndFilterController::updateCategory/$1');
+		$routes->post('categories/(:segment)/delete', 'Admin\FrameAndFilterController::deleteCategory/$1');
+
+		// ---- Layout Frame ----
+		$routes->post('layouts',                     'Admin\FrameAndFilterController::storeLayout');
+		$routes->post('layouts/(:segment)/update',   'Admin\FrameAndFilterController::updateLayout/$1');
+		$routes->post('layouts/(:segment)/delete',   'Admin\FrameAndFilterController::deleteLayout/$1');
+
+		// ---- Tab 9: Pengaturan Akses (Admin) ----
+		$routes->get('settings',                      'Admin\AdminAccessController::index');
+		$routes->get('settings/create',               'Admin\AdminAccessController::create');
+		$routes->post('settings',                     'Admin\AdminAccessController::store');
+		$routes->get('settings/(:segment)/edit',      'Admin\AdminAccessController::edit/$1');
+		$routes->post('settings/(:segment)/update',   'Admin\AdminAccessController::update/$1');
+		$routes->post('settings/(:segment)/delete',   'Admin\AdminAccessController::delete/$1');
+	});
 });
 
 // ============================================================
