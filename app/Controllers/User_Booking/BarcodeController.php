@@ -170,8 +170,6 @@ class BarcodeController extends BaseController
             $frameName = 'Retro Vibes';
         }
 
-        $customerPassword = session('customer_password') ?? 'Password123!';
-
         $statusMap = [
             'pending'   => ['label' => 'Menunggu Pembayaran', 'color' => 'yellow'],
             'paid'      => ['label' => 'Terbayar', 'color' => 'green'],
@@ -198,7 +196,6 @@ class BarcodeController extends BaseController
                 'email' => $customer['email'] ?? session('customer_email') ?? 'N/A', 
                 'phone' => $customer['phone'] ?? session('customer_phone') ?? 'N/A'
             ],
-            'customer_password' => $customerPassword,
             'booth' => $booth ?: ['name' => 'Booth Studio A', 'location' => 'Main Studio'],
             'print_option' => $printOption ? ['name' => $printOption['copies'] . ' Cetak', 'duration' => '0', 'price' => $printOption['extra_price']] : ['name' => 'N/A', 'duration' => '0', 'price' => 0],
             'created_at' => $booking['created_at'] ?? date('Y-m-d H:i:s'),
@@ -228,21 +225,22 @@ class BarcodeController extends BaseController
             return redirect()->to('barcode')->with('error', '❌ Booking tidak ditemukan.');
         }
 
-        $customerEmail = $booking['customer']['email'] ?? null;
+        $customerEmail = $booking['customer']['email'] ?? session('customer_email') ?? null;
         if (empty($customerEmail) || $customerEmail === 'N/A') {
-            return redirect()->to('barcode')->with('error', '❌ Email customer tidak terdaftar.');
+            if (!empty($booking['customer_id'])) {
+                $customerModel = new \App\Models\CustomerModel();
+                $cust = $customerModel->find($booking['customer_id']);
+                $customerEmail = $cust['email'] ?? null;
+            }
         }
 
-        $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' . urlencode(site_url('barcode/verify') . '?code=' . $booking['booking_code']);
+        if (empty($customerEmail) || $customerEmail === 'N/A') {
+            return redirect()->to('barcode')->with('error', '❌ Email customer tidak ditemukan. Silakan login atau periksa akun Anda.');
+        }
 
         $emailConfig = config('Email');
         $emailService = \Config\Services::email();
 
-        // Ambil email tujuan
-        $customerEmail = !empty($booking['user_email']) 
-            ? $booking['user_email'] 
-            : 'cuitboxstudio@gmail.com';
-            
         $emailService->setFrom('cuitboxstudio@gmail.com', 'CuitBox Studio');
         $emailService->setTo($customerEmail);
         $emailService->setSubject('[TIKET BOOKING] Tiket Resmi Pemesanan #' . $booking['booking_code'] . ' - CuitBox Studio');
@@ -292,10 +290,6 @@ class BarcodeController extends BaseController
                         <tr style="border-bottom: 1px dashed #cbd5e1;">
                             <td style="padding: 8px 0; color:#64748b; font-weight:600;">Email Terdaftar:</td>
                             <td style="padding: 8px 0; color:#0f172a; font-weight:700; text-align:right;">' . esc($customerEmail) . '</td>
-                        </tr>
-                        <tr style="border-bottom: 1px dashed #cbd5e1;">
-                            <td style="padding: 8px 0; color:#64748b; font-weight:600;">Password Akun:</td>
-                            <td style="padding: 8px 0; color:#0f172a; font-weight:700; text-align:right;">' . esc($booking['customer_password']) . '</td>
                         </tr>
                         <tr style="border-bottom: 1px dashed #cbd5e1;">
                             <td style="padding: 8px 0; color:#64748b; font-weight:600;">Booth:</td>

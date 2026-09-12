@@ -17,6 +17,7 @@ class SessionModel extends Model
 		'frame_id',
 		'filter_id',
 		'email_recipient',
+		'drive_folder_id',
 		'drive_folder_url',
 		'final_image_path',
 		'capture_folder',

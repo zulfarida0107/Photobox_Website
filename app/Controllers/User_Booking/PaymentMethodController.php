@@ -186,7 +186,7 @@ class PaymentMethodController extends BaseController
             $updateData = [
                 'amount' => $amount,
                 'gateway_ref' => 'PAY-' . strtoupper(uniqid()),
-                'status' => 'success',
+                'status' => 'paid',
                 'payment_method' => $paymentMethod ?? 'QRIS',
                 'updated_at' => date('Y-m-d H:i:s')
             ];
@@ -205,7 +205,7 @@ class PaymentMethodController extends BaseController
                 'print_option_id' => $printOptionId,  // Data dari Daftar Cetak Admin
                 'amount' => $amount,
                 'gateway_ref' => 'PAY-' . strtoupper(uniqid()),
-                'status' => 'success',
+                'status' => 'paid',
                 'payment_method' => $paymentMethod ?? 'QRIS',
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
@@ -225,7 +225,7 @@ class PaymentMethodController extends BaseController
             'konfirmasi_pembayaran_id' => $paymentId,
             'booking_id' => $bookingId,
             'payment_method' => $paymentMethod ?? 'QRIS',
-            'payment_status' => 'success',
+            'payment_status' => 'paid',
             'payment_amount' => $amount
         ]);
 
@@ -283,7 +283,7 @@ class PaymentMethodController extends BaseController
             $updateData = [
                 'amount' => $amount,
                 'gateway_ref' => 'PAY-' . strtoupper(uniqid()),
-                'status' => 'success',
+                'status' => 'paid',
                 'payment_method' => $paymentMethod ?? 'QRIS',
                 'updated_at' => date('Y-m-d H:i:s')
             ];
@@ -299,10 +299,10 @@ class PaymentMethodController extends BaseController
             $paymentData = [
                 'id' => $paymentId,
                 'booking_id' => $bookingId,
-                'print_option_id' => 1,
+                'print_option_id' => $this->session->get('selected_print_option_id') ?: null,
                 'amount' => $amount,
                 'gateway_ref' => 'PAY-' . strtoupper(uniqid()),
-                'status' => 'success',
+                'status' => 'paid',
                 'payment_method' => $paymentMethod ?? 'QRIS',
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
@@ -322,7 +322,7 @@ class PaymentMethodController extends BaseController
             'konfirmasi_pembayaran_id' => $paymentId,
             'booking_id' => $bookingId,
             'payment_method' => $paymentMethod ?? 'QRIS',
-            'payment_status' => 'success',
+            'payment_status' => 'paid',
             'payment_amount' => $amount
         ]);
 

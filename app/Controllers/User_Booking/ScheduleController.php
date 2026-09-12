@@ -185,11 +185,62 @@ class ScheduleController extends BaseController
 
     public function getSlots()
     {
-        // ... existing code ...
+        $boothId = $this->request->getGet('booth_id') ?? session()->get('selected_booth_id');
+        $date    = $this->request->getGet('date') ?? '';
+
+        if (empty($date) || !strtotime($date)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Tanggal tidak valid.',
+                'slots'   => [],
+            ]);
+        }
+
+        // Cek apakah tanggal termasuk hari libur / pemeliharaan
+        $blockedDateModel = new \App\Models\BlockedDateModel();
+        if ($blockedDateModel->isBlocked($date)) {
+            return $this->response->setJSON([
+                'status'  => 'blocked',
+                'message' => 'Tanggal ini tidak tersedia (hari libur / pemeliharaan).',
+                'slots'   => [],
+            ]);
+        }
+
+        // Ambil slot tersedia untuk booth & tanggal yang dipilih
+        $slotQuery = $this->slotModel
+            ->select('slots.id, slots.start_time, slots.max_bookings, slots.booked_count, booths.name AS booth_name')
+            ->join('booths', 'booths.id = slots.booth_id', 'left')
+            ->where('slots.slot_date', $date)
+            ->where('slots.booked_count < slots.max_bookings')
+            ->orderBy('slots.start_time', 'ASC');
+
+        if (!empty($boothId)) {
+            $slotQuery->where('slots.booth_id', $boothId);
+        }
+
+        $slots = $slotQuery->findAll();
+
+        $result = array_map(function ($slot) {
+            $available = $slot['max_bookings'] - $slot['booked_count'];
+            return [
+                'id'         => $slot['id'],
+                'start_time' => date('H:i', strtotime($slot['start_time'])),
+                'available'  => $available,
+                'label'      => date('H:i', strtotime($slot['start_time'])) . ' (sisa ' . $available . ' tempat)',
+            ];
+        }, $slots);
+
+        return $this->response->setJSON([
+            'status'  => 'ok',
+            'message' => count($result) . ' slot tersedia.',
+            'slots'   => $result,
+        ]);
     }
 
     public function book()
     {
-        // ... existing code ...
+        // Method book() sudah ditangani oleh submitSchedule() di atas.
+        // Dipertahankan untuk kompatibilitas route jika ada route lama yang memanggil ini.
+        return redirect()->to('/schedule')->with('info', 'Silakan pilih jadwal melalui halaman Schedule.');
     }
 }

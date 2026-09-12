@@ -56,7 +56,6 @@ class LoginController extends Controller
                 'customer_name' => $user['name'],
                 'customer_email' => $user['email'],
                 'customer_phone' => $user['phone'],
-                'customer_password' => $password,
                 'isLoggedIn' => true
             ]);
 

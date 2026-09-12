@@ -16,7 +16,7 @@ class EmailService
         $config->protocol = 'smtp';
         $config->SMTPHost = 'smtp.gmail.com';
         $config->SMTPUser = 'cuitboxstudio@gmail.com';
-        $config->SMTPPass = 'mmnyzpjjpcvdxrio';
+        $config->SMTPPass = env('SMTP_PASS', 'mmnyzpjjpcvdxrio');
         $config->SMTPPort = 465;
         $config->SMTPCrypto = 'ssl';
         $config->SMTPAuthMethod = 'login';

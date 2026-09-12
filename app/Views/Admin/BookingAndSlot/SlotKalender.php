@@ -19,18 +19,9 @@
             </ol>
         </nav>
 
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div>
-                <h1 class="font-h1 text-h1 text-on-surface tracking-tight">Kalender Slot Operasional</h1>
-                <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Daftar keseluruhan jadwal operasional seluruh booth.</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <a href="<?= base_url('admin/slots/create') ?>"
-                   class="flex items-center gap-2 px-4 py-2.5 bg-primary text-on-primary rounded-lg font-label-bold text-label-bold hover:bg-primary-container transition-colors">
-                    <span class="material-symbols-outlined text-[20px]">event_available</span>
-                    Tambah Slot
-                </a>
-            </div>
+        <div class="mb-6">
+            <h1 class="font-h1 text-h1 text-on-surface tracking-tight">Kalender Slot Operasional</h1>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Daftar keseluruhan jadwal operasional seluruh booth.</p>
         </div>
 
         <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">

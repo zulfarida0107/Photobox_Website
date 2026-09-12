@@ -205,9 +205,11 @@ class UserBookingBridgeController extends BaseApiController
     // =========================================================================
     public function getPackages()
     {
-        $packages = $this->packageModel
+        $db = \Config\Database::connect();
+        $packages = $db->table('packages')
             ->orderBy('base_price', 'ASC')
-            ->findAll();
+            ->get()
+            ->getResultArray();
 
         return $this->respondOk([
             'status'  => 'success',
@@ -432,7 +434,7 @@ class UserBookingBridgeController extends BaseApiController
                 'amount'         => $input['amount'],
                 'payment_method' => $input['payment_method'] ?? 'QRIS',
                 'gateway_ref'    => $paymentRef,
-                'status'         => 'settlement',
+                'status'         => 'paid',
                 'updated_at'     => date('Y-m-d H:i:s'),
             ]);
             $paymentId = $existing['id'];
@@ -445,7 +447,7 @@ class UserBookingBridgeController extends BaseApiController
                 'amount'         => $input['amount'],
                 'payment_method' => $input['payment_method'] ?? 'QRIS',
                 'gateway_ref'    => $paymentRef,
-                'status'         => 'settlement',
+                'status'         => 'paid',
                 'created_at'     => date('Y-m-d H:i:s'),
                 'updated_at'     => date('Y-m-d H:i:s'),
             ]);

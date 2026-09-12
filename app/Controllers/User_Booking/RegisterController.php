@@ -126,7 +126,6 @@ class RegisterController extends Controller
                 'customer_name' => $this->request->getPost('name'),
                 'customer_email' => $email,
                 'customer_phone' => $fullPhone,
-                'customer_password' => $password,
                 'isLoggedIn' => true
             ]);
             

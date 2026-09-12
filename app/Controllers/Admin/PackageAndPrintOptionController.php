@@ -44,12 +44,12 @@ class PackageAndPrintOptionController extends BaseController
 
         if (!empty($searchOpt)) {
             $optBuilder->groupStart()
-                ->like('print_options.name', $searchOpt)
-                ->orLike('print_options.id', $searchOpt)
+                ->like('print_options.id', $searchOpt)
+                ->orLike('print_options.copies', $searchOpt)
                 ->groupEnd();
             $totalBuilder->groupStart()
-                ->like('name', $searchOpt)
-                ->orLike('id', $searchOpt)
+                ->like('id', $searchOpt)
+                ->orLike('copies', $searchOpt)
                 ->groupEnd();
         }
         
@@ -57,7 +57,7 @@ class PackageAndPrintOptionController extends BaseController
         $totalOptPages = max(1, (int) ceil($totalPrintOptions / $perPage));
         $currentOptPage = min($currentOptPage, $totalOptPages);
 
-        $optBuilder->orderBy('print_options.extra_price', 'ASC');
+        $optBuilder->orderBy('print_options.copies', 'ASC');
         $printOptions = $optBuilder->limit($perPage, ($currentOptPage - 1) * $perPage)->get()->getResultArray();
 
         $statTotalPrintOptions = $this->printOptionModel->countAll();
@@ -152,7 +152,7 @@ class PackageAndPrintOptionController extends BaseController
         fputcsv($output, ['ID Opsi', 'Nama Opsi', 'Jumlah Copies', 'Harga Tambahan (Rp)'], ';');
         
         foreach ($printOptions as $opt) {
-            $name = isset($opt['name']) ? $opt['name'] : 'Opsi Cetak';
+            $name = isset($opt['name']) ? $opt['name'] : ($opt['copies'] . ' Lembar');
             fputcsv($output, [
                 $opt['id'],
                 $name,
@@ -183,7 +183,7 @@ class PackageAndPrintOptionController extends BaseController
     {
         $rules = [
             'copies'      => 'required|is_natural_no_zero|is_unique[print_options.copies]',
-            'extra_price' => 'required|is_natural',
+            'extra_price' => 'required|is_natural_no_zero',
         ];
 
         if (!$this->validate($rules)) {
@@ -191,8 +191,8 @@ class PackageAndPrintOptionController extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        $count = $this->printOptionModel->countAll();
-        $newId = sprintf('OPT-%02d', $count + 1);
+        $maxRow = $this->printOptionModel->select('MAX(CAST(id AS UNSIGNED)) as max_id')->first();
+        $newId  = (string) (($maxRow['max_id'] ?? 0) + 1);
 
         $this->printOptionModel->insert([
             'id'          => $newId,
@@ -235,7 +235,7 @@ class PackageAndPrintOptionController extends BaseController
 
         $rules = [
             'copies'      => "required|is_natural_no_zero|is_unique[print_options.copies,id,{$id}]",
-            'extra_price' => 'required|is_natural',
+            'extra_price' => 'required|is_natural_no_zero',
         ];
 
         if (!$this->validate($rules)) {
@@ -261,6 +261,19 @@ class PackageAndPrintOptionController extends BaseController
         if (!$option) {
             return redirect()->to(base_url('admin/print-options'))
                 ->with('error', 'Opsi cetak tidak ditemukan.');
+        }
+
+        // Cek apakah opsi cetak masih dirujuk oleh booking/payment aktif
+        $db             = \Config\Database::connect();
+        $activeStatuses = ['paid', 'pending', 'confirmed'];
+        $activeBookings = $db->table('bookings')
+            ->whereIn('status', $activeStatuses)
+            ->where('print_option_id', $id)
+            ->countAllResults();
+
+        if ($activeBookings > 0) {
+            return redirect()->to(base_url('admin/print-options'))
+                ->with('error', "Opsi cetak tidak dapat dihapus — masih digunakan oleh {$activeBookings} booking aktif. Batalkan booking tersebut terlebih dahulu.");
         }
 
         $this->printOptionModel->delete($id);
