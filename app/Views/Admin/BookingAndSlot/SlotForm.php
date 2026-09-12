@@ -1,3 +1,5 @@
+<?php $this->extend('Admin/layouts/main'); ?>
+<?php $this->section('content'); ?>
 <?php 
     $isEdit = !empty($slot);
     $pageTitle = $isEdit ? 'Edit Slot Operasional' : 'Buat Slot Baru';

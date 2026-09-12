@@ -139,7 +139,7 @@
                                             #<?= esc($opt['id']) ?>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <p class="font-bold text-slate-800 text-sm"><?= esc($opt['name'] ?? 'Opsi Cetak') ?></p>
+                                            <p class="font-bold text-slate-800 text-sm"><?= esc(!empty($opt['name']) ? $opt['name'] : ($opt['copies'] . ' Lembar Cetak')) ?></p>
                                         </td>
                                         <td class="px-6 py-4 text-center">
                                             <span class="text-xs font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full inline-flex items-center gap-1">

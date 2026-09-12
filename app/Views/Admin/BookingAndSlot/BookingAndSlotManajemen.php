@@ -124,8 +124,8 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
             <!-- KIRI: Tabel Slot Operasional (5 Cols) -->
-            <section class="lg:col-span-5 flex flex-col h-full">
-                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex-1 flex flex-col">
+            <section class="lg:col-span-5 flex flex-col space-y-6">
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
                     <!-- Table Header -->
                     <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-white">
                         <div class="flex items-center gap-2">
@@ -155,7 +155,7 @@
                     </div>
 
                     <!-- Table -->
-                    <div class="overflow-x-auto flex-1 max-h-[500px]">
+                    <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
                                 <tr>
@@ -194,7 +194,7 @@
                                                 'Malam' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
                                             ];
                                         ?>
-                                        <tr class="hover:bg-blue-50/50 transition-colors">
+                                        <tr class="hover:bg-blue-50/50 transition-colors h-[52px]">
                                             <td class="px-3.5 py-2.5">
                                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border <?= $sesColors[$sesLabel] ?>">
                                                     <span class="material-symbols-outlined text-[12px]">schedule</span>
@@ -209,52 +209,77 @@
                                                 <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold border <?= $sc ?>"><?= $sl ?></span>
                                             </td>
                                             <td class="px-3.5 py-2.5 text-center">
-                                                <div class="flex items-center justify-center gap-1.5">
+                                                <div class="flex items-center justify-center gap-1">
                                                     <a href="<?= base_url('admin/slots/' . esc($slot['id']) . '/edit') ?>"
-                                                       class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-600 border border-blue-200 text-[10px] font-semibold hover:bg-blue-100 transition-colors">
-                                                        <span class="material-symbols-outlined text-[13px]">edit</span>
-                                                        Edit
+                                                       class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit Sesi Slot">
+                                                        <span class="material-symbols-outlined text-[18px]">edit</span>
                                                     </a>
                                                     <form method="post" action="<?= base_url('admin/slots/' . esc($slot['id']) . '/delete') ?>"
-                                                          onsubmit="return confirm('Hapus sesi <?= esc($sesLabel . ' ' . $startFmt) ?>? Tindakan ini tidak dapat dibatalkan.')">
+                                                           onsubmit="return confirm('Hapus sesi <?= esc($sesLabel . ' ' . $startFmt) ?>? Tindakan ini tidak dapat dibatalkan.')" class="inline">
                                                         <?= csrf_field() ?>
                                                         <button type="submit"
-                                                                class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-red-50 text-red-600 border border-red-200 text-[10px] font-semibold hover:bg-red-100 transition-colors">
-                                                            <span class="material-symbols-outlined text-[13px]">delete</span>
-                                                            Hapus
+                                                                class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Hapus Sesi Slot">
+                                                            <span class="material-symbols-outlined text-[18px]">delete</span>
                                                         </button>
                                                     </form>
                                                 </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <?php for ($k = 0; $k < (7 - count($slots)); $k++): ?>
+                                        <tr class="pointer-events-none select-none h-[52px]">
+                                            <td class="px-3.5 py-2.5 border-b border-slate-50">&nbsp;</td>
+                                            <td class="px-3.5 py-2.5 border-b border-slate-50">&nbsp;</td>
+                                            <td class="px-3.5 py-2.5 border-b border-slate-50">&nbsp;</td>
+                                            <td class="px-3.5 py-2.5 border-b border-slate-50">&nbsp;</td>
+                                        </tr>
+                                    <?php endfor; ?>
                                 <?php else: ?>
-                                    <tr>
-                                        <td colspan="4" class="px-4 py-8 text-center text-xs text-slate-400">Belum ada slot operasional. <a href="<?= base_url('admin/slots/create') ?>" class="text-primary font-semibold hover:underline">Tambah sekarang</a></td>
+                                    <tr class="h-[364px]">
+                                        <td colspan="4" class="px-4 py-8 text-center text-xs text-slate-400">
+                                            <span class="material-symbols-outlined text-2xl text-slate-300 mb-1 block">event_busy</span>
+                                            Belum ada slot operasional. <a href="<?= base_url('admin/slots/create') ?>" class="text-primary font-semibold hover:underline">Tambah sekarang</a>
+                                        </td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- Footer Link -->
-                    <div class="p-3 bg-slate-50 border-t border-slate-200 text-center">
-                        <a href="<?= base_url('admin/slots') ?>" class="text-xs font-bold text-primary hover:underline flex items-center justify-center gap-1">
-                            <span class="material-symbols-outlined text-sm">calendar_month</span>
-                            Kelola Semua Kalender Slot
+                    <!-- Footer 1 Baris: Link Kalender (Kiri) + Pagination (Kanan) -->
+                    <div class="p-3 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+                        <a href="<?= base_url('admin/slots') ?>" class="text-xs font-bold text-primary hover:text-blue-800 flex items-center gap-1.5 transition-colors group">
+                            <span class="material-symbols-outlined text-[16px] text-blue-600 group-hover:scale-110 transition-transform">calendar_month</span>
+                            <span class="hover:underline">Kelola Semua Kalender</span>
                         </a>
+                        <div class="flex items-center gap-1">
+                            <a href="<?= base_url('admin/bookings?' . http_build_query(array_merge($_GET, ['slot_page' => max(1, ($slotPage ?? 1) - 1)]))) ?>"
+                               class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-500 <?= ($slotPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-xs">chevron_left</span>
+                            </a>
+                            <?php for ($i = 1; $i <= ($totalSlotPages ?? 1); $i++): ?>
+                                <a href="<?= base_url('admin/bookings?' . http_build_query(array_merge($_GET, ['slot_page' => $i]))) ?>"
+                                   class="w-7 h-7 flex items-center justify-center border rounded-lg text-[11px] font-bold transition-colors <?= $i === ($slotPage ?? 1) ? 'border-primary bg-primary text-white shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
+                                    <?= $i ?>
+                                </a>
+                            <?php endfor; ?>
+                            <a href="<?= base_url('admin/bookings?' . http_build_query(array_merge($_GET, ['slot_page' => min(($totalSlotPages ?? 1), ($slotPage ?? 1) + 1)]))) ?>"
+                               class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-500 <?= ($slotPage ?? 1) >= ($totalSlotPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-xs">chevron_right</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
                 <!-- ====== TABEL TANGGAL LIBUR ====== -->
-                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm mt-6">
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                     <!-- Header -->
                     <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-white">
                         <div class="flex items-center gap-2">
                             <div class="w-1 h-5 bg-primary rounded-full"></div>
                             <h4 class="font-bold text-slate-800 text-sm">Tanggal Libur & Pemeliharaan</h4>
                             <span class="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[11px] font-bold border border-rose-100">
-                                <?= count($blockedDates ?? []) ?> Terdaftar
+                                <?= $totalLibur ?? count($blockedDates ?? []) ?> Terdaftar
                             </span>
                         </div>
                     </div>
@@ -280,7 +305,7 @@
                     </div>
 
                     <!-- Tabel -->
-                    <div class="overflow-x-auto flex-1 max-h-[300px]">
+                    <div class="overflow-x-auto flex-1">
                         <table class="w-full text-left border-collapse">
                             <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider sticky top-0 bg-slate-50 z-10">
                                 <tr>
@@ -306,7 +331,7 @@
                                             $fmtDate = $dayNames[$w] . ', ' . $j . ' ' . $monthNames[$n] . ' ' . $y;
                                             $isPast = $bd['blocked_date'] < date('Y-m-d');
                                         ?>
-                                        <tr class="hover:bg-blue-50/50 transition-colors">
+                                        <tr class="hover:bg-blue-50/50 transition-colors h-[52px]">
                                             <td class="px-3.5 py-2.5">
                                                 <div class="font-semibold text-slate-800 text-[11px] flex items-center gap-1.5">
                                                     <span class="material-symbols-outlined text-slate-400 text-[15px]">event_busy</span>
@@ -328,20 +353,29 @@
                                                 <?php endif; ?>
                                             </td>
                                             <td class="px-3.5 py-2.5 text-center">
-                                                <form method="post" action="<?= base_url('admin/blocked-dates/' . esc($bd['id']) . '/delete') ?>"
-                                                      onsubmit="return confirm('Hapus tanggal libur <?= esc($fmtDate) ?>?')" class="inline">
-                                                    <?= csrf_field() ?>
-                                                    <button type="submit"
-                                                            class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-red-50 text-red-600 border border-red-200 text-[10px] font-semibold hover:bg-red-100 transition-colors">
-                                                        <span class="material-symbols-outlined text-[13px]">delete</span>
-                                                        Hapus
-                                                    </button>
-                                                </form>
+                                                <div class="flex items-center justify-center gap-1">
+                                                    <form method="post" action="<?= base_url('admin/blocked-dates/' . esc($bd['id']) . '/delete') ?>"
+                                                          onsubmit="return confirm('Hapus tanggal libur <?= esc($fmtDate) ?>?')" class="inline">
+                                                        <?= csrf_field() ?>
+                                                        <button type="submit"
+                                                                class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Hapus Tanggal Libur">
+                                                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <?php for ($k = 0; $k < (7 - count($blockedDates)); $k++): ?>
+                                        <tr class="pointer-events-none select-none h-[52px]">
+                                            <td class="px-3.5 py-2.5 border-b border-slate-50">&nbsp;</td>
+                                            <td class="px-3.5 py-2.5 border-b border-slate-50">&nbsp;</td>
+                                            <td class="px-3.5 py-2.5 border-b border-slate-50">&nbsp;</td>
+                                            <td class="px-3.5 py-2.5 border-b border-slate-50">&nbsp;</td>
+                                        </tr>
+                                    <?php endfor; ?>
                                 <?php else: ?>
-                                    <tr>
+                                    <tr class="h-[364px]">
                                         <td colspan="4" class="px-4 py-8 text-center text-xs text-slate-400">
                                             <span class="material-symbols-outlined text-2xl text-slate-300 mb-1 block">event_available</span>
                                             Belum ada tanggal libur yang dikonfigurasi.
@@ -350,6 +384,29 @@
                                 <?php endif; ?>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Pagination Tanggal Libur -->
+                    <div class="p-3 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+                        <span class="text-slate-500 font-medium text-[11px]">
+                            Menampilkan <?= count($blockedDates ?? []) ?> dari <?= $totalLibur ?? 0 ?> tanggal
+                        </span>
+                        <div class="flex items-center gap-1">
+                            <a href="<?= base_url('admin/bookings?' . http_build_query(array_merge($_GET, ['libur_page' => max(1, ($liburPage ?? 1) - 1)]))) ?>"
+                               class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-500 <?= ($liburPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-xs">chevron_left</span>
+                            </a>
+                            <?php for ($i = 1; $i <= ($totalLiburPages ?? 1); $i++): ?>
+                                <a href="<?= base_url('admin/bookings?' . http_build_query(array_merge($_GET, ['libur_page' => $i]))) ?>"
+                                   class="w-7 h-7 flex items-center justify-center border rounded-lg text-[11px] font-bold transition-colors <?= $i === ($liburPage ?? 1) ? 'border-primary bg-primary text-white shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
+                                    <?= $i ?>
+                                </a>
+                            <?php endfor; ?>
+                            <a href="<?= base_url('admin/bookings?' . http_build_query(array_merge($_GET, ['libur_page' => min(($totalLiburPages ?? 1), ($liburPage ?? 1) + 1)]))) ?>"
+                               class="w-7 h-7 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-500 <?= ($liburPage ?? 1) >= ($totalLiburPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                                <span class="material-symbols-outlined text-xs">chevron_right</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -418,12 +475,10 @@
                                             ];
                                             $st = $statusMap[$bk['status']] ?? ['bg-slate-50 text-slate-600 border-slate-200', strtoupper($bk['status'])];
                                         ?>
-                                        <tr class="hover:bg-blue-50/50 transition-colors">
+                                        <tr class="hover:bg-blue-50/50 transition-colors h-[52px]">
                                             <td class="px-4 py-3">
-                                                <div class="font-bold text-primary hover:underline cursor-pointer flex items-center gap-1"
-                                                     onclick="showBookingPreviewModal('<?= esc($bk['id'], 'js') ?>', '<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc(!empty($bk['print_copies']) ? $bk['print_copies'] . ' Cetak' : '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>', '<?= $bk['status'] ?>', <?= $bk['edit_count'] ?? 0 ?>)">
-                                                    <span><?= esc($bk['booking_code']) ?></span>
-                                                    <span class="material-symbols-outlined text-[14px] text-blue-400">info</span>
+                                                <div class="font-bold text-primary">
+                                                    <?= esc($bk['booking_code']) ?>
                                                 </div>
                                                 <div class="text-slate-700 font-medium mt-0.5"><?= esc($bk['customer_name'] ?? '-') ?></div>
                                             </td>
@@ -443,27 +498,40 @@
                                             </td>
                                             <td class="px-4 py-3 text-center">
                                                 <div class="flex justify-center items-center gap-1">
-                                                    <?php if (in_array($bk['status'], ['confirmed', 'pending'])): ?>
-                                                        <a href="<?= base_url('admin/bookings/' . $bk['id'] . '/edit') ?>"
-                                                           class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" title="Edit Booking">
-                                                            <span class="material-symbols-outlined text-[18px]">edit</span>
-                                                        </a>
+                                                    <!-- Tombol Mata (Detail) -->
+                                                    <button type="button" onclick="showBookingPreviewModal('<?= esc($bk['id'], 'js') ?>', '<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc(!empty($bk['print_copies']) ? $bk['print_copies'] . ' Cetak' : '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>', '<?= $bk['status'] ?>', <?= $bk['edit_count'] ?? 0 ?>)"
+                                                            class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Lihat Detail & Riwayat">
+                                                        <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                    </button>
+
+                                                    <!-- Tombol Pen (Edit) -->
+                                                    <a href="<?= base_url('admin/bookings/' . $bk['id'] . '/edit') ?>"
+                                                       class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit Jadwal & Booking">
+                                                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                                                    </a>
+
+                                                    <!-- Tombol Batalkan (Jika belum selesai / batal) -->
+                                                    <?php if (in_array($bk['status'], ['confirmed', 'pending', 'paid'])): ?>
                                                         <button type="button" onclick="showCancelBookingModal('<?= base_url('admin/bookings/' . $bk['id'] . '/cancel') ?>')"
-                                                                class="p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors" title="Batalkan Booking">
+                                                                class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Batalkan Booking">
                                                             <span class="material-symbols-outlined text-[18px]">cancel</span>
-                                                        </button>
-                                                    <?php else: ?>
-                                                        <button type="button" onclick="showBookingPreviewModal('<?= esc($bk['id'], 'js') ?>', '<?= esc($bk['booking_code'], 'js') ?>', '<?= esc($bk['customer_name'] ?? '-', 'js') ?>', 'Slot #<?= esc($bk['slot_id'], 'js') ?> (<?= esc($bk['booth_name'] ?? 'Booth', 'js') ?>)', '<?= esc(!empty($bk['print_copies']) ? $bk['print_copies'] . ' Cetak' : '-', 'js') ?>', '<?= esc($bk['queue_number'], 'js') ?>', '<?= $st[1] ?>', '<?= $st[0] ?>', '<?= $bk['status'] ?>', <?= $bk['edit_count'] ?? 0 ?>)"
-                                                                class="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors" title="Detail & Riwayat">
-                                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
                                                         </button>
                                                     <?php endif; ?>
                                                 </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <?php for ($k = 0; $k < (17 - count($bookings)); $k++): ?>
+                                        <tr class="pointer-events-none select-none h-[52px]">
+                                            <td class="px-4 py-3 border-b border-slate-50">&nbsp;</td>
+                                            <td class="px-4 py-3 border-b border-slate-50">&nbsp;</td>
+                                            <td class="px-4 py-3 border-b border-slate-50">&nbsp;</td>
+                                            <td class="px-4 py-3 border-b border-slate-50">&nbsp;</td>
+                                            <td class="px-4 py-3 border-b border-slate-50">&nbsp;</td>
+                                        </tr>
+                                    <?php endfor; ?>
                                 <?php else: ?>
-                                    <tr>
+                                    <tr class="h-[884px]">
                                         <td colspan="5" class="px-4 py-10 text-center text-xs text-slate-400">
                                             <span class="material-symbols-outlined text-3xl mb-1 text-slate-300 block">event_busy</span>
                                             Belum ada booking untuk periode ini.

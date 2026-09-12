@@ -609,6 +609,14 @@
                             <span class="font-bold">✕</span> <?= session()->getFlashdata('error') ?>
                         </div>
                     <?php endif; ?>
+
+                    <?php if (session()->getFlashdata('errors')): ?>
+                        <?php foreach ((array) session()->getFlashdata('errors') as $fieldErr): ?>
+                            <div class="alert-error">
+                                <span class="font-bold">✕</span> <?= esc($fieldErr) ?>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                     
                     <!-- Form -->
                     <form action="<?= base_url('register/store') ?>" method="POST" class="space-y-4 sm:space-y-5" data-purpose="signup-form" id="registerForm">
@@ -642,7 +650,7 @@
                                 type="email"
                                 required
                             >
-                            <span class="field-error" id="email-error" style="display:none;"></span>
+                            <span class="field-error" id="email-error" style="<?= session('errors.email') ? 'display:block; color:#ef4444;' : 'display:none;' ?>"><?= session('errors.email') ? '❌ ' . esc(session('errors.email')) : '' ?></span>
                         </div>
 
                         <!-- Field: Phone -->

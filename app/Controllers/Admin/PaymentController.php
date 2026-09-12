@@ -173,12 +173,47 @@ class PaymentController extends BaseController
     // =========================================================================
     public function verifyBulk()
     {
-        $this->paymentModel->whereIn('status', ['pending', 'failed'])
-            ->set(['status' => 'paid'])
-            ->update();
+        // Ambil filter periode dari query string agar bulk verify tidak global tanpa batas
+        $filterPeriod = $this->request->getGet('period') ?? 'today';
+        $paymentDate  = $this->request->getGet('payment_date') ?? '';
+
+        $hasDateFilter = false;
+        if ($paymentDate !== '') {
+            $dateFrom      = $paymentDate . ' 00:00:00';
+            $dateTo        = $paymentDate . ' 23:59:59';
+            $hasDateFilter = true;
+        } elseif ($filterPeriod === 'month') {
+            $dateFrom      = date('Y-m-01 00:00:00');
+            $dateTo        = date('Y-m-t 23:59:59');
+            $hasDateFilter = true;
+        } elseif ($filterPeriod !== 'all') {
+            $days          = (int) $filterPeriod ?: 7;
+            $dateFrom      = date('Y-m-d 00:00:00', strtotime("-{$days} days"));
+            $dateTo        = date('Y-m-d 23:59:59');
+            $hasDateFilter = true;
+        }
+
+        $builder = $this->paymentModel->whereIn('status', ['pending', 'failed']);
+
+        if ($hasDateFilter) {
+            $builder->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+        }
+
+        $affected = $builder->set(['status' => 'paid'])->update();
+
+        $periodLabel = match ($filterPeriod) {
+            'today'  => 'Hari Ini',
+            '7'      => '7 Hari Terakhir',
+            'month'  => 'Bulan Ini',
+            'all'    => 'Semua Waktu',
+            default  => $filterPeriod,
+        };
+        if ($paymentDate !== '') {
+            $periodLabel = 'Tanggal ' . $paymentDate;
+        }
 
         return redirect()->to(base_url('admin/payments'))
-            ->with('success', 'Semua pembayaran pending/gagal berhasil diverifikasi massal.');
+            ->with('success', "Verifikasi massal selesai untuk periode \"{$periodLabel}\". Semua pembayaran pending/gagal berhasil diverifikasi.");
     }
 
     // =========================================================================

@@ -15,13 +15,10 @@ class FrameModel extends Model
         'id',
         'name',
         'category',
-        'category_id',
         'layout_id',
         'price',
         'file_path',
         'is_active',
-        'created_at',
-        'updated_at',
     ];
 
     protected $useSoftDeletes = false;

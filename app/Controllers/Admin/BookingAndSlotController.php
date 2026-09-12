@@ -27,11 +27,17 @@ class BookingAndSlotController extends BaseController
     {
         $period      = $this->request->getGet('period') ?? 'all';
         $currentPage = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $slotPage    = max(1, (int) ($this->request->getGet('slot_page') ?? 1));
+        $liburPage   = max(1, (int) ($this->request->getGet('libur_page') ?? 1));
+
         $keyword     = $this->request->getGet('q') ?? '';
         $slotKeyword = $this->request->getGet('slot_q') ?? '';
         $slotDate    = $this->request->getGet('slot_date') ?? '';
-        $perPage     = 10;
-        $today       = date('Y-m-d');
+
+        $perPage      = 17;
+        $slotPerPage  = 7;
+        $liburPerPage = 7;
+        $today        = date('Y-m-d');
         
         // Menentukan rentang tanggal berdasarkan filter period
         if ($period === 'today') {
@@ -67,13 +73,30 @@ class BookingAndSlotController extends BaseController
                 ->groupEnd();
         }
 
+        $totalSlots     = $slotsBuilder->countAllResults(false);
+        $totalSlotPages = max(1, (int) ceil($totalSlots / $slotPerPage));
+        $slotPage       = min($slotPage, $totalSlotPages);
+
         $slots = $slotsBuilder->orderBy('slots.slot_date', 'ASC')
             ->orderBy('slots.start_time', 'ASC')
+            ->findAll($slotPerPage, ($slotPage - 1) * $slotPerPage);
+
+        // Ambil semua slot periode ini untuk hitung ketersediaan & okupansi
+        $allPeriodSlots = $this->slotModel
+            ->where('slot_date >=', $dateStart)
+            ->where('slot_date <=', $dateEnd)
             ->findAll();
 
-        $totalAvailableSlots = array_reduce($slots, function ($carry, $slot) {
+        $totalAvailableSlots = array_reduce($allPeriodSlots, function ($carry, $slot) {
             return $carry + ($slot['booked_count'] < $slot['max_bookings'] ? 1 : 0);
         }, 0);
+
+        // --- Tanggal Libur & Pemeliharaan ---
+        $liburBuilder    = $this->blockedDateModel->orderBy('blocked_date', 'DESC');
+        $totalLibur      = $liburBuilder->countAllResults(false);
+        $totalLiburPages = max(1, (int) ceil($totalLibur / $liburPerPage));
+        $liburPage       = min($liburPage, $totalLiburPages);
+        $blockedDates    = $liburBuilder->findAll($liburPerPage, ($liburPage - 1) * $liburPerPage);
 
         // --- Booking berdasarkan periode ---
         $bookingBuilder = $this->bookingModel
@@ -104,9 +127,9 @@ class BookingAndSlotController extends BaseController
         $statTotalReservasi = $this->bookingModel->countAll();
         $statCancelled      = $this->bookingModel->where('status', 'cancelled')->countAllResults();
 
-        // Tingkat okupansi: booked_count / max_bookings * 100 (slot hari ini)
-        $totalMax    = array_sum(array_column($slots, 'max_bookings'));
-        $totalBooked = array_sum(array_column($slots, 'booked_count'));
+        // Tingkat okupansi
+        $totalMax    = array_sum(array_column($allPeriodSlots, 'max_bookings'));
+        $totalBooked = array_sum(array_column($allPeriodSlots, 'booked_count'));
         $statOkupansi = $totalMax > 0
             ? round(($totalBooked / $totalMax) * 100, 1) . '%'
             : '0%';
@@ -114,7 +137,7 @@ class BookingAndSlotController extends BaseController
             ? round(($totalBooked / $totalMax) * 100)
             : 0;
 
-        // Booth teraktif (booth dengan jumlah booking terbanyak atau booth aktif Kiosk)
+        // Booth teraktif
         $topBooth = $this->bookingModel
             ->select('booths.name AS booth_name, COUNT(bookings.id) AS total')
             ->join('booths', 'booths.id = bookings.booth_id', 'left')
@@ -136,6 +159,9 @@ class BookingAndSlotController extends BaseController
         $data = [
             'title'               => 'Manajemen Reservasi | Admin Panel',
             'slots'               => $slots,
+            'totalSlots'          => $totalSlots,
+            'slotPage'            => $slotPage,
+            'totalSlotPages'      => $totalSlotPages,
             'totalAvailableSlots' => $totalAvailableSlots,
             'bookings'            => $bookings,
             'totalBookings'       => $totalBookings,
@@ -150,7 +176,10 @@ class BookingAndSlotController extends BaseController
             'statCancelled'       => $statCancelled,
             'statTopBooth'        => $statTopBooth,
             'statTopBoothPct'     => $statTopBoothPct,
-            'blockedDates'        => $this->blockedDateModel->getAllOrdered(),
+            'blockedDates'        => $blockedDates,
+            'totalLibur'          => $totalLibur,
+            'liburPage'           => $liburPage,
+            'totalLiburPages'     => $totalLiburPages,
         ];
 
         return view('Admin/BookingAndSlot/BookingAndSlotManajemen', $data);
@@ -174,7 +203,8 @@ class BookingAndSlotController extends BaseController
                 ->with('error', 'Booking tidak ditemukan.');
         }
 
-        return view('Admin/BookingAndSlot/BookingDetail', ['title' => 'Detail Booking', 'booking' => $booking]);
+        return redirect()->to(base_url('admin/bookings'))
+            ->with('info', "Detail booking #{$id} dapat dilihat melalui tombol aksi detail pada tabel.");
     }
 
     // =========================================================================
@@ -427,22 +457,21 @@ class BookingAndSlotController extends BaseController
                 ->with('error', 'Slot tidak ditemukan.');
         }
 
-        // Cek apakah ada booking yang terikat ke slot ini
-        $db = \Config\Database::connect();
-        
-        // Cari slot operasional alternatif dengan jam yang sama
-        $fallbackSlot = $this->slotModel
-            ->where('start_time', $slot['start_time'])
-            ->where('id !=', $id)
-            ->first();
+        // Cek apakah ada booking aktif (paid / pending / confirmed) yang terikat ke slot ini
+        $db             = \Config\Database::connect();
+        $activeStatuses = ['paid', 'pending', 'confirmed'];
+        $activeBookings = $db->table('bookings')
+            ->whereIn('status', $activeStatuses)
+            ->where('slot_id', $id)
+            ->countAllResults();
 
-        if ($fallbackSlot) {
-            // Alihkan booking ke slot alternatif yang masih aktif
-            $db->table('bookings')->where('slot_id', $id)->update(['slot_id' => $fallbackSlot['id']]);
-        } else {
-            // Jika tidak ada slot lain, hapus riwayat booking yang terikat agar penghapusan slot berhasil
-            $db->table('bookings')->where('slot_id', $id)->delete();
+        if ($activeBookings > 0) {
+            return redirect()->to(base_url('admin/bookings'))
+                ->with('error', "Slot tidak dapat dihapus — terdapat {$activeBookings} booking aktif (paid/pending/confirmed) yang masih terikat. Batalkan booking tersebut terlebih dahulu.");
         }
+
+        // Hapus booking yang sudah cancelled / completed (aman untuk dihapus)
+        $db->table('bookings')->where('slot_id', $id)->delete();
 
         $this->slotModel->delete($id);
 

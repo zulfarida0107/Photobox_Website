@@ -138,12 +138,48 @@ class SessionAndPhotoController extends BaseController
                 ->with('error', 'Sesi ini tidak memiliki penerima email.');
         }
 
-        // Placeholder: integrasi email service (Mailer CI4)
-        // \Config\Services::email()->setTo($session['email_recipient'])...
-        // Untuk sekarang, hanya log / redirect dengan pesan sukses.
+        // Ambil semua foto sesi ini
+        $photos      = $this->photoModel->where('session_id', $id)->orderBy('shot_number', 'ASC')->findAll();
+        $driveUrl    = $session['drive_folder_url'] ?? null;
+        $bookingCode = $session['booking_id'] ?? '-';
+        $sessionDate = date('d M Y', strtotime($session['created_at']));
 
+        $photoListHtml = '';
+        foreach ($photos as $i => $photo) {
+            $photoUrl       = base_url($photo['file_path']);
+            $photoListHtml .= "<li style='margin-bottom:6px;'><a href='{$photoUrl}'>Foto " . ($i + 1) . "</a></li>";
+        }
+        if ($driveUrl) {
+            $photoListHtml .= "<li style='margin-bottom:6px;'><a href='{$driveUrl}'>📁 Buka Folder Google Drive</a></li>";
+        }
+
+        $htmlBody = "
+<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;'>
+  <h2 style='color:#4f46e5;'>🎞️ Galeri Foto Anda Sudah Siap!</h2>
+  <p>Halo,</p>
+  <p>Terima kasih telah menggunakan <strong>CuitBox Studio</strong>. Berikut adalah tautan galeri foto dari sesi Anda pada <strong>{$sessionDate}</strong>.</p>
+  <p><strong>Kode Sesi/Booking:</strong> {$bookingCode}</p>
+  <ul style='line-height:1.8;'>{$photoListHtml}</ul>
+  <p style='color:#6b7280;font-size:0.875rem;'>Email ini dikirim ulang oleh Admin CuitBox Studio.</p>
+  <hr/>
+  <p style='color:#9ca3af;font-size:0.75rem;'>CuitBox Studio — Smart Photobox Management</p>
+</div>";
+
+        $emailService = \Config\Services::email();
+        $emailService->clear();
+        $emailService->setFrom('cuitboxstudio@gmail.com', 'CuitBox Studio');
+        $emailService->setTo($session['email_recipient']);
+        $emailService->setSubject('🎞️ Galeri Foto CuitBox Studio — Sesi ' . $sessionDate);
+        $emailService->setMessage($htmlBody);
+
+        if ($emailService->send()) {
+            return redirect()->to(base_url('admin/sessions'))
+                ->with('success', "Email galeri sesi #{$id} berhasil dikirim ulang ke {$session['email_recipient']}.");
+        }
+
+        log_message('error', 'Email resend gagal sesi #' . $id . ': ' . $emailService->printDebugger(['headers']));
         return redirect()->to(base_url('admin/sessions'))
-            ->with('success', "Email galeri sesi #{$id} berhasil dikirim ulang ke {$session['email_recipient']}.");
+            ->with('error', "Gagal mengirim email ke {$session['email_recipient']}. Periksa konfigurasi SMTP di .env.");
     }
 
     // =========================================================================
@@ -156,11 +192,57 @@ class SessionAndPhotoController extends BaseController
             ->where('email_recipient !=', '')
             ->findAll();
 
-        // Placeholder: loop kirim email
+        $successCount = 0;
+        $failCount    = 0;
+
+        foreach ($sessions as $sess) {
+            $photos      = $this->photoModel->where('session_id', $sess['id'])->orderBy('shot_number', 'ASC')->findAll();
+            $driveUrl    = $sess['drive_folder_url'] ?? null;
+            $bookingCode = $sess['booking_id'] ?? '-';
+            $sessDate    = date('d M Y', strtotime($sess['created_at']));
+
+            $photoListHtml = '';
+            foreach ($photos as $i => $photo) {
+                $photoUrl       = base_url($photo['file_path']);
+                $photoListHtml .= "<li><a href='{$photoUrl}'>Foto " . ($i + 1) . "</a></li>";
+            }
+            if ($driveUrl) {
+                $photoListHtml .= "<li><a href='{$driveUrl}'>📁 Google Drive</a></li>";
+            }
+
+            $htmlBody = "
+<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;'>
+  <h2 style='color:#4f46e5;'>🎞️ Galeri Foto Anda Sudah Siap!</h2>
+  <p>Terima kasih telah menggunakan <strong>CuitBox Studio</strong> pada <strong>{$sessDate}</strong>.</p>
+  <p><strong>Kode Sesi/Booking:</strong> {$bookingCode}</p>
+  <ul style='line-height:1.8;'>{$photoListHtml}</ul>
+  <hr/>
+  <p style='color:#9ca3af;font-size:0.75rem;'>CuitBox Studio — Smart Photobox Management</p>
+</div>";
+
+            $emailService = \Config\Services::email();
+            $emailService->clear();
+            $emailService->setFrom('cuitboxstudio@gmail.com', 'CuitBox Studio');
+            $emailService->setTo($sess['email_recipient']);
+            $emailService->setSubject('🎞️ Galeri Foto CuitBox Studio — Sesi ' . $sessDate);
+            $emailService->setMessage($htmlBody);
+
+            if ($emailService->send()) {
+                $successCount++;
+            } else {
+                $failCount++;
+                log_message('error', 'Email resendAll gagal sesi #' . $sess['id']);
+            }
+        }
+
         $count = count($sessions);
+        $msg   = "Kirim ulang selesai: {$successCount}/{$count} berhasil.";
+        if ($failCount > 0) {
+            $msg .= " {$failCount} gagal — periksa konfigurasi SMTP.";
+        }
 
         return redirect()->to(base_url('admin/sessions'))
-            ->with('success', "Perintah kirim ulang email dikirim untuk {$count} sesi.");
+            ->with('success', $msg);
     }
 
     // =========================================================================
