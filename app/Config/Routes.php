@@ -26,7 +26,13 @@ if ($serverPort == '8080') {
 
 
 // Handle global OPTIONS requests for CORS preflight
-$routes->options('(:any)', function() {});
+$routes->options('(:any)', static function () {
+    return response()
+        ->setHeader('Access-Control-Allow-Origin', '*')
+        ->setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-API-KEY')
+        ->setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH')
+        ->setStatusCode(200);
+});
 
 // ============================================================
 // API ROUTES
@@ -50,7 +56,7 @@ $routes->group('api', static function ($routes) {
     $routes->post('payment/qr', 'Api\PaymentController::createQr');
     $routes->get('payment', 'Api\PaymentController::statusByQuery');
     $routes->get('payment/(:segment)/status', 'Api\PaymentController::status/$1');
-    $routes->post('payment/midtrans/callback', 'Api\PaymentController::midtransCallback');
+    $routes->match(['get', 'post'], 'payment/midtrans/callback', 'Api\PaymentController::midtransCallback');
 
     // ---- Manajemen Alur Sesi Pemotretan (Start, Email, Complete) ----
     $routes->post('session/start', 'Api\SessionController::start');
@@ -294,6 +300,8 @@ $routes->get('logout', 'User_Booking\LoginController::logout');
 // ---- Alur 4: Lupa Password ----
 $routes->get('forgot-password', 'User_Booking\LoginController::forgotPassword');
 $routes->post('forgot-password/process', 'User_Booking\LoginController::processForgotPassword');
+$routes->get('reset-password', 'User_Booking\LoginController::resetPassword');
+$routes->post('reset-password/process', 'User_Booking\LoginController::processResetPassword');
 
 // ---- Alur 5: Pemilihan Mesin Booth ----
 $routes->get('booth', 'User_Booking\BoothController::index');

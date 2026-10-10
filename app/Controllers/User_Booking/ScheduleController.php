@@ -206,29 +206,76 @@ class ScheduleController extends BaseController
             ]);
         }
 
-        // Ambil slot tersedia untuk booth & tanggal yang dipilih
+        if (empty($boothId)) {
+            $boothModel = new \App\Models\BoothModel();
+            $firstBooth = $boothModel->first();
+            $boothId    = $firstBooth['id'] ?? 'booth_001';
+        }
+
+        // Cek apakah slot untuk booth & tanggal ini sudah ada di database
+        $existingSlots = $this->slotModel
+            ->where('slot_date', $date)
+            ->where('booth_id', $boothId)
+            ->findAll();
+
+        if (empty($existingSlots)) {
+            // Auto-generate standard daily slots (10:00 - 21:00) jika belum dibuat
+            $timeSchedules = [
+                '10:00:00', '11:00:00', '12:00:00', '13:00:00', '14:00:00',
+                '15:00:00', '16:00:00', '17:00:00', '18:00:00', '19:00:00',
+                '20:00:00', '21:00:00'
+            ];
+
+            foreach ($timeSchedules as $time) {
+                $timeFormatted = str_replace(':', '', substr($time, 0, 5));
+                $slotId = 'SLOT_' . date('Ymd', strtotime($date)) . '_' . $boothId . '_' . $timeFormatted;
+                if ($this->slotModel->find($slotId) === null) {
+                    $this->slotModel->insert([
+                        'id'           => $slotId,
+                        'booth_id'     => $boothId,
+                        'slot_date'    => $date,
+                        'start_time'   => $time,
+                        'max_bookings' => 1,
+                        'booked_count' => 0,
+                        'created_at'   => date('Y-m-d H:i:s'),
+                        'updated_at'   => date('Y-m-d H:i:s'),
+                    ]);
+                }
+            }
+        }
+
+        // Query slots
         $slotQuery = $this->slotModel
             ->select('slots.id, slots.start_time, slots.max_bookings, slots.booked_count, booths.name AS booth_name')
             ->join('booths', 'booths.id = slots.booth_id', 'left')
             ->where('slots.slot_date', $date)
-            ->where('slots.booked_count < slots.max_bookings')
+            ->where('slots.booth_id', $boothId)
             ->orderBy('slots.start_time', 'ASC');
-
-        if (!empty($boothId)) {
-            $slotQuery->where('slots.booth_id', $boothId);
-        }
 
         $slots = $slotQuery->findAll();
 
-        $result = array_map(function ($slot) {
-            $available = $slot['max_bookings'] - $slot['booked_count'];
-            return [
-                'id'         => $slot['id'],
-                'start_time' => date('H:i', strtotime($slot['start_time'])),
-                'available'  => $available,
-                'label'      => date('H:i', strtotime($slot['start_time'])) . ' (sisa ' . $available . ' tempat)',
-            ];
-        }, $slots);
+        $bookingModel = new \App\Models\BookingModel();
+
+        $result = [];
+        foreach ($slots as $slot) {
+            // Hitung booking aktif (pending, paid, completed) untuk slot ini
+            $activeBookings = $bookingModel
+                ->where('slot_id', $slot['id'])
+                ->whereIn('status', ['pending', 'paid', 'completed'])
+                ->countAllResults();
+
+            $maxBookings = (int) ($slot['max_bookings'] ?? 1);
+            $available   = max(0, $maxBookings - $activeBookings);
+
+            if ($available > 0) {
+                $result[] = [
+                    'id'         => $slot['id'],
+                    'start_time' => date('H:i', strtotime($slot['start_time'])),
+                    'available'  => $available,
+                    'label'      => date('H:i', strtotime($slot['start_time'])) . ' (Tersedia)',
+                ];
+            }
+        }
 
         return $this->response->setJSON([
             'status'  => 'ok',

@@ -18,6 +18,8 @@ class CustomerModel extends Model
 		'password',
 		'phone',
 		'status',
+		'reset_token',
+		'reset_token_expires_at',
 	];
 
 	protected $useSoftDeletes = false;
