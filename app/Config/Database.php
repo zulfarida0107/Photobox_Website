@@ -194,9 +194,35 @@ class Database extends Config
     {
         parent::__construct();
 
+        // Auto-detect Railway or standard Cloud MySQL Environment Variables
+        if (getenv('MYSQLHOST') || getenv('MYSQL_HOST')) {
+            $this->default['hostname'] = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST');
+        }
+        if (getenv('MYSQLUSER') || getenv('MYSQL_USER')) {
+            $this->default['username'] = getenv('MYSQLUSER') ?: getenv('MYSQL_USER');
+        }
+        if (getenv('MYSQLPASSWORD') || getenv('MYSQL_PASSWORD')) {
+            $this->default['password'] = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD');
+        }
+        if (getenv('MYSQLDATABASE') || getenv('MYSQL_DATABASE')) {
+            $this->default['database'] = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE');
+        }
+        if (getenv('MYSQLPORT') || getenv('MYSQL_PORT')) {
+            $this->default['port'] = (int) (getenv('MYSQLPORT') ?: getenv('MYSQL_PORT'));
+        }
+        if (getenv('DATABASE_URL')) {
+            $dbUrl = parse_url((string) getenv('DATABASE_URL'));
+            if ($dbUrl && isset($dbUrl['host'])) {
+                $this->default['hostname'] = $dbUrl['host'];
+                $this->default['username'] = $dbUrl['user'] ?? '';
+                $this->default['password'] = $dbUrl['pass'] ?? '';
+                $this->default['database'] = ltrim($dbUrl['path'] ?? '', '/');
+                $this->default['port']     = (int) ($dbUrl['port'] ?? 3306);
+            }
+        }
+
         // Ensure that we always set the database group to 'tests' if
-        // we are currently running an automated test suite, so that
-        // we don't overwrite live data on accident.
+        // we are currently running an automated test suite.
         if (ENVIRONMENT === 'testing') {
             $this->defaultGroup = 'tests';
         }

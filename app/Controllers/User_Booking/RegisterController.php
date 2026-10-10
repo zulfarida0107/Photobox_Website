@@ -136,13 +136,19 @@ class RegisterController extends Controller
         }
     }
 
-    // Method untuk handle POST dari landing page
-    public function fromLanding()
+    // Method untuk handle registrasi langsung / direct dari beranda
+    public function directRegister()
     {
-        if ($this->request->getPost('from_landing')) {
-            session()->setFlashdata('info', 'Silahkan lengkapi data registrasi Anda');
+        if ($this->request->getPost('direct_booking') || $this->request->getPost('from_home') || $this->request->getPost('from_landing')) {
+            session()->setFlashdata('info', 'Silakan lengkapi data registrasi Anda untuk memulai pemesanan.');
         }
         
-        return redirect()->to('/register');
+        return redirect()->to(base_url('register'));
+    }
+
+    // Alias backward compatibility untuk fromLanding
+    public function fromLanding()
+    {
+        return $this->directRegister();
     }
 }
