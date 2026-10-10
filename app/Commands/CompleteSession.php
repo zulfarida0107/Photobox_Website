@@ -48,28 +48,39 @@ class CompleteSession extends BaseCommand
             return;
         }
 
+        $sessionDirWritable = WRITEPATH . "uploads/sessions/{$sessionId}/";
+        $sessionDirPublic = FCPATH . "uploads/sessions/{$sessionId}/";
+        $targetDir = is_dir($sessionDirWritable) ? $sessionDirWritable : (is_dir($sessionDirPublic) ? $sessionDirPublic : null);
+
         $driveLink = '';
+        $driveSuccess = false;
         try {
             CLI::write("Uploading photos to Google Drive...");
             $driveService = new GoogleDriveService();
             $driveLink = $driveService->uploadSessionPhotos($sessionId);
+            $driveSuccess = !empty($driveLink) && str_contains($driveLink, 'drive.google.com');
             CLI::write("Google Drive upload success: {$driveLink}", 'green');
         } catch (\Throwable $driveError) {
             log_message('warning', "Google Drive upload skipped/failed for session #{$sessionId}: " . $driveError->getMessage());
             CLI::write("Google Drive notice: " . $driveError->getMessage(), 'yellow');
-            // Fallback link ke URL web lokal
             $driveLink = base_url("uploads/sessions/{$sessionId}/final.png");
         }
 
-        // Cari file frame foto final (final.png) untuk dilampirkan langsung ke email
         $attachments = [];
-        $sessionDirWritable = WRITEPATH . "uploads/sessions/{$sessionId}/";
-        $sessionDirPublic = FCPATH . "uploads/sessions/{$sessionId}/";
+        if ($targetDir) {
+            // 1. Lampirkan lembar final.png
+            if (file_exists($targetDir . 'final.png')) {
+                $attachments[] = $targetDir . 'final.png';
+            }
 
-        if (file_exists($sessionDirWritable . 'final.png')) {
-            $attachments[] = $sessionDirWritable . 'final.png';
-        } elseif (file_exists($sessionDirPublic . 'final.png')) {
-            $attachments[] = $sessionDirPublic . 'final.png';
+            // 2. Lampirkan semua jepretan foto mentah
+            $captureFiles = glob($targetDir . 'capture_*.{jpg,jpeg,png}', GLOB_BRACE) ?: [];
+            sort($captureFiles, SORT_NATURAL);
+            foreach ($captureFiles as $capFile) {
+                if (!in_array($capFile, $attachments, true)) {
+                    $attachments[] = $capFile;
+                }
+            }
         }
 
         try {
