@@ -1,6 +1,19 @@
-<header class="fixed top-0 right-0 w-[calc(100%-260px)] z-40 bg-white border-b border-slate-200 shadow-sm flex items-center justify-between px-6 h-16">
-    <div class="flex-grow"></div>
-    <div class="flex items-center gap-5">
+<header class="fixed top-0 right-0 w-full md:w-[calc(100%-260px)] z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm flex items-center justify-between px-4 sm:px-6 h-16 transition-all duration-300">
+    <!-- Mobile Hamburger Toggle & Title -->
+    <div class="flex items-center gap-3">
+        <button id="sidebar-toggle-btn" 
+                type="button" 
+                onclick="toggleSidebar(true)" 
+                class="md:hidden flex items-center justify-center w-10 h-10 -ml-1 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition-colors focus:outline-none"
+                aria-label="Buka Sidebar Navigasi">
+            <span class="material-symbols-outlined text-2xl">menu</span>
+        </button>
+        <div class="flex items-center gap-2 md:hidden">
+            <span class="text-sm font-bold text-slate-800 tracking-tight">CuitBox Studio</span>
+        </div>
+    </div>
+    
+    <div class="flex items-center gap-2 sm:gap-5">
         <!-- Ikon Waktu / Timer -->
         <button onclick="openModal('modalClock')" class="text-slate-500 hover:bg-slate-50 p-2 rounded-lg transition-colors">
             <span class="material-symbols-outlined">schedule</span>
@@ -10,14 +23,14 @@
             <span class="material-symbols-outlined">notifications</span>
             <span id="notif-badge" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white hidden"></span>
         </button>
-        <div class="h-8 w-px bg-slate-200 mx-2"></div>
+        <div class="h-6 sm:h-8 w-px bg-slate-200 mx-1 sm:mx-2"></div>
         <!-- Ikon Profil -->
-        <div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onclick="openModal('modalProfile')">
+        <div class="flex items-center gap-2 sm:gap-3 cursor-pointer hover:opacity-80 transition-opacity" onclick="openModal('modalProfile')">
             <div class="text-right hidden sm:block">
                 <p class="text-xs font-bold text-on-surface leading-none"><?= esc(session()->get('adminName') ?? 'Admin CuitBox Studio') ?></p>
                 <p class="text-[10px] text-slate-500 uppercase tracking-wider mt-1"><?= esc(strtolower(session()->get('adminRole') ?? '') === 'superadmin' ? 'Super Admin' : 'Staff') ?></p>
             </div>
-            <img id="dashboard-profile-img" alt="Admin Profile" class="w-10 h-10 rounded-full border border-slate-100 object-cover"
+            <img id="dashboard-profile-img" alt="Admin Profile" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-100 object-cover"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuDru5yG0kfgrAexiefmfPXrmbf__ddiHYCNse2EGwIxmzqDZQcLg1eAYw22ws1eruImLu7Qldg3CG24mWnx9DCff9YDE9XZ-hDvImkrF230qHqOc86k-j-F1anq2ljfObxwH5H9hH2-DvMUhbdIyghqBUFEDI2QsmbH3YT2XgrMzqIVSj5naElgHfhhqx5y9cKHG1ZXlcAh5jNsuwiIcvAhYUwbXl4Ls23yVAqUlT49ChvMnedJES1cV1aToIn3pmWztakJyeDOrWyn" />
             <script>
                 (function() {

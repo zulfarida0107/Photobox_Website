@@ -893,7 +893,7 @@
                         <!-- Submit Button -->
                         <div class="pt-4">
                             <button type="submit" class="btn-submit">
-                                <span>Kirim Password Baru</span>
+                                <span>Kirim Tautan Reset</span>
                                 <svg fill="currentColor" viewBox="0 0 20 20">
                                     <path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"/>
                                 </svg>
@@ -937,22 +937,24 @@
 
     <!-- ===== JAVASCRIPT ===== -->
     <script>
-            const value = this.value.trim();
-            
-            if (value.length === 0) {
-                error.style.display = 'none';
-                this.classList.remove('input-error', 'input-success');
-                return;
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.getElementById('email');
+            if (emailInput) {
+                emailInput.addEventListener('input', function() {
+                    const value = this.value.trim();
+                    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    if (emailPattern.test(value)) {
+                        this.classList.add('input-success');
+                        this.classList.remove('input-error');
+                    } else if (value.length > 0) {
+                        this.classList.add('input-error');
+                        this.classList.remove('input-success');
+                    } else {
+                        this.classList.remove('input-error', 'input-success');
+                    }
+                });
             }
-            
-            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-            if (emailPattern.test(value)) {
-                error.textContent = '✅ Email valid';
-                error.style.color = '#22c55e';
-                error.style.display = 'block';
-                this.classList.remove('input-error');
-    <!-- ===== JAVASCRIPT ===== -->
-    <script>
+        });
     </script>
 </body>
 </html>

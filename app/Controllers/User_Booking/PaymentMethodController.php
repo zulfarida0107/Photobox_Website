@@ -28,15 +28,18 @@ class PaymentMethodController extends BaseController
     public function index()
     {
         $data = [
-            'title' => 'Payment Method - CuitBox Studio',
-            'booking' => null,
-            'payment' => null,
-            'frame' => null,
-            'error' => null,
-            'success' => null,
+            'title'        => 'Payment Method - CuitBox Studio',
+            'booking'      => null,
+            'payment'      => null,
+            'frame'        => null,
+            'error'        => null,
+            'success'      => null,
+            'snapToken'    => null,
+            'clientKey'    => config('Midtrans')->clientKey ?? '',
+            'isProduction' => config('Midtrans')->isProduction ?? false,
         ];
 
-        // Ambil frame_id dari URL atau session
+        // 1. Ambil frame_id dari URL atau session
         $frameId = $this->request->getGet('frame_id') ?? $this->session->get('selected_frame');
         $frame = null;
         if ($frameId) {
@@ -45,7 +48,7 @@ class PaymentMethodController extends BaseController
             $data['frame'] = $frame;
         }
 
-        // Ambil booth_id dari session untuk informasi lokasi
+        // 2. Ambil booth_id dari session untuk informasi lokasi
         $boothId = $this->session->get('booth_id');
         $booth = null;
         if ($boothId) {
@@ -54,40 +57,157 @@ class PaymentMethodController extends BaseController
         }
         $data['booth'] = $booth;
 
-        // Hitung total tagihan dari session
-        $printOptionPrice = $this->session->get('selected_print_option_price') ?? 25000;
-        $framePrice = $frame['price'] ?? $this->session->get('selected_frame_price') ?? 0;
+        // 3. Kalkulasi harga secara aman di Server-Side dari database
+        $printOptionId = $this->session->get('selected_print_option_id');
+        $printOptionModel = new \App\Models\PrintOptionModel();
+        $printOption = null;
+        if ($printOptionId) {
+            $printOption = $printOptionModel->find($printOptionId);
+        }
+        if (!$printOption) {
+            $printOption = $printOptionModel->first() ?? ['id' => '1', 'copies' => 2, 'extra_price' => 25000];
+        }
+
+        $printOptionPrice      = (float) ($printOption['extra_price'] ?? 25000);
+        $framePrice            = (float) ($frame['price'] ?? 0);
         $totalCalculatedAmount = $printOptionPrice + $framePrice;
 
-        // Cek booking_id dari berbagai sumber
-        $bookingId = null;
-        
-        if ($this->request->getGet('booking_id')) {
-            $bookingId = $this->request->getGet('booking_id');
-            $this->session->set('booking_id', $bookingId);
-        } elseif ($this->session->has('booking_id')) {
-            $bookingId = $this->session->get('booking_id');
-        }
+        // 4. Cek atau Buat Booking di Database
+        $bookingId = $this->request->getGet('booking_id') ?? $this->session->get('booking_id');
+        $booking   = null;
 
         if ($bookingId) {
-            $booking = $this->getBookingDetail($bookingId);
-            if ($booking) {
-                $booking['total_amount'] = $totalCalculatedAmount;
-                $data['booking'] = $booking;
-                
-                $payment = $this->paymentModel
-                    ->where('booking_id', $bookingId)
-                    ->orderBy('created_at', 'DESC')
-                    ->first();
-                if ($payment) {
-                    $data['payment'] = $payment;
-                }
-            } else {
-                $data['booking'] = $this->createDummyBooking($totalCalculatedAmount);
-            }
-        } else {
-            $data['booking'] = $this->createDummyBooking($totalCalculatedAmount);
+            $booking = $this->bookingModel->find($bookingId);
         }
+
+        if (!$booking) {
+            // Buat booking jika belum ada
+            $customerId = $this->session->get('customer_id');
+            if (!$customerId) {
+                $firstCust = $this->customerModel->first();
+                $customerId = $firstCust ? $firstCust['id'] : 'C0001';
+            }
+
+            $slotModel = new \App\Models\SlotModel();
+            $slotId    = $this->session->get('slot_id') ?? ($slotModel->first()['id'] ?? 'SLOT_01');
+            $boothId   = $this->session->get('booth_id') ?? ($booth['id'] ?? 'booth_001');
+
+            $newBookingId = 'BKG' . date('YmdHis') . rand(10, 99);
+            do {
+                $bookingCode = (string) rand(100000, 999999);
+            } while ($this->bookingModel->where('booking_code', $bookingCode)->first() !== null);
+
+            $queueNumber = $this->bookingModel->where('slot_id', $slotId)->countAllResults() + 1;
+
+            $bookingData = [
+                'id'              => $newBookingId,
+                'booking_code'    => $bookingCode,
+                'customer_id'     => $customerId,
+                'slot_id'         => $slotId,
+                'booth_id'        => $boothId,
+                'print_option_id' => $printOption['id'] ?? null,
+                'queue_number'    => $queueNumber,
+                'status'          => 'pending',
+                'created_at'      => date('Y-m-d H:i:s'),
+                'updated_at'      => date('Y-m-d H:i:s')
+            ];
+
+            $this->bookingModel->insert($bookingData);
+            $bookingId = $newBookingId;
+            $this->session->set('booking_id', $bookingId);
+            $booking = $this->bookingModel->find($bookingId);
+        }
+
+        // 5. Cek atau Buat Record Payment di Database
+        $payment = $this->paymentModel
+            ->where('booking_id', $bookingId)
+            ->orderBy('created_at', 'DESC')
+            ->first();
+
+        if (!$payment) {
+            $paymentId = 'PAY' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+            $paymentData = [
+                'id'              => $paymentId,
+                'booking_id'      => $bookingId,
+                'print_option_id' => $printOption['id'] ?? null,
+                'amount'          => $totalCalculatedAmount,
+                'gateway_ref'     => 'MIDTRANS-' . strtoupper(bin2hex(random_bytes(4))),
+                'status'          => 'pending',
+                'created_at'      => date('Y-m-d H:i:s'),
+                'updated_at'      => date('Y-m-d H:i:s'),
+            ];
+            $this->paymentModel->insert($paymentData);
+            $payment = $this->paymentModel->find($paymentId);
+        } else {
+            if ($payment['status'] === 'pending') {
+                $this->paymentModel->update($payment['id'], [
+                    'amount'          => $totalCalculatedAmount,
+                    'print_option_id' => $printOption['id'] ?? null,
+                    'updated_at'      => date('Y-m-d H:i:s'),
+                ]);
+                $payment = $this->paymentModel->find($payment['id']);
+            }
+        }
+
+        // 6. Generate Midtrans Snap Token Resmi
+        $snapToken = null;
+        $serverKey = config('Midtrans')->serverKey ?? (string) env('midtrans.serverKey', '');
+
+        if (!empty($serverKey)) {
+            try {
+                \Midtrans\Config::$serverKey    = $serverKey;
+                \Midtrans\Config::$isProduction = (bool) (config('Midtrans')->isProduction ?? false);
+                \Midtrans\Config::$isSanitized  = true;
+                \Midtrans\Config::$is3ds        = true;
+
+                $customer = $this->customerModel->find($booking['customer_id'] ?? '') ?: [];
+
+                $itemDetails = [
+                    [
+                        'id'       => (string) ($printOption['id'] ?? 'PRINT_OPT'),
+                        'price'    => (int) $printOptionPrice,
+                        'quantity' => 1,
+                        'name'     => ($printOption['copies'] ?? 2) . ' Lembar Cetak Foto',
+                    ]
+                ];
+
+                if ($framePrice > 0) {
+                    $itemDetails[] = [
+                        'id'       => (string) ($frame['id'] ?? 'FRAME_OPT'),
+                        'price'    => (int) $framePrice,
+                        'quantity' => 1,
+                        'name'     => 'Desain Frame: ' . ($frame['name'] ?? 'Pilihan'),
+                    ];
+                }
+
+                $params = [
+                    'transaction_details' => [
+                        'order_id'     => $payment['id'],
+                        'gross_amount' => (int) $totalCalculatedAmount,
+                    ],
+                    'customer_details'    => [
+                        'first_name' => $customer['name'] ?? ($this->session->get('customer_name') ?? 'Pelanggan CuitBox'),
+                        'email'      => $customer['email'] ?? ($this->session->get('customer_email') ?? 'customer@cuitbox.com'),
+                        'phone'      => $customer['phone'] ?? ($this->session->get('customer_phone') ?? '08123456789'),
+                    ],
+                    'item_details'        => $itemDetails,
+                ];
+
+                $snapToken = \Midtrans\Snap::getSnapToken($params);
+            } catch (\Throwable $e) {
+                log_message('error', '[Midtrans Snap Token Error] ' . $e->getMessage());
+                $data['error'] = 'Koneksi Midtrans: ' . $e->getMessage();
+            }
+        }
+
+        $bookingDetail = $this->getBookingDetail($bookingId);
+        if ($bookingDetail) {
+            $bookingDetail['total_amount'] = $totalCalculatedAmount;
+            $data['booking'] = $bookingDetail;
+        }
+
+        $data['payment']   = $payment;
+        $data['snapToken'] = $snapToken;
 
         if ($this->session->getFlashdata('error')) {
             $data['error'] = $this->session->getFlashdata('error');
@@ -97,141 +217,6 @@ class PaymentMethodController extends BaseController
         }
 
         return view('User_Booking/payment_method', $data);
-    }
-
-    public function store()
-    {
-        // Ambil data dari POST
-        $paymentId = $this->request->getPost('payment_id');
-        $bookingId = $this->request->getPost('booking_id');
-        $paymentMethod = $this->request->getPost('payment_method');
-        $amount = $this->request->getPost('amount');
-        $status = $this->request->getPost('status');
-
-        // Validasi
-        if (empty($paymentId) || empty($amount)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Data pembayaran tidak lengkap. Silahkan coba lagi.');
-        }
-
-        // Jika booking_id tidak ada, ambil dari session
-        if (empty($bookingId)) {
-            $bookingId = $this->session->get('booking_id');
-        }
-
-        // Cek apakah booking ada di database
-        $booking = $this->bookingModel->find($bookingId);
-        if (!$booking) {
-            // BOOKING BELUM ADA (ini Dummy Booking dari web flow, simpan ke DB).
-            
-            // Ambil customer dari session atau fallback ke yang pertama di DB
-            $customerModel = new \App\Models\CustomerModel();
-            $customer = $customerModel->first();
-            $customerId = $this->session->get('customer_id') ?? ($customer ? $customer['id'] : null);
-            
-            // Ambil slot valid dari DB
-            $slotModel = new \App\Models\SlotModel();
-            $slot = $slotModel->first();
-            $slotId = $this->session->get('slot_id') ?? ($slot ? $slot['id'] : null);
-            
-            // Ambil booth valid dari DB
-            $boothModel = new \App\Models\BoothModel();
-            $booth = $boothModel->first();
-            $boothId = $this->session->get('booth_id') ?? ($booth ? $booth['id'] : null);
-            
-            // Ambil print_option yang dipilih user dari session (dari Daftar Cetak Admin)
-            $printOptionId = $this->session->get('selected_print_option_id');
-            if (empty($printOptionId)) {
-                // Fallback: ambil print option pertama dari database
-                $printOptionModel = new \App\Models\PrintOptionModel();
-                $firstOption = $printOptionModel->first();
-                $printOptionId = $firstOption ? $firstOption['id'] : null;
-            }
-            
-            $newBookingId = 'BKG' . date('YmdHis') . rand(10, 99);
-            do {
-                $bookingCode = (string) rand(100000, 999999);
-            } while ($this->bookingModel->where('booking_code', $bookingCode)->first() !== null);
-            
-            // Hitung nomor antrean berurutan per slot (1, 2, 3, dst.)
-            $queueNumber = $this->bookingModel->where('slot_id', $slotId)->countAllResults() + 1;
-            
-            $bookingData = [
-                'id' => $newBookingId,
-                'booking_code' => $bookingCode,
-                'customer_id' => $customerId,
-                'slot_id' => $slotId,
-                'booth_id' => $boothId,
-                'print_option_id' => $printOptionId,  // Menggunakan data Daftar Cetak dari Admin
-                'queue_number' => $queueNumber,
-                'status' => 'pending',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-            
-            $this->bookingModel->insert($bookingData);
-            
-            $bookingId = $newBookingId;
-            $this->session->set('booking_id', $bookingId);
-        }
-
-        // Cek apakah payment sudah ada
-        $existingPayment = $this->paymentModel
-            ->where('booking_id', $bookingId)
-            ->first();
-
-        if ($existingPayment) {
-            // Update existing payment
-            $updateData = [
-                'amount' => $amount,
-                'gateway_ref' => 'PAY-' . strtoupper(uniqid()),
-                'status' => 'paid',
-                'payment_method' => $paymentMethod ?? 'QRIS',
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-            
-            $this->paymentModel->update($existingPayment['id'], $updateData);
-            $paymentId = $existingPayment['id'];
-        } else {
-            // Create new payment
-            if (empty($paymentId)) {
-                $paymentId = 'PAY' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
-            }
-            
-            $paymentData = [
-                'id' => $paymentId,
-                'booking_id' => $bookingId,
-                'print_option_id' => $printOptionId,  // Data dari Daftar Cetak Admin
-                'amount' => $amount,
-                'gateway_ref' => 'PAY-' . strtoupper(uniqid()),
-                'status' => 'paid',
-                'payment_method' => $paymentMethod ?? 'QRIS',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-
-            $this->paymentModel->insert($paymentData);
-        }
-
-        // Update booking status menjadi paid
-        $this->bookingModel->update($bookingId, [
-            'status' => 'paid',
-            'updated_at' => date('Y-m-d H:i:s')
-        ]);
-
-        // Simpan ke session
-        $this->session->set([
-            'konfirmasi_pembayaran_id' => $paymentId,
-            'booking_id' => $bookingId,
-            'payment_method' => $paymentMethod ?? 'QRIS',
-            'payment_status' => 'paid',
-            'payment_amount' => $amount
-        ]);
-
-        // Redirect ke halaman status booking
-        return redirect()->to('/StatusBooking?payment_id=' . $paymentId . '&booking_id=' . $bookingId)
-            ->with('success', 'Pembayaran berhasil dikonfirmasi!');
     }
 
     /**

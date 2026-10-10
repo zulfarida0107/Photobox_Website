@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Payment Method - CuitBox Studio</title>
+    <title><?= esc($title ?? 'Pembayaran - CuitBox Studio') ?></title>
     <!-- Tailwind CSS v3 CDN -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <!-- Google Fonts -->
@@ -27,6 +27,13 @@
             }
         }
     </script>
+    <?php if (!empty($clientKey)): ?>
+        <!-- Midtrans Snap JS -->
+        <script type="text/javascript" 
+                src="<?= (!empty($isProduction) && $isProduction) ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' ?>" 
+                data-client-key="<?= esc($clientKey) ?>">
+        </script>
+    <?php endif; ?>
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #B8E4FF 0%, #FCD2E8 100%);
@@ -42,11 +49,6 @@
             align-items: stretch;
             justify-content: center;
             padding: 0;
-        }
-        @media (min-width: 640px) {
-            .page-wrapper {
-                padding: 0;
-            }
         }
         .header-bg {
             background: rgba(255, 255, 255, 0.9);
@@ -99,6 +101,7 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             width: 100%;
+            text-decoration: none;
         }
         .btn-secondary:hover {
             background: #334155;
@@ -110,26 +113,6 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
             vertical-align: middle;
-        }
-        .barcode-container {
-            background: white;
-            padding: 16px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .barcode-wrapper {
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-        .barcode-wrapper img {
-            display: block;
-            width: 160px;
-            height: 160px;
-            object-fit: contain;
         }
         .timer-warning {
             animation: pulse 1s ease-in-out infinite;
@@ -161,39 +144,17 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             line-height: 1.35;
             pointer-events: auto;
-            cursor: grab;
-            user-select: none;
-            touch-action: none;
-            transition: transform 0.2s ease, opacity 0.2s ease;
         }
-        .toast:active {
-            cursor: grabbing;
-        }
-        .toast-success {
-            background: #10b981;
-            color: white;
-        }
-        .toast-error {
-            background: #ef4444;
-            color: white;
-        }
-        .toast-info {
-            background: #3b82f6;
-            color: white;
-        }
+        .toast-success { background: #10b981; color: white; }
+        .toast-error { background: #ef4444; color: white; }
+        .toast-info { background: #3b82f6; color: white; }
         @keyframes slideInDown {
-            from {
-                transform: translateY(-20px) scale(0.95);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
+            from { transform: translateY(-20px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
         }
         .spinner {
             display: inline-block;
@@ -207,74 +168,36 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
         .payment-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
             border-radius: 24px;
-            padding: 32px;
+            padding: 28px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.6);
         }
-        .method-option {
-            border: 2px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 16px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            display: flex;
+        .badge-payment {
+            display: inline-flex;
             align-items: center;
-            gap: 12px;
+            gap: 6px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #475569;
         }
-        .method-option:hover {
-            border-color: #bef264;
-            background: rgba(190, 242, 100, 0.05);
-        }
-        .method-option.active {
-            border-color: #bef264;
-            background: rgba(190, 242, 100, 0.1);
-            box-shadow: 0 0 0 4px rgba(190, 242, 100, 0.2);
-        }
-        .method-option input[type="radio"] {
-            width: 20px;
-            height: 20px;
-            accent-color: #bef264;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-        .method-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            flex-shrink: 0;
-        }
-        .method-icon.qris { background: #dbeafe; color: #2563eb; }
-        .method-icon.bca { background: #fef3c7; color: #d97706; }
-        .method-icon.bni { background: #e0e7ff; color: #4f46e5; }
-        .method-icon.mandiri { background: #fce4ec; color: #dc2626; }
-        .method-icon.gopay { background: #d1fae5; color: #059669; }
-        .method-icon.ovo { background: #ede9fe; color: #7c3aed; }
-        .method-icon.dana { background: #dbeafe; color: #2563eb; }
-        .method-icon.shopeepay { background: #fee2e2; color: #ef4444; }
     </style>
 </head>
 <body>
     <!-- Toast Container -->
     <div id="toastContainer" class="toast-container"></div>
 
-    <!-- BEGIN: Page Wrapper -->
     <div class="page-wrapper">
-        <!-- BEGIN: MainContainer with Gradient -->
         <div class="w-full main-container-rounded gradient-bg flex flex-col min-h-screen">
 
-            <!-- BEGIN: MainHeader -->
+            <!-- BEGIN: Header -->
             <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100">
                 <div class="flex items-center">
                     <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
@@ -288,158 +211,174 @@
                     </a>
                 </div>
             </header>
-            <!-- END: MainHeader -->
+            <!-- END: Header -->
 
             <!-- BEGIN: Main Content -->
-            <main class="main-content relative px-6 sm:px-8 py-8 overflow-hidden bg-white/40 backdrop-blur-sm">
+            <main class="flex-1 px-6 sm:px-8 py-8 overflow-hidden bg-white/40 backdrop-blur-sm">
                 
                 <!-- Flash Messages -->
-                <?php if (session()->getFlashdata('success')): ?>
-                    <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl">
-                        <?= session()->getFlashdata('success') ?>
-                    </div>
-                <?php endif; ?>
-                <?php if (session()->getFlashdata('error')): ?>
-                    <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl">
-                        <?= session()->getFlashdata('error') ?>
+                <?php if (session()->getFlashdata('success') || !empty($success)): ?>
+                    <div class="mb-6 p-4 bg-emerald-100 border border-emerald-300 text-emerald-800 rounded-2xl flex items-center gap-3">
+                        <span class="material-symbols-outlined text-emerald-600">check_circle</span>
+                        <span class="font-medium text-sm"><?= session()->getFlashdata('success') ?? $success ?></span>
                     </div>
                 <?php endif; ?>
 
-               
-                <!-- BEGIN FORM -->
-                <form action="<?= base_url('user-payment/store') ?>" method="post" id="paymentForm">
-                    <?= csrf_field() ?>
+                <?php if (session()->getFlashdata('error') || !empty($error)): ?>
+                    <div class="mb-6 p-4 bg-red-100 border border-red-300 text-red-800 rounded-2xl flex items-center gap-3">
+                        <span class="material-symbols-outlined text-red-600">error</span>
+                        <span class="font-medium text-sm"><?= session()->getFlashdata('error') ?? $error ?></span>
+                    </div>
+                <?php endif; ?>
 
-                    <!-- HIDDEN INPUTS -->
-                    <?php 
-                    $bookingId = $booking['id'] ?? session()->get('booking_id') ?? 1;
-                    $amount = $booking['total_amount'] ?? 45000;
-                    $paymentId = 'PAY' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
-                    ?>
-                    <input type="hidden" name="payment_id" value="<?= $paymentId ?>">
-                    <input type="hidden" name="booking_id" value="<?= $bookingId ?>">
-                    <input type="hidden" name="amount" value="<?= $amount ?>">
-                    <input type="hidden" name="status" value="success">
-                    <input type="hidden" name="payment_method" value="QRIS">
+                <?php 
+                $bookingId = $booking['id'] ?? session()->get('booking_id') ?? '';
+                $totalAmount = $booking['total_amount'] ?? ($payment['amount'] ?? 45000);
+                $paymentId = $payment['id'] ?? '';
+                ?>
 
-                    <div class="flex flex-col lg:flex-row gap-6">
-                        <!-- Left Column - Detail Booking & Payment Method -->
-                        <div class="flex-1">
-                            <!-- Detail Booking -->
-                            <div class="payment-card mb-6">
-                                <div class="flex justify-between items-start mb-6">
-                                    <h3 class="text-lg font-bold text-slate-800">Detail Booking</h3>
-                                    <span class="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-3 py-1 rounded-md border border-indigo-100">
-                                        #<?= $booking['booking_code'] ?? 'BK-' . date('Ymd') ?>
+                <div class="max-w-4xl mx-auto flex flex-col lg:flex-row gap-6">
+                    <!-- Left Column - Detail Pesanan -->
+                    <div class="flex-1">
+                        <div class="payment-card mb-6">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-800">Ringkasan Pemesanan</h3>
+                                    <p class="text-xs text-slate-500 mt-0.5">Periksa detail pesanan Anda sebelum membayar</p>
+                                </div>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-100">
+                                    #<?= esc($booking['booking_code'] ?? 'BK-' . date('Ymd')) ?>
+                                </span>
+                            </div>
+
+                            <div class="space-y-4">
+                                <!-- Lokasi Booth -->
+                                <div class="flex items-center space-x-4 p-3 bg-white/70 rounded-xl border border-slate-100">
+                                    <div class="bg-indigo-50 p-3 rounded-xl text-indigo-600">
+                                        <span class="material-symbols-outlined text-xl">store</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest">Booth Studio</p>
+                                        <p class="text-slate-800 font-bold text-sm sm:text-base"><?= esc($booth['name'] ?? ($frame['name'] ?? 'Premium Booth Studio')) ?></p>
+                                    </div>
+                                </div>
+
+                                <!-- Desain Frame & Opsi Cetak -->
+                                <div class="flex items-center space-x-4 p-3 bg-white/70 rounded-xl border border-slate-100">
+                                    <div class="bg-emerald-50 p-3 rounded-xl text-emerald-600">
+                                        <span class="material-symbols-outlined text-xl">photo_library</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-[10px] font-extrabold text-emerald-500 uppercase tracking-widest">Pilihan Cetak & Frame</p>
+                                        <p class="text-slate-800 font-bold text-sm sm:text-base">
+                                            <?= esc(session()->get('selected_print_option_name') ?? '2 Lembar Cetak') ?> 
+                                            <span class="text-slate-500 font-normal text-xs">• <?= esc($frame['name'] ?? 'Frame Pilihan') ?></span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Jadwal Sesi -->
+                                <div class="flex items-center space-x-4 p-3 bg-white/70 rounded-xl border border-slate-100">
+                                    <div class="bg-cyan-50 p-3 rounded-xl text-cyan-600">
+                                        <span class="material-symbols-outlined text-xl">calendar_today</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-[10px] font-extrabold text-cyan-500 uppercase tracking-widest">Jadwal Sesi</p>
+                                        <p class="text-slate-800 font-bold text-sm sm:text-base"><?= esc($booking['booking_date'] ?? date('d F Y')) ?> • <?= esc($booking['booking_time'] ?? date('H:i')) ?> WIB</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-6 border-dashed border-slate-200">
+
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Total Tagihan</span>
+                                    <span class="text-2xl sm:text-3xl font-black text-indigo-700">Rp <?= number_format($totalAmount, 0, ',', '.') ?></span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="inline-block bg-emerald-100 text-emerald-700 text-[11px] font-bold px-3 py-1 rounded-full">
+                                        Harga Terverifikasi
                                     </span>
                                 </div>
-                                <div class="space-y-4">
-                                    <!-- Lokasi Booth -->
-                                    <div class="flex items-center space-x-4">
-                                        <div class="bg-indigo-50 p-3 rounded-xl shadow-sm text-indigo-600">
-                                            <span class="material-symbols-outlined text-xl">store</span>
-                                        </div>
-                                        <div>
-                                            <p class="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest">Booth Terpilih</p>
-                                            <p class="text-slate-800 font-bold text-base"><?= $frame['name'] ?? 'Premium Booth' ?></p>
-                                        </div>
-                                    </div>
-                                    <!-- Cetak & Tema -->
-                                    <div class="flex items-center space-x-4">
-                                        <div class="bg-emerald-50 p-3 rounded-xl shadow-sm text-emerald-600">
-                                            <span class="material-symbols-outlined text-white text-xl" style="color: #059669;">photo_library</span>
-                                        </div>
-                                        <div>
-                                            <p class="text-[10px] font-extrabold text-emerald-500 uppercase tracking-widest">Pilihan Cetak</p>
-                                            <p class="text-slate-800 font-bold text-base">
-                                                <?= session()->get('selected_print_option_name') ?? '2 Cetak' ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <!-- Jadwal Sesi -->
-                                    <div class="flex items-center space-x-4">
-                                        <div class="bg-cyan-50 p-3 rounded-xl shadow-sm text-cyan-600">
-                                            <span class="material-symbols-outlined text-xl">calendar_today</span>
-                                        </div>
-                                        <div>
-                                            <p class="text-[10px] font-extrabold text-cyan-500 uppercase tracking-widest">Jadwal Sesi</p>
-                                            <p class="text-slate-800 font-bold text-base"><?= $booking['booking_date'] ?? date('d F Y') ?> • <?= $booking['booking_time'] ?? date('H:i') ?> WIB</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr class="my-6 border-dashed border-slate-200">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-lg font-bold text-slate-800">Total Tagihan</span>
-                                    <span class="text-2xl font-black text-indigo-700">Rp <?= number_format($amount, 0, ',', '.') ?></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right Column: QR Code -->
-                        <div class="flex-1">
-                            <div class="payment-card flex flex-col items-center sticky top-8">
-                                <h4 class="text-sm font-bold text-slate-700 mb-4 text-center">Scan QRIS untuk Pembayaran</h4>
-                                <div class="barcode-wrapper">
-                                    <div class="barcode-container">
-                                        <img alt="QR Code" 
-                                             src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=PAYMENT-<?= date('Ymd') ?>-CUITBOX-<?= $bookingId ?>" 
-                                             class="w-48 h-48">
-                                    </div>
-                                </div>
-                                <div class="bg-indigo-50/80 w-full rounded-2xl p-4 mt-6 text-center border border-indigo-100/50">
-                                    <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1">Total Pembayaran</p>
-                                    <p class="text-2xl font-black text-slate-800">Rp <?= number_format($amount, 0, ',', '.') ?></p>
-                                </div>
-
-                                <!-- Timer -->
-                                <div class="w-full bg-[#D9F99D] rounded-2xl py-3 flex items-center justify-center space-x-2 text-slate-800 font-bold mt-4" id="timer-container">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                                    </svg>
-                                    <span class="text-sm" id="timer-display">Sesi berakhir dalam: 05:00</span>
-                                </div>
-                                
-                                <p class="text-[10px] text-slate-700 text-center leading-relaxed font-medium mt-3">
-                                    *Dapat dibayar melalui semua aplikasi m-banking dan e-wallet yang mendukung QRIS
-                                </p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Tombol Konfirmasi Pembayaran -->
-                    <div class="w-full mt-8 flex flex-col sm:flex-row gap-4">
-                        <a href="<?= base_url('print-option') ?>" class="btn-secondary flex-1">
-                            <span class="material-symbols-outlined">arrow_back</span>
-                            Kembali
-                        </a>
-                        <button type="submit" class="btn-primary flex-1" id="confirmPaymentBtn">
-                            <span id="btnText">Konfirmasi Pembayaran</span>
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" id="btnIcon">
-                                <path clip-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.64.304 1.24.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"/>
-                            </svg>
-                        </button>
+                    <!-- Right Column: Midtrans Payment Checkout Card -->
+                    <div class="flex-1">
+                        <div class="payment-card flex flex-col items-center">
+                            <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-3 shadow-sm">
+                                <span class="material-symbols-outlined text-3xl">payments</span>
+                            </div>
+
+                            <h4 class="text-base font-bold text-slate-800 text-center">Pembayaran Online Resmi</h4>
+                            <p class="text-xs text-slate-500 text-center mt-1 mb-5">
+                                Didukung oleh Midtrans Payment Gateway (Otomatis & Terenkripsi SHA-512)
+                            </p>
+
+                            <!-- Supported Payment Methods Badges -->
+                            <div class="w-full flex flex-wrap justify-center gap-2 mb-6">
+                                <span class="badge-payment">⚡ QRIS</span>
+                                <span class="badge-payment">🏦 BCA VA</span>
+                                <span class="badge-payment">🏦 Mandiri</span>
+                                <span class="badge-payment">🏦 BNI</span>
+                                <span class="badge-payment">🏦 BRI</span>
+                                <span class="badge-payment">💚 GoPay</span>
+                                <span class="badge-payment">💳 Kartu Kredit</span>
+                            </div>
+
+                            <div class="bg-indigo-50/80 w-full rounded-2xl p-5 text-center border border-indigo-100/50 mb-4">
+                                <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1">Jumlah yang Harus Dibayar</p>
+                                <p class="text-3xl font-black text-slate-800">Rp <?= number_format($totalAmount, 0, ',', '.') ?></p>
+                                <p class="text-[11px] text-slate-500 mt-1">ID Transaksi: <span class="font-mono font-bold text-slate-700"><?= esc($paymentId) ?></span></p>
+                            </div>
+
+                            <!-- Timer Sesi -->
+                            <div class="w-full bg-[#D9F99D] rounded-2xl py-3 flex items-center justify-center space-x-2 text-slate-800 font-bold mb-6" id="timer-container">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                </svg>
+                                <span class="text-xs sm:text-sm" id="timer-display">Sesi berakhir dalam: 05:00</span>
+                            </div>
+
+                            <!-- Tombol Bayar Sekarang (Midtrans Snap) -->
+                            <div class="w-full space-y-3">
+                                <button type="button" class="btn-primary" id="payButton">
+                                    <span class="material-symbols-outlined text-xl">lock</span>
+                                    <span id="btnText">Bayar Sekarang via Midtrans</span>
+                                </button>
+
+                                <a href="<?= base_url('print-option') ?>" class="btn-secondary">
+                                    <span class="material-symbols-outlined">arrow_back</span>
+                                    Ubah Opsi Cetak
+                                </a>
+                            </div>
+
+                            <p class="text-[11px] text-slate-500 text-center leading-relaxed mt-4">
+                                *Setelah pembayaran selesai di popup Midtrans, status booking Anda akan langsung aktif secara instan.
+                            </p>
+                        </div>
                     </div>
-                </form>
-                <!-- END FORM -->
+                </div>
+
             </main>
             <!-- END: Main Content -->
 
             <!-- BEGIN: Footer -->
             <footer class="flex flex-col sm:flex-row items-center justify-between px-6 sm:px-8 py-4 footer-bg border-t border-gray-100 text-slate-500 text-xs font-medium gap-2 sm:gap-0">
                 <div class="flex items-center gap-2">
-                    <svg class="h-3 w-3 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                    <svg class="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                     </svg>
-                    <span class="font-semibold text-slate-600">Connected</span>
+                    <span class="font-semibold text-slate-700">256-Bit SSL Encrypted Midtrans Gateway</span>
                 </div>
                 <div class="text-center">© 2026 CuitBox Studio. All rights reserved.</div>
             </footer>
             <!-- END: Footer -->
 
         </div>
-        <!-- END: MainContainer -->
     </div>
-    <!-- END: Page Wrapper -->
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -447,6 +386,7 @@
             let totalSeconds = 300;
             const timerDisplay = document.getElementById('timer-display');
             const timerContainer = document.getElementById('timer-container');
+            const payBtn = document.getElementById('payButton');
             
             function formatTime(seconds) {
                 const mins = Math.floor(seconds / 60);
@@ -462,12 +402,8 @@
                     timerContainer.style.color = 'white';
                     clearInterval(timerInterval);
                     
-                    const btn = document.getElementById('confirmPaymentBtn');
-                    btn.disabled = true;
-                    btn.style.opacity = '0.5';
-                    btn.style.cursor = 'not-allowed';
+                    payBtn.disabled = true;
                     document.getElementById('btnText').textContent = 'Sesi Berakhir';
-                    document.getElementById('btnIcon').style.display = 'none';
                     return;
                 }
                 
@@ -487,113 +423,67 @@
             const timerInterval = setInterval(updateTimer, 1000);
             updateTimer();
 
-
-
             // ========== TOAST NOTIFICATION ==========
-            window.showToast = function(message, type = 'success') {
-                const container = document.getElementById('toastContainer') || (() => {
-                    const div = document.createElement('div');
-                    div.id = 'toastContainer';
-                    div.className = 'toast-container';
-                    document.body.appendChild(div);
-                    return div;
-                })();
-
+            window.showToast = function(message, type = 'info') {
+                const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
                 toast.className = `toast toast-${type}`;
                 toast.innerHTML = `<span>${message}</span>`;
                 container.appendChild(toast);
                 
-                function dismissToast() {
+                setTimeout(() => {
                     toast.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
                     toast.style.transform = 'translateY(-40px)';
                     toast.style.opacity = '0';
                     setTimeout(() => toast.remove(), 250);
-                }
-
-                // Auto dismiss after 4s
-                let autoTimer = setTimeout(dismissToast, 4000);
-
-                // Swipe Up to dismiss logic (Touch & Drag)
-                let startY = 0;
-                let isDragging = false;
-
-                const onStart = (clientY) => {
-                    clearTimeout(autoTimer);
-                    startY = clientY;
-                    isDragging = true;
-                    toast.style.transition = 'none';
-                };
-
-                const onMove = (clientY) => {
-                    if (!isDragging) return;
-                    const diffY = clientY - startY;
-                    if (diffY < 0) { // Dragging upwards
-                        toast.style.transform = `translateY(${diffY}px)`;
-                        toast.style.opacity = `${Math.max(0, 1 + diffY / 50)}`;
-                    }
-                };
-
-                const onEnd = (clientY) => {
-                    if (!isDragging) return;
-                    isDragging = false;
-                    const diffY = clientY - startY;
-                    if (diffY < -15) { // Swiped up
-                        dismissToast();
-                    } else {
-                        toast.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
-                        toast.style.transform = 'translateY(0)';
-                        toast.style.opacity = '1';
-                        autoTimer = setTimeout(dismissToast, 3000);
-                    }
-                };
-
-                // Touch events (Mobile)
-                toast.addEventListener('touchstart', (e) => onStart(e.touches[0].clientY), { passive: true });
-                toast.addEventListener('touchmove', (e) => onMove(e.touches[0].clientY), { passive: true });
-                toast.addEventListener('touchend', (e) => onEnd(e.changedTouches[0].clientY));
-
-                // Mouse events (Desktop testing)
-                toast.addEventListener('mousedown', (e) => {
-                    onStart(e.clientY);
-                    const moveHandler = (ev) => onMove(ev.clientY);
-                    const upHandler = (ev) => {
-                        onEnd(ev.clientY);
-                        document.removeEventListener('mousemove', moveHandler);
-                        document.removeEventListener('mouseup', upHandler);
-                    };
-                    document.addEventListener('mousemove', moveHandler);
-                    document.addEventListener('mouseup', upHandler);
-                });
+                }, 4000);
             };
 
-            // ========== FLASH MESSAGES ==========
-            <?php if (session()->getFlashdata('success')): ?>
-                showToast('<?= session()->getFlashdata('success') ?>', 'success');
-            <?php endif; ?>
-            
-            <?php if (session()->getFlashdata('error')): ?>
-                showToast('<?= session()->getFlashdata('error') ?>', 'error');
-            <?php endif; ?>
+            // ========== MIDTRANS SNAP PAYMENT TRIGGER ==========
+            const snapToken = '<?= esc($snapToken ?? '', 'js') ?>';
+            const paymentId = '<?= esc($paymentId ?? '', 'js') ?>';
+            const bookingId = '<?= esc($bookingId ?? '', 'js') ?>';
+            const redirectUrl = '<?= base_url('StatusBooking') ?>' + '?payment_id=' + encodeURIComponent(paymentId) + '&booking_id=' + encodeURIComponent(bookingId);
 
-            // ========== FORM SUBMIT ==========
-            const form = document.getElementById('paymentForm');
-            const submitBtn = document.getElementById('confirmPaymentBtn');
-            
-            form.addEventListener('submit', function(e) {
-                // Show loading state
-                submitBtn.disabled = true;
-                submitBtn.style.opacity = '0.7';
-                document.getElementById('btnText').textContent = 'Memproses...';
-                document.getElementById('btnIcon').style.display = 'none';
-                
-                // Add loading spinner
-                const spinner = document.createElement('span');
-                spinner.className = 'spinner';
-                spinner.style.display = 'inline-block';
-                submitBtn.prepend(spinner);
-                
-                return true;
+            payBtn.addEventListener('click', function() {
+                if (!snapToken) {
+                    showToast('Token pembayaran Midtrans tidak ditemukan. Silakan periksa konfigurasi server key.', 'error');
+                    return;
+                }
+
+                if (typeof window.snap === 'undefined') {
+                    showToast('Midtrans Snap SDK gagal dimuat. Periksa koneksi internet Anda.', 'error');
+                    return;
+                }
+
+                payBtn.disabled = true;
+                const originalText = document.getElementById('btnText').textContent;
+                document.getElementById('btnText').textContent = 'Membuka Midtrans...';
+
+                window.snap.pay(snapToken, {
+                    onSuccess: function(result) {
+                        showToast('Pembayaran berhasil! Mengalihkan ke status booking...', 'success');
+                        setTimeout(function() {
+                            window.location.href = redirectUrl;
+                        }, 1200);
+                    },
+                    onPending: function(result) {
+                        showToast('Menunggu pembayaran diselesaikan...', 'info');
+                        setTimeout(function() {
+                            window.location.href = redirectUrl;
+                        }, 1500);
+                    },
+                    onError: function(result) {
+                        showToast('Pembayaran gagal diproses oleh Midtrans.', 'error');
+                        payBtn.disabled = false;
+                        document.getElementById('btnText').textContent = originalText;
+                    },
+                    onClose: function() {
+                        showToast('Anda menutup popup pembayaran sebelum transaksi selesai.', 'info');
+                        payBtn.disabled = false;
+                        document.getElementById('btnText').textContent = originalText;
+                    }
+                });
             });
         });
     </script>

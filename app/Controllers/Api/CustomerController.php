@@ -25,7 +25,7 @@ class CustomerController extends BaseApiController
 
     public function verifyBooking(): ResponseInterface
     {
-        $payload = $this->request->getJSON(true) ?? $this->request->getPost();
+        $payload     = $this->getRequestPayload();
         $bookingCode = trim((string) ($payload['booking_code'] ?? $payload['qr_code'] ?? ''));
 
         if ($bookingCode === '') {
