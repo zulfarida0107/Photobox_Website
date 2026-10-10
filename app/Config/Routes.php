@@ -336,3 +336,7 @@ $routes->post('help/send', 'User_Booking\HelpController::send');
 
 
 
+
+// Alias Google Drive OAuth
+$routes->get('google/auth', 'GoogleAuthController::auth');
+$routes->get('google/callback', 'GoogleAuthController::callback');

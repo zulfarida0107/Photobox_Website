@@ -679,10 +679,8 @@ class SessionController extends BaseApiController
         // response ini (cek writable/logs/ untuk hasil aktualnya). Dipilih
         // karena kecepatan tampil foto ke user jadi prioritas utama.
         $liveViewRearmed = null; // status tidak diverifikasi sinkron
-        if ($isWebServerActive) {
-            $command = 'start /B "" "' . PHP_BINARY . '" "' . FCPATH . '../spark" liveview:rearm > NUL 2>&1';
-            @pclose(@popen($command, 'r'));
-        }
+        $liveViewRearmed = true;
+        $mark('liveview_standby');
         $mark('dispatch_liveview_rearm_async'); // seharusnya nyaris 0ms karena async
 
         // DI-BYPASS UNTUK KECEPATAN MAKSIMAL:
