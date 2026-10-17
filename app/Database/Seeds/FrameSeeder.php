@@ -12,7 +12,7 @@ class FrameSeeder extends Seeder
             [
                 'id'         => 'FRM_001',
                 'name'       => 'Pastel Dream',
-                'category'   => 'pastel',
+                'category'   => 'Pastel',
                 'file_path'  => 'uploads/frames/pastel_dream.png',
                 'price'      => 10000.00,
                 'is_active'  => 1,
@@ -22,7 +22,7 @@ class FrameSeeder extends Seeder
             [
                 'id'         => 'FRM_002',
                 'name'       => 'Cute Kitty',
-                'category'   => 'cute',
+                'category'   => 'Cute',
                 'file_path'  => 'uploads/frames/cute_kitty.png',
                 'price'      => 12000.00,
                 'is_active'  => 1,
@@ -31,8 +31,8 @@ class FrameSeeder extends Seeder
             ],
             [
                 'id'         => 'FRM_003',
-                'name'       => 'Classic Layout',
-                'category'   => 'layout',
+                'name'       => 'Classic Minimalist',
+                'category'   => 'Minimalist',
                 'file_path'  => 'uploads/frames/classic_layout.png',
                 'price'      => 15000.00,
                 'is_active'  => 1,
@@ -42,7 +42,7 @@ class FrameSeeder extends Seeder
             [
                 'id'         => 'FRM_004',
                 'name'       => 'Simple Minimalist',
-                'category'   => 'minimalist',
+                'category'   => 'Minimalist',
                 'file_path'  => 'uploads/frames/simple_minimalist.png',
                 'price'      => 10000.00,
                 'is_active'  => 1,
@@ -52,7 +52,7 @@ class FrameSeeder extends Seeder
             [
                 'id'         => 'FRM_005',
                 'name'       => 'Daily News',
-                'category'   => 'newspaper',
+                'category'   => 'Newspaper',
                 'file_path'  => 'uploads/frames/daily_news.png',
                 'price'      => 18000.00,
                 'is_active'  => 1,
@@ -62,7 +62,7 @@ class FrameSeeder extends Seeder
             [
                 'id'         => 'FRM_006',
                 'name'       => 'Vogue Cover',
-                'category'   => 'magazine',
+                'category'   => 'Magazine',
                 'file_path'  => 'uploads/frames/vogue_cover.png',
                 'price'      => 20000.00,
                 'is_active'  => 1,
@@ -72,7 +72,7 @@ class FrameSeeder extends Seeder
             [
                 'id'         => 'FRM_007',
                 'name'       => '90s Vibe',
-                'category'   => 'retro 90s',
+                'category'   => 'Retro 90s',
                 'file_path'  => 'uploads/frames/90s_vibe.png',
                 'price'      => 15000.00,
                 'is_active'  => 1,
@@ -82,7 +82,7 @@ class FrameSeeder extends Seeder
             [
                 'id'         => 'FRM_008',
                 'name'       => 'Y2K Cyber',
-                'category'   => 'y2k',
+                'category'   => 'Y2k',
                 'file_path'  => 'uploads/frames/y2k_cyber.png',
                 'price'      => 15000.00,
                 'is_active'  => 1,

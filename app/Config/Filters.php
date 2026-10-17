@@ -26,7 +26,6 @@ class Filters extends BaseFilters
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
         'adminAuth'      => \App\Filters\AuthFilter::class,
-        'adminCatalogAuth' => \App\Filters\AdminCatalogFilter::class,
         'superadminAuth' => \App\Filters\SuperadminFilter::class,
     ];
 

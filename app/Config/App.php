@@ -29,7 +29,7 @@ class App extends BaseConfig
      *
      * @var list<string>
      */
-    public array $allowedHostnames = ['localhost'];
+    public array $allowedHostnames = ['localhost', '127.0.0.1', 'affected-creates-selective-packed.trycloudflare.com'];
 
     /**
      * --------------------------------------------------------------------------

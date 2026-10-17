@@ -138,7 +138,10 @@ class SessionController extends BaseApiController
         // simpan video transisi jika ada
         $finalVideoTransition = $this->request->getFile('final_video_transition');
         if ($finalVideoTransition && $finalVideoTransition->isValid()) {
-            $ext = $finalVideoTransition->getExtension();
+            $ext = $finalVideoTransition->getExtension() ?: 'mp4';
+            if ($ext === 'tmp' || empty($ext)) {
+                $ext = 'mp4';
+            }
             $transitionFilename = 'final_video_transition.' . $ext;
             $finalVideoTransition->move(
                 $folder,
@@ -157,7 +160,10 @@ class SessionController extends BaseApiController
         // simpan video loop jika ada
         $finalVideoLoop = $this->request->getFile('final_video_loop');
         if ($finalVideoLoop && $finalVideoLoop->isValid()) {
-            $ext = $finalVideoLoop->getExtension();
+            $ext = $finalVideoLoop->getExtension() ?: 'mp4';
+            if ($ext === 'tmp' || empty($ext)) {
+                $ext = 'mp4';
+            }
             $loopFilename = 'final_video_loop.' . $ext;
             $finalVideoLoop->move(
                 $folder,
@@ -488,6 +494,16 @@ class SessionController extends BaseApiController
         $tempFolder = FCPATH . 'uploads/temp/';
         if (!is_dir($tempFolder)) {
             mkdir($tempFolder, 0777, true);
+        } else {
+            // Auto cleanup file temp yang lebih tua dari 2 jam (7200 detik)
+            if (rand(1, 10) === 1) {
+                $cutoff = time() - 7200;
+                foreach (glob($tempFolder . 'dslr_*') as $oldFile) {
+                    if (is_file($oldFile) && filemtime($oldFile) < $cutoff) {
+                        @unlink($oldFile);
+                    }
+                }
+            }
         }
 
         $outputFile = $tempFolder . 'dslr_' . $sessionId . '_' . time() . '.jpg';
@@ -663,10 +679,8 @@ class SessionController extends BaseApiController
         // response ini (cek writable/logs/ untuk hasil aktualnya). Dipilih
         // karena kecepatan tampil foto ke user jadi prioritas utama.
         $liveViewRearmed = null; // status tidak diverifikasi sinkron
-        if ($isWebServerActive) {
-            $command = 'start /B "" "' . PHP_BINARY . '" "' . FCPATH . '../spark" liveview:rearm > NUL 2>&1';
-            @pclose(@popen($command, 'r'));
-        }
+        $liveViewRearmed = true;
+        $mark('liveview_standby');
         $mark('dispatch_liveview_rearm_async'); // seharusnya nyaris 0ms karena async
 
         // DI-BYPASS UNTUK KECEPATAN MAKSIMAL:
@@ -783,4 +797,5 @@ class SessionController extends BaseApiController
         ]);
     }
 }
+
 

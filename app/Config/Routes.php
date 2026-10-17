@@ -26,7 +26,13 @@ if ($serverPort == '8080') {
 
 
 // Handle global OPTIONS requests for CORS preflight
-$routes->options('(:any)', function() {});
+$routes->options('(:any)', static function () {
+    return response()
+        ->setHeader('Access-Control-Allow-Origin', '*')
+        ->setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-API-KEY')
+        ->setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH')
+        ->setStatusCode(200);
+});
 
 // ============================================================
 // API ROUTES
@@ -50,7 +56,7 @@ $routes->group('api', static function ($routes) {
     $routes->post('payment/qr', 'Api\PaymentController::createQr');
     $routes->get('payment', 'Api\PaymentController::statusByQuery');
     $routes->get('payment/(:segment)/status', 'Api\PaymentController::status/$1');
-    $routes->post('payment/midtrans/callback', 'Api\PaymentController::midtransCallback');
+    $routes->match(['get', 'post'], 'payment/midtrans/callback', 'Api\PaymentController::midtransCallback');
 
     // ---- Manajemen Alur Sesi Pemotretan (Start, Email, Complete) ----
     $routes->post('session/start', 'Api\SessionController::start');
@@ -225,9 +231,9 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->post('photos/(:segment)/delete',       'Admin\SessionAndPhotoController::deletePhoto/$1');
 
 	// ============================================================
-	// RUTE KATALOG (Admin dan Superadmin)
+	// RUTE KHUSUS SUPERADMIN (Master Data, Harga, Desain, Akses)
 	// ============================================================
-	$routes->group('', ['filter' => 'adminCatalogAuth'], static function ($routes) {
+	$routes->group('', ['filter' => 'superadminAuth'], static function ($routes) {
 		// ---- Tab 5: Opsi Cetak & Harga ----
 		$routes->get('print-options',                    'Admin\PackageAndPrintOptionController::index');
 		$routes->get('print-options/export',             'Admin\PackageAndPrintOptionController::exportPrintOptions');
@@ -262,11 +268,8 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 		$routes->post('layouts',                     'Admin\FrameAndFilterController::storeLayout');
 		$routes->post('layouts/(:segment)/update',   'Admin\FrameAndFilterController::updateLayout/$1');
 		$routes->post('layouts/(:segment)/delete',   'Admin\FrameAndFilterController::deleteLayout/$1');
-	});
 
-	// RUTE PENGELOLAAN AKUN (Admin dan Superadmin)
-	$routes->group('', ['filter' => 'adminCatalogAuth'], static function ($routes) {
-		// ---- Tab 9: Pengaturan Akses ----
+		// ---- Tab 9: Pengaturan Akses (Admin) ----
 		$routes->get('settings',                      'Admin\AdminAccessController::index');
 		$routes->get('settings/create',               'Admin\AdminAccessController::create');
 		$routes->post('settings',                     'Admin\AdminAccessController::store');
@@ -297,6 +300,8 @@ $routes->get('logout', 'User_Booking\LoginController::logout');
 // ---- Alur 4: Lupa Password ----
 $routes->get('forgot-password', 'User_Booking\LoginController::forgotPassword');
 $routes->post('forgot-password/process', 'User_Booking\LoginController::processForgotPassword');
+$routes->get('reset-password', 'User_Booking\LoginController::resetPassword');
+$routes->post('reset-password/process', 'User_Booking\LoginController::processResetPassword');
 
 // ---- Alur 5: Pemilihan Mesin Booth ----
 $routes->get('booth', 'User_Booking\BoothController::index');
@@ -337,3 +342,9 @@ $routes->get('statusbooking', 'User_Booking\StatusBookingController::index');  /
 $routes->get('help', 'User_Booking\HelpController::index');
 $routes->post('help/send', 'User_Booking\HelpController::send');
 
+
+
+
+// Alias Google Drive OAuth
+$routes->get('google/auth', 'GoogleAuthController::auth');
+$routes->get('google/callback', 'GoogleAuthController::callback');
