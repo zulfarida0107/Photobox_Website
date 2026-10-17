@@ -39,13 +39,15 @@ class AdminAccessController extends BaseController
         $totalAdmins = $builder->countAllResults(false);
         $totalPages  = max(1, (int) ceil($totalAdmins / $perPage));
         $admins      = $builder
-            ->orderBy('created_at', 'DESC')
+            ->orderBy("CAST(REGEXP_REPLACE(id, '[^0-9]', '') AS UNSIGNED)", 'ASC', false)
+            ->orderBy('id', 'ASC')
             ->findAll($perPage, ($currentPage - 1) * $perPage);
 
         // --- Stats ---
         $statTotal      = $this->adminModel->countAll();
         $statSuperadmin = $this->adminModel->where('role', 'superadmin')->countAllResults();
-        $statAdmin      = $this->adminModel->where('role', 'staff')->countAllResults();
+        $statAdmin      = $this->adminModel->where('role', 'admin')->countAllResults();
+        $statStaff      = $this->adminModel->where('role', 'staff')->countAllResults();
 
         $data = [
             'title'          => 'Pengaturan Akses Admin | Admin Panel',
@@ -58,7 +60,9 @@ class AdminAccessController extends BaseController
             'statTotal'      => $statTotal,
             'statSuperadmin' => $statSuperadmin,
             'statAdmin'      => $statAdmin,
+            'statStaff'      => $statStaff,
             'loggedInId'     => session()->get('adminId'), // untuk proteksi hapus diri sendiri
+            'canManageSuperadmin' => $this->isSuperadmin(),
         ];
 
         return view('Admin/AdminAccess/AdminAccessManajemen', $data);
@@ -72,6 +76,7 @@ class AdminAccessController extends BaseController
         return view('Admin/AdminAccess/AdminAccessForm', [
             'title'      => 'Tambah Admin Baru | Admin Panel',
             'validation' => \Config\Services::validation(),
+            'canManageSuperadmin' => $this->isSuperadmin(),
         ]);
     }
 
@@ -80,11 +85,12 @@ class AdminAccessController extends BaseController
     // =========================================================================
     public function store()
     {
+        $allowedRoles = $this->isSuperadmin() ? ['superadmin', 'admin', 'staff'] : ['admin', 'staff'];
         $rules = [
             'name'     => 'required|min_length[3]|max_length[100]|is_unique[admins.name]',
             'email'    => 'required|valid_email|is_unique[admins.email]',
             'password' => 'required|min_length[8]',
-            'role'     => 'required|in_list[superadmin,staff]',
+            'role'     => 'required|in_list[' . implode(',', $allowedRoles) . ']',
         ];
 
         if (!$this->validate($rules)) {
@@ -129,10 +135,16 @@ class AdminAccessController extends BaseController
                 ->with('error', 'Admin tidak ditemukan.');
         }
 
+        if (!$this->isSuperadmin() && strtolower($admin['role']) === 'superadmin') {
+            return redirect()->to(base_url('admin/settings'))
+                ->with('error', 'Data superadmin hanya dapat diubah oleh superadmin.');
+        }
+
         return view('Admin/AdminAccess/AdminAccessForm', [
             'title'      => 'Edit Admin | Admin Panel',
             'admin'      => $admin,
             'validation' => \Config\Services::validation(),
+            'canManageSuperadmin' => $this->isSuperadmin(),
         ]);
     }
 
@@ -147,10 +159,16 @@ class AdminAccessController extends BaseController
                 ->with('error', 'Admin tidak ditemukan.');
         }
 
+        if (!$this->isSuperadmin() && strtolower($admin['role']) === 'superadmin') {
+            return redirect()->to(base_url('admin/settings'))
+                ->with('error', 'Data superadmin hanya dapat diubah oleh superadmin.');
+        }
+
+        $allowedRoles = $this->isSuperadmin() ? ['superadmin', 'admin', 'staff'] : ['admin', 'staff'];
         $rules = [
             'name'  => "required|min_length[3]|max_length[100]|is_unique[admins.name,id,{$id}]",
             'email' => "required|valid_email|is_unique[admins.email,id,{$id}]",
-            'role'  => 'required|in_list[superadmin,staff]',
+            'role'  => 'required|in_list[' . implode(',', $allowedRoles) . ']',
         ];
 
         $newPassword = $this->request->getPost('password');
@@ -161,6 +179,15 @@ class AdminAccessController extends BaseController
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()
                 ->with('errors', $this->validator->getErrors());
+        }
+
+        if (
+            strtolower($admin['role']) === 'superadmin'
+            && $this->request->getPost('role') !== 'superadmin'
+            && $this->adminModel->where('role', 'superadmin')->countAllResults() <= 1
+        ) {
+            return redirect()->to(base_url('admin/settings'))
+                ->with('error', 'Tidak dapat menurunkan role superadmin terakhir.');
         }
 
         $updateData = [
@@ -190,6 +217,11 @@ class AdminAccessController extends BaseController
                 ->with('error', 'Admin tidak ditemukan.');
         }
 
+        if (!$this->isSuperadmin() && strtolower($admin['role']) === 'superadmin') {
+            return redirect()->to(base_url('admin/settings'))
+                ->with('error', 'Data superadmin hanya dapat dihapus oleh superadmin.');
+        }
+
         // Proteksi: admin tidak boleh menghapus dirinya sendiri
         if ($id === session()->get('adminId')) {
             return redirect()->to(base_url('admin/settings'))
@@ -209,5 +241,10 @@ class AdminAccessController extends BaseController
 
         return redirect()->to(base_url('admin/settings'))
             ->with('success', "Admin {$id} berhasil dihapus.");
+    }
+
+    private function isSuperadmin(): bool
+    {
+        return strtolower(session()->get('adminRole') ?? '') === 'superadmin';
     }
 }

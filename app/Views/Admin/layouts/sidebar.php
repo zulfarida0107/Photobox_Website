@@ -8,6 +8,11 @@ $uri        = service('request')->getUri();
 $seg2       = $uri->getSegment(2) ?? ''; // segment setelah 'admin'
 $seg3       = $uri->getSegment(3) ?? '';
 
+// Role Admin
+$adminRole    = strtolower(session()->get('adminRole') ?? '');
+$isAdmin      = in_array($adminRole, ['admin', 'superadmin'], true);
+$isSuperAdmin = ($adminRole === 'superadmin');
+
 // Mapping segment → menu key
 $activeMap = [
     'dashboard'     => 'dashboard',
@@ -19,6 +24,7 @@ $activeMap = [
     'frames'        => 'frames',
     'filters'       => 'frames',        // filter masuk menu Aset Desain
     'booths'        => 'booths',
+    'locations'     => 'booths',
     'sessions'      => 'sessions',
     'photos'        => 'sessions',      // photo masuk menu Galeri Sesi
     'settings'      => 'settings',
@@ -41,8 +47,10 @@ function sidebarClass(string $key, string $activeKey, string $clsActive, string 
             <p class="text-xs text-slate-500">Admin Management</p>
         </div>
     </div>
+
     <nav class="flex-1 space-y-1">
 
+        <!-- Menu Operasional (Bisa diakses semua role admin) -->
         <a class="<?= sidebarClass('dashboard', $activeKey, $clsActive, $clsDefault) ?>"
            href="<?= base_url('admin/dashboard') ?>">
             <span class="material-symbols-outlined">dashboard</span>
@@ -67,18 +75,6 @@ function sidebarClass(string $key, string $activeKey, string $clsActive, string 
             <span>Pembayaran</span>
         </a>
 
-        <a class="<?= sidebarClass('print-options', $activeKey, $clsActive, $clsDefault) ?>"
-           href="<?= base_url('admin/print-options') ?>">
-            <span class="material-symbols-outlined">print</span>
-            <span>Opsi Cetak</span>
-        </a>
-
-        <a class="<?= sidebarClass('frames', $activeKey, $clsActive, $clsDefault) ?>"
-           href="<?= base_url('admin/frames') ?>">
-            <span class="material-symbols-outlined">palette</span>
-            <span>Aset Desain</span>
-        </a>
-
         <a class="<?= sidebarClass('booths', $activeKey, $clsActive, $clsDefault) ?>"
            href="<?= base_url('admin/booths') ?>">
             <span class="material-symbols-outlined">nest_display</span>
@@ -91,13 +87,33 @@ function sidebarClass(string $key, string $activeKey, string $clsActive, string 
             <span>Galeri Sesi</span>
         </a>
 
-        <a class="<?= sidebarClass('settings', $activeKey, $clsActive, $clsDefault) ?>"
-           href="<?= base_url('admin/settings') ?>">
-            <span class="material-symbols-outlined">admin_panel_settings</span>
-            <span>Pengaturan Akses</span>
-        </a>
+        <!-- Menu Katalog (Admin & Superadmin) -->
+        <?php if ($isAdmin): ?>
+            <a class="<?= sidebarClass('print-options', $activeKey, $clsActive, $clsDefault) ?>"
+               href="<?= base_url('admin/print-options') ?>">
+                <span class="material-symbols-outlined">print</span>
+                <span>Opsi Cetak</span>
+            </a>
+
+            <a class="<?= sidebarClass('frames', $activeKey, $clsActive, $clsDefault) ?>"
+               href="<?= base_url('admin/frames') ?>">
+                <span class="material-symbols-outlined">palette</span>
+                <span>Aset Desain</span>
+            </a>
+
+        <?php endif; ?>
+
+        <!-- Pengaturan Akses untuk Admin dan Superadmin -->
+        <?php if ($isAdmin): ?>
+            <a class="<?= sidebarClass('settings', $activeKey, $clsActive, $clsDefault) ?>"
+               href="<?= base_url('admin/settings') ?>">
+                <span class="material-symbols-outlined">admin_panel_settings</span>
+                <span>Pengaturan Akses</span>
+            </a>
+        <?php endif; ?>
 
     </nav>
+
     <div class="pt-4 border-t border-slate-100">
         <a class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 rounded-lg"
            href="<?= base_url('admin/logout') ?>">
@@ -105,4 +121,4 @@ function sidebarClass(string $key, string $activeKey, string $clsActive, string 
             <span>Logout</span>
         </a>
     </div>
-</aside>
+</aside>
