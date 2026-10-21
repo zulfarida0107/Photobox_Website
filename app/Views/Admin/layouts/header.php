@@ -351,7 +351,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
                             </div>
                             <div class="space-y-2">
                                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">PERAN</label>
-                                <input class="w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-500 font-medium text-sm py-2.5 px-3 outline-none cursor-not-allowed" readonly type="text" value="<?= esc(strtolower(session()->get('adminRole') ?? '') === 'superadmin' ? 'Super Admin' : 'Staff') ?>"/>
+                                <input class="w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-500 font-medium text-sm py-2.5 px-3 outline-none cursor-not-allowed" readonly type="text" value="<?= esc($adminRoleLabel) ?>"/>
                             </div>
                             <div class="space-y-2">
                                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">ALAMAT EMAIL</label>

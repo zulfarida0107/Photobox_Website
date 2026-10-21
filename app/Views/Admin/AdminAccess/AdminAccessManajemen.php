@@ -57,7 +57,7 @@
         </div>
 
         <!-- Stats Bento -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
             <!-- Total Admin -->
             <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
@@ -74,13 +74,21 @@
                 <p class="text-sm font-medium text-slate-500">Superadmin</p>
                 <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statSuperadmin ?? 0 ?></h3>
             </div>
+            <!-- Admin -->
+            <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-blue-600 bg-blue-50 p-2 rounded-lg material-symbols-outlined">admin_panel_settings</span>
+                </div>
+                <p class="text-sm font-medium text-slate-500">Admin</p>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statAdmin ?? 0 ?></h3>
+            </div>
             <!-- Staff -->
             <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-amber-600 bg-amber-50 p-2 rounded-lg material-symbols-outlined">badge</span>
                 </div>
                 <p class="text-sm font-medium text-slate-500">Staff</p>
-                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statAdmin ?? 0 ?></h3>
+                <h3 class="text-2xl font-black text-slate-900 mt-1"><?= $statStaff ?? 0 ?></h3>
             </div>
             <!-- Status Keamanan -->
             <div class="bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
@@ -122,6 +130,7 @@
                             class="w-full sm:w-48 px-4 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all text-slate-600">
                         <option value="" <?= ($filterRole ?? '') === '' ? 'selected' : '' ?>>Semua Role</option>
                         <option value="superadmin" <?= ($filterRole ?? '') === 'superadmin' ? 'selected' : '' ?>>Superadmin</option>
+                        <option value="admin"      <?= ($filterRole ?? '') === 'admin'      ? 'selected' : '' ?>>Admin</option>
                         <option value="staff"      <?= ($filterRole ?? '') === 'staff'      ? 'selected' : '' ?>>Staff</option>
                     </select>
 
@@ -152,9 +161,19 @@
                             <?php foreach ($admins as $admin): ?>
                                 <?php
                                     $initials = strtoupper(substr($admin['name'] ?? 'A', 0, 1) . (strpos($admin['name'] ?? '', ' ') !== false ? substr(strrchr($admin['name'], ' '), 1, 1) : substr($admin['name'] ?? 'D', 1, 1)));
-                                    $isSuperadmin = strtolower($admin['role'] ?? '') === 'superadmin';
-                                    $avatarClass  = $isSuperadmin ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700';
-                                    $badgeClass   = $isSuperadmin ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
+                                    $role = strtolower($admin['role'] ?? '');
+                                    $isLockedSuperadmin = $role === 'superadmin' && !($canManageSuperadmin ?? false);
+                                    $roleLabels = ['superadmin' => 'Superadmin', 'admin' => 'Admin', 'staff' => 'Staff'];
+                                    $avatarClass = match ($role) {
+                                        'superadmin' => 'bg-emerald-100 text-emerald-700',
+                                        'admin' => 'bg-blue-100 text-blue-700',
+                                        default => 'bg-amber-100 text-amber-700',
+                                    };
+                                    $badgeClass = match ($role) {
+                                        'superadmin' => 'bg-emerald-100 text-emerald-800',
+                                        'admin' => 'bg-blue-100 text-blue-800',
+                                        default => 'bg-amber-100 text-amber-800',
+                                    };
                                 ?>
                                 <tr class="hover:bg-blue-50/30 transition-colors group">
                                     <td class="px-6 py-4 text-sm font-medium text-slate-900 text-center">#<?= strtolower(esc($admin['id'])) ?></td>
@@ -169,7 +188,7 @@
                                     <td class="px-6 py-4 text-sm text-slate-600 text-center"><?= esc($admin['email']) ?></td>
                                     <td class="px-6 py-4 text-center">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold <?= $badgeClass ?> uppercase tracking-wide">
-                                            <?= esc($admin['role'] === 'superadmin' ? 'Superadmin' : 'Staff') ?>
+                                            <?= esc($roleLabels[$role] ?? ucfirst($role)) ?>
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-center text-xs text-slate-500">
@@ -177,17 +196,23 @@
                                     </td>
                                     <td class="px-6 py-4 text-center">
                                         <div class="flex items-center justify-center gap-2">
-                                            <a href="<?= base_url('admin/settings/' . $admin['id'] . '/edit') ?>"
-                                               class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
-                                                <span class="material-symbols-outlined text-[18px]">edit</span>
-                                            </a>
-                                            <form action="<?= base_url('admin/settings/' . $admin['id'] . '/delete') ?>" method="post" class="inline" onsubmit="confirmDelete(event, this)">
-                                                <?= csrf_field() ?>
-                                                <button type="submit"
-                                                        class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
-                                                    <span class="material-symbols-outlined text-[18px]">delete</span>
-                                                </button>
-                                            </form>
+                                            <?php if ($isLockedSuperadmin): ?>
+                                                <span class="p-2 text-slate-400 cursor-not-allowed" title="Record superadmin terkunci">
+                                                    <span class="material-symbols-outlined text-[18px]">lock</span>
+                                                </span>
+                                            <?php else: ?>
+                                                <a href="<?= base_url('admin/settings/' . $admin['id'] . '/edit') ?>"
+                                                   class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+                                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                                </a>
+                                                <form action="<?= base_url('admin/settings/' . $admin['id'] . '/delete') ?>" method="post" class="inline" onsubmit="confirmDelete(event, this)">
+                                                    <?= csrf_field() ?>
+                                                    <button type="submit"
+                                                            class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
+                                                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                    </button>
+                                                </form>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
