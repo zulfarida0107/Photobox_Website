@@ -10,6 +10,7 @@ use App\Models\BoothModel;
 use App\Models\PrintOptionModel;
 use App\Models\PaymentModel;
 use App\Models\FrameModel;
+use App\Libraries\BayarGGService;
 
 class StatusBookingController extends BaseController
 {
@@ -61,60 +62,57 @@ class StatusBookingController extends BaseController
             }
         }
 
-        // Live Fallback Midtrans Status Inquiry jika payment masih pending
-        if ($payment && $payment['status'] === 'pending') {
-            $serverKey = config('Midtrans')->serverKey ?? (string) env('midtrans.serverKey', '');
-            if (!empty($serverKey)) {
-                try {
-                    \Midtrans\Config::$serverKey    = $serverKey;
-                    \Midtrans\Config::$isProduction = (bool) (config('Midtrans')->isProduction ?? false);
+        // Live Fallback: Cek status ke Bayar.gg jika payment masih pending
+        if ($payment && $payment['status'] === 'pending' && !empty($payment['gateway_ref'])) {
+            try {
+                $bayargg = new BayarGGService();
+                $statusResponse = $bayargg->checkPayment($payment['gateway_ref']);
 
-                    $statusObj = \Midtrans\Transaction::status($payment['id']);
-                    $txStatus  = $statusObj->transaction_status ?? '';
-                    $fraud     = $statusObj->fraud_status ?? 'accept';
+                $invoiceData = $statusResponse['data'] ?? $statusResponse;
+                $bayarggStatus = $invoiceData['status'] ?? '';
+                $mappedStatus = $bayargg->mapStatus($bayarggStatus);
 
-                    $db = \Config\Database::connect();
-                    $db->transBegin();
+                $db = \Config\Database::connect();
+                $db->transBegin();
 
-                    if ($txStatus === 'settlement' || ($txStatus === 'capture' && $fraud === 'accept')) {
-                        $this->paymentModel->update($payment['id'], [
-                            'status'         => 'paid',
-                            'payment_method' => $statusObj->payment_type ?? 'Midtrans',
-                            'updated_at'     => date('Y-m-d H:i:s'),
-                        ]);
+                if ($mappedStatus === 'paid') {
+                    $this->paymentModel->update($payment['id'], [
+                        'status'         => 'paid',
+                        'payment_method' => 'QRIS Bayar.gg',
+                        'updated_at'     => date('Y-m-d H:i:s'),
+                    ]);
 
-                        if (!empty($payment['booking_id'])) {
-                            $this->bookingModel->update($payment['booking_id'], [
-                                'status'     => 'paid',
-                                'updated_at' => date('Y-m-d H:i:s'),
-                            ]);
-                        }
-                    } elseif (in_array($txStatus, ['deny', 'cancel', 'expire'], true)) {
-                        $this->paymentModel->update($payment['id'], [
-                            'status'     => 'failed',
+                    if (!empty($payment['booking_id'])) {
+                        $this->bookingModel->update($payment['booking_id'], [
+                            'status'     => 'paid',
                             'updated_at' => date('Y-m-d H:i:s'),
                         ]);
-
-                        if (!empty($payment['booking_id'])) {
-                            $this->bookingModel->update($payment['booking_id'], [
-                                'status'     => 'cancelled',
-                                'updated_at' => date('Y-m-d H:i:s'),
-                            ]);
-                        }
                     }
+                } elseif ($mappedStatus === 'failed') {
+                    $this->paymentModel->update($payment['id'], [
+                        'status'     => 'failed',
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
 
-                    if ($db->transStatus() === false) {
-                        $db->transRollback();
-                    } else {
-                        $db->transCommit();
+                    if (!empty($payment['booking_id'])) {
+                        $this->bookingModel->update($payment['booking_id'], [
+                            'status'     => 'cancelled',
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
                     }
-
-                    // Reload updated payment
-                    $payment = $this->paymentModel->find($payment['id']);
-                } catch (\Throwable $e) {
-                    // Jika transaksi belum ditemukan di Midtrans atau offline, biarkan pending
-                    log_message('notice', '[Midtrans Live Inquiry Notice] ' . $e->getMessage());
                 }
+
+                if ($db->transStatus() === false) {
+                    $db->transRollback();
+                } else {
+                    $db->transCommit();
+                }
+
+                // Reload updated payment
+                $payment = $this->paymentModel->find($payment['id']);
+            } catch (\Throwable $e) {
+                // Jika invoice belum ditemukan di Bayar.gg atau offline, biarkan pending
+                log_message('notice', '[BayarGG Live Inquiry Notice] ' . $e->getMessage());
             }
         }
 

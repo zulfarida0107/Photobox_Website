@@ -27,13 +27,6 @@
             }
         }
     </script>
-    <?php if (!empty($clientKey)): ?>
-        <!-- Midtrans Snap JS -->
-        <script type="text/javascript" 
-                src="<?= (!empty($isProduction) && $isProduction) ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' ?>" 
-                data-client-key="<?= esc($clientKey) ?>">
-        </script>
-    <?php endif; ?>
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #B8E4FF 0%, #FCD2E8 100%);
@@ -73,6 +66,7 @@
             border: none;
             cursor: pointer;
             width: 100%;
+            text-decoration: none;
         }
         .btn-primary:hover {
             transform: scale(1.02);
@@ -156,18 +150,6 @@
             from { transform: translateY(-20px) scale(0.95); opacity: 0; }
             to { transform: translateY(0) scale(1); opacity: 1; }
         }
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(0,0,0,0.1);
-            border-radius: 50%;
-            border-top-color: #1e293b;
-            animation: spin 0.6s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
         .payment-card {
             background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(12px);
@@ -187,6 +169,48 @@
             font-size: 11px;
             font-weight: 600;
             color: #475569;
+        }
+        .qr-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .qr-container img {
+            width: 220px;
+            height: 220px;
+            margin: 0 auto;
+            display: block;
+        }
+        @keyframes qrPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+            50% { box-shadow: 0 0 0 12px rgba(99, 102, 241, 0); }
+        }
+        .qr-active {
+            animation: qrPulse 2s ease-in-out infinite;
+        }
+        .status-checking {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #6366f1;
+            font-weight: 600;
+        }
+        .status-checking .dot {
+            width: 6px;
+            height: 6px;
+            background: #6366f1;
+            border-radius: 50%;
+            animation: dotPulse 1.4s ease-in-out infinite;
+        }
+        .status-checking .dot:nth-child(2) { animation-delay: 0.2s; }
+        .status-checking .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dotPulse {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
         }
     </style>
 </head>
@@ -305,49 +329,85 @@
                         </div>
                     </div>
 
-                    <!-- Right Column: Midtrans Payment Checkout Card -->
+                    <!-- Right Column: QRIS Payment via Bayar.gg -->
                     <div class="flex-1">
                         <div class="payment-card flex flex-col items-center">
                             <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-3 shadow-sm">
-                                <span class="material-symbols-outlined text-3xl">payments</span>
+                                <span class="material-symbols-outlined text-3xl">qr_code_2</span>
                             </div>
 
-                            <h4 class="text-base font-bold text-slate-800 text-center">Pembayaran Online Resmi</h4>
+                            <h4 class="text-base font-bold text-slate-800 text-center">Scan QRIS untuk Bayar</h4>
                             <p class="text-xs text-slate-500 text-center mt-1 mb-5">
-                                Didukung oleh Midtrans Payment Gateway (Otomatis & Terenkripsi SHA-512)
+                                Gunakan aplikasi m-Banking atau e-Wallet (GoPay, OVO, DANA, dll) untuk memindai kode QR
                             </p>
 
-                            <!-- Supported Payment Methods Badges -->
-                            <div class="w-full flex flex-wrap justify-center gap-2 mb-6">
+                            <!-- Supported Payment Badges -->
+                            <div class="w-full flex flex-wrap justify-center gap-2 mb-5">
                                 <span class="badge-payment">⚡ QRIS</span>
-                                <span class="badge-payment">🏦 BCA VA</span>
-                                <span class="badge-payment">🏦 Mandiri</span>
-                                <span class="badge-payment">🏦 BNI</span>
-                                <span class="badge-payment">🏦 BRI</span>
                                 <span class="badge-payment">💚 GoPay</span>
-                                <span class="badge-payment">💳 Kartu Kredit</span>
+                                <span class="badge-payment">💜 OVO</span>
+                                <span class="badge-payment">💙 DANA</span>
+                                <span class="badge-payment">🏦 m-Banking</span>
                             </div>
 
-                            <div class="bg-indigo-50/80 w-full rounded-2xl p-5 text-center border border-indigo-100/50 mb-4">
-                                <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1">Jumlah yang Harus Dibayar</p>
-                                <p class="text-3xl font-black text-slate-800">Rp <?= number_format($totalAmount, 0, ',', '.') ?></p>
-                                <p class="text-[11px] text-slate-500 mt-1">ID Transaksi: <span class="font-mono font-bold text-slate-700"><?= esc($paymentId) ?></span></p>
-                            </div>
+                            <!-- QR Code Display -->
+                            <?php if (!empty($qrImageUrl)): ?>
+                                <div class="qr-container qr-active mb-4" id="qrContainer">
+                                    <img src="<?= esc($qrImageUrl) ?>" alt="QRIS CuitBox Studio" id="qrImage">
+                                </div>
+
+                                <div class="bg-indigo-50/80 w-full rounded-2xl p-4 text-center border border-indigo-100/50 mb-3">
+                                    <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1">Jumlah yang Harus Dibayar</p>
+                                    <p class="text-3xl font-black text-slate-800">Rp <?= number_format($totalAmount, 0, ',', '.') ?></p>
+                                    <p class="text-[11px] text-slate-500 mt-1">ID: <span class="font-mono font-bold text-slate-700"><?= esc($paymentId) ?></span></p>
+                                </div>
+
+                                <!-- Auto-check status indicator -->
+                                <div class="w-full text-center mb-4" id="statusIndicator">
+                                    <div class="status-checking">
+                                        <span class="dot"></span>
+                                        <span class="dot"></span>
+                                        <span class="dot"></span>
+                                        <span>Menunggu pembayaran...</span>
+                                    </div>
+                                </div>
+
+                            <?php else: ?>
+                                <!-- Fallback jika QR belum muncul (misal API Key belum diisi atau error) -->
+                                <div class="w-full bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center mb-4">
+                                    <span class="material-symbols-outlined text-4xl text-amber-500 mb-2">info</span>
+                                    <p class="text-sm font-bold text-amber-800">Menyiapkan QRIS</p>
+                                    <p class="text-xs text-amber-600 mt-1">Silakan klik tombol di bawah untuk membuka halaman pembayaran atau muat ulang.</p>
+                                </div>
+
+                                <div class="bg-indigo-50/80 w-full rounded-2xl p-4 text-center border border-indigo-100/50 mb-3">
+                                    <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1">Jumlah yang Harus Dibayar</p>
+                                    <p class="text-3xl font-black text-slate-800">Rp <?= number_format($totalAmount, 0, ',', '.') ?></p>
+                                    <p class="text-[11px] text-slate-500 mt-1">ID: <span class="font-mono font-bold text-slate-700"><?= esc($paymentId) ?></span></p>
+                                </div>
+                            <?php endif; ?>
 
                             <!-- Timer Sesi -->
-                            <div class="w-full bg-[#D9F99D] rounded-2xl py-3 flex items-center justify-center space-x-2 text-slate-800 font-bold mb-6" id="timer-container">
+                            <div class="w-full bg-[#D9F99D] rounded-2xl py-3 flex items-center justify-center space-x-2 text-slate-800 font-bold mb-5" id="timer-container">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                                 </svg>
-                                <span class="text-xs sm:text-sm" id="timer-display">Sesi berakhir dalam: 05:00</span>
+                                <span class="text-xs sm:text-sm" id="timer-display">Sesi berakhir dalam: 15:00</span>
                             </div>
 
-                            <!-- Tombol Bayar Sekarang (Midtrans Snap) -->
+                            <!-- Action Buttons -->
                             <div class="w-full space-y-3">
-                                <button type="button" class="btn-primary" id="payButton">
-                                    <span class="material-symbols-outlined text-xl">lock</span>
-                                    <span id="btnText">Bayar Sekarang via Midtrans</span>
-                                </button>
+                                <?php if (!empty($paymentPageUrl)): ?>
+                                    <a href="<?= esc($paymentPageUrl) ?>" target="_blank" class="btn-primary" id="payButton">
+                                        <span class="material-symbols-outlined text-xl">open_in_new</span>
+                                        <span id="btnText">Buka Halaman Pembayaran</span>
+                                    </a>
+                                <?php else: ?>
+                                    <button type="button" class="btn-primary" id="payButton" onclick="location.reload()">
+                                        <span class="material-symbols-outlined text-xl">refresh</span>
+                                        <span id="btnText">Muat Ulang Halaman</span>
+                                    </button>
+                                <?php endif; ?>
 
                                 <a href="<?= base_url('print-option') ?>" class="btn-secondary">
                                     <span class="material-symbols-outlined">arrow_back</span>
@@ -356,7 +416,7 @@
                             </div>
 
                             <p class="text-[11px] text-slate-500 text-center leading-relaxed mt-4">
-                                *Setelah pembayaran selesai di popup Midtrans, status booking Anda akan langsung aktif secara instan.
+                                *Setelah pembayaran berhasil, halaman ini akan otomatis berpindah ke tiket booking Anda.
                             </p>
                         </div>
                     </div>
@@ -371,7 +431,7 @@
                     <svg class="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                     </svg>
-                    <span class="font-semibold text-slate-700">256-Bit SSL Encrypted Midtrans Gateway</span>
+                    <span class="font-semibold text-slate-700">Pembayaran QRIS Aman via Bayar.gg</span>
                 </div>
                 <div class="text-center">© 2026 CuitBox Studio. All rights reserved.</div>
             </footer>
@@ -382,8 +442,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ========== COUNTDOWN TIMER ==========
-            let totalSeconds = 300;
+            // ========== COUNTDOWN TIMER (15 menit) ==========
+            let totalSeconds = 900;
             const timerDisplay = document.getElementById('timer-display');
             const timerContainer = document.getElementById('timer-container');
             const payBtn = document.getElementById('payButton');
@@ -396,14 +456,19 @@
             
             function updateTimer() {
                 if (totalSeconds <= 0) {
-                    timerDisplay.textContent = '⏰ Sesi telah berakhir!';
+                    timerDisplay.textContent = '⏰ Sesi QRIS telah berakhir!';
                     timerContainer.classList.add('timer-warning');
                     timerContainer.style.background = '#ef4444';
                     timerContainer.style.color = 'white';
                     clearInterval(timerInterval);
-                    
-                    payBtn.disabled = true;
-                    document.getElementById('btnText').textContent = 'Sesi Berakhir';
+                    if (pollInterval) clearInterval(pollInterval);
+
+                    if (payBtn) {
+                        payBtn.style.pointerEvents = 'none';
+                        payBtn.style.opacity = '0.5';
+                    }
+                    const btnText = document.getElementById('btnText');
+                    if (btnText) btnText.textContent = 'QRIS Kedaluwarsa - Muat Ulang';
                     return;
                 }
                 
@@ -439,52 +504,82 @@
                 }, 4000);
             };
 
-            // ========== MIDTRANS SNAP PAYMENT TRIGGER ==========
-            const snapToken = '<?= esc($snapToken ?? '', 'js') ?>';
+            // ========== AUTO-POLLING STATUS PEMBAYARAN ==========
             const paymentId = '<?= esc($paymentId ?? '', 'js') ?>';
             const bookingId = '<?= esc($bookingId ?? '', 'js') ?>';
             const redirectUrl = '<?= base_url('StatusBooking') ?>' + '?payment_id=' + encodeURIComponent(paymentId) + '&booking_id=' + encodeURIComponent(bookingId);
 
-            payBtn.addEventListener('click', function() {
-                if (!snapToken) {
-                    showToast('Token pembayaran Midtrans tidak ditemukan. Silakan periksa konfigurasi server key.', 'error');
+            let pollInterval = null;
+            let pollCount = 0;
+            const MAX_POLLS = 180; // 15 menit x 12 polls/menit = 180 polls
+
+            function checkPaymentStatus() {
+                if (!paymentId || pollCount >= MAX_POLLS) {
+                    if (pollInterval) clearInterval(pollInterval);
                     return;
                 }
 
-                if (typeof window.snap === 'undefined') {
-                    showToast('Midtrans Snap SDK gagal dimuat. Periksa koneksi internet Anda.', 'error');
-                    return;
-                }
+                pollCount++;
 
-                payBtn.disabled = true;
-                const originalText = document.getElementById('btnText').textContent;
-                document.getElementById('btnText').textContent = 'Membuka Midtrans...';
+                fetch('<?= base_url('api/payment') ?>' + '/' + encodeURIComponent(paymentId) + '/status', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const status = data?.payment?.status;
 
-                window.snap.pay(snapToken, {
-                    onSuccess: function(result) {
-                        showToast('Pembayaran berhasil! Mengalihkan ke status booking...', 'success');
+                    if (status === 'paid') {
+                        if (pollInterval) clearInterval(pollInterval);
+                        clearInterval(timerInterval);
+
+                        // Update UI
+                        const indicator = document.getElementById('statusIndicator');
+                        if (indicator) {
+                            indicator.innerHTML = `
+                                <div class="flex items-center justify-center gap-2 text-emerald-600 font-bold text-sm">
+                                    <span class="material-symbols-outlined">check_circle</span>
+                                    <span>Pembayaran berhasil diterima!</span>
+                                </div>
+                            `;
+                        }
+
+                        const qrContainer = document.getElementById('qrContainer');
+                        if (qrContainer) {
+                            qrContainer.classList.remove('qr-active');
+                            qrContainer.style.borderColor = '#10b981';
+                            qrContainer.style.background = '#f0fdf4';
+                        }
+
+                        showToast('✅ Pembayaran berhasil! Mengalihkan ke tiket booking...', 'success');
+
                         setTimeout(function() {
                             window.location.href = redirectUrl;
-                        }, 1200);
-                    },
-                    onPending: function(result) {
-                        showToast('Menunggu pembayaran diselesaikan...', 'info');
-                        setTimeout(function() {
-                            window.location.href = redirectUrl;
-                        }, 1500);
-                    },
-                    onError: function(result) {
-                        showToast('Pembayaran gagal diproses oleh Midtrans.', 'error');
-                        payBtn.disabled = false;
-                        document.getElementById('btnText').textContent = originalText;
-                    },
-                    onClose: function() {
-                        showToast('Anda menutup popup pembayaran sebelum transaksi selesai.', 'info');
-                        payBtn.disabled = false;
-                        document.getElementById('btnText').textContent = originalText;
+                        }, 2000);
+                    } else if (status === 'failed') {
+                        if (pollInterval) clearInterval(pollInterval);
+                        const indicator = document.getElementById('statusIndicator');
+                        if (indicator) {
+                            indicator.innerHTML = `
+                                <div class="flex items-center justify-center gap-2 text-red-600 font-bold text-sm">
+                                    <span class="material-symbols-outlined">cancel</span>
+                                    <span>Pembayaran gagal / kedaluwarsa</span>
+                                </div>
+                            `;
+                        }
+                        showToast('Pembayaran gagal. Silakan muat ulang halaman untuk coba lagi.', 'error');
                     }
+                })
+                .catch(err => {
+                    console.log('Poll retry:', err);
                 });
-            });
+            }
+
+            // Mulai polling setiap 5 detik
+            if (paymentId) {
+                pollInterval = setInterval(checkPaymentStatus, 5000);
+                setTimeout(checkPaymentStatus, 3000);
+            }
         });
     </script>
 </body>

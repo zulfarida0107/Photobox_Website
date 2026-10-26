@@ -7,6 +7,7 @@ use App\Models\PaymentModel;
 use App\Models\BookingModel;
 use App\Models\CustomerModel;
 use App\Models\FrameModel;
+use App\Libraries\BayarGGService;
 
 class PaymentMethodController extends BaseController
 {
@@ -34,9 +35,10 @@ class PaymentMethodController extends BaseController
             'frame'        => null,
             'error'        => null,
             'success'      => null,
-            'snapToken'    => null,
-            'clientKey'    => config('Midtrans')->clientKey ?? '',
-            'isProduction' => config('Midtrans')->isProduction ?? false,
+            'qrImageUrl'   => null,
+            'qrString'     => null,
+            'invoiceId'    => null,
+            'paymentPageUrl' => null,
         ];
 
         // 1. Ambil frame_id dari URL atau session
@@ -70,7 +72,7 @@ class PaymentMethodController extends BaseController
 
         $printOptionPrice      = (float) ($printOption['extra_price'] ?? 25000);
         $framePrice            = (float) ($frame['price'] ?? 0);
-        $totalCalculatedAmount = $printOptionPrice + $framePrice;
+        $totalCalculatedAmount = (int) ($printOptionPrice + $framePrice);
 
         // 4. Cek atau Buat Booking di Database
         $bookingId = $this->request->getGet('booking_id') ?? $this->session->get('booking_id');
@@ -131,7 +133,7 @@ class PaymentMethodController extends BaseController
                 'booking_id'      => $bookingId,
                 'print_option_id' => $printOption['id'] ?? null,
                 'amount'          => $totalCalculatedAmount,
-                'gateway_ref'     => 'MIDTRANS-' . strtoupper(bin2hex(random_bytes(4))),
+                'gateway_ref'     => '',
                 'status'          => 'pending',
                 'created_at'      => date('Y-m-d H:i:s'),
                 'updated_at'      => date('Y-m-d H:i:s'),
@@ -149,54 +151,54 @@ class PaymentMethodController extends BaseController
             }
         }
 
-        // 6. Generate Midtrans Snap Token Resmi
-        $snapToken = null;
-        $serverKey = config('Midtrans')->serverKey ?? (string) env('midtrans.serverKey', '');
-
-        if (!empty($serverKey)) {
+        // 6. Generate QRIS via Bayar.gg API (hanya jika payment masih pending)
+        if ($payment && $payment['status'] === 'pending' && $totalCalculatedAmount > 0) {
             try {
-                \Midtrans\Config::$serverKey    = $serverKey;
-                \Midtrans\Config::$isProduction = (bool) (config('Midtrans')->isProduction ?? false);
-                \Midtrans\Config::$isSanitized  = true;
-                \Midtrans\Config::$is3ds        = true;
+                $bayargg = new BayarGGService();
 
                 $customer = $this->customerModel->find($booking['customer_id'] ?? '') ?: [];
+                $description = ($printOption['copies'] ?? 2) . ' Lembar Cetak Foto - CuitBox #' . $payment['id'];
 
-                $itemDetails = [
+                $apiResponse = $bayargg->createPayment(
+                    $totalCalculatedAmount,
+                    $description,
+                    $payment['id'],
                     [
-                        'id'       => (string) ($printOption['id'] ?? 'PRINT_OPT'),
-                        'price'    => (int) $printOptionPrice,
-                        'quantity' => 1,
-                        'name'     => ($printOption['copies'] ?? 2) . ' Lembar Cetak Foto',
+                        'name'  => $customer['name'] ?? ($this->session->get('customer_name') ?? 'Pelanggan CuitBox'),
+                        'email' => $customer['email'] ?? ($this->session->get('customer_email') ?? ''),
+                        'phone' => $customer['phone'] ?? ($this->session->get('customer_phone') ?? ''),
                     ]
-                ];
+                );
 
-                if ($framePrice > 0) {
-                    $itemDetails[] = [
-                        'id'       => (string) ($frame['id'] ?? 'FRAME_OPT'),
-                        'price'    => (int) $framePrice,
-                        'quantity' => 1,
-                        'name'     => 'Desain Frame: ' . ($frame['name'] ?? 'Pilihan'),
-                    ];
+                $invoiceData = $apiResponse['data'] ?? [];
+                $invoiceId   = $invoiceData['invoice_id'] ?? null;
+                $qrString    = !empty($invoiceData['qris_string']) ? $invoiceData['qris_string'] : ($invoiceData['qr_string'] ?? '');
+                $paymentPageUrl = $invoiceData['payment_url'] ?? null;
+
+                // Buat URL gambar QR dari qr_string
+                if (!empty($qrString)) {
+                    $data['qrImageUrl'] = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' . urlencode($qrString);
+                } elseif (!empty($paymentPageUrl)) {
+                    $data['qrImageUrl'] = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' . urlencode($paymentPageUrl);
+                    $qrString = $paymentPageUrl;
                 }
 
-                $params = [
-                    'transaction_details' => [
-                        'order_id'     => $payment['id'],
-                        'gross_amount' => (int) $totalCalculatedAmount,
-                    ],
-                    'customer_details'    => [
-                        'first_name' => $customer['name'] ?? ($this->session->get('customer_name') ?? 'Pelanggan CuitBox'),
-                        'email'      => $customer['email'] ?? ($this->session->get('customer_email') ?? 'customer@cuitbox.com'),
-                        'phone'      => $customer['phone'] ?? ($this->session->get('customer_phone') ?? '08123456789'),
-                    ],
-                    'item_details'        => $itemDetails,
-                ];
+                $data['qrString']       = $qrString;
+                $data['invoiceId']      = $invoiceId;
+                $data['paymentPageUrl'] = $paymentPageUrl;
 
-                $snapToken = \Midtrans\Snap::getSnapToken($params);
+                // Simpan invoice reference ke database
+                if (!empty($invoiceId)) {
+                    $this->paymentModel->update($payment['id'], [
+                        'gateway_ref' => $invoiceId,
+                        'updated_at'  => date('Y-m-d H:i:s'),
+                    ]);
+                    $payment['gateway_ref'] = $invoiceId;
+                }
+
             } catch (\Throwable $e) {
-                log_message('error', '[Midtrans Snap Token Error] ' . $e->getMessage());
-                $data['error'] = 'Koneksi Midtrans: ' . $e->getMessage();
+                log_message('error', '[BayarGG Website Payment Error] ' . $e->getMessage());
+                $data['error'] = 'Gagal membuat QRIS: ' . $e->getMessage();
             }
         }
 
@@ -207,7 +209,8 @@ class PaymentMethodController extends BaseController
         }
 
         $data['payment']   = $payment;
-        $data['snapToken'] = $snapToken;
+        $data['paymentId'] = $payment['id'] ?? '';
+        $data['bookingId'] = $bookingId;
 
         if ($this->session->getFlashdata('error')) {
             $data['error'] = $this->session->getFlashdata('error');
@@ -267,9 +270,9 @@ class PaymentMethodController extends BaseController
             // Update existing payment
             $updateData = [
                 'amount' => $amount,
-                'gateway_ref' => 'PAY-' . strtoupper(uniqid()),
+                'gateway_ref' => $existingPayment['gateway_ref'] ?: ('PAY-' . strtoupper(uniqid())),
                 'status' => 'paid',
-                'payment_method' => $paymentMethod ?? 'QRIS',
+                'payment_method' => $paymentMethod ?? 'QRIS Bayar.gg',
                 'updated_at' => date('Y-m-d H:i:s')
             ];
             
@@ -288,7 +291,7 @@ class PaymentMethodController extends BaseController
                 'amount' => $amount,
                 'gateway_ref' => 'PAY-' . strtoupper(uniqid()),
                 'status' => 'paid',
-                'payment_method' => $paymentMethod ?? 'QRIS',
+                'payment_method' => $paymentMethod ?? 'QRIS Bayar.gg',
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ];
@@ -306,7 +309,7 @@ class PaymentMethodController extends BaseController
         $this->session->set([
             'konfirmasi_pembayaran_id' => $paymentId,
             'booking_id' => $bookingId,
-            'payment_method' => $paymentMethod ?? 'QRIS',
+            'payment_method' => $paymentMethod ?? 'QRIS Bayar.gg',
             'payment_status' => 'paid',
             'payment_amount' => $amount
         ]);
