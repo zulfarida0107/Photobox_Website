@@ -70,12 +70,12 @@ Events::on('pre_system', static function (): void {
         return; // Lewati saat spark/CLI — pakai default dari App.php
     }
 
-    $port = $_SERVER['SERVER_PORT'] ?? 8080;
-
-    // Hanya override untuk port yang dikenal
-    if (in_array((int) $port, [8080, 8081], true)) {
-        $app          = config('App');
-        $app->baseURL = 'http://localhost:' . $port . '/';
+    // Auto-detect dynamic baseURL dari HTTP_HOST agar port 8080 & 8081 bekerja tanpa konflik
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    if ($host !== '') {
+        $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+        $app    = config('App');
+        $app->baseURL = $scheme . '://' . rtrim($host, '/') . '/';
     }
 });
 

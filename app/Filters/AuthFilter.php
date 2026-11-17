@@ -13,8 +13,8 @@ class AuthFilter implements FilterInterface
         $adminId   = session()->get('adminId');
         $adminRole = strtolower(session()->get('adminRole') ?? '');
 
-        // 1. Cek apakah session admin yang sah (superadmin / staff) sudah aktif
-        if ($adminId && in_array($adminRole, ['superadmin', 'staff'])) {
+        // 1. Cek apakah session admin yang sah (superadmin / admin / staff) sudah aktif
+        if ($adminId && in_array($adminRole, ['superadmin', 'admin', 'staff'], true)) {
             return; // Lolos verifikasi
         }
 
@@ -29,7 +29,7 @@ class AuthFilter implements FilterInterface
                 $adminModel = new \App\Models\AdminModel();
                 $admin = $adminModel->find($cAdminId);
                 
-                if ($admin && in_array(strtolower($admin['role']), ['superadmin', 'staff'])) {
+                if ($admin && in_array(strtolower($admin['role']), ['superadmin', 'admin', 'staff'], true)) {
                     $expectedSig = hash_hmac('sha256', $admin['id'] . $admin['password'], config('App')->baseURL);
                     if (hash_equals($expectedSig, $cSignature)) {
                         session()->set([

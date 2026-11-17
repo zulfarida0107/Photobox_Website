@@ -28,7 +28,7 @@
         <div class="flex items-center gap-2 sm:gap-3 cursor-pointer hover:opacity-80 transition-opacity" onclick="openModal('modalProfile')">
             <div class="text-right hidden sm:block">
                 <p class="text-xs font-bold text-on-surface leading-none"><?= esc(session()->get('adminName') ?? 'Admin CuitBox Studio') ?></p>
-                <p class="text-[10px] text-slate-500 uppercase tracking-wider mt-1"><?= esc(strtolower(session()->get('adminRole') ?? '') === 'superadmin' ? 'Super Admin' : 'Staff') ?></p>
+                <p class="text-[10px] text-slate-500 uppercase tracking-wider mt-1"><?= esc(strtolower(session()->get('adminRole') ?? '') === 'superadmin' ? 'Super Admin' : (strtolower(session()->get('adminRole') ?? '') === 'admin' ? 'Administrator' : 'Staff')) ?></p>
             </div>
             <img id="dashboard-profile-img" alt="Admin Profile" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-100 object-cover"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuDru5yG0kfgrAexiefmfPXrmbf__ddiHYCNse2EGwIxmzqDZQcLg1eAYw22ws1eruImLu7Qldg3CG24mWnx9DCff9YDE9XZ-hDvImkrF230qHqOc86k-j-F1anq2ljfObxwH5H9hH2-DvMUhbdIyghqBUFEDI2QsmbH3YT2XgrMzqIVSj5naElgHfhhqx5y9cKHG1ZXlcAh5jNsuwiIcvAhYUwbXl4Ls23yVAqUlT49ChvMnedJES1cV1aToIn3pmWztakJyeDOrWyn" />
@@ -351,7 +351,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
                             </div>
                             <div class="space-y-2">
                                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">PERAN</label>
-                                <input class="w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-500 font-medium text-sm py-2.5 px-3 outline-none cursor-not-allowed" readonly type="text" value="<?= esc($adminRoleLabel) ?>"/>
+                                <input class="w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-500 font-medium text-sm py-2.5 px-3 outline-none cursor-not-allowed" readonly type="text" value="<?= esc($adminRoleLabel ?? (strtolower(session()->get('adminRole') ?? '') === 'superadmin' ? 'Super Admin' : (strtolower(session()->get('adminRole') ?? '') === 'admin' ? 'Administrator' : 'Staff'))) ?>"/>
                             </div>
                             <div class="space-y-2">
                                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">ALAMAT EMAIL</label>
