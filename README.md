@@ -252,7 +252,6 @@ Proyek ini dikembangkan secara kolaboratif oleh tim mahasiswa **TI-FSD 2 (Full S
 
 <div align="center">
 
-Dibuat dengan dedikasi untuk **Uji Kompetensi BNSP LSP TRI**  
 © 2026 **CuitBox Studio Team**. Seluruh Hak Cipta Dilindungi.
 
 </div>
