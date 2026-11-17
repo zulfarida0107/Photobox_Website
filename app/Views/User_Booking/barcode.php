@@ -214,7 +214,7 @@
                             <svg class="w-4 h-4 text-lime-900" fill="currentColor" viewBox="0 0 20 20">
                                 <path clip-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" fill-rule="evenodd"/>
                             </svg>
-                            <p class="text-[10px] md:text-xs font-medium text-lime-900">Scan atau masukkan kode ini di mesin photobooth saat tiba</p>
+                            <p class="text-[10px] md:text-xs font-medium text-lime-900">Scan atau masukkan kode ini</p>
                         </div>
                     </div>
 
@@ -223,12 +223,11 @@
                         <div class="detail-card">
                             <div class="icon">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                                    <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                    <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                                 </svg>
                             </div>
-                            <p class="label">Tema Frame</p>
-                            <p class="value"><?= esc($booking['frame_name'] ?? 'Retro Vibes') ?></p>
+                            <p class="label">Booth</p>
+                            <p class="value"><?= esc($booking['booth_name'] ?? $booking['booth']['name'] ?? 'Booth Studio A') ?></p>
                         </div>
                         <div class="detail-card">
                             <div class="icon">

@@ -40,7 +40,7 @@ class RegisterController extends Controller
 
     public function store()
     {
-        $rules = [
+        $rules = [ 
             'name' => 'required|min_length[4]|max_length[100]',
             'email' => 'required|valid_email|is_unique[customers.email]',
             'phone' => 'permit_empty|min_length[11]|max_length[12]|regex_match[/^[0-9]+$/]',
@@ -126,24 +126,29 @@ class RegisterController extends Controller
                 'customer_name' => $this->request->getPost('name'),
                 'customer_email' => $email,
                 'customer_phone' => $fullPhone,
-                'customer_password' => $password,
                 'isLoggedIn' => true
             ]);
             
-            return redirect()->to('/schedule')->with('success', 'Akun berhasil dibuat! Selamat datang, ' . $this->request->getPost('name') . '!');
+            return redirect()->to('/booth')->with('success', 'Akun berhasil dibuat! Selamat datang, ' . $this->request->getPost('name') . '!');
             
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
-    // Method untuk handle POST dari landing page
-    public function fromLanding()
+    // Method untuk handle registrasi langsung / direct dari beranda
+    public function directRegister()
     {
-        if ($this->request->getPost('from_landing')) {
-            session()->setFlashdata('info', 'Silahkan lengkapi data registrasi Anda');
+        if ($this->request->getPost('direct_booking') || $this->request->getPost('from_home') || $this->request->getPost('from_landing')) {
+            session()->setFlashdata('info', 'Silakan lengkapi data registrasi Anda untuk memulai pemesanan.');
         }
         
-        return redirect()->to('/register');
+        return redirect()->to(base_url('register'));
+    }
+
+    // Alias backward compatibility untuk fromLanding
+    public function fromLanding()
+    {
+        return $this->directRegister();
     }
 }

@@ -6,7 +6,8 @@ use App\Controllers\BaseController;
 use App\Models\PaymentModel;
 use App\Models\BookingModel;
 use App\Models\CustomerModel;
-use App\Models\frameModel;
+use App\Models\FrameModel;
+use App\Libraries\BayarGGService;
 
 class PaymentMethodController extends BaseController
 {
@@ -28,15 +29,19 @@ class PaymentMethodController extends BaseController
     public function index()
     {
         $data = [
-            'title' => 'Payment Method - CuitBox Studio',
-            'booking' => null,
-            'payment' => null,
-            'frame' => null,
-            'error' => null,
-            'success' => null,
+            'title'        => 'Payment Method - CuitBox Studio',
+            'booking'      => null,
+            'payment'      => null,
+            'frame'        => null,
+            'error'        => null,
+            'success'      => null,
+            'qrImageUrl'   => null,
+            'qrString'     => null,
+            'invoiceId'    => null,
+            'paymentPageUrl' => null,
         ];
 
-        // Ambil frame_id dari URL atau session
+        // 1. Ambil frame_id dari URL atau session
         $frameId = $this->request->getGet('frame_id') ?? $this->session->get('selected_frame');
         $frame = null;
         if ($frameId) {
@@ -45,7 +50,7 @@ class PaymentMethodController extends BaseController
             $data['frame'] = $frame;
         }
 
-        // Ambil booth_id dari session untuk informasi lokasi
+        // 2. Ambil booth_id dari session untuk informasi lokasi
         $boothId = $this->session->get('booth_id');
         $booth = null;
         if ($boothId) {
@@ -54,40 +59,158 @@ class PaymentMethodController extends BaseController
         }
         $data['booth'] = $booth;
 
-        // Hitung total tagihan dari session
-        $printOptionPrice = $this->session->get('selected_print_option_price') ?? 25000;
-        $framePrice = $frame['price'] ?? $this->session->get('selected_frame_price') ?? 0;
-        $totalCalculatedAmount = $printOptionPrice + $framePrice;
-
-        // Cek booking_id dari berbagai sumber
-        $bookingId = null;
-        
-        if ($this->request->getGet('booking_id')) {
-            $bookingId = $this->request->getGet('booking_id');
-            $this->session->set('booking_id', $bookingId);
-        } elseif ($this->session->has('booking_id')) {
-            $bookingId = $this->session->get('booking_id');
+        // 3. Kalkulasi harga secara aman di Server-Side dari database
+        $printOptionId = $this->session->get('selected_print_option_id');
+        $printOptionModel = new \App\Models\PrintOptionModel();
+        $printOption = null;
+        if ($printOptionId) {
+            $printOption = $printOptionModel->find($printOptionId);
         }
+        if (!$printOption) {
+            $printOption = $printOptionModel->first() ?? ['id' => '1', 'copies' => 2, 'extra_price' => 25000];
+        }
+
+        $printOptionPrice      = (float) ($printOption['extra_price'] ?? 25000);
+        $framePrice            = (float) ($frame['price'] ?? 0);
+        $totalCalculatedAmount = (int) ($printOptionPrice + $framePrice);
+
+        // 4. Cek atau Buat Booking di Database
+        $bookingId = $this->request->getGet('booking_id') ?? $this->session->get('booking_id');
+        $booking   = null;
 
         if ($bookingId) {
-            $booking = $this->getBookingDetail($bookingId);
-            if ($booking) {
-                $booking['total_amount'] = $totalCalculatedAmount;
-                $data['booking'] = $booking;
-                
-                $payment = $this->paymentModel
-                    ->where('booking_id', $bookingId)
-                    ->orderBy('created_at', 'DESC')
-                    ->first();
-                if ($payment) {
-                    $data['payment'] = $payment;
-                }
-            } else {
-                $data['booking'] = $this->createDummyBooking($totalCalculatedAmount);
-            }
-        } else {
-            $data['booking'] = $this->createDummyBooking($totalCalculatedAmount);
+            $booking = $this->bookingModel->find($bookingId);
         }
+
+        if (!$booking) {
+            // Buat booking jika belum ada
+            $customerId = $this->session->get('customer_id');
+            if (!$customerId) {
+                $firstCust = $this->customerModel->first();
+                $customerId = $firstCust ? $firstCust['id'] : 'C0001';
+            }
+
+            $slotModel = new \App\Models\SlotModel();
+            $slotId    = $this->session->get('slot_id') ?? ($slotModel->first()['id'] ?? 'SLOT_01');
+            $boothId   = $this->session->get('booth_id') ?? ($booth['id'] ?? 'booth_001');
+
+            $newBookingId = 'BKG' . date('YmdHis') . rand(10, 99);
+            do {
+                $bookingCode = (string) rand(100000, 999999);
+            } while ($this->bookingModel->where('booking_code', $bookingCode)->first() !== null);
+
+            $queueNumber = $this->bookingModel->where('slot_id', $slotId)->countAllResults() + 1;
+
+            $bookingData = [
+                'id'              => $newBookingId,
+                'booking_code'    => $bookingCode,
+                'customer_id'     => $customerId,
+                'slot_id'         => $slotId,
+                'booth_id'        => $boothId,
+                'print_option_id' => $printOption['id'] ?? null,
+                'queue_number'    => $queueNumber,
+                'status'          => 'pending',
+                'created_at'      => date('Y-m-d H:i:s'),
+                'updated_at'      => date('Y-m-d H:i:s')
+            ];
+
+            $this->bookingModel->insert($bookingData);
+            $bookingId = $newBookingId;
+            $this->session->set('booking_id', $bookingId);
+            $booking = $this->bookingModel->find($bookingId);
+        }
+
+        // 5. Cek atau Buat Record Payment di Database
+        $payment = $this->paymentModel
+            ->where('booking_id', $bookingId)
+            ->orderBy('created_at', 'DESC')
+            ->first();
+
+        if (!$payment) {
+            $paymentId = 'PAY' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+            $paymentData = [
+                'id'              => $paymentId,
+                'booking_id'      => $bookingId,
+                'print_option_id' => $printOption['id'] ?? null,
+                'amount'          => $totalCalculatedAmount,
+                'gateway_ref'     => '',
+                'status'          => 'pending',
+                'created_at'      => date('Y-m-d H:i:s'),
+                'updated_at'      => date('Y-m-d H:i:s'),
+            ];
+            $this->paymentModel->insert($paymentData);
+            $payment = $this->paymentModel->find($paymentId);
+        } else {
+            if ($payment['status'] === 'pending') {
+                $this->paymentModel->update($payment['id'], [
+                    'amount'          => $totalCalculatedAmount,
+                    'print_option_id' => $printOption['id'] ?? null,
+                    'updated_at'      => date('Y-m-d H:i:s'),
+                ]);
+                $payment = $this->paymentModel->find($payment['id']);
+            }
+        }
+
+        // 6. Generate QRIS via Bayar.gg API (hanya jika payment masih pending)
+        if ($payment && $payment['status'] === 'pending' && $totalCalculatedAmount > 0) {
+            try {
+                $bayargg = new BayarGGService();
+
+                $customer = $this->customerModel->find($booking['customer_id'] ?? '') ?: [];
+                $description = ($printOption['copies'] ?? 2) . ' Lembar Cetak Foto - CuitBox #' . $payment['id'];
+
+                $apiResponse = $bayargg->createPayment(
+                    $totalCalculatedAmount,
+                    $description,
+                    $payment['id'],
+                    [
+                        'name'  => $customer['name'] ?? ($this->session->get('customer_name') ?? 'Pelanggan CuitBox'),
+                        'email' => $customer['email'] ?? ($this->session->get('customer_email') ?? ''),
+                        'phone' => $customer['phone'] ?? ($this->session->get('customer_phone') ?? ''),
+                    ]
+                );
+
+                $invoiceData = $apiResponse['data'] ?? [];
+                $invoiceId   = $invoiceData['invoice_id'] ?? null;
+                $qrString    = !empty($invoiceData['qris_string']) ? $invoiceData['qris_string'] : ($invoiceData['qr_string'] ?? '');
+                $paymentPageUrl = $invoiceData['payment_url'] ?? null;
+
+                // Buat URL gambar QR dari qr_string
+                if (!empty($qrString)) {
+                    $data['qrImageUrl'] = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' . urlencode($qrString);
+                } elseif (!empty($paymentPageUrl)) {
+                    $data['qrImageUrl'] = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' . urlencode($paymentPageUrl);
+                    $qrString = $paymentPageUrl;
+                }
+
+                $data['qrString']       = $qrString;
+                $data['invoiceId']      = $invoiceId;
+                $data['paymentPageUrl'] = $paymentPageUrl;
+
+                // Simpan invoice reference ke database
+                if (!empty($invoiceId)) {
+                    $this->paymentModel->update($payment['id'], [
+                        'gateway_ref' => $invoiceId,
+                        'updated_at'  => date('Y-m-d H:i:s'),
+                    ]);
+                    $payment['gateway_ref'] = $invoiceId;
+                }
+
+            } catch (\Throwable $e) {
+                log_message('error', '[BayarGG Website Payment Error] ' . $e->getMessage());
+                $data['error'] = 'Gagal membuat QRIS: ' . $e->getMessage();
+            }
+        }
+
+        $bookingDetail = $this->getBookingDetail($bookingId);
+        if ($bookingDetail) {
+            $bookingDetail['total_amount'] = $totalCalculatedAmount;
+            $data['booking'] = $bookingDetail;
+        }
+
+        $data['payment']   = $payment;
+        $data['paymentId'] = $payment['id'] ?? '';
+        $data['bookingId'] = $bookingId;
 
         if ($this->session->getFlashdata('error')) {
             $data['error'] = $this->session->getFlashdata('error');
@@ -99,7 +222,11 @@ class PaymentMethodController extends BaseController
         return view('User_Booking/payment_method', $data);
     }
 
-    public function store()
+    /**
+     * METHOD CONFIRM - Untuk konfirmasi pembayaran dari form
+     * Ini yang akan dipanggil oleh form action
+     */
+    public function confirm()
     {
         // Ambil data dari POST
         $paymentId = $this->request->getPost('payment_id');
@@ -129,57 +256,9 @@ class PaymentMethodController extends BaseController
         // Cek apakah booking ada di database
         $booking = $this->bookingModel->find($bookingId);
         if (!$booking) {
-            // BOOKING BELUM ADA (ini Dummy Booking dari web flow, simpan ke DB).
-            
-            // Ambil customer dari session atau fallback ke yang pertama di DB
-            $customerModel = new \App\Models\CustomerModel();
-            $customer = $customerModel->first();
-            $customerId = $this->session->get('customer_id') ?? ($customer ? $customer['id'] : null);
-            
-            // Ambil slot valid dari DB
-            $slotModel = new \App\Models\SlotModel();
-            $slot = $slotModel->first();
-            $slotId = $this->session->get('slot_id') ?? ($slot ? $slot['id'] : null);
-            
-            // Ambil booth valid dari DB
-            $boothModel = new \App\Models\BoothModel();
-            $booth = $boothModel->first();
-            $boothId = $this->session->get('booth_id') ?? ($booth ? $booth['id'] : null);
-            
-            // Ambil print_option yang dipilih user dari session (dari Daftar Cetak Admin)
-            $printOptionId = $this->session->get('selected_print_option_id');
-            if (empty($printOptionId)) {
-                // Fallback: ambil print option pertama dari database
-                $printOptionModel = new \App\Models\PrintOptionModel();
-                $firstOption = $printOptionModel->first();
-                $printOptionId = $firstOption ? $firstOption['id'] : null;
-            }
-            
-            $newBookingId = 'BKG' . date('YmdHis') . rand(10, 99);
-            do {
-                $bookingCode = (string) rand(100000, 999999);
-            } while ($this->bookingModel->where('booking_code', $bookingCode)->first() !== null);
-            
-            // Hitung nomor antrean berurutan per slot (1, 2, 3, dst.)
-            $queueNumber = $this->bookingModel->where('slot_id', $slotId)->countAllResults() + 1;
-            
-            $bookingData = [
-                'id' => $newBookingId,
-                'booking_code' => $bookingCode,
-                'customer_id' => $customerId,
-                'slot_id' => $slotId,
-                'booth_id' => $boothId,
-                'print_option_id' => $printOptionId,  // Menggunakan data Daftar Cetak dari Admin
-                'queue_number' => $queueNumber,
-                'status' => 'pending',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-            
-            $this->bookingModel->insert($bookingData);
-            
-            $bookingId = $newBookingId;
-            $this->session->set('booking_id', $bookingId);
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Booking tidak ditemukan. Silahkan pilih frame terlebih dahulu.');
         }
 
         // Cek apakah payment sudah ada
@@ -191,34 +270,28 @@ class PaymentMethodController extends BaseController
             // Update existing payment
             $updateData = [
                 'amount' => $amount,
-                'gateway_ref' => 'PAY-' . strtoupper(uniqid()),
-                'status' => 'success',
-                'payment_method' => $paymentMethod ?? 'QRIS',
+                'gateway_ref' => $existingPayment['gateway_ref'] ?: ('PAY-' . strtoupper(uniqid())),
+                'status' => 'paid',
+                'payment_method' => $paymentMethod ?? 'QRIS Bayar.gg',
                 'updated_at' => date('Y-m-d H:i:s')
             ];
             
             $this->paymentModel->update($existingPayment['id'], $updateData);
             $paymentId = $existingPayment['id'];
         } else {
-            // Create new payment - Selalu buat ID baru untuk menghindari duplicate entry
-            $paymentId = 'PAY' . date('YmdHis') . rand(100, 999);
-            
-            // Ambil print_option_id dari session (pilihan user dari Daftar Cetak Admin)
-            $selectedPrintOptionId = $this->session->get('selected_print_option_id');
-            if (empty($selectedPrintOptionId)) {
-                $printOptModel = new \App\Models\PrintOptionModel();
-                $firstOpt = $printOptModel->first();
-                $selectedPrintOptionId = $firstOpt ? $firstOpt['id'] : null;
+            // Create new payment
+            if (empty($paymentId)) {
+                $paymentId = 'PAY' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
             }
             
             $paymentData = [
                 'id' => $paymentId,
                 'booking_id' => $bookingId,
-                'print_option_id' => $selectedPrintOptionId,  // Data dari Daftar Cetak Admin
+                'print_option_id' => $this->session->get('selected_print_option_id') ?: null,
                 'amount' => $amount,
                 'gateway_ref' => 'PAY-' . strtoupper(uniqid()),
-                'status' => 'success',
-                'payment_method' => $paymentMethod ?? 'QRIS',
+                'status' => 'paid',
+                'payment_method' => $paymentMethod ?? 'QRIS Bayar.gg',
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ];
@@ -236,13 +309,13 @@ class PaymentMethodController extends BaseController
         $this->session->set([
             'konfirmasi_pembayaran_id' => $paymentId,
             'booking_id' => $bookingId,
-            'payment_method' => $paymentMethod ?? 'QRIS',
-            'payment_status' => 'success',
+            'payment_method' => $paymentMethod ?? 'QRIS Bayar.gg',
+            'payment_status' => 'paid',
             'payment_amount' => $amount
         ]);
 
         // Redirect ke halaman status booking
-        return redirect()->to('/statusbooking?payment_id=' . $paymentId . '&booking_id=' . $bookingId)
+        return redirect()->to('/StatusBooking?payment_id=' . $paymentId . '&booking_id=' . $bookingId)
             ->with('success', 'Pembayaran berhasil dikonfirmasi!');
     }
 
@@ -265,11 +338,6 @@ class PaymentMethodController extends BaseController
         return redirect()->to('payment');
     }
 
-    public function confirm()
-    {
-        return redirect()->to('payment')->with('info', 'Silahkan lanjutkan ke pembayaran');
-    }
-
     public function success($paymentId = null)
     {
         if (!$paymentId) {
@@ -281,7 +349,7 @@ class PaymentMethodController extends BaseController
             return redirect()->to('payment')->with('error', 'Payment tidak ditemukan');
         }
 
-        return redirect()->to('/statusbooking?payment_id=' . $paymentId . '&booking_id=' . $payment['booking_id'])
+        return redirect()->to('/StatusBooking?payment_id=' . $paymentId . '&booking_id=' . $payment['booking_id'])
             ->with('success', 'Pembayaran berhasil!');
     }
 
@@ -346,54 +414,54 @@ class PaymentMethodController extends BaseController
         return [
             [
                 'id' => 'B001',
-                'name' => 'frame Premium 1',
+                'name' => 'Frame Premium 1',
                 'price' => 150000,
-                'description' => 'frame premium dengan kamera 4K dan lighting profesional',
+                'description' => 'Frame premium dengan kamera 4K dan lighting profesional',
                 'capacity' => 4,
                 'status' => 'available',
                 'facilities' => ['Kamera 4K', 'Lighting Profesional', 'Background LED', 'Prop lengkap']
             ],
             [
                 'id' => 'B002',
-                'name' => 'frame Premium 2',
+                'name' => 'Frame Premium 2',
                 'price' => 150000,
-                'description' => 'frame premium dengan aksesoris lengkap dan ruang yang luas',
+                'description' => 'Frame premium dengan aksesoris lengkap dan ruang yang luas',
                 'capacity' => 4,
                 'status' => 'available',
                 'facilities' => ['Kamera 4K', 'Lighting Profesional', 'Background Video', 'Prop lengkap', 'Monitor 32"']
             ],
             [
                 'id' => 'B003',
-                'name' => 'frame Standar 1',
+                'name' => 'Frame Standar 1',
                 'price' => 100000,
-                'description' => 'frame standar dengan kualitas gambar yang baik dan nyaman',
+                'description' => 'Frame standar dengan kualitas gambar yang baik dan nyaman',
                 'capacity' => 3,
                 'status' => 'available',
                 'facilities' => ['Kamera HD', 'Lighting Standar', 'Background Polos', 'Prop dasar']
             ],
             [
                 'id' => 'B004',
-                'name' => 'frame Standar 2',
+                'name' => 'Frame Standar 2',
                 'price' => 100000,
-                'description' => 'frame standar dengan desain minimalis dan modern',
+                'description' => 'Frame standar dengan desain minimalis dan modern',
                 'capacity' => 3,
                 'status' => 'available',
                 'facilities' => ['Kamera HD', 'Lighting Standar', 'Background Polos', 'Aksesoris tambahan']
             ],
             [
                 'id' => 'B005',
-                'name' => 'frame Family 1',
+                'name' => 'Frame Family 1',
                 'price' => 200000,
-                'description' => 'frame khusus keluarga dengan ruang yang luas dan nyaman',
+                'description' => 'Frame khusus keluarga dengan ruang yang luas dan nyaman',
                 'capacity' => 6,
                 'status' => 'available',
                 'facilities' => ['Kamera 4K', 'Lighting Premium', 'Background LED', 'Prop lengkap', 'Ruang luas']
             ],
             [
                 'id' => 'B006',
-                'name' => 'frame Couple 1',
+                'name' => 'Frame Couple 1',
                 'price' => 180000,
-                'description' => 'frame romantis khusus untuk couple dengan dekorasi spesial',
+                'description' => 'Frame romantis khusus untuk couple dengan dekorasi spesial',
                 'capacity' => 2,
                 'status' => 'available',
                 'facilities' => ['Kamera 4K', 'Lighting Romantis', 'Background Dekorasi', 'Prop couple']

@@ -162,10 +162,32 @@ class PaymentController extends BaseController
                 ->with('error', 'Data pembayaran tidak ditemukan.');
         }
 
-        $this->paymentModel->update($id, ['status' => 'paid']);
+        $db = \Config\Database::connect();
+        $db->transBegin();
 
-        return redirect()->to(base_url('admin/payments#table-payment'))
-            ->with('success', "Pembayaran #{$id} berhasil diverifikasi sebagai Paid.");
+        $this->paymentModel->update($id, [
+            'status'     => 'paid',
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        if (!empty($payment['booking_id'])) {
+            $bookingModel = new \App\Models\BookingModel();
+            $bookingModel->update($payment['booking_id'], [
+                'status'     => 'paid',
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+
+        if ($db->transStatus() === false) {
+            $db->transRollback();
+            return redirect()->to(base_url('admin/payments'))
+                ->with('error', "Gagal memverifikasi pembayaran #{$id}.");
+        }
+
+        $db->transCommit();
+
+        return redirect()->to(base_url('admin/payments'))
+            ->with('success', "Pembayaran #{$id} dan Booking terkait berhasil diverifikasi sebagai Paid.");
     }
 
     // =========================================================================
@@ -173,12 +195,86 @@ class PaymentController extends BaseController
     // =========================================================================
     public function verifyBulk()
     {
-        $this->paymentModel->whereIn('status', ['pending', 'failed'])
-            ->set(['status' => 'paid'])
-            ->update();
+        // Ambil filter periode dari query string agar bulk verify tidak global tanpa batas
+        $filterPeriod = $this->request->getGet('period') ?? 'today';
+        $paymentDate  = $this->request->getGet('payment_date') ?? '';
 
-        return redirect()->to(base_url('admin/payments#table-payment'))
-            ->with('success', 'Semua pembayaran pending/gagal berhasil diverifikasi massal.');
+        $hasDateFilter = false;
+        if ($paymentDate !== '') {
+            $dateFrom      = $paymentDate . ' 00:00:00';
+            $dateTo        = $paymentDate . ' 23:59:59';
+            $hasDateFilter = true;
+        } elseif ($filterPeriod === 'month') {
+            $dateFrom      = date('Y-m-01 00:00:00');
+            $dateTo        = date('Y-m-t 23:59:59');
+            $hasDateFilter = true;
+        } elseif ($filterPeriod !== 'all') {
+            $days          = (int) $filterPeriod ?: 7;
+            $dateFrom      = date('Y-m-d 00:00:00', strtotime("-{$days} days"));
+            $dateTo        = date('Y-m-d 23:59:59');
+            $hasDateFilter = true;
+        }
+
+        $builder = $this->paymentModel->whereIn('status', ['pending', 'failed']);
+
+        if ($hasDateFilter) {
+            $builder->where('created_at >=', $dateFrom)->where('created_at <=', $dateTo);
+        }
+
+        $targetPayments = $builder->findAll();
+
+        if (empty($targetPayments)) {
+            return redirect()->to(base_url('admin/payments'))
+                ->with('error', 'Tidak ada pembayaran pending/gagal yang perlu diverifikasi pada periode ini.');
+        }
+
+        $db = \Config\Database::connect();
+        $db->transBegin();
+
+        $paymentIds = [];
+        $bookingIds = [];
+        foreach ($targetPayments as $p) {
+            $paymentIds[] = $p['id'];
+            if (!empty($p['booking_id'])) {
+                $bookingIds[] = $p['booking_id'];
+            }
+        }
+
+        $this->paymentModel->whereIn('id', $paymentIds)->set([
+            'status'     => 'paid',
+            'updated_at' => date('Y-m-d H:i:s')
+        ])->update();
+
+        if (!empty($bookingIds)) {
+            $bookingModel = new \App\Models\BookingModel();
+            $bookingModel->whereIn('id', array_unique($bookingIds))->set([
+                'status'     => 'paid',
+                'updated_at' => date('Y-m-d H:i:s')
+            ])->update();
+        }
+
+        if ($db->transStatus() === false) {
+            $db->transRollback();
+            return redirect()->to(base_url('admin/payments'))
+                ->with('error', 'Gagal memproses verifikasi massal.');
+        }
+
+        $db->transCommit();
+
+        $periodLabel = match ($filterPeriod) {
+            'today'  => 'Hari Ini',
+            '7'      => '7 Hari Terakhir',
+            'month'  => 'Bulan Ini',
+            'all'    => 'Semua Waktu',
+            default  => $filterPeriod,
+        };
+        if ($paymentDate !== '') {
+            $periodLabel = 'Tanggal ' . $paymentDate;
+        }
+
+        $totalCount = count($paymentIds);
+        return redirect()->to(base_url('admin/payments'))
+            ->with('success', "Verifikasi massal selesai ({$totalCount} transaksi) untuk periode \"{$periodLabel}\". Status pembayaran dan booking berhasil diubah ke Paid.");
     }
 
     // =========================================================================

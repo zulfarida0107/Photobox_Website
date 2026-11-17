@@ -43,7 +43,7 @@
                     </div>
                 <?php endif; ?>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label for="category" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kategori Frame *</label>
                         <select name="category" id="category" required
@@ -53,6 +53,21 @@
                                 <?php foreach ($categories as $cat): ?>
                                     <option value="<?= esc($cat['id']) ?>" <?= old('category', $frame['category'] ?? '') === $cat['id'] ? 'selected' : '' ?>>
                                         <?= esc($cat['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="layout_id" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Layout Frame *</label>
+                        <select name="layout_id" id="layout_id" required
+                                class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white">
+                            <option value="">-- Pilih Layout --</option>
+                            <?php if (!empty($layouts)): ?>
+                                <?php foreach ($layouts as $ly): ?>
+                                    <option value="<?= esc($ly['id']) ?>" <?= old('layout_id', $frame['layout_id'] ?? '') === $ly['id'] ? 'selected' : '' ?>>
+                                        <?= esc($ly['name']) ?> (<?= esc($ly['photo_count']) ?> Foto)
                                     </option>
                                 <?php endforeach; ?>
                             <?php endif; ?>

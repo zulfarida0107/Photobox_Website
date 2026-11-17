@@ -170,8 +170,6 @@ class BarcodeController extends BaseController
             $frameName = 'Retro Vibes';
         }
 
-        $customerPassword = session('customer_password') ?? 'Password123!';
-
         $statusMap = [
             'pending'   => ['label' => 'Menunggu Pembayaran', 'color' => 'yellow'],
             'paid'      => ['label' => 'Terbayar', 'color' => 'green'],
@@ -198,7 +196,6 @@ class BarcodeController extends BaseController
                 'email' => $customer['email'] ?? session('customer_email') ?? 'N/A', 
                 'phone' => $customer['phone'] ?? session('customer_phone') ?? 'N/A'
             ],
-            'customer_password' => $customerPassword,
             'booth' => $booth ?: ['name' => 'Booth Studio A', 'location' => 'Main Studio'],
             'print_option' => $printOption ? ['name' => $printOption['copies'] . ' Cetak', 'duration' => '0', 'price' => $printOption['extra_price']] : ['name' => 'N/A', 'duration' => '0', 'price' => 0],
             'created_at' => $booking['created_at'] ?? date('Y-m-d H:i:s'),
@@ -228,45 +225,54 @@ class BarcodeController extends BaseController
             return redirect()->to('barcode')->with('error', '❌ Booking tidak ditemukan.');
         }
 
-        $customerEmail = $booking['customer']['email'] ?? null;
+        $customerEmail = $booking['customer']['email'] ?? session('customer_email') ?? null;
         if (empty($customerEmail) || $customerEmail === 'N/A') {
-            return redirect()->to('barcode')->with('error', '❌ Email customer tidak terdaftar.');
+            if (!empty($booking['customer_id'])) {
+                $customerModel = new \App\Models\CustomerModel();
+                $cust = $customerModel->find($booking['customer_id']);
+                $customerEmail = $cust['email'] ?? null;
+            }
         }
 
-        $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' . urlencode(site_url('barcode/verify') . '?code=' . $booking['booking_code']);
+        if (empty($customerEmail) || $customerEmail === 'N/A') {
+            return redirect()->to('barcode')->with('error', '❌ Email customer tidak ditemukan. Silakan login atau periksa akun Anda.');
+        }
 
         $emailConfig = config('Email');
         $emailService = \Config\Services::email();
-        $emailService->initialize($emailConfig);
-        
-        $emailService->setFrom('cuitbox.studio@gmail.com', 'CuitBox Studio');
-        $emailService->setCRLF("\r\n");
-        $emailService->setNewline("\r\n");
-        $emailService->setMailType('html');
-        $emailService->setTo($customerEmail);
-        $emailService->setSubject('Tiket & Detail Booking CuitBox Studio - ' . $booking['booking_code']);
 
+        $emailService->setFrom('cuitboxstudio@gmail.com', 'CuitBox Studio');
+        $emailService->setTo($customerEmail);
+        $emailService->setSubject('[TIKET BOOKING] Tiket Resmi Pemesanan #' . $booking['booking_code'] . ' - CuitBox Studio');
+        
+        // Tandai sebagai Email Penting (High Priority Headers)
+        $emailService->setPriority(1);
+        $emailService->setHeader('X-Priority', '1');
+        $emailService->setHeader('Importance', 'High');
+        $emailService->setHeader('X-MSMail-Priority', 'High');
+        $emailService->setHeader('X-Message-Flag', 'Tiket Booking Resmi');
+        
+        // URL QR Code
+        $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' . urlencode($booking['booking_code']);
+
+        // Template HTML Email Tiket Resmi CuitBox Studio
         $htmlMessage = '
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="utf-8">
             <style>
-                body { font-family: "Plus Jakarta Sans", Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; }
-                .ticket-container { max-width: 550px; margin: 0 auto; background: #ffffff; border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
-                .brand-title { text-align: center; font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
-                .brand-subtitle { text-align: center; font-size: 13px; color: #64748b; margin-bottom: 20px; }
-                .user-info-box { background: #f1f5f9; border-radius: 14px; padding: 16px 20px; margin-bottom: 20px; }
-                .user-info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #cbd5e1; font-size: 13px; }
-                .user-info-row:last-child { border-bottom: none; }
-                .user-info-label { color: #64748b; font-weight: 600; }
-                .user-info-value { color: #0f172a; font-weight: 700; }
-                .card-green { background-color: #D9F99D; border-radius: 20px; padding: 24px; text-align: center; margin-bottom: 16px; }
-                .code-label { font-size: 11px; font-weight: 800; color: #365314; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
-                .code-value { font-size: 32px; font-weight: 900; color: #1e293b; margin: 0 0 16px 0; letter-spacing: 1px; }
-                .qr-box { background: #ffffff; display: inline-block; padding: 16px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-                .note-pill { background: rgba(54, 83, 20, 0.15); color: #365314; padding: 8px 16px; border-radius: 999px; font-size: 11px; font-weight: 600; margin-top: 16px; display: inline-block; }
-                .footer-text { text-align: center; font-size: 11px; color: #94a3b8; margin-top: 24px; }
+                body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; background-color: #f1f5f9; margin: 0; padding: 20px; }
+                .ticket-container { max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; }
+                .brand-title { font-size: 22px; font-weight: 800; color: #0f172a; text-align: center; margin-top: 24px; }
+                .brand-subtitle { font-size: 13px; font-weight: 600; color: #64748b; text-align: center; margin-bottom: 20px; }
+                .user-info-box { padding: 0 24px 20px; }
+                .card-green { background-color: #D9F99D; padding: 24px; text-align: center; border-radius: 16px; margin: 0 20px 20px; }
+                .code-label { font-size: 11px; font-weight: 800; color: #365314; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+                .code-value { font-size: 28px; font-weight: 900; color: #0f172a; margin-bottom: 16px; }
+                .qr-box { background: #ffffff; padding: 12px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+                .note-pill { display: inline-block; background: rgba(54, 83, 20, 0.15); color: #365314; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 20px; margin-top: 14px; }
+                .footer-text { text-align: center; font-size: 11px; color: #94a3b8; padding-bottom: 20px; }
             </style>
         </head>
         <body>
@@ -286,12 +292,8 @@ class BarcodeController extends BaseController
                             <td style="padding: 8px 0; color:#0f172a; font-weight:700; text-align:right;">' . esc($customerEmail) . '</td>
                         </tr>
                         <tr style="border-bottom: 1px dashed #cbd5e1;">
-                            <td style="padding: 8px 0; color:#64748b; font-weight:600;">Password Akun:</td>
-                            <td style="padding: 8px 0; color:#0f172a; font-weight:700; text-align:right;">' . esc($booking['customer_password']) . '</td>
-                        </tr>
-                        <tr style="border-bottom: 1px dashed #cbd5e1;">
-                            <td style="padding: 8px 0; color:#64748b; font-weight:600;">Tema Frame:</td>
-                            <td style="padding: 8px 0; color:#0f172a; font-weight:700; text-align:right;">' . esc($booking['frame_name']) . '</td>
+                            <td style="padding: 8px 0; color:#64748b; font-weight:600;">Booth:</td>
+                            <td style="padding: 8px 0; color:#0f172a; font-weight:700; text-align:right;">' . esc($booking['booth_name'] ?? $booking['booth']['name'] ?? 'Booth Studio A') . '</td>
                         </tr>
                         <tr style="border-bottom: 1px dashed #cbd5e1;">
                             <td style="padding: 8px 0; color:#64748b; font-weight:600;">Waktu Sesi:</td>
@@ -312,7 +314,7 @@ class BarcodeController extends BaseController
                         <img src="' . $qrCodeUrl . '" alt="QR Code Booking" width="180" height="180" style="display:block;">
                     </div>
                     <br>
-                    <div class="note-pill">ℹ️ Scan atau masukkan kode ini di mesin photobooth saat tiba</div>
+                    <div class="note-pill">ℹ️ Scan atau masukkan kode ini</div>
                 </div>
 
                 <div class="footer-text">© 2026 CuitBox Studio. All rights reserved.</div>
@@ -327,7 +329,7 @@ class BarcodeController extends BaseController
             $debugInfo = "Email berhasil dikirim ke " . $customerEmail . "\n" . $emailService->printDebugger(['headers', 'subject']);
             log_message('error', $debugInfo); // Force log as error
             file_put_contents(WRITEPATH . 'logs/email_debug.txt', date('Y-m-d H:i:s') . " - SUCCESS:\n" . $debugInfo . "\n", FILE_APPEND);
-            return redirect()->to('barcode')->with('success', 'Pesanan berhasil, data akan dikirim ke email user');
+            return redirect()->to('barcode')->with('success', 'Pesanan berhasil, data akan dikirimkan melalui Email');
         } else {
             $error = $emailService->printDebugger(['headers']);
             log_message('error', 'Gagal mengirim email ke ' . $customerEmail . ': ' . $error);

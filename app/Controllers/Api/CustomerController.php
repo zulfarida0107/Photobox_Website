@@ -25,7 +25,7 @@ class CustomerController extends BaseApiController
 
     public function verifyBooking(): ResponseInterface
     {
-        $payload = $this->request->getJSON(true) ?? $this->request->getPost();
+        $payload     = $this->getRequestPayload();
         $bookingCode = trim((string) ($payload['booking_code'] ?? $payload['qr_code'] ?? ''));
 
         if ($bookingCode === '') {
@@ -37,10 +37,11 @@ class CustomerController extends BaseApiController
             return $this->failNotFound('Booking tidak ditemukan.');
         }
 
-        // Fetch package details
+        // Fetch print option details
         $printOptionModel = new \App\Models\PrintOptionModel();
-        $printOption = $printOptionModel->find($booking['print_option_id']);
-        $booking['package'] = $printOption;
+        $printOption = $printOptionModel->find($booking['print_option_id'] ?? null);
+        $booking['print_option'] = $printOption;
+        $booking['package'] = $printOption; // Keep package key for frontend compatibility
 
         return $this->respondOk([
             'message' => 'Booking valid.',
@@ -90,7 +91,7 @@ class CustomerController extends BaseApiController
         $customerModel = new \App\Models\CustomerModel();
         $slotModel = new \App\Models\SlotModel();
         $boothModel = new \App\Models\BoothModel();
-        $packageModel = new \App\Models\PrintOptionModel();
+        $printOptionModel = new \App\Models\PrintOptionModel();
 
         try {
             // 1. Find or create default walk-in customer
@@ -106,12 +107,12 @@ class CustomerController extends BaseApiController
                 $customer = $customerModel->find($customerId);
             }
 
-            // 2. Find first package
-            $package = $packageModel->first();
-            if ($package === null) {
+            // 2. Find first print option
+            $printOption = $printOptionModel->first();
+            if ($printOption === null) {
                 return $this->response->setStatusCode(500)->setJSON([
                     'status' => 500,
-                    'error' => 'Print Option tidak ditemukan di database.',
+                    'error' => 'Print option tidak ditemukan di database.',
                 ]);
             }
 
@@ -140,9 +141,11 @@ class CustomerController extends BaseApiController
                 $slot = $slotModel->find($slotId);
             }
 
-            // 5. Generate booking ID & code
-            $bookingId = 'BK-' . strtoupper(bin2hex(random_bytes(5)));
-            $bookingCode = $bookingId;
+            // 5. Generate booking ID & 6-digit numeric booking code
+            $bookingId = 'BK' . date('YmdHis') . rand(10, 99);
+            do {
+                $bookingCode = (string) rand(100000, 999999);
+            } while ($this->bookingModel->where('booking_code', $bookingCode)->first() !== null);
 
             $bookingData = [
                 'id' => $bookingId,
@@ -150,7 +153,7 @@ class CustomerController extends BaseApiController
                 'customer_id' => $customer['id'],
                 'slot_id' => $slot['id'],
                 'booth_id' => $booth['id'],
-                'print_option_id' => $package['id'],
+                'print_option_id' => $printOption['id'],
                 'queue_number' => 1,
                 'status' => 'pending',
             ];

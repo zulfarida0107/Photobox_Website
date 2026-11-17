@@ -141,13 +141,18 @@
         }
     </style>
 </head>
-<body class="bg-background text-on-surface min-h-screen flex">
+<body class="bg-background text-on-surface min-h-screen flex antialiased">
+
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="sidebar-backdrop" 
+         onclick="toggleSidebar(false)" 
+         class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300 opacity-0"></div>
 
     <!-- Sidebar -->
     <?= $this->include('Admin/layouts/sidebar') ?>
 
-    <!-- Main wrapper: offset by sidebar width, allow full height flex column -->
-    <div class="flex-1 ml-[260px] flex flex-col min-h-screen">
+    <!-- Main wrapper: offset on desktop (md:ml-[260px]), full width on mobile (ml-0) -->
+    <div class="flex-1 ml-0 md:ml-[260px] flex flex-col min-h-screen min-w-0 transition-all duration-300">
 
         <!-- Fixed Header -->
         <?= $this->include('Admin/layouts/header') ?>
@@ -162,6 +167,42 @@
         <span>Berhasil! Laporan sedang diunduh.</span>
     </div>
     <script>
+        // Controller Sidebar Responsif Mobile
+        function toggleSidebar(forceState) {
+            const sidebar = document.getElementById('admin-sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            if (!sidebar || !backdrop) return;
+            
+            const isCurrentlyClosed = sidebar.classList.contains('-translate-x-full');
+            const shouldOpen = forceState !== undefined ? forceState : isCurrentlyClosed;
+            
+            if (shouldOpen) {
+                sidebar.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+                setTimeout(() => {
+                    backdrop.classList.remove('opacity-0');
+                }, 10);
+                document.body.classList.add('overflow-hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                backdrop.classList.add('opacity-0');
+                setTimeout(() => {
+                    backdrop.classList.add('hidden');
+                }, 300);
+                document.body.classList.remove('overflow-hidden');
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                const backdrop = document.getElementById('sidebar-backdrop');
+                if (backdrop) {
+                    backdrop.classList.add('hidden', 'opacity-0');
+                }
+                document.body.classList.remove('overflow-hidden');
+            }
+        });
+
         function showExportNotif() {
             const toast = document.getElementById('export-toast');
             toast.classList.remove('opacity-0', 'pointer-events-none');

@@ -11,9 +11,9 @@ class CreateFrames extends Migration
         $this->forge->addField([
             'id' => ['type' => 'VARCHAR', 'constraint' => 20],
             'name' => ['type' => 'VARCHAR', 'constraint' => 100],
-            'category_id' => ['type' => 'VARCHAR', 'constraint' => 20, 'null' => true],
-            'layout_id' => ['type' => 'VARCHAR', 'constraint' => 20, 'null' => true],
+            'category' => ['type' => 'VARCHAR', 'constraint' => 20],
             'file_path' => ['type' => 'TEXT'],
+            'price' => ['type' => 'DECIMAL', 'constraint' => '10,2'],
             'is_active' => ['type' => 'TINYINT', 'constraint' => 1, 'default' => 1],
             'created_at' => ['type' => 'DATETIME', 'null' => true],
             'updated_at' => ['type' => 'DATETIME', 'null' => true],

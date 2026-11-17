@@ -48,6 +48,18 @@
                         <span class="col-span-2 text-sm text-slate-800 font-semibold"><?= esc($booth['name']) ?></span>
                     </div>
 
+
+
+                    <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Lokasi Cabang</span>
+                        <span class="col-span-2 text-sm text-slate-800 font-semibold"><?= esc($booth['location_name'] ?? 'Pusat') ?></span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Kapasitas Sesi</span>
+                        <span class="col-span-2 text-sm text-slate-800 font-semibold">👥 <?= esc($booth['capacity'] ?? 4) ?> Orang</span>
+                    </div>
+
                     <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
                         <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Lokasi Fisik</span>
                         <span class="col-span-2 text-sm font-semibold text-emerald-700">
@@ -65,17 +77,6 @@
                     <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
                         <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Alamat IP Perangkat</span>
                         <span class="col-span-2 text-sm text-slate-800 font-mono"><?= esc($booth['ip_address'] ?? '-') ?></span>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
-                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Koordinat Geografis</span>
-                        <span class="col-span-2 text-sm text-slate-800 font-mono">
-                            <?php if (!empty($booth['latitude']) && !empty($booth['longitude'])): ?>
-                                Lat: <?= esc($booth['latitude']) ?>, Lng: <?= esc($booth['longitude']) ?>
-                            <?php else: ?>
-                                -
-                            <?php endif; ?>
-                        </span>
                     </div>
 
                     <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">

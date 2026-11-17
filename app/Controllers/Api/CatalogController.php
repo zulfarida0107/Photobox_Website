@@ -32,7 +32,7 @@ class CatalogController extends BaseApiController
 
         $options = $this->printOptionModel->findAll();
         foreach ($options as &$option) {
-            $basePrice = 0;
+            $basePrice = 0.00;
             $extraPrice = (float) ($option['extra_price'] ?? 0);
             $option['total_amount'] = number_format($basePrice + $extraPrice, 2, '.', '');
         }
@@ -45,11 +45,14 @@ class CatalogController extends BaseApiController
 
     public function listFrames(): ResponseInterface
     {
-        $frames = $this->frameModel
-            ->where('is_active', 1)
-            ->findAll();
-
         $db = \Config\Database::connect();
+        $frames = $db->table('frames f')
+            ->select('f.*, l.photo_count as layout_photo_count, l.slot_coordinates as layout_slot_coordinates')
+            ->join('frame_layouts l', 'l.id = f.layout_id', 'left')
+            ->where('f.is_active', 1)
+            ->get()
+            ->getResultArray();
+
         $categoriesList = $db->table('frame_categories')
             ->select('name')
             ->orderBy('name', 'ASC')
@@ -58,19 +61,7 @@ class CatalogController extends BaseApiController
 
         $categories = ['All'];
         foreach ($categoriesList as $cat) {
-            if (!empty($cat['name'])) {
-                $categories[] = $cat['name'];
-            }
-        }
-
-        foreach ($frames as &$frame) {
-            // Provide fallback layout fields for Kiosk if needed
-            $frame['layout_photo_count'] = 6;
-            
-            // Provide category_name to ensure case-insensitive matching in frontend works smoothly
-            if (isset($frame['category'])) {
-                $frame['category_name'] = ucfirst($frame['category']);
-            }
+            $categories[] = $cat['name'];
         }
 
         return $this->respondOk([
@@ -84,12 +75,12 @@ class CatalogController extends BaseApiController
     {
         $path = $this->request->getGet('path');
         if (empty($path)) {
-            return $this->respondError('Path is required', 400);
+            return $this->failValidation('Path is required');
         }
         
         $filePath = FCPATH . str_replace(['../', '..\\'], '', $path);
         if (!file_exists($filePath) || !is_file($filePath)) {
-            return $this->respondError('File not found', 404);
+            return $this->failNotFound('File not found');
         }
         
         $mime = mime_content_type($filePath) ?: 'image/png';

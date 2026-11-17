@@ -48,20 +48,19 @@
                 <?php endif; ?>
 
                 <div>
-                    <label for="name" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Mesin Booth *</label>
+                    <label for="name" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Booth *</label>
                     <input type="text" name="name" id="name" required
                            value="<?= esc(old('name', $booth['name'] ?? '')) ?>"
-                           placeholder="Contoh: Unit 1 - Retro Corner"
+                           placeholder="Contoh: Booth CuitBox Pastel A"
                            class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <?php if (false): // FITUR LOKASI SEMENTARA DI-NONAKTIFKAN (FOKUS 1 TITIK) ?>
                     <div>
-                        <label for="location_id" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Lokasi</label>
+                        <label for="location_id" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Lokasi Cabang / Mall (Opsional)</label>
                         <select name="location_id" id="location_id"
                                 class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white">
-                            <option value="">-- Pilih Lokasi --</option>
+                            <option value="">-- Tanpa Lokasi Tertentu / Pusat --</option>
                             <?php if (!empty($locations)): ?>
                                 <?php foreach ($locations as $loc): ?>
                                     <option value="<?= esc($loc['id']) ?>" <?= old('location_id', $booth['location_id'] ?? '') === $loc['id'] ? 'selected' : '' ?>>
@@ -71,37 +70,29 @@
                             <?php endif; ?>
                         </select>
                     </div>
-                    <?php endif; ?>
-
                     <div>
-                        <label for="theme" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tema Booth</label>
-                        <select name="theme" id="theme"
-                                class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white">
-                            <option value="">-- Pilih Tema --</option>
-                            <?php if (!empty($availableThemes)): ?>
-                                <?php foreach ($availableThemes as $key => $label): ?>
-                                    <option value="<?= esc($key) ?>" <?= old('theme', $booth['theme'] ?? '') === $key ? 'selected' : '' ?>>
-                                        <?= esc($label) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </select>
+                        <label for="capacity" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kapasitas Orang (Opsional)</label>
+                        <div class="relative">
+                            <input type="number" name="capacity" id="capacity" min="1" max="30"
+                                   value="<?= esc(old('capacity', $booth['capacity'] ?? 4)) ?>"
+                                   placeholder="Contoh: 4"
+                                   class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white pr-16" />
+                            <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-semibold">Orang</span>
+                        </div>
                     </div>
                 </div>
 
                 <div>
-                    <label for="ip_address" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Alamat IP Booth</label>
+                    <label for="ip_address" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Alamat IP Booth (Opsional)</label>
                     <input type="text" name="ip_address" id="ip_address"
                            value="<?= esc(old('ip_address', $booth['ip_address'] ?? '')) ?>"
                            placeholder="Contoh: 192.168.1.50"
                            class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white" />
                 </div>
 
-
-
                 <?php if (isset($booth)): ?>
                     <div>
-                        <label for="status" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Status Operasional *</label>
+                        <label for="status" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Status Operasional</label>
                         <select name="status" id="status" required
                                 class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white">
                             <option value="active" <?= old('status', $booth['status']) === 'active' ? 'selected' : '' ?>>Aktif (Operasional)</option>

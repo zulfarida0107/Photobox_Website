@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Selesaikan Pembayaran - CuitBox Studio</title>
+    <title><?= esc($title ?? 'Pembayaran - CuitBox Studio') ?></title>
     <!-- Tailwind CSS v3 CDN -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <!-- Google Fonts -->
@@ -43,11 +43,6 @@
             justify-content: center;
             padding: 0;
         }
-        @media (min-width: 640px) {
-            .page-wrapper {
-                padding: 0;
-            }
-        }
         .header-bg {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(20px);
@@ -71,6 +66,7 @@
             border: none;
             cursor: pointer;
             width: 100%;
+            text-decoration: none;
         }
         .btn-primary:hover {
             transform: scale(1.02);
@@ -84,7 +80,7 @@
             cursor: not-allowed;
             transform: none !important;
         }
-        .btn-back {
+        .btn-secondary {
             background: #1e293b;
             transition: all 0.3s ease;
             border-radius: 16px;
@@ -99,37 +95,18 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             width: 100%;
+            text-decoration: none;
         }
-        .btn-back:hover {
+        .btn-secondary:hover {
             background: #334155;
             transform: scale(1.02);
         }
-        .btn-back:active {
+        .btn-secondary:active {
             transform: scale(0.98);
         }
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
             vertical-align: middle;
-        }
-        .barcode-container {
-            background: white;
-            padding: 16px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .barcode-wrapper {
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-        .barcode-wrapper img {
-            display: block;
-            width: 160px;
-            height: 160px;
-            object-fit: contain;
         }
         .timer-warning {
             animation: pulse 1s ease-in-out infinite;
@@ -140,95 +117,116 @@
         }
         .toast-container {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 9999;
-            max-width: 400px;
-            width: 100%;
+            max-width: 340px;
+            width: calc(100% - 32px);
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .toast {
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            animation: slideInRight 0.5s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .toast-success {
-            background: #10b981;
-            color: white;
-        }
-        .toast-error {
-            background: #ef4444;
-            color: white;
-        }
-        .toast-info {
-            background: #3b82f6;
-            color: white;
-        }
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        .toast-close {
-            margin-left: auto;
-            cursor: pointer;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
+            padding: 10px 16px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            animation: slideInDown 0.35s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
-            transition: background 0.3s;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.35;
+            pointer-events: auto;
         }
-        .toast-close:hover {
-            background: rgba(255,255,255,0.3);
+        .toast-success { background: #10b981; color: white; }
+        .toast-error { background: #ef4444; color: white; }
+        .toast-info { background: #3b82f6; color: white; }
+        @keyframes slideInDown {
+            from { transform: translateY(-20px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
         }
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(0,0,0,0.1);
+        .payment-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        .badge-payment {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #475569;
+        }
+        .qr-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .qr-container img {
+            width: 220px;
+            height: 220px;
+            margin: 0 auto;
+            display: block;
+        }
+        @keyframes qrPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+            50% { box-shadow: 0 0 0 12px rgba(99, 102, 241, 0); }
+        }
+        .qr-active {
+            animation: qrPulse 2s ease-in-out infinite;
+        }
+        .status-checking {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #6366f1;
+            font-weight: 600;
+        }
+        .status-checking .dot {
+            width: 6px;
+            height: 6px;
+            background: #6366f1;
             border-radius: 50%;
-            border-top-color: #1e293b;
-            animation: spin 0.6s linear infinite;
+            animation: dotPulse 1.4s ease-in-out infinite;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        /* Main content agar footer menempel di bawah */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
+        .status-checking .dot:nth-child(2) { animation-delay: 0.2s; }
+        .status-checking .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dotPulse {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
         }
     </style>
 </head>
 <body>
-    <!-- BEGIN: Page Wrapper -->
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <div class="page-wrapper">
-        <!-- BEGIN: MainContainer with Gradient -->
         <div class="w-full main-container-rounded gradient-bg flex flex-col min-h-screen">
 
-            <!-- BEGIN: MainHeader -->
-            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100" data-purpose="site-header">
+            <!-- BEGIN: Header -->
+            <header class="flex items-center justify-between px-6 sm:px-8 py-4 header-bg border-b border-gray-100">
                 <div class="flex items-center">
                     <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">CuitBox Studio</h1>
                 </div>
                 <div class="flex items-center space-x-2 sm:space-x-4 text-slate-600">
-                    <!-- Help Button -->
                     <a href="<?= base_url('help') ?>" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all relative group" aria-label="Help">
                         <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
@@ -237,164 +235,218 @@
                     </a>
                 </div>
             </header>
-            <!-- END: MainHeader -->
+            <!-- END: Header -->
 
             <!-- BEGIN: Main Content -->
-            <main class="main-content relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm flex-1">
+            <main class="flex-1 px-6 sm:px-8 py-8 overflow-hidden bg-white/40 backdrop-blur-sm">
                 
-                <?php if (session()->getFlashdata('success')): ?>
-                    <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                        <?= session()->getFlashdata('success') ?>
-                    </div>
-                <?php endif; ?>
-                <?php if (session()->getFlashdata('error')): ?>
-                    <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                        <?= session()->getFlashdata('error') ?>
+                <!-- Flash Messages -->
+                <?php if (session()->getFlashdata('success') || !empty($success)): ?>
+                    <div class="mb-6 p-4 bg-emerald-100 border border-emerald-300 text-emerald-800 rounded-2xl flex items-center gap-3">
+                        <span class="material-symbols-outlined text-emerald-600">check_circle</span>
+                        <span class="font-medium text-sm"><?= session()->getFlashdata('success') ?? $success ?></span>
                     </div>
                 <?php endif; ?>
 
-                <div class="text-center mb-8">
-                    <h2 class="text-2xl font-extrabold mb-1 text-slate-800">Pembayaran Booking CuitBox Studio</h2>
-                    <p class="text-[10px] text-slate-600 font-medium">Segera lakukan pembayaran untuk Booking Photo Anda.</p>
-                </div>
+                <?php if (session()->getFlashdata('error') || !empty($error)): ?>
+                    <div class="mb-6 p-4 bg-red-100 border border-red-300 text-red-800 rounded-2xl flex items-center gap-3">
+                        <span class="material-symbols-outlined text-red-600">error</span>
+                        <span class="font-medium text-sm"><?= session()->getFlashdata('error') ?? $error ?></span>
+                    </div>
+                <?php endif; ?>
 
-                <!-- FORM PEMBAYARAN -->
-                <form action="/user-payment/store" method="post" id="paymentForm">
-                    <?= csrf_field() ?>
-                    
-                    <!-- HIDDEN INPUTS -->
-                    <?php 
-                    $bookingId = $booking['id'] ?? session()->get('booking_id') ?? 1;
-                    $amount = $booking['total_amount'] ?? 45000;
-                    ?>
-                    <input type="hidden" name="payment_id" value="<?= 'PAY' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT) ?>">
-                    <input type="hidden" name="booking_id" value="<?= $bookingId ?>">
-                    <input type="hidden" name="amount" value="<?= $amount ?>">
-                    <input type="hidden" name="status" value="success">
-                    <input type="hidden" name="payment_method" value="QRIS">
+                <?php 
+                $bookingId = $booking['id'] ?? session()->get('booking_id') ?? '';
+                $totalAmount = $booking['total_amount'] ?? ($payment['amount'] ?? 45000);
+                $paymentId = $payment['id'] ?? '';
+                ?>
 
-                    <div class="flex flex-col lg:flex-row gap-6">
-                        <!-- Left Column -->
-                        <div class="flex-1">
-                            <div class="bg-white/90 rounded-2xl p-6 shadow-sm">
-                                <div class="flex justify-between items-start mb-6">
-                                    <h3 class="text-lg font-bold text-slate-800">Detail Booking</h3>
-                                    <span class="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-3 py-1 rounded-md border border-indigo-100">
-                                        ID #<?= $booking['booking_code'] ?? 'GPB-8829' ?>
+                <div class="max-w-4xl mx-auto flex flex-col lg:flex-row gap-6">
+                    <!-- Left Column - Detail Pesanan -->
+                    <div class="flex-1">
+                        <div class="payment-card mb-6">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-800">Ringkasan Pemesanan</h3>
+                                    <p class="text-xs text-slate-500 mt-0.5">Periksa detail pesanan Anda sebelum membayar</p>
+                                </div>
+                                <span class="bg-indigo-50 text-indigo-600 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-100">
+                                    #<?= esc($booking['booking_code'] ?? 'BK-' . date('Ymd')) ?>
+                                </span>
+                            </div>
+
+                            <div class="space-y-4">
+                                <!-- Lokasi Booth -->
+                                <div class="flex items-center space-x-4 p-3 bg-white/70 rounded-xl border border-slate-100">
+                                    <div class="bg-indigo-50 p-3 rounded-xl text-indigo-600">
+                                        <span class="material-symbols-outlined text-xl">store</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest">Booth Studio</p>
+                                        <p class="text-slate-800 font-bold text-sm sm:text-base"><?= esc($booth['name'] ?? ($frame['name'] ?? 'Premium Booth Studio')) ?></p>
+                                    </div>
+                                </div>
+
+                                <!-- Desain Frame & Opsi Cetak -->
+                                <div class="flex items-center space-x-4 p-3 bg-white/70 rounded-xl border border-slate-100">
+                                    <div class="bg-emerald-50 p-3 rounded-xl text-emerald-600">
+                                        <span class="material-symbols-outlined text-xl">photo_library</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-[10px] font-extrabold text-emerald-500 uppercase tracking-widest">Pilihan Cetak & Frame</p>
+                                        <p class="text-slate-800 font-bold text-sm sm:text-base">
+                                            <?= esc(session()->get('selected_print_option_name') ?? '2 Lembar Cetak') ?> 
+                                            <span class="text-slate-500 font-normal text-xs">• <?= esc($frame['name'] ?? 'Frame Pilihan') ?></span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Jadwal Sesi -->
+                                <div class="flex items-center space-x-4 p-3 bg-white/70 rounded-xl border border-slate-100">
+                                    <div class="bg-cyan-50 p-3 rounded-xl text-cyan-600">
+                                        <span class="material-symbols-outlined text-xl">calendar_today</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-[10px] font-extrabold text-cyan-500 uppercase tracking-widest">Jadwal Sesi</p>
+                                        <p class="text-slate-800 font-bold text-sm sm:text-base"><?= esc($booking['booking_date'] ?? date('d F Y')) ?> • <?= esc($booking['booking_time'] ?? date('H:i')) ?> WIB</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-6 border-dashed border-slate-200">
+
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Total Tagihan</span>
+                                    <span class="text-2xl sm:text-3xl font-black text-indigo-700">Rp <?= number_format($totalAmount, 0, ',', '.') ?></span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="inline-block bg-emerald-100 text-emerald-700 text-[11px] font-bold px-3 py-1 rounded-full">
+                                        Harga Terverifikasi
                                     </span>
                                 </div>
-                                <div class="space-y-4">
-                                    <!-- Lokasi Booth -->
-                                    <div class="flex items-center space-x-4">
-                                        <div class="bg-indigo-50 p-3 rounded-xl shadow-sm text-indigo-600">
-                                            <span class="material-symbols-outlined text-xl">store</span>
-                                        </div>
-                                        <div>
-                                            <p class="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest">Lokasi Booth</p>
-                                            <p class="text-slate-800 font-bold text-base"><?= esc($booth['name'] ?? 'Booth Umum') ?></p>
-                                        </div>
-                                    </div>
-                                    <!-- Cetak & Tema -->
-                                    <div class="flex items-center space-x-4">
-                                        <div class="bg-emerald-50 p-3 rounded-xl shadow-sm text-emerald-600">
-                                            <span class="material-symbols-outlined text-white text-xl" style="color: #059669;">photo_library</span>
-                                        </div>
-                                        <div>
-                                            <p class="text-[10px] font-extrabold text-emerald-500 uppercase tracking-widest">Cetak &amp; Tema</p>
-                                            <p class="text-slate-800 font-bold text-base">
-                                                <?= session()->get('selected_print_option_name') ?? '2 Cetak' ?>
-                                                <br>
-                                                <span class="text-sm font-normal text-slate-500">Tema: <?= session()->get('selected_frame_name') ?? 'Belum memilih tema' ?></span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <!-- Jadwal Sesi -->
-                                    <div class="flex items-center space-x-4">
-                                        <div class="bg-cyan-50 p-3 rounded-xl shadow-sm text-cyan-600">
-                                            <span class="material-symbols-outlined text-xl">calendar_today</span>
-                                        </div>
-                                        <div>
-                                            <p class="text-[10px] font-extrabold text-cyan-500 uppercase tracking-widest">Jadwal Sesi</p>
-                                            <p class="text-slate-800 font-bold text-base"><?= $booking['booking_date'] ?? 'Sabtu, 24 Mei 2024' ?> • <?= $booking['booking_time'] ?? '19:00 WIB' ?></p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr class="my-6 border-dashed border-slate-200">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-lg font-bold text-slate-800">Total Tagihan</span>
-                                    <span class="text-2xl font-black text-indigo-700">Rp <?= number_format($amount, 0, ',', '.') ?></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right Column: QR Code -->
-                        <div class="flex-1">
-                            <div class="bg-white/90 rounded-2xl p-6 shadow-sm flex flex-col items-center">
-                                <div class="barcode-wrapper">
-                                    <div class="barcode-container">
-                                        <img alt="QR Code Barcode" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PAYMENT-<?= date('Ymd') ?>-CUITBOX-<?= $bookingId ?>" class="w-40 h-40">
-                                    </div>
-                                </div>
-                                <div class="bg-indigo-50/50 w-full rounded-2xl p-4 mt-4 mb-4 text-center border border-indigo-100/50">
-                                    <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1">Scan Qris dan Lakukan Pembayaran</p>
-                                    <p class="text-2xl font-black text-slate-800">Rp <?= number_format($amount, 0, ',', '.') ?></p>
-                                </div>
-                                <div class="w-full bg-[#D9F99D] rounded-2xl py-3 flex items-center justify-center space-x-2 text-slate-800 font-bold mb-3" id="timer-container">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                                    </svg>
-                                    <span class="text-sm" id="timer-display">Sesi berakhir dalam: 05:00</span>
-                                </div>
-                                <p class="text-[10px] text-slate-700 text-center leading-relaxed font-medium">
-                                    *Dapat dibayar melalui semua aplikasi m-banking dan e-wallet.
-                                </p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Bottom Action Buttons -->
-                    <div class="mt-6 flex flex-col sm:flex-row gap-4">
-                        <a href="<?= base_url('frame') ?>" class="btn-back flex-1 text-center no-underline">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                            </svg>
-                            Kembali
-                        </a>
-                        <button type="submit" class="btn-primary flex-1" id="confirmPaymentBtn">
-                            <span id="btnText">Konfirmasi Pembayaran</span>
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" id="btnIcon">
-                                <path clip-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.64.304 1.24.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"/>
-                            </svg>
-                        </button>
+                    <!-- Right Column: QRIS Payment via Bayar.gg -->
+                    <div class="flex-1">
+                        <div class="payment-card flex flex-col items-center">
+                            <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-3 shadow-sm">
+                                <span class="material-symbols-outlined text-3xl">qr_code_2</span>
+                            </div>
+
+                            <h4 class="text-base font-bold text-slate-800 text-center">Scan QRIS untuk Bayar</h4>
+                            <p class="text-xs text-slate-500 text-center mt-1 mb-5">
+                                Gunakan aplikasi m-Banking atau e-Wallet (GoPay, OVO, DANA, dll) untuk memindai kode QR
+                            </p>
+
+                            <!-- Supported Payment Badges -->
+                            <div class="w-full flex flex-wrap justify-center gap-2 mb-5">
+                                <span class="badge-payment">⚡ QRIS</span>
+                                <span class="badge-payment">💚 GoPay</span>
+                                <span class="badge-payment">💜 OVO</span>
+                                <span class="badge-payment">💙 DANA</span>
+                                <span class="badge-payment">🏦 m-Banking</span>
+                            </div>
+
+                            <!-- QR Code Display -->
+                            <?php if (!empty($qrImageUrl)): ?>
+                                <div class="qr-container qr-active mb-4" id="qrContainer">
+                                    <img src="<?= esc($qrImageUrl) ?>" alt="QRIS CuitBox Studio" id="qrImage">
+                                </div>
+
+                                <div class="bg-indigo-50/80 w-full rounded-2xl p-4 text-center border border-indigo-100/50 mb-3">
+                                    <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1">Jumlah yang Harus Dibayar</p>
+                                    <p class="text-3xl font-black text-slate-800">Rp <?= number_format($totalAmount, 0, ',', '.') ?></p>
+                                    <p class="text-[11px] text-slate-500 mt-1">ID: <span class="font-mono font-bold text-slate-700"><?= esc($paymentId) ?></span></p>
+                                </div>
+
+                                <!-- Auto-check status indicator -->
+                                <div class="w-full text-center mb-4" id="statusIndicator">
+                                    <div class="status-checking">
+                                        <span class="dot"></span>
+                                        <span class="dot"></span>
+                                        <span class="dot"></span>
+                                        <span>Menunggu pembayaran...</span>
+                                    </div>
+                                </div>
+
+                            <?php else: ?>
+                                <!-- Fallback jika QR belum muncul (misal API Key belum diisi atau error) -->
+                                <div class="w-full bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center mb-4">
+                                    <span class="material-symbols-outlined text-4xl text-amber-500 mb-2">info</span>
+                                    <p class="text-sm font-bold text-amber-800">Menyiapkan QRIS</p>
+                                    <p class="text-xs text-amber-600 mt-1">Silakan klik tombol di bawah untuk membuka halaman pembayaran atau muat ulang.</p>
+                                </div>
+
+                                <div class="bg-indigo-50/80 w-full rounded-2xl p-4 text-center border border-indigo-100/50 mb-3">
+                                    <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1">Jumlah yang Harus Dibayar</p>
+                                    <p class="text-3xl font-black text-slate-800">Rp <?= number_format($totalAmount, 0, ',', '.') ?></p>
+                                    <p class="text-[11px] text-slate-500 mt-1">ID: <span class="font-mono font-bold text-slate-700"><?= esc($paymentId) ?></span></p>
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- Timer Sesi -->
+                            <div class="w-full bg-[#D9F99D] rounded-2xl py-3 flex items-center justify-center space-x-2 text-slate-800 font-bold mb-5" id="timer-container">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                </svg>
+                                <span class="text-xs sm:text-sm" id="timer-display">Sesi berakhir dalam: 15:00</span>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="w-full space-y-3">
+                                <?php if (!empty($paymentPageUrl)): ?>
+                                    <a href="<?= esc($paymentPageUrl) ?>" target="_blank" class="btn-primary" id="payButton">
+                                        <span class="material-symbols-outlined text-xl">open_in_new</span>
+                                        <span id="btnText">Buka Halaman Pembayaran</span>
+                                    </a>
+                                <?php else: ?>
+                                    <button type="button" class="btn-primary" id="payButton" onclick="location.reload()">
+                                        <span class="material-symbols-outlined text-xl">refresh</span>
+                                        <span id="btnText">Muat Ulang Halaman</span>
+                                    </button>
+                                <?php endif; ?>
+
+                                <a href="<?= base_url('print-option') ?>" class="btn-secondary">
+                                    <span class="material-symbols-outlined">arrow_back</span>
+                                    Ubah Opsi Cetak
+                                </a>
+                            </div>
+
+                            <p class="text-[11px] text-slate-500 text-center leading-relaxed mt-4">
+                                *Setelah pembayaran berhasil, halaman ini akan otomatis berpindah ke tiket booking Anda.
+                            </p>
+                        </div>
                     </div>
-                </form>
+                </div>
+
             </main>
             <!-- END: Main Content -->
 
             <!-- BEGIN: Footer -->
             <footer class="flex flex-col sm:flex-row items-center justify-between px-6 sm:px-8 py-4 footer-bg border-t border-gray-100 text-slate-500 text-xs font-medium gap-2 sm:gap-0">
                 <div class="flex items-center gap-2">
-                    <svg class="h-3 w-3 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                    <svg class="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                     </svg>
-                    <span class="font-semibold text-slate-600">Connected</span>
+                    <span class="font-semibold text-slate-700">Pembayaran QRIS Aman via Bayar.gg</span>
                 </div>
                 <div class="text-center">© 2026 CuitBox Studio. All rights reserved.</div>
             </footer>
             <!-- END: Footer -->
 
         </div>
-        <!-- END: MainContainer -->
     </div>
-    <!-- END: Page Wrapper -->
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // COUNTDOWN TIMER
-            let totalSeconds = 300;
+            // ========== COUNTDOWN TIMER (15 menit) ==========
+            let totalSeconds = 900;
             const timerDisplay = document.getElementById('timer-display');
             const timerContainer = document.getElementById('timer-container');
-            let timerInterval;
+            const payBtn = document.getElementById('payButton');
             
             function formatTime(seconds) {
                 const mins = Math.floor(seconds / 60);
@@ -404,18 +456,19 @@
             
             function updateTimer() {
                 if (totalSeconds <= 0) {
-                    timerDisplay.textContent = '⏰ Sesi telah berakhir!';
+                    timerDisplay.textContent = '⏰ Sesi QRIS telah berakhir!';
                     timerContainer.classList.add('timer-warning');
                     timerContainer.style.background = '#ef4444';
                     timerContainer.style.color = 'white';
                     clearInterval(timerInterval);
-                    
-                    const btn = document.getElementById('confirmPaymentBtn');
-                    btn.disabled = true;
-                    btn.style.opacity = '0.5';
-                    btn.style.cursor = 'not-allowed';
-                    document.getElementById('btnText').textContent = 'Sesi Berakhir';
-                    document.getElementById('btnIcon').style.display = 'none';
+                    if (pollInterval) clearInterval(pollInterval);
+
+                    if (payBtn) {
+                        payBtn.style.pointerEvents = 'none';
+                        payBtn.style.opacity = '0.5';
+                    }
+                    const btnText = document.getElementById('btnText');
+                    if (btnText) btnText.textContent = 'QRIS Kedaluwarsa - Muat Ulang';
                     return;
                 }
                 
@@ -432,39 +485,101 @@
                 totalSeconds--;
             }
             
-            timerInterval = setInterval(updateTimer, 1000);
+            const timerInterval = setInterval(updateTimer, 1000);
             updateTimer();
 
-            // TOAST NOTIFICATION
-            window.showToast = function(message, type = 'success') {
+            // ========== TOAST NOTIFICATION ==========
+            window.showToast = function(message, type = 'info') {
                 const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
-                const icons = { success: '✅', error: '❌', info: 'ℹ️' };
                 toast.className = `toast toast-${type}`;
-                toast.innerHTML = `
-                    <span class="text-xl">${icons[type] || 'ℹ️'}</span>
-                    <span class="flex-1">${message}</span>
-                    <button class="toast-close" onclick="this.parentElement.remove()">×</button>
-                `;
+                toast.innerHTML = `<span>${message}</span>`;
                 container.appendChild(toast);
                 
                 setTimeout(() => {
-                    if (toast.parentElement) {
-                        toast.style.opacity = '0';
-                        toast.style.transition = 'opacity 0.5s ease';
-                        setTimeout(() => toast.remove(), 500);
-                    }
-                }, 5000);
+                    toast.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+                    toast.style.transform = 'translateY(-40px)';
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 250);
+                }, 4000);
             };
 
-            // FLASH MESSAGES
-            <?php if (session()->getFlashdata('success')): ?>
-                showToast('<?= session()->getFlashdata('success') ?>', 'success');
-            <?php endif; ?>
-            
-            <?php if (session()->getFlashdata('error')): ?>
-                showToast('<?= session()->getFlashdata('error') ?>', 'error');
-            <?php endif; ?>
+            // ========== AUTO-POLLING STATUS PEMBAYARAN ==========
+            const paymentId = '<?= esc($paymentId ?? '', 'js') ?>';
+            const bookingId = '<?= esc($bookingId ?? '', 'js') ?>';
+            const redirectUrl = '<?= base_url('StatusBooking') ?>' + '?payment_id=' + encodeURIComponent(paymentId) + '&booking_id=' + encodeURIComponent(bookingId);
+
+            let pollInterval = null;
+            let pollCount = 0;
+            const MAX_POLLS = 180; // 15 menit x 12 polls/menit = 180 polls
+
+            function checkPaymentStatus() {
+                if (!paymentId || pollCount >= MAX_POLLS) {
+                    if (pollInterval) clearInterval(pollInterval);
+                    return;
+                }
+
+                pollCount++;
+
+                fetch('<?= base_url('api/payment') ?>' + '/' + encodeURIComponent(paymentId) + '/status', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const status = data?.payment?.status;
+
+                    if (status === 'paid') {
+                        if (pollInterval) clearInterval(pollInterval);
+                        clearInterval(timerInterval);
+
+                        // Update UI
+                        const indicator = document.getElementById('statusIndicator');
+                        if (indicator) {
+                            indicator.innerHTML = `
+                                <div class="flex items-center justify-center gap-2 text-emerald-600 font-bold text-sm">
+                                    <span class="material-symbols-outlined">check_circle</span>
+                                    <span>Pembayaran berhasil diterima!</span>
+                                </div>
+                            `;
+                        }
+
+                        const qrContainer = document.getElementById('qrContainer');
+                        if (qrContainer) {
+                            qrContainer.classList.remove('qr-active');
+                            qrContainer.style.borderColor = '#10b981';
+                            qrContainer.style.background = '#f0fdf4';
+                        }
+
+                        showToast('✅ Pembayaran berhasil! Mengalihkan ke tiket booking...', 'success');
+
+                        setTimeout(function() {
+                            window.location.href = redirectUrl;
+                        }, 2000);
+                    } else if (status === 'failed') {
+                        if (pollInterval) clearInterval(pollInterval);
+                        const indicator = document.getElementById('statusIndicator');
+                        if (indicator) {
+                            indicator.innerHTML = `
+                                <div class="flex items-center justify-center gap-2 text-red-600 font-bold text-sm">
+                                    <span class="material-symbols-outlined">cancel</span>
+                                    <span>Pembayaran gagal / kedaluwarsa</span>
+                                </div>
+                            `;
+                        }
+                        showToast('Pembayaran gagal. Silakan muat ulang halaman untuk coba lagi.', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.log('Poll retry:', err);
+                });
+            }
+
+            // Mulai polling setiap 5 detik
+            if (paymentId) {
+                pollInterval = setInterval(checkPaymentStatus, 5000);
+                setTimeout(checkPaymentStatus, 3000);
+            }
         });
     </script>
 </body>

@@ -1,6 +1,19 @@
-<header class="fixed top-0 right-0 w-[calc(100%-260px)] z-40 bg-white border-b border-slate-200 shadow-sm flex items-center justify-between px-6 h-16">
-    <div class="flex-grow"></div>
-    <div class="flex items-center gap-5">
+<header class="fixed top-0 right-0 w-full md:w-[calc(100%-260px)] z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm flex items-center justify-between px-4 sm:px-6 h-16 transition-all duration-300">
+    <!-- Mobile Hamburger Toggle & Title -->
+    <div class="flex items-center gap-3">
+        <button id="sidebar-toggle-btn" 
+                type="button" 
+                onclick="toggleSidebar(true)" 
+                class="md:hidden flex items-center justify-center w-10 h-10 -ml-1 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition-colors focus:outline-none"
+                aria-label="Buka Sidebar Navigasi">
+            <span class="material-symbols-outlined text-2xl">menu</span>
+        </button>
+        <div class="flex items-center gap-2 md:hidden">
+            <span class="text-sm font-bold text-slate-800 tracking-tight">CuitBox Studio</span>
+        </div>
+    </div>
+    
+    <div class="flex items-center gap-2 sm:gap-5">
         <!-- Ikon Waktu / Timer -->
         <button onclick="openModal('modalClock')" class="text-slate-500 hover:bg-slate-50 p-2 rounded-lg transition-colors">
             <span class="material-symbols-outlined">schedule</span>
@@ -10,18 +23,19 @@
             <span class="material-symbols-outlined">notifications</span>
             <span id="notif-badge" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white hidden"></span>
         </button>
-        <div class="h-8 w-px bg-slate-200 mx-2"></div>
+        <div class="h-6 sm:h-8 w-px bg-slate-200 mx-1 sm:mx-2"></div>
         <!-- Ikon Profil -->
-        <div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onclick="openModal('modalProfile')">
+        <div class="flex items-center gap-2 sm:gap-3 cursor-pointer hover:opacity-80 transition-opacity" onclick="openModal('modalProfile')">
             <div class="text-right hidden sm:block">
-                <p class="text-xs font-bold text-on-surface leading-none">Admin CuitBox Studio</p>
+                <p class="text-xs font-bold text-on-surface leading-none"><?= esc(session()->get('adminName') ?? 'Admin CuitBox Studio') ?></p>
                 <p class="text-[10px] text-slate-500 uppercase tracking-wider mt-1"><?= esc(strtolower(session()->get('adminRole') ?? '') === 'superadmin' ? 'Super Admin' : 'Staff') ?></p>
             </div>
-            <img id="dashboard-profile-img" alt="Admin Profile" class="w-10 h-10 rounded-full border border-slate-100 object-cover"
+            <img id="dashboard-profile-img" alt="Admin Profile" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-100 object-cover"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuDru5yG0kfgrAexiefmfPXrmbf__ddiHYCNse2EGwIxmzqDZQcLg1eAYw22ws1eruImLu7Qldg3CG24mWnx9DCff9YDE9XZ-hDvImkrF230qHqOc86k-j-F1anq2ljfObxwH5H9hH2-DvMUhbdIyghqBUFEDI2QsmbH3YT2XgrMzqIVSj5naElgHfhhqx5y9cKHG1ZXlcAh5jNsuwiIcvAhYUwbXl4Ls23yVAqUlT49ChvMnedJES1cV1aToIn3pmWztakJyeDOrWyn" />
             <script>
                 (function() {
-                    const savedImg = localStorage.getItem('adminProfileImg');
+                    const adminId = '<?= esc(session()->get('adminId') ?? 'default_admin') ?>';
+                    const savedImg = localStorage.getItem('adminProfileImg_' + adminId);
                     if (savedImg) document.getElementById('dashboard-profile-img').src = savedImg;
                 })();
             </script>
@@ -310,10 +324,24 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             <section class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden p-6">
                 <h3 class="font-bold text-[#001848] mb-6 text-lg">Informasi Profil</h3>
                 <div class="flex flex-col md:flex-row gap-8 items-start">
-                    <div class="relative group mx-auto md:mx-0 w-32 h-32 flex-shrink-0">
-                        <div class="w-full h-full rounded-2xl overflow-hidden border border-slate-100 shadow-sm bg-white p-1.5">
-                            <img id="modal-profile-img" alt="Current profile" class="w-full h-full object-cover rounded-xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgzPXgOYOFnUaa01GpekBQj1KlquZyBSw9tRg9K6QBvo0jvb-7uJ3A44o1y_G3VBfpwSvg-nP_lTdAy9xLYSuRL5ZF-fmflDtaZMb07vXrzDCvgTLyhTRoqFJ0dJndmn09KlhnAlH9Fz7IJ3pkNDWjS009yTI18hpvsuGnT6ruezfsRUWNtj8WefpyGfGwbX7ug1sSf3MST3l_QQfeBK9zHgjYgFBNSOAVWMOH_mdTapP4nU5zXr5eFYJZts2Jc3QwGYgXdJkM_BBl"/>
+                    <div class="relative group mx-auto md:mx-0 w-32 h-32 flex-shrink-0 cursor-pointer" onclick="document.getElementById('profile-upload').click()" title="Klik untuk mengubah foto profil">
+                        <div class="w-full h-full rounded-2xl overflow-hidden border-2 border-dashed border-slate-200 group-hover:border-[#003d9b] shadow-sm bg-white p-1 relative transition-colors">
+                            <img id="modal-profile-img" alt="Current profile" class="w-full h-full object-cover rounded-xl transition-all group-hover:brightness-75" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgzPXgOYOFnUaa01GpekBQj1KlquZyBSw9tRg9K6QBvo0jvb-7uJ3A44o1y_G3VBfpwSvg-nP_lTdAy9xLYSuRL5ZF-fmflDtaZMb07vXrzDCvgTLyhTRoqFJ0dJndmn09KlhnAlH9Fz7IJ3pkNDWjS009yTI18hpvsuGnT6ruezfsRUWNtj8WefpyGfGwbX7ug1sSf3MST3l_QQfeBK9zHgjYgFBNSOAVWMOH_mdTapP4nU5zXr5eFYJZts2Jc3QwGYgXdJkM_BBl"/>
+                            
+                            <!-- Overlay Hover Kamera -->
+                            <div class="absolute inset-1 rounded-xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white gap-1">
+                                <span class="material-symbols-outlined text-2xl">photo_camera</span>
+                                <span class="text-[10px] font-bold uppercase tracking-wider">Ganti Foto</span>
+                            </div>
                         </div>
+
+                        <!-- Badge Tombol Edit di Pojok Kanan Bawah -->
+                        <div class="absolute -bottom-1 -right-1 w-8 h-8 bg-[#003d9b] group-hover:bg-[#002b6d] text-white rounded-full flex items-center justify-center shadow-md border-2 border-white transition-transform group-hover:scale-110">
+                            <span class="material-symbols-outlined text-sm">edit</span>
+                        </div>
+
+                        <!-- Input File Tersembunyi -->
+                        <input type="file" id="profile-upload" accept="image/png, image/jpeg, image/webp, image/gif" class="hidden" />
                     </div>
                     <div class="flex-1 w-full">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
@@ -323,7 +351,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
                             </div>
                             <div class="space-y-2">
                                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">PERAN</label>
-                                <input class="w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-500 font-medium text-sm py-2.5 px-3 outline-none cursor-not-allowed" readonly type="text" value="<?= esc(strtolower(session()->get('adminRole') ?? '') === 'superadmin' ? 'Super Admin' : 'Staff') ?>"/>
+                                <input class="w-full rounded-lg border border-slate-200 bg-slate-50 text-slate-500 font-medium text-sm py-2.5 px-3 outline-none cursor-not-allowed" readonly type="text" value="<?= esc($adminRoleLabel) ?>"/>
                             </div>
                             <div class="space-y-2">
                                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">ALAMAT EMAIL</label>
@@ -332,7 +360,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
                         </div>
                         <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs flex items-center gap-2">
                             <span class="material-symbols-outlined text-amber-600 text-base flex-shrink-0">info</span>
-                            <span>Informasi profil bersifat ter-kunci. Perubahan data akun hanya dapat dilakukan melalui menu <a href="<?= base_url('admin/settings') ?>" class="font-bold underline hover:text-amber-900">Pengaturan Akses</a>.</span>
+                            <?php if (strtolower(session()->get('adminRole') ?? '') === 'superadmin'): ?>
+                                <span>Informasi profil bersifat ter-kunci. Perubahan data akun hanya dapat dilakukan melalui menu <a href="<?= base_url('admin/settings') ?>" class="font-bold underline hover:text-amber-900">Pengaturan Akses</a>.</span>
+                            <?php else: ?>
+                                <span>Informasi profil bersifat ter-kunci. Perubahan data akun hanya dapat dilakukan oleh <strong class="font-bold text-amber-900">Super Admin</strong>.</span>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -345,7 +377,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
                     <!-- Toggle 1 -->
                     <div class="flex items-center justify-between p-4 bg-[#f8fafc] rounded-xl border border-slate-50">
                         <div class="flex items-center gap-4">
-                            <div class="p-2 bg-[#e0e7ff] text-[#4f46e5] rounded-lg"><span class="material-symbols-outlined text-[20px]">mail</span></div>
+                            <div class="p-2 bg-[#dae2ff] text-[#003d9b] rounded-lg"><span class="material-symbols-outlined text-[20px]">mail</span></div>
                             <div>
                                 <p class="font-bold text-[#001848] text-sm mb-0.5">Laporan Email Mingguan</p>
                                 <p class="text-xs text-slate-500">Terima ringkasan transaksi mingguan via email.</p>
@@ -359,7 +391,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
                     <!-- Toggle 2 -->
                     <div class="flex items-center justify-between p-4 bg-[#f8fafc] rounded-xl border border-slate-50">
                         <div class="flex items-center gap-4">
-                            <div class="p-2 bg-[#e0e7ff] text-[#4f46e5] rounded-lg"><span class="material-symbols-outlined text-[20px]">bolt</span></div>
+                            <div class="p-2 bg-[#dae2ff] text-[#003d9b] rounded-lg"><span class="material-symbols-outlined text-[20px]">bolt</span></div>
                             <div>
                                 <p class="font-bold text-[#001848] text-sm mb-0.5">Push Notifications</p>
                                 <p class="text-xs text-slate-500">Notifikasi instan untuk aktivitas sistem yang kritis.</p>
@@ -373,7 +405,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
                     <!-- Toggle 3 -->
                     <div class="flex items-center justify-between p-4 bg-[#f8fafc] rounded-xl border border-slate-50">
                         <div class="flex items-center gap-4">
-                            <div class="p-2 bg-[#e0e7ff] text-[#4f46e5] rounded-lg"><span class="material-symbols-outlined text-[20px]">security</span></div>
+                            <div class="p-2 bg-[#dae2ff] text-[#003d9b] rounded-lg"><span class="material-symbols-outlined text-[20px]">security</span></div>
                             <div>
                                 <p class="font-bold text-[#001848] text-sm mb-0.5">Peringatan Keamanan</p>
                                 <p class="text-xs text-slate-500">Notifikasi saat ada upaya login yang mencurigakan.</p>
@@ -388,8 +420,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             </section>
 
             <div class="flex items-center justify-end gap-4 pt-4">
-                <button id="btn-batal-profil" class="px-6 py-2.5 rounded-lg border border-[#003d9b] text-[#003d9b] font-bold text-sm hover:bg-blue-50 transition-colors bg-white">Batalkan Perubahan</button>
-                <button id="btn-simpan-profil" class="px-6 py-2.5 rounded-lg bg-[#003d9b] text-white font-bold text-sm shadow-md hover:bg-blue-800 transition-all flex items-center gap-2">
+                <button id="btn-batal-profil" class="px-6 py-2.5 rounded-lg border border-[#003d9b] text-[#003d9b] font-bold text-sm hover:bg-[#dae2ff]/30 transition-colors bg-white">Batalkan Perubahan</button>
+                <button id="btn-simpan-profil" class="px-6 py-2.5 rounded-lg bg-[#003d9b] hover:bg-[#002b6d] text-white font-bold text-sm shadow-md transition-all flex items-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">save</span>Simpan Pengaturan
                 </button>
             </div>
@@ -704,17 +736,42 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             });
         }
 
-        // Profile Modal Logic
+        // Profile Modal Logic (User-specific scoped to active adminId)
+        const activeAdminId = '<?= esc(session()->get('adminId') ?? 'default_admin') ?>';
+        const profileImgKey = 'adminProfileImg_' + activeAdminId;
+        const prefEmailKey   = 'prefEmail_' + activeAdminId;
+        const prefPushKey    = 'prefPush_' + activeAdminId;
+        const prefSecKey     = 'prefSecurity_' + activeAdminId;
+
         const profileUpload = document.getElementById('profile-upload');
         const modalProfileImg = document.getElementById('modal-profile-img');
         const dashboardProfileImg = document.getElementById('dashboard-profile-img');
         const btnBatalProfil = document.getElementById('btn-batal-profil');
         const btnSimpanProfil = document.getElementById('btn-simpan-profil');
         
-        const savedImg = localStorage.getItem('adminProfileImg');
+        const savedImg = localStorage.getItem(profileImgKey);
         if(savedImg) {
             if(dashboardProfileImg) dashboardProfileImg.src = savedImg;
             if(modalProfileImg) modalProfileImg.src = savedImg;
+        }
+
+        if(profileUpload) {
+            profileUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert("Ukuran file foto maksimal 5 MB.");
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        if (modalProfileImg) {
+                            modalProfileImg.src = evt.target.result;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
         }
 
         const toggleEmail = document.getElementById('toggle-email');
@@ -738,13 +795,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             }
         }
 
-        const savedEmail = localStorage.getItem('prefEmail');
+        const savedEmail = localStorage.getItem(prefEmailKey);
         if(savedEmail) applyToggleState(toggleEmail, savedEmail);
         
-        const savedPush = localStorage.getItem('prefPush');
+        const savedPush = localStorage.getItem(prefPushKey);
         if(savedPush) applyToggleState(togglePush, savedPush);
         
-        const savedSecurity = localStorage.getItem('prefSecurity');
+        const savedSecurity = localStorage.getItem(prefSecKey);
         if(savedSecurity) applyToggleState(toggleSecurity, savedSecurity);
 
         document.querySelectorAll('.notif-toggle').forEach(toggle => {
@@ -771,11 +828,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             btnSimpanProfil.addEventListener('click', () => {
                 if(dashboardProfileImg && modalProfileImg) {
                     dashboardProfileImg.src = modalProfileImg.src;
-                    localStorage.setItem('adminProfileImg', modalProfileImg.src);
+                    localStorage.setItem(profileImgKey, modalProfileImg.src);
                 }
-                if(toggleEmail) localStorage.setItem('prefEmail', toggleEmail.getAttribute('data-state'));
-                if(togglePush) localStorage.setItem('prefPush', togglePush.getAttribute('data-state'));
-                if(toggleSecurity) localStorage.setItem('prefSecurity', toggleSecurity.getAttribute('data-state'));
+                if(toggleEmail) localStorage.setItem(prefEmailKey, toggleEmail.getAttribute('data-state'));
+                if(togglePush) localStorage.setItem(prefPushKey, togglePush.getAttribute('data-state'));
+                if(toggleSecurity) localStorage.setItem(prefSecKey, toggleSecurity.getAttribute('data-state'));
                 
                 forceClose('modalProfile');
                 alert("Pengaturan profil berhasil disimpan!");

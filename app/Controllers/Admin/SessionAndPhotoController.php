@@ -7,8 +7,6 @@ use App\Models\SessionModel;
 use App\Models\PhotoModel;
 use App\Models\FrameModel;
 use App\Models\FilterModel;
-use App\Services\EmailService;
-use App\Services\GoogleDriveService;
 
 class SessionAndPhotoController extends BaseController
 {
@@ -37,9 +35,8 @@ class SessionAndPhotoController extends BaseController
         // --- Query sesi dengan JOIN ke frames & filters ---
         $db = $this->sessionModel->db;
         $builder = $db->table('sessions s')
-            ->select('s.*, b.booking_code, fr.name AS frame_name, fi.name AS filter_name, c.email AS customer_email')
+            ->select('s.*, b.booking_code, fr.name AS frame_name, fi.name AS filter_name')
             ->join('bookings b',  'b.id = s.booking_id', 'left')
-            ->join('customers c', 'c.id = b.customer_id', 'left')
             ->join('frames fr',   'fr.id = s.frame_id',  'left')
             ->join('filters fi',  'fi.id = s.filter_id', 'left')
             ->orderBy('s.created_at', 'DESC');
@@ -101,16 +98,15 @@ class SessionAndPhotoController extends BaseController
     {
         $db = $this->sessionModel->db;
         $session = $db->table('sessions s')
-            ->select('s.*, b.booking_code, fr.name AS frame_name, fi.name AS filter_name, c.email AS customer_email')
+            ->select('s.*, b.booking_code, fr.name AS frame_name, fi.name AS filter_name')
             ->join('bookings b',  'b.id = s.booking_id', 'left')
-            ->join('customers c', 'c.id = b.customer_id', 'left')
             ->join('frames fr',   'fr.id = s.frame_id',  'left')
             ->join('filters fi',  'fi.id = s.filter_id', 'left')
             ->where('s.id', $id)
             ->get()->getRowArray();
 
         if (!$session) {
-            return redirect()->to(base_url('admin/sessions#table-session'))
+            return redirect()->to(base_url('admin/sessions'))
                 ->with('error', 'Sesi tidak ditemukan.');
         }
 
@@ -137,61 +133,53 @@ class SessionAndPhotoController extends BaseController
                 ->with('error', 'Sesi tidak ditemukan.');
         }
 
-        $db = $this->sessionModel->db;
-        $customerEmail = $db->table('bookings b')
-            ->select('c.email')
-            ->join('customers c', 'c.id = b.customer_id', 'left')
-            ->where('b.id', $session['booking_id'])
-            ->get()->getRowArray();
-        
-        $emailRecipient = $session['email_recipient'] ?? ($customerEmail['email'] ?? '');
-
-        if (empty($emailRecipient)) {
-            return redirect()->to(base_url('admin/sessions#table-session'))
+        if (empty($session['email_recipient'])) {
+            return redirect()->to(base_url('admin/sessions'))
                 ->with('error', 'Sesi ini tidak memiliki penerima email.');
         }
 
-        // Coba upload ke Drive dulu (atau gunakan drive_folder_url yang sudah ada)
-        $driveLink = $session['drive_folder_url'] ?? null;
+        // Ambil semua foto sesi ini
+        $photos      = $this->photoModel->where('session_id', $id)->orderBy('shot_number', 'ASC')->findAll();
+        $driveUrl    = $session['drive_folder_url'] ?? null;
+        $bookingCode = $session['booking_id'] ?? '-';
+        $sessionDate = date('d M Y', strtotime($session['created_at']));
 
-        if (empty($driveLink)) {
-            try {
-                $driveService = new GoogleDriveService();
-                $driveLink    = $driveService->uploadSessionPhotos($id);
-                $this->sessionModel->update($id, ['drive_folder_url' => $driveLink]);
-            } catch (\Throwable $driveErr) {
-                log_message('error', 'Resend Drive upload error: ' . $driveErr->getMessage());
-                $driveLink = null;
-            }
+        $photoListHtml = '';
+        foreach ($photos as $i => $photo) {
+            $photoUrl       = base_url($photo['file_path']);
+            $photoListHtml .= "<li style='margin-bottom:6px;'><a href='{$photoUrl}'>Foto " . ($i + 1) . "</a></li>";
+        }
+        if ($driveUrl) {
+            $photoListHtml .= "<li style='margin-bottom:6px;'><a href='{$driveUrl}'>📁 Buka Folder Google Drive</a></li>";
         }
 
-        // Kirim email
-        if (!empty($emailRecipient)) {
-            try {
-                $emailService = new EmailService();
-                // Send specific params to email template
-                // Assuming it expects photos array
-                $photos = (new \App\Models\PhotoModel())->where('session_id', $id)->findAll();
-                
-                $emailParams = [
-                    'recipient'   => $emailRecipient,
-                    'subject'     => 'Your Photobox Session #' . $id,
-                    'messageBody' => 'Thank you for using Photobox! Here are your session results.',
-                    'driveLink'   => $driveLink,
-                ];
-                $emailService->sendEmail($emailParams);
+        $htmlBody = "
+<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;'>
+  <h2 style='color:#4f46e5;'>🎞️ Galeri Foto Anda Sudah Siap!</h2>
+  <p>Halo,</p>
+  <p>Terima kasih telah menggunakan <strong>CuitBox Studio</strong>. Berikut adalah tautan galeri foto dari sesi Anda pada <strong>{$sessionDate}</strong>.</p>
+  <p><strong>Kode Sesi/Booking:</strong> {$bookingCode}</p>
+  <ul style='line-height:1.8;'>{$photoListHtml}</ul>
+  <p style='color:#6b7280;font-size:0.875rem;'>Email ini dikirim ulang oleh Admin CuitBox Studio.</p>
+  <hr/>
+  <p style='color:#9ca3af;font-size:0.75rem;'>CuitBox Studio — Smart Photobox Management</p>
+</div>";
 
-                return redirect()->to(base_url('admin/sessions#table-session'))
-                    ->with('success', 'Email galeri berhasil dikirim ulang ke ' . esc($emailRecipient) . '.');
-            } catch (\Throwable $e) {
-                log_message('error', 'Resend Email error: ' . $e->getMessage());
-                return redirect()->to(base_url('admin/sessions#table-session'))
-                    ->with('error', 'Gagal mengirim ulang email: ' . $e->getMessage());
-            }
+        $emailService = \Config\Services::email();
+        $emailService->clear();
+        $emailService->setFrom('cuitboxstudio@gmail.com', 'CuitBox Studio');
+        $emailService->setTo($session['email_recipient']);
+        $emailService->setSubject('🎞️ Galeri Foto CuitBox Studio — Sesi ' . $sessionDate);
+        $emailService->setMessage($htmlBody);
+
+        if ($emailService->send()) {
+            return redirect()->to(base_url('admin/sessions'))
+                ->with('success', "Email galeri sesi #{$id} berhasil dikirim ulang ke {$session['email_recipient']}.");
         }
 
-        return redirect()->to(base_url('admin/sessions#table-session'))
-            ->with('error', 'Gagal mengirim ulang email.');
+        log_message('error', 'Email resend gagal sesi #' . $id . ': ' . $emailService->printDebugger(['headers']));
+        return redirect()->to(base_url('admin/sessions'))
+            ->with('error', "Gagal mengirim email ke {$session['email_recipient']}. Periksa konfigurasi SMTP di .env.");
     }
 
     // =========================================================================
@@ -199,52 +187,62 @@ class SessionAndPhotoController extends BaseController
     // =========================================================================
     public function resendAll()
     {
-        $db = $this->sessionModel->db;
-        $sessions = $db->table('sessions s')
-            ->select('s.*, c.email AS customer_email')
-            ->join('bookings b', 'b.id = s.booking_id', 'left')
-            ->join('customers c', 'c.id = b.customer_id', 'left')
-            ->where("(s.email_recipient IS NOT NULL AND s.email_recipient != '') OR (c.email IS NOT NULL AND c.email != '')")
-            ->get()->getResultArray();
+        $sessions = $this->sessionModel
+            ->where('email_recipient IS NOT NULL')
+            ->where('email_recipient !=', '')
+            ->findAll();
 
-        $emailService = new EmailService();
         $successCount = 0;
         $failCount    = 0;
 
         foreach ($sessions as $sess) {
-            $driveLink = $sess['drive_folder_url'] ?? null;
+            $photos      = $this->photoModel->where('session_id', $sess['id'])->orderBy('shot_number', 'ASC')->findAll();
+            $driveUrl    = $sess['drive_folder_url'] ?? null;
+            $bookingCode = $sess['booking_id'] ?? '-';
+            $sessDate    = date('d M Y', strtotime($sess['created_at']));
 
-            if (empty($driveLink)) {
-                try {
-                    $driveService = new GoogleDriveService();
-                    $driveLink    = $driveService->uploadSessionPhotos($sess['id']);
-                    $this->sessionModel->update($sess['id'], ['drive_folder_url' => $driveLink]);
-                } catch (\Throwable $e) {
-                    log_message('error', 'ResendAll Drive error for ' . $sess['id'] . ': ' . $e->getMessage());
-                    $driveLink = null;
-                }
+            $photoListHtml = '';
+            foreach ($photos as $i => $photo) {
+                $photoUrl       = base_url($photo['file_path']);
+                $photoListHtml .= "<li><a href='{$photoUrl}'>Foto " . ($i + 1) . "</a></li>";
+            }
+            if ($driveUrl) {
+                $photoListHtml .= "<li><a href='{$driveUrl}'>📁 Google Drive</a></li>";
             }
 
-            try {
-                $recipient = !empty($sess['email_recipient']) ? $sess['email_recipient'] : $sess['customer_email'];
-                $sent = $emailService->sendDriveLink($recipient, $driveLink, $sess['id']);
-                if ($sent) {
-                    $successCount++;
-                } else {
-                    $failCount++;
-                }
-            } catch (\Throwable $e) {
-                log_message('error', 'ResendAll email error for ' . $sess['id'] . ': ' . $e->getMessage());
+            $htmlBody = "
+<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;'>
+  <h2 style='color:#4f46e5;'>🎞️ Galeri Foto Anda Sudah Siap!</h2>
+  <p>Terima kasih telah menggunakan <strong>CuitBox Studio</strong> pada <strong>{$sessDate}</strong>.</p>
+  <p><strong>Kode Sesi/Booking:</strong> {$bookingCode}</p>
+  <ul style='line-height:1.8;'>{$photoListHtml}</ul>
+  <hr/>
+  <p style='color:#9ca3af;font-size:0.75rem;'>CuitBox Studio — Smart Photobox Management</p>
+</div>";
+
+            $emailService = \Config\Services::email();
+            $emailService->clear();
+            $emailService->setFrom('cuitboxstudio@gmail.com', 'CuitBox Studio');
+            $emailService->setTo($sess['email_recipient']);
+            $emailService->setSubject('🎞️ Galeri Foto CuitBox Studio — Sesi ' . $sessDate);
+            $emailService->setMessage($htmlBody);
+
+            if ($emailService->send()) {
+                $successCount++;
+            } else {
                 $failCount++;
+                log_message('error', 'Email resendAll gagal sesi #' . $sess['id']);
             }
         }
 
-        $msg = "Berhasil kirim ulang: {$successCount} email.";
+        $count = count($sessions);
+        $msg   = "Kirim ulang selesai: {$successCount}/{$count} berhasil.";
         if ($failCount > 0) {
-            $msg .= " Gagal: {$failCount} (cek log SMTP).";
+            $msg .= " {$failCount} gagal — periksa konfigurasi SMTP.";
         }
 
-        return redirect()->to(base_url('admin/sessions#table-session'))->with('success', $msg);
+        return redirect()->to(base_url('admin/sessions'))
+            ->with('success', $msg);
     }
 
     // =========================================================================
@@ -261,8 +259,8 @@ class SessionAndPhotoController extends BaseController
         // Hapus file fisik semua foto dalam sesi ini
         $photos = $this->photoModel->where('session_id', $id)->findAll();
         foreach ($photos as $photo) {
-            if (!empty($photo['file_path']) && file_exists(WRITEPATH . $photo['file_path'])) {
-                unlink(WRITEPATH . $photo['file_path']);
+            if (!empty($photo['file_path']) && file_exists(FCPATH . $photo['file_path'])) {
+                unlink(FCPATH . $photo['file_path']);
             }
         }
 
@@ -270,8 +268,8 @@ class SessionAndPhotoController extends BaseController
         $this->photoModel->where('session_id', $id)->delete();
         $this->sessionModel->delete($id);
 
-        return redirect()->to(base_url('admin/sessions#table-session'))
-            ->with('success', 'Sesi beserta foto berhasil dihapus.');
+        return redirect()->to(base_url('admin/sessions'))
+            ->with('success', "Sesi #{$id} dan seluruh fotonya berhasil dihapus.");
     }
 
     // =========================================================================

@@ -8,24 +8,29 @@ class MigrateBookingsPackageIdToPrintOptionId extends Migration
 {
     public function up()
     {
-        // Step 1: Hapus foreign key lama (package_id) jika ada
-        try {
-            $this->forge->dropForeignKey('bookings', 'bookings_package_id_foreign');
-        } catch (\Throwable $e) {
-            // Ignore if foreign key does not exist
-        }
+        $fields = $this->db->getFieldNames('bookings');
 
-        // Step 2: Ubah nama kolom package_id menjadi print_option_id jika kolom package_id ada
-        if ($this->db->fieldExists('package_id', 'bookings')) {
+        if (in_array('package_id', $fields)) {
+            // Step 1: Hapus foreign key lama (package_id)
+            try {
+                $this->forge->dropForeignKey('bookings', 'bookings_package_id_foreign');
+            } catch (\Throwable $e) {
+                // Abaikan jika sudah tidak ada
+            }
+
+            // Step 2: Ubah nama kolom package_id menjadi print_option_id
             $this->db->query('ALTER TABLE bookings CHANGE `package_id` `print_option_id` VARCHAR(20) NULL DEFAULT NULL');
         }
 
-        // Step 3: Tambahkan foreign key baru ke print_options jika belum ada
+        // Set existing records' print_option_id to NULL to prevent foreign key violation
+        $this->db->query('UPDATE bookings SET print_option_id = NULL');
+
+        // Step 3: Tambahkan foreign key baru ke print_options
         try {
             $this->forge->addForeignKey('print_option_id', 'print_options', 'id', 'SET NULL', 'CASCADE');
             $this->forge->processIndexes('bookings');
         } catch (\Throwable $e) {
-            // Ignore if foreign key constraint already exists
+            // Abaikan jika sudah ditambahkan
         }
     }
 
