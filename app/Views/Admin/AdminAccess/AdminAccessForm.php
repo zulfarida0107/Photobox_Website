@@ -48,7 +48,7 @@
                 <?php endif; ?>
 
                 <div>
-                    <label for="name" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Lengkap *</label>
+                    <label for="name" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama / Username *</label>
                     <input type="text" name="name" id="name" required
                            value="<?= esc(old('name', $admin['name'] ?? '')) ?>"
                            placeholder="Masukkan nama lengkap admin"
@@ -74,7 +74,10 @@
                     <label for="role" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Hak Akses / Role *</label>
                     <select name="role" id="role" required
                             class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 transition-all bg-white">
-                        <option value="superadmin" <?= old('role', $admin['role'] ?? '') === 'superadmin' ? 'selected' : '' ?>>Superadmin</option>
+                        <?php if ($canManageSuperadmin ?? false): ?>
+                            <option value="superadmin" <?= old('role', $admin['role'] ?? '') === 'superadmin' ? 'selected' : '' ?>>Superadmin</option>
+                        <?php endif; ?>
+                        <option value="admin" <?= old('role', $admin['role'] ?? '') === 'admin' ? 'selected' : '' ?>>Admin</option>
                         <option value="staff" <?= old('role', $admin['role'] ?? '') === 'staff' ? 'selected' : '' ?>>Staff</option>
                     </select>
                 </div>

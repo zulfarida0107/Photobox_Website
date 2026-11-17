@@ -64,8 +64,8 @@ class BoothController extends BaseController
             return [
                 'name'      => $b['name'],
                 'status'    => $b['status'],
-                'latitude'  => $b['latitude'] ? (float)$b['latitude'] : null,
-                'longitude' => $b['longitude'] ? (float)$b['longitude'] : null,
+                'latitude'  => !empty($b['latitude']) ? (float)$b['latitude'] : null,
+                'longitude' => !empty($b['longitude']) ? (float)$b['longitude'] : null,
             ];
         }, $allBooths));
 
