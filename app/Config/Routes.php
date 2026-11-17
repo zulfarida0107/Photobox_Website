@@ -7,10 +7,60 @@ use CodeIgniter\Router\RouteCollection;
  */
 
 // ============================================================
-// HOME / DEFAULT ROUTE
+// DYNAMIC DUAL-PORT ROUTING
+// Port 8080 = Dedicated Admin Management Panel
+// Port 8081 = Dedicated Customer / User Booking Portal
 // ============================================================
-// Default URL (/) diarahkan ke Beranda Utama (Home / Online Booking)
-$routes->get('/', 'User_Booking\HomeController::index');
+$currentPort = (int) ($_SERVER['SERVER_PORT'] ?? 0);
+if (!empty($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], ':') !== false) {
+    $parts = explode(':', $_SERVER['HTTP_HOST']);
+    $hostPort = (int) end($parts);
+    if ($hostPort > 0) {
+        $currentPort = $hostPort;
+    }
+}
+
+if ($currentPort === 8080) {
+    // Pada Port 8080: Halaman utama (/) langsung diarahkan ke Admin Panel
+    $routes->get('/', static function () {
+        if (session()->get('isLoggedIn') && in_array(strtolower(session()->get('adminRole') ?? ''), ['superadmin', 'admin', 'staff'], true)) {
+            return redirect()->to(base_url('admin/dashboard'));
+        }
+        return redirect()->to(base_url('admin/login'));
+    });
+
+    // Alias /home dan /login di port 8080 diarahkan ke Admin
+    $routes->get('home', static function () {
+        return redirect()->to(base_url('admin'));
+    });
+    $routes->get('login', static function () {
+        return redirect()->to(base_url('admin/login'));
+    });
+
+    // Jika mengakses fitur customer booking di port 8080, arahkan ke port 8081
+    $customerPages = ['booking', 'book', 'landing', 'register', 'booth', 'schedule', 'print-option', 'user-payment', 'barcode', 'StatusBooking', 'statusbooking', 'help'];
+    foreach ($customerPages as $page) {
+        $routes->get($page, static function () use ($page) {
+            return redirect()->to('http://localhost:8081/' . $page);
+        });
+    }
+} else {
+    // Pada Port 8081 (atau default): Halaman utama (/) adalah Portal Customer
+    $routes->get('/', 'User_Booking\HomeController::index');
+
+    // Jika pada Port 8081 mencoba membuka panel admin (/admin), alihkan ke port 8080
+    if ($currentPort === 8081) {
+        $routes->get('admin', static function () {
+            return redirect()->to('http://localhost:8080/admin');
+        });
+        $routes->get('admin/login', static function () {
+            return redirect()->to('http://localhost:8080/admin/login');
+        });
+        $routes->get('admin/(:any)', static function ($sub = '') {
+            return redirect()->to('http://localhost:8080/admin/' . $sub);
+        });
+    }
+}
 
 
 // Handle global OPTIONS requests for CORS preflight
