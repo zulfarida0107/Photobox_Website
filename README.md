@@ -246,7 +246,7 @@ Proyek ini dikembangkan secara kolaboratif oleh tim mahasiswa **TI-FSD 2 (Full S
 | **Zulfarida**<br>`@zulfarida0107-crypto` | **Lead Backend & Web Developer**<br>• Arsitektur Database & Controller CI4<br>• Modul Role-Based Access Control (RBAC) Admin<br>• Sistem User Booking & Penjadwalan Slot Kalender<br>• Integrasi Google Drive OAuth, SMTP, & API Kiosk | 🥇 **80 Commits** |
 | **Khanza Haura**<br>`@khanzaen` | **Project Manager & Fullstack Developer**<br>• Manajemen Repositori & Code Review (PR Approval)<br>• Perancangan UI/UX & Flow Desain Antarmuka<br>• Integrasi Layout & Pengujian Alur Kiosk | 🥈 **78 Commits** |
 | **Vany Putri Handayani**<br>`3FSD2 CCIT-FTUI` | **UI/UX & Frontend Developer**<br>• Penataan Komponen Tampilan Antarmuka<br>• Pengujian Fungsionalitas & Dokumentasi | 🥉 **14 Commits** |
-| **Aidan-Joe** | **Junior Developer**<br>• Aset Desain Frame Digital & Pengujian Input | **9 Commits** |
+| **Aidan-Joe**<br>`@Aidan-Joe` | **Kiosk Application Developer**<br>• Pengembang Aplikasi Mesin Kiosk Terpisah ([Photobox Kiosk](https://github.com/Aidan-Joe/Photobox))<br>• Pengujian komunikasi API mesin kiosk & aset desain | **9 Commits** |
 
 ---
 
