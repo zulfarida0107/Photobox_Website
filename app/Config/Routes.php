@@ -8,21 +8,9 @@ use CodeIgniter\Router\RouteCollection;
 
 // ============================================================
 // HOME / DEFAULT ROUTE
-// Port 8080 -> Admin Panel (app/Views/Admin)
-// Port 8081 -> User Booking (app/Views/User_Booking)
 // ============================================================
-$serverPort = $_SERVER['SERVER_PORT'] ?? '8080';
-
-if ($serverPort == '8080') {
-    $routes->get('/', function () {
-        if (session()->get('isLoggedIn')) {
-            return redirect()->to(base_url('admin/dashboard'));
-        }
-        return redirect()->to(base_url('admin/login'));
-    });
-} else {
-    $routes->get('/', 'User_Booking\LandingPageController::index');
-}
+// Default URL (/) diarahkan ke Beranda Utama (Home / Online Booking)
+$routes->get('/', 'User_Booking\HomeController::index');
 
 
 // Handle global OPTIONS requests for CORS preflight
@@ -124,6 +112,12 @@ $routes->get('preview/verify', function() {
 // ============================================================
 // ADMIN AUTH ROUTES
 // ============================================================
+$routes->get('admin', function () {
+    if (session()->get('isLoggedIn')) {
+        return redirect()->to(base_url('admin/dashboard'));
+    }
+    return redirect()->to(base_url('admin/login'));
+});
 $routes->get('admin/login', 'Admin\AuthController::login');
 $routes->post('admin/login', 'Admin\AuthController::attemptLogin');
 $routes->get('admin/logout', 'Admin\AuthController::logout');
@@ -280,15 +274,23 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 });
 
 // ============================================================
-// USER BOOKING ROUTES (Customer Online Booking & Landing Page)
+// USER BOOKING ROUTES (Customer Online Booking & Home Page)
 // ============================================================
 
-// ---- Alur 1: Landing Page & Beranda ----
-$routes->get('landing', 'User_Booking\LandingPageController::index');
+// ---- Alur 1: Beranda & Alur Booking ----
+$routes->get('home', 'User_Booking\HomeController::index');
+$routes->get('booking', 'User_Booking\HomeController::booking');
+$routes->get('book', 'User_Booking\HomeController::booking');
+
+// Alias backward-compatibility redirect /landing ke /
+$routes->get('landing', static function() {
+    return redirect()->to(base_url('/'), 301);
+});
 
 // ---- Alur 2: Registrasi Pelanggan Baru ----
 $routes->get('register', 'User_Booking\RegisterController::index');
 $routes->post('register/store', 'User_Booking\RegisterController::store');
+$routes->post('register/direct', 'User_Booking\RegisterController::directRegister');
 $routes->post('register/from-landing', 'User_Booking\RegisterController::fromLanding');
 $routes->post('register/check-email', 'User_Booking\RegisterController::checkEmail');
 

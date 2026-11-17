@@ -2,16 +2,9 @@
 
 namespace App\Controllers\User_Booking;
 
-use App\Controllers\BaseController;
-
-class LandingPageController extends BaseController
+/**
+ * Backward compatibility alias for HomeController
+ */
+class LandingPageController extends HomeController
 {
-    public function index()
-    {
-        $data = [
-            'title' => 'CuitBox Studio - Premium Photobox Experience'
-        ];
-
-        return view('User_Booking/index', $data);
-    }
 }
