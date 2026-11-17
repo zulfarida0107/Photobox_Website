@@ -1,22 +1,57 @@
 <?php
 
+/**
+ * Berkas: app/Controllers/Admin/PaymentController.php
+ * Proyek: CuitBox Studio - Photobox Website & Management System
+ * Author: Zulfarida (Lead Backend & Web Developer)
+ * 
+ * Standar Kompetensi Kerja Nasional Indonesia (SKKNI):
+ * - Unit SKKNI: J.620100.005.02 (Mengimplementasikan User Interface)
+ * - Unit SKKNI: J.620100.015.01 (Menyusun Fungsi, File atau Sumber Daya Pemrograman dalam Organisasi yang Rapi)
+ * - Unit SKKNI: J.620100.016.01 (Menulis Kode dengan Prinsip Sesuai Guidelines dan Best Practices)
+ * - Unit SKKNI: J.620100.017.02 (Mengimplementasikan Pemrograman Terstruktur - Kueri & Agregasi Finansial)
+ * - Unit SKKNI: J.620100.019.02 (Menggunakan Library atau Komponen Pre-Existing - Payment Gateway)
+ * 
+ * Deskripsi:
+ * Mengendalikan audit mutasi pembayaran, verifikasi transaksi keuangan (paid, pending, failed),
+ * kalkulasi ringkasan omzet/pendapatan kotor, penyaringan data berbasis rentang waktu (harian, mingguan, bulanan),
+ * integrasi gateway pembayaran, serta pencetakan bukti transaksi / invoice digital.
+ */
+
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Models\PaymentModel;
 
+/**
+ * Class PaymentController
+ *
+ * Mengendalikan modul audit pembayaran dan riwayat transaksi keuangan pada panel admin.
+ *
+ * @package App\Controllers\Admin
+ */
 class PaymentController extends BaseController
 {
+    /**
+     * Instance model PaymentModel untuk manipulasi tabel payments
+     *
+     * @var PaymentModel
+     */
     protected PaymentModel $paymentModel;
 
+    /**
+     * Inisialisasi controller dan instansiasi model pembayaran
+     */
     public function __construct()
     {
         $this->paymentModel = new PaymentModel();
     }
 
-    // =========================================================================
-    // INDEX — Daftar pembayaran + stats + filter + pagination
-    // =========================================================================
+    /**
+     * Menampilkan daftar transaksi pembayaran dengan filter status, periode, dan paginasi
+     *
+     * @return string Render tampilan view PaymentManajemen
+     */
     public function index()
     {
         $perPage       = 10;

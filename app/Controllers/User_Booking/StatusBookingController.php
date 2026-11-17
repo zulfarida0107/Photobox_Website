@@ -1,5 +1,25 @@
 <?php
 
+/**
+ * Berkas: app/Controllers/User_Booking/StatusBookingController.php
+ * Proyek: CuitBox Studio - Photobox Website & Management System
+ * Author: Zulfarida (Lead Backend & Web Developer)
+ * 
+ * Standar Kompetensi Kerja Nasional Indonesia (SKKNI):
+ * - Unit SKKNI: J.620100.005.02 (Mengimplementasikan User Interface)
+ * - Unit SKKNI: J.620100.015.01 (Menyusun Fungsi, File atau Sumber Daya Pemrograman dalam Organisasi yang Rapi)
+ * - Unit SKKNI: J.620100.016.01 (Menulis Kode dengan Prinsip Sesuai Guidelines dan Best Practices)
+ * - Unit SKKNI: J.620100.017.02 (Mengimplementasikan Pemrograman Terstruktur - Transaksi Basis Data)
+ * - Unit SKKNI: J.620100.019.02 (Menggunakan Library atau Komponen Pre-Existing - Bayar.gg Payment Gateway)
+ * 
+ * Deskripsi:
+ * Mengendalikan pemantauan status reservasi dan konfirmasi pembayaran pelanggan.
+ * Mengimplementasikan mekanisme live fallback inquiry ke API Payment Gateway (Bayar.gg),
+ * manajemen transaksi atomik basis data (Database Transaction Begin, Commit, Rollback),
+ * penggabungan entitas relasional (Booking, Customer, Booth, Slot, PrintOption),
+ * serta pemetaan status tiket visual (badge warna dan ikon status).
+ */
+
 namespace App\Controllers\User_Booking;
 
 use App\Controllers\BaseController;
@@ -11,18 +31,44 @@ use App\Models\PrintOptionModel;
 use App\Models\PaymentModel;
 use App\Models\FrameModel;
 use App\Libraries\BayarGGService;
+use CodeIgniter\HTTP\RedirectResponse;
 
+/**
+ * Class StatusBookingController
+ *
+ * Mengendalikan halaman pemantauan status pesanan tiket dan penyelarasan status transaksi pelanggan.
+ *
+ * @package App\Controllers\User_Booking
+ */
 class StatusBookingController extends BaseController
 {
+    /** @var BookingModel */
     protected $bookingModel;
+
+    /** @var CustomerModel */
     protected $customerModel;
+
+    /** @var SlotModel */
     protected $slotModel;
+
+    /** @var BoothModel */
     protected $boothModel;
+
+    /** @var PrintOptionModel */
     protected $printOptionModel;
+
+    /** @var PaymentModel */
     protected $paymentModel;
+
+    /** @var FrameModel */
     protected $frameModel;
+
+    /** @var \CodeIgniter\Session\Session */
     protected $session;
 
+    /**
+     * Inisialisasi controller dan instansiasi model-model relasi
+     */
     public function __construct()
     {
         $this->bookingModel     = new BookingModel();
@@ -35,6 +81,18 @@ class StatusBookingController extends BaseController
         $this->session          = \Config\Services::session();
     }
 
+    /**
+     * Menampilkan halaman status pemesanan dan melakukan sinkronisasi status pembayaran live
+     *
+     * Alur pemrosesan:
+     * 1. Mendeteksi ID pembayaran atau ID booking dari query GET atau session
+     * 2. Live Fallback Inquiry: Jika transaksi berstatus 'pending', sistem memanggil API BayarGGService
+     * 3. Eksekusi transaksi basis data (Atomic Transaction): memperbarui status di tabel 'payments' dan 'bookings'
+     * 4. Membaca detail lengkap pemesanan (pelanggan, booth, jadwal slot, opsi cetak)
+     * 5. Merender tampilan antarmuka status pemesanan beserta lencana (badge) status
+     *
+     * @return string Render view Status_Booking
+     */
     public function index()
     {
         $data = [
@@ -43,6 +101,7 @@ class StatusBookingController extends BaseController
             'payment' => null,
         ];
 
+        // 1. Ekstraksi identifier transaksi dari query parameter atau session aktif
         $paymentId = $this->request->getGet('payment_id') ?? $this->session->get('konfirmasi_pembayaran_id');
         $bookingId = $this->request->getGet('booking_id') ?? $this->session->get('booking_id');
 
@@ -62,16 +121,17 @@ class StatusBookingController extends BaseController
             }
         }
 
-        // Live Fallback: Cek status ke Bayar.gg jika payment masih pending
+        // 2. Mekanisme Sinkronisasi Live: Cek status ke Payment Gateway jika status lokal masih 'pending'
         if ($payment && $payment['status'] === 'pending' && !empty($payment['gateway_ref'])) {
             try {
-                $bayargg = new BayarGGService();
+                $bayargg        = new BayarGGService();
                 $statusResponse = $bayargg->checkPayment($payment['gateway_ref']);
 
-                $invoiceData = $statusResponse['data'] ?? $statusResponse;
+                $invoiceData   = $statusResponse['data'] ?? $statusResponse;
                 $bayarggStatus = $invoiceData['status'] ?? '';
-                $mappedStatus = $bayargg->mapStatus($bayarggStatus);
+                $mappedStatus  = $bayargg->mapStatus($bayarggStatus);
 
+                // Mulai transaksi atomik basis data (Database Transaction - SKKNI Unit 04)
                 $db = \Config\Database::connect();
                 $db->transBegin();
 
@@ -102,20 +162,22 @@ class StatusBookingController extends BaseController
                     }
                 }
 
+                // Evaluasi status transaksi atomik (Commit jika berhasil, Rollback jika terjadi galat)
                 if ($db->transStatus() === false) {
                     $db->transRollback();
                 } else {
                     $db->transCommit();
                 }
 
-                // Reload updated payment
+                // Muat ulang data pembayaran teranyar setelah pembaruan
                 $payment = $this->paymentModel->find($payment['id']);
             } catch (\Throwable $e) {
-                // Jika invoice belum ditemukan di Bayar.gg atau offline, biarkan pending
+                // Catat log notifikasi jika layanan gateway offline atau dalam antrean pemrosesan
                 log_message('notice', '[BayarGG Live Inquiry Notice] ' . $e->getMessage());
             }
         }
 
+        // 3. Muat detail relasi pemesanan jika ID booking ditemukan
         if ($bookingId) {
             $this->session->set('booking_id', $bookingId);
             $bookingDetail = $this->getBookingDetail($bookingId);
@@ -127,6 +189,11 @@ class StatusBookingController extends BaseController
         return view('User_Booking/Status_Booking', $data);
     }
 
+    /**
+     * Memproses pengalihan ke tiket digital berbasis QR Code / Barcode
+     *
+     * @return RedirectResponse Redirect ke halaman barcode tiket
+     */
     public function store()
     {
         $bookingId = $this->request->getPost('booking_id') ?? $this->session->get('booking_id');
@@ -136,18 +203,26 @@ class StatusBookingController extends BaseController
         return redirect()->to('barcode');
     }
 
+    /**
+     * Mengambil dan memetakan struktur lengkap detail pemesanan sesi foto
+     *
+     * @param string|int $bookingId ID pemesanan yang dicari
+     * @return array|null Array asosiatif detail booking lengkap atau null jika tidak ditemukan
+     */
     private function getBookingDetail($bookingId)
     {
+        // 1. Ambil data master booking
         $booking = $this->bookingModel->find($bookingId);
         if (!$booking) {
             return null;
         }
 
+        // 2. Ambil entitas relasional terkait
         $customer    = $this->customerModel->find($booking['customer_id'] ?? 0);
         $booth       = $this->boothModel->find($booking['booth_id'] ?? 0);
         $printOption = $this->printOptionModel->find($booking['print_option_id'] ?? 0);
 
-        // Fetch slot details
+        // 3. Format tanggal dan jam slot operasional
         $slotDate = null;
         $slotTime = null;
         if (!empty($booking['slot_id'])) {
@@ -164,6 +239,7 @@ class StatusBookingController extends BaseController
             }
         }
 
+        // 4. Pemetaan visual status pemesanan (Warna lencana dan icon)
         $statusMap = [
             'paid'      => ['label' => 'Terbayar & Terkonfirmasi', 'badge' => 'bg-emerald-100 text-emerald-800 border border-emerald-300', 'icon' => 'check_circle'],
             'completed' => ['label' => 'Sesi Selesai',             'badge' => 'bg-purple-100 text-purple-800 border border-purple-300',   'icon' => 'task_alt'],
@@ -174,6 +250,7 @@ class StatusBookingController extends BaseController
         $statusKey = $booking['status'] ?? 'pending';
         $meta = $statusMap[$statusKey] ?? ['label' => ucfirst($statusKey), 'badge' => 'bg-gray-100 text-gray-800', 'icon' => 'info'];
 
+        // 5. Susun struktur array siap pakai untuk antarmuka pengguna
         return [
             'id'           => $booking['id'],
             'booking_code' => $booking['booking_code'] ?? 'N/A',

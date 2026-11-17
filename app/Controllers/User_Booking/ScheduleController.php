@@ -1,5 +1,22 @@
 <?php
 
+/**
+ * Berkas: app/Controllers/User_Booking/ScheduleController.php
+ * Proyek: CuitBox Studio - Photobox Website & Management System
+ * Author: Zulfarida (Lead Backend & Web Developer)
+ * 
+ * Standar Kompetensi Kerja Nasional Indonesia (SKKNI):
+ * - Unit SKKNI: J.620100.005.02 (Mengimplementasikan User Interface)
+ * - Unit SKKNI: J.620100.015.01 (Menyusun Fungsi, File atau Sumber Daya Pemrograman dalam Organisasi yang Rapi)
+ * - Unit SKKNI: J.620100.016.01 (Menulis Kode dengan Prinsip Sesuai Guidelines dan Best Practices)
+ * - Unit SKKNI: J.620100.017.02 (Mengimplementasikan Pemrograman Terstruktur - Manajemen Jadwal & Slot)
+ * 
+ * Deskripsi:
+ * Mengendalikan pemilihan jadwal tanggal dan slot jam sesi pemotretan pelanggan.
+ * Memastikan booth terpilih valid, menyajikan slot jam yang tersedia, memuat katalog template frame,
+ * memvalidasi ketersediaan kuota pemesanan, serta memproses data identitas pelanggan sebelum menuju ke tahap pembayaran.
+ */
+
 namespace App\Controllers\User_Booking;
 
 use App\Controllers\BaseController;
@@ -7,12 +24,27 @@ use App\Models\SlotModel;
 use App\Models\FrameModel;
 use App\Models\CustomerModel;
 
+/**
+ * Class ScheduleController
+ *
+ * Mengatur interaksi pemilihan jadwal kalender dan slot waktu pemotretan pada portal booking pelanggan.
+ *
+ * @package App\Controllers\User_Booking
+ */
 class ScheduleController extends BaseController
 {
+    /** @var SlotModel */
     protected $slotModel;
+
+    /** @var FrameModel */
     protected $frameModel;
+
+    /** @var CustomerModel */
     protected $customerModel;
 
+    /**
+     * Inisialisasi controller dan instansiasi model-model dependensi
+     */
     public function __construct()
     {
         $this->slotModel = new SlotModel();
@@ -20,6 +52,11 @@ class ScheduleController extends BaseController
         $this->customerModel = new CustomerModel();
     }
 
+    /**
+     * Menampilkan antarmuka pemilihan jadwal booking photobox
+     *
+     * @return string Render tampilan view schedule
+     */
     public function index()
     {
         $customerId = session()->get('customer_id');

@@ -1,25 +1,67 @@
 <?php
 
+/**
+ * Berkas: app/Controllers/Admin/BoothController.php
+ * Proyek: CuitBox Studio - Photobox Website & Management System
+ * Author: Zulfarida (Lead Backend & Web Developer)
+ * 
+ * Standar Kompetensi Kerja Nasional Indonesia (SKKNI):
+ * - Unit SKKNI: J.620100.005.02 (Mengimplementasikan User Interface)
+ * - Unit SKKNI: J.620100.010.01 (Menerapkan Perintah Eksekusi Bahasa Pemrograman)
+ * - Unit SKKNI: J.620100.015.01 (Menyusun Fungsi, File atau Sumber Daya Pemrograman dalam Organisasi yang Rapi)
+ * - Unit SKKNI: J.620100.016.01 (Menulis Kode dengan Prinsip Sesuai Guidelines dan Best Practices)
+ * - Unit SKKNI: J.620100.017.02 (Mengimplementasikan Pemrograman Terstruktur)
+ * 
+ * Deskripsi:
+ * Mengendalikan manajemen mesin bilik photobox fisik dan data master lokasi studio.
+ * Mencakup operasi CRUD unit booth, pemetaan titik koordinat geografis (peta Leaflet OpenStreetMap),
+ * pemantauan status antrean (current_queue), mode perawatan (maintenance mode),
+ * validasi input form dan sanitasi IP address, serta manajemen paginasi dinamis.
+ */
+
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Models\BoothModel;
 use App\Models\LocationModel;
 
+/**
+ * Class BoothController
+ *
+ * Mengendalikan operasional unit booth dan titik lokasi fisik pada Admin Management Panel.
+ *
+ * @package App\Controllers\Admin
+ */
 class BoothController extends BaseController
 {
+    /**
+     * Instance model untuk manipulasi tabel booths
+     *
+     * @var BoothModel
+     */
     protected BoothModel $boothModel;
+
+    /**
+     * Instance model untuk manipulasi tabel locations
+     *
+     * @var LocationModel
+     */
     protected LocationModel $locationModel;
 
+    /**
+     * Inisialisasi controller dan instansiasi dependensi model
+     */
     public function __construct()
     {
         $this->boothModel    = new BoothModel();
         $this->locationModel = new LocationModel();
     }
 
-    // =========================================================================
-    // INDEX — Daftar booth & Lokasi + filter + search + pagination + stats
-    // =========================================================================
+    /**
+     * Menampilkan daftar unit booth dan master lokasi beserta metrik statistik operasional
+     *
+     * @return string Render tampilan view BoothManajemen
+     */
     public function index()
     {
         $perPage      = 10;

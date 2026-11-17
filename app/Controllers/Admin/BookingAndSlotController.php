@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Berkas: app/Controllers/Admin/BookingAndSlotController.php
+ * Proyek: CuitBox Studio - Photobox Website & Management System
+ * Author: Zulfarida (Lead Backend & Web Developer)
+ * 
+ * Standar Kompetensi Kerja Nasional Indonesia (SKKNI):
+ * - Unit SKKNI: J.620100.005.02 (Mengimplementasikan User Interface)
+ * - Unit SKKNI: J.620100.015.01 (Menyusun Fungsi, File atau Sumber Daya Pemrograman dalam Organisasi yang Rapi)
+ * - Unit SKKNI: J.620100.016.01 (Menulis Kode dengan Prinsip Sesuai Guidelines dan Best Practices)
+ * - Unit SKKNI: J.620100.017.02 (Mengimplementasikan Pemrograman Terstruktur - Algoritma Kalender & Penjadwalan)
+ * 
+ * Deskripsi:
+ * Mengendalikan manajemen reservasi pelanggan dan penjadwalan slot operasional studio.
+ * Mencakup audit jadwal harian/mingguan/bulanan, kalender visual dinamis slot sesi foto,
+ * pencegahan bentrok jadwal (slot collision prevention), pemblokiran tanggal libur (blocked dates),
+ * pembatalan dan verifikasi pemesanan, serta paginasi tabel data reservasi.
+ */
+
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
@@ -7,12 +25,27 @@ use App\Models\BookingModel;
 use App\Models\SlotModel;
 use App\Models\BlockedDateModel;
 
+/**
+ * Class BookingAndSlotController
+ *
+ * Mengendalikan modul reservasi dan manajemen slot operasional pada panel admin.
+ *
+ * @package App\Controllers\Admin
+ */
 class BookingAndSlotController extends BaseController
 {
+    /** @var BookingModel */
     protected BookingModel     $bookingModel;
+
+    /** @var SlotModel */
     protected SlotModel        $slotModel;
+
+    /** @var BlockedDateModel */
     protected BlockedDateModel $blockedDateModel;
 
+    /**
+     * Inisialisasi controller dan instansiasi model
+     */
     public function __construct()
     {
         $this->bookingModel     = new BookingModel();
@@ -20,9 +53,11 @@ class BookingAndSlotController extends BaseController
         $this->blockedDateModel = new BlockedDateModel();
     }
 
-    // =========================================================================
-    // INDEX — Halaman utama (slot hari ini + daftar booking)
-    // =========================================================================
+    /**
+     * Menampilkan daftar reservasi dan slot operasional dengan filter rentang waktu
+     *
+     * @return string Render tampilan view BookingAndSlotManajemen
+     */
     public function index()
     {
         $period      = $this->request->getGet('period') ?? 'all';
