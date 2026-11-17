@@ -8,26 +8,19 @@ use CodeIgniter\Router\RouteCollection;
 
 // ============================================================
 // HOME / DEFAULT ROUTE
-// Port 8080 -> Admin Panel (app/Views/Admin)
-// Port 8081 -> User Booking (app/Views/User_Booking)
 // ============================================================
-$serverPort = $_SERVER['SERVER_PORT'] ?? '8080';
-
-if ($serverPort == '8080') {
-    $routes->get('/', function () {
-        if (session()->get('isLoggedIn')) {
-            return redirect()->to(base_url('admin/dashboard'));
-        }
-        return redirect()->to(base_url('admin/login'));
-    });
-} else {
-    $routes->get('/', 'User_Booking\LandingPageController::index');
-}
-
+// Default URL (/) diarahkan ke Beranda Utama (Home / Online Booking)
+$routes->get('/', 'User_Booking\HomeController::index');
 
 
 // Handle global OPTIONS requests for CORS preflight
-$routes->options('(:any)', function() {});
+$routes->options('(:any)', static function () {
+    return response()
+        ->setHeader('Access-Control-Allow-Origin', '*')
+        ->setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-API-KEY')
+        ->setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH')
+        ->setStatusCode(200);
+});
 
 // ============================================================
 // API ROUTES
@@ -51,7 +44,9 @@ $routes->group('api', static function ($routes) {
     $routes->post('payment/qr', 'Api\PaymentController::createQr');
     $routes->get('payment', 'Api\PaymentController::statusByQuery');
     $routes->get('payment/(:segment)/status', 'Api\PaymentController::status/$1');
-    $routes->post('payment/midtrans/callback', 'Api\PaymentController::midtransCallback');
+    $routes->match(['get', 'post'], 'payment/bayargg/callback', 'Api\PaymentController::bayarggCallback');
+    $routes->match(['get', 'post'], 'payment/callback', 'Api\PaymentController::bayarggCallback');
+    $routes->match(['get', 'post'], 'payment/midtrans/callback', 'Api\PaymentController::bayarggCallback');
 
     // ---- Manajemen Alur Sesi Pemotretan (Start, Email, Complete) ----
     $routes->post('session/start', 'Api\SessionController::start');
@@ -119,6 +114,12 @@ $routes->get('preview/verify', function() {
 // ============================================================
 // ADMIN AUTH ROUTES
 // ============================================================
+$routes->get('admin', function () {
+    if (session()->get('isLoggedIn')) {
+        return redirect()->to(base_url('admin/dashboard'));
+    }
+    return redirect()->to(base_url('admin/login'));
+});
 $routes->get('admin/login', 'Admin\AuthController::login');
 $routes->post('admin/login', 'Admin\AuthController::attemptLogin');
 $routes->get('admin/logout', 'Admin\AuthController::logout');
@@ -226,9 +227,9 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 	$routes->post('photos/(:segment)/delete',       'Admin\SessionAndPhotoController::deletePhoto/$1');
 
 	// ============================================================
-	// RUTE KATALOG (Admin dan Superadmin)
+	// RUTE KHUSUS SUPERADMIN (Master Data, Harga, Desain, Akses)
 	// ============================================================
-	$routes->group('', ['filter' => 'adminCatalogAuth'], static function ($routes) {
+	$routes->group('', ['filter' => 'superadminAuth'], static function ($routes) {
 		// ---- Tab 5: Opsi Cetak & Harga ----
 		$routes->get('print-options',                    'Admin\PackageAndPrintOptionController::index');
 		$routes->get('print-options/export',             'Admin\PackageAndPrintOptionController::exportPrintOptions');
@@ -263,11 +264,8 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 		$routes->post('layouts',                     'Admin\FrameAndFilterController::storeLayout');
 		$routes->post('layouts/(:segment)/update',   'Admin\FrameAndFilterController::updateLayout/$1');
 		$routes->post('layouts/(:segment)/delete',   'Admin\FrameAndFilterController::deleteLayout/$1');
-	});
 
-	// RUTE PENGELOLAAN AKUN (Admin dan Superadmin)
-	$routes->group('', ['filter' => 'adminCatalogAuth'], static function ($routes) {
-		// ---- Tab 9: Pengaturan Akses ----
+		// ---- Tab 9: Pengaturan Akses (Admin) ----
 		$routes->get('settings',                      'Admin\AdminAccessController::index');
 		$routes->get('settings/create',               'Admin\AdminAccessController::create');
 		$routes->post('settings',                     'Admin\AdminAccessController::store');
@@ -278,15 +276,23 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function ($routes) {
 });
 
 // ============================================================
-// USER BOOKING ROUTES (Customer Online Booking & Landing Page)
+// USER BOOKING ROUTES (Customer Online Booking & Home Page)
 // ============================================================
 
-// ---- Alur 1: Landing Page & Beranda ----
-$routes->get('landing', 'User_Booking\LandingPageController::index');
+// ---- Alur 1: Beranda & Alur Booking ----
+$routes->get('home', 'User_Booking\HomeController::index');
+$routes->get('booking', 'User_Booking\HomeController::booking');
+$routes->get('book', 'User_Booking\HomeController::booking');
+
+// Alias backward-compatibility redirect /landing ke /
+$routes->get('landing', static function() {
+    return redirect()->to(base_url('/'), 301);
+});
 
 // ---- Alur 2: Registrasi Pelanggan Baru ----
 $routes->get('register', 'User_Booking\RegisterController::index');
 $routes->post('register/store', 'User_Booking\RegisterController::store');
+$routes->post('register/direct', 'User_Booking\RegisterController::directRegister');
 $routes->post('register/from-landing', 'User_Booking\RegisterController::fromLanding');
 $routes->post('register/check-email', 'User_Booking\RegisterController::checkEmail');
 
@@ -298,6 +304,8 @@ $routes->get('logout', 'User_Booking\LoginController::logout');
 // ---- Alur 4: Lupa Password ----
 $routes->get('forgot-password', 'User_Booking\LoginController::forgotPassword');
 $routes->post('forgot-password/process', 'User_Booking\LoginController::processForgotPassword');
+$routes->get('reset-password', 'User_Booking\LoginController::resetPassword');
+$routes->post('reset-password/process', 'User_Booking\LoginController::processResetPassword');
 
 // ---- Alur 5: Pemilihan Mesin Booth ----
 $routes->get('booth', 'User_Booking\BoothController::index');
@@ -338,3 +346,9 @@ $routes->get('statusbooking', 'User_Booking\StatusBookingController::index');  /
 $routes->get('help', 'User_Booking\HelpController::index');
 $routes->post('help/send', 'User_Booking\HelpController::send');
 
+
+
+
+// Alias Google Drive OAuth
+$routes->get('google/auth', 'GoogleAuthController::auth');
+$routes->get('google/callback', 'GoogleAuthController::callback');

@@ -88,11 +88,12 @@
             background: rgba(190, 242, 100, 0.3);
         }
         
-        .date-cell.selected-date {
-            background: #000;
-            color: white;
-            font-weight: bold;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        .date-cell.selected-date,
+        .date-cell.selected-date:hover {
+            background: #0f172a !important;
+            color: #ffffff !important;
+            font-weight: bold !important;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3) !important;
             border-radius: 8px;
             padding: 4px 0;
         }
@@ -310,10 +311,16 @@
             <!-- BEGIN: HeroSection -->
             <main class="relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm flex-1">
                 <div class="text-center mb-8">
+                    <?php if (!empty($selectedBooth)): ?>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1 bg-lime-200/80 border border-lime-400 text-slate-800 text-xs font-bold rounded-full mb-2 shadow-sm">
+                            <span><?= esc($selectedBooth['name']) ?></span>
+                            <a href="<?= base_url('booth') ?>" class="text-slate-600 hover:text-slate-900 underline text-[10px] ml-1 font-semibold">Ganti Booth</a>
+                        </div>
+                    <?php endif; ?>
                     <h2 class="text-2xl font-extrabold mb-1 text-slate-800">Booking Session</h2>
                     <p class="text-[10px] text-slate-600 font-medium">Pilih Tanggal &amp; Waktu Sesi Fotobox</p>
                     <div class="mt-2">
-                        <span class="current-time-indicator" id="current-time-display">⏰ Memuat waktu...</span>
+                        <span class="current-time-indicator" id="current-time-display">Memuat waktu...</span>
                     </div>
                 </div>
                 
@@ -386,8 +393,8 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                             <div class="mt-4 space-y-3">
                                 <!-- Confirmation Box -->
                                 <div class="confirmation-box">
-                                    <p class="label">Konfirmasi Pilihan</p>
-                                    <p class="value" id="confirmation-display">Pilih tanggal &amp; waktu</p>
+                                    <p class="label">Konfirmasi Sesi</p>
+                                    <p class="value" id="confirmation-display"><?= $currentDateFullPhp ?></p>
                                 </div>
                                 
                                 <!-- Form untuk Submit Schedule -->
@@ -402,16 +409,16 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                                     
                                     <!-- Button Lanjutkan ke frame -->
                                     <button type="submit" class="btn-primary" id="submitScheduleBtn">
-                                        <span>Lanjutkan ke Pemilihan Tema Frame</span>
+                                        <span>Lanjut ke Pilih Harga Cetak</span>
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                                         </svg>
                                     </button>
                                 </form>
                                 
-                                <!-- Button Kembali ke Register -->
+                                <!-- Button Kembali ke Booth -->
                                 <button class="btn-back" id="btn-back">
-                                    Kembali ke Registrasi
+                                    Kembali ke Pilih Booth
                                 </button>
                             </div>
                         </div>
@@ -473,7 +480,7 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                 const year = now.getFullYear();
                 
                 if (currentTimeDisplay) {
-                    currentTimeDisplay.textContent = `⏰ ${dayName}, ${date} ${month} ${year} | ${hours}:${minutes} WIB`;
+                    currentTimeDisplay.textContent = `${dayName}, ${date} ${month} ${year} | ${hours}:${minutes} WIB`;
                 }
             }
             
@@ -509,7 +516,7 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                     if (confirmationDisplay) confirmationDisplay.textContent = dateStr + ' | ' + selectedTime + ' WIB';
                 } else {
                     if (selectedTimeInput) selectedTimeInput.value = '';
-                    if (confirmationDisplay) confirmationDisplay.textContent = dateStr + ' | Pilih waktu';
+                    if (confirmationDisplay) confirmationDisplay.textContent = dateStr;
                 }
             }
             
@@ -532,8 +539,20 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                         if (res.status === 'success' && res.data.length > 0) {
                             renderDynamicSlots(res.data);
                         } else {
+                            // Pesan berbeda untuk tanggal libur vs tanggal tanpa slot
+                            let emptyMessage = 'Tidak ada sesi operasional tersedia untuk tanggal ini.';
+                            let emptyIcon = '📅';
+                            if (res.blocked) {
+                                emptyIcon = '🚫';
+                                emptyMessage = `Tanggal ini libur${res.reason ? ': ' + res.reason : ''}`;
+                            }
                             if (container) {
-                                container.innerHTML = '<div class="col-span-full text-center py-8 text-sm text-slate-500 italic">Tidak ada sesi operasional tersedia untuk tanggal ini.</div>';
+                                container.innerHTML = `
+                                    <div class="col-span-full text-center py-10">
+                                        <div class="text-4xl mb-3">${emptyIcon}</div>
+                                        <p class="text-sm font-semibold text-slate-600">${emptyMessage}</p>
+                                        <p class="text-xs text-slate-400 mt-1">Silakan pilih tanggal lain.</p>
+                                    </div>`;
                             }
                             selectedTime = '';
                             if (selectedTimeInput) selectedTimeInput.value = '';
@@ -565,8 +584,7 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                 slots.forEach(slot => {
                     const startHour = parseInt(slot.start_time.split(':')[0]);
                     const timeLabel = slot.start_time.substring(0, 5);
-                    const endHour = (startHour + 1) % 24;
-                    const endTimeLabel = `${String(endHour).padStart(2, '0')}:00`;
+                    const endTimeLabel = slot.end_time ? slot.end_time.substring(0, 5) : '00:00';
                     const fullTimeRange = `${timeLabel} - ${endTimeLabel}`;
                     
                     let category = 'MALAM';
@@ -733,6 +751,12 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
                         document.querySelectorAll('.date-cell').forEach(c => c.classList.remove('selected-date'));
                         this.classList.add('selected-date');
                         
+                        // Reset pilihan sesi waktu saat tanggal berubah
+                        selectedTime = '';
+                        if (selectedTimeInput) selectedTimeInput.value = '';
+                        if (slotIdInput) slotIdInput.value = '';
+                        if (boothIdInput) boothIdInput.value = '';
+                        
                         updateConfirmation();
                         fetchSlotsForDate(selectedDate);
                     });
@@ -760,7 +784,7 @@ $currentDateFullPhp = date('d') . ' ' . $monthsIndo[date('m')] . ' ' . date('Y')
             
             if (btnBack) {
                 btnBack.addEventListener('click', function() {
-                    window.location.href = '<?= base_url('register') ?>';
+                    window.location.href = '<?= base_url('booth') ?>';
                 });
             }
             

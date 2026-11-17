@@ -25,7 +25,7 @@ class GoogleAuthCommand extends BaseCommand
         $client->setScopes([Drive::DRIVE]);
         $client->setAccessType('offline');
         $client->setPrompt('consent');
-        $client->setRedirectUri('http://127.0.0.1:8080/api/google/callback');
+        $client->setRedirectUri('http://localhost');
 
         $code = $params[0] ?? null;
 

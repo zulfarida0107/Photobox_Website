@@ -494,6 +494,16 @@ class SessionController extends BaseApiController
         $tempFolder = FCPATH . 'uploads/temp/';
         if (!is_dir($tempFolder)) {
             mkdir($tempFolder, 0777, true);
+        } else {
+            // Auto cleanup file temp yang lebih tua dari 2 jam (7200 detik)
+            if (rand(1, 10) === 1) {
+                $cutoff = time() - 7200;
+                foreach (glob($tempFolder . 'dslr_*') as $oldFile) {
+                    if (is_file($oldFile) && filemtime($oldFile) < $cutoff) {
+                        @unlink($oldFile);
+                    }
+                }
+            }
         }
 
         $outputFile = $tempFolder . 'dslr_' . $sessionId . '_' . time() . '.jpg';
@@ -669,10 +679,8 @@ class SessionController extends BaseApiController
         // response ini (cek writable/logs/ untuk hasil aktualnya). Dipilih
         // karena kecepatan tampil foto ke user jadi prioritas utama.
         $liveViewRearmed = null; // status tidak diverifikasi sinkron
-        if ($isWebServerActive) {
-            $command = 'start /B "" "' . PHP_BINARY . '" "' . FCPATH . '../spark" liveview:rearm > NUL 2>&1';
-            @pclose(@popen($command, 'r'));
-        }
+        $liveViewRearmed = true;
+        $mark('liveview_standby');
         $mark('dispatch_liveview_rearm_async'); // seharusnya nyaris 0ms karena async
 
         // DI-BYPASS UNTUK KECEPATAN MAKSIMAL:

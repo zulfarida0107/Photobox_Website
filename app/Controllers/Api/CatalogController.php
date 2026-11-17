@@ -75,12 +75,12 @@ class CatalogController extends BaseApiController
     {
         $path = $this->request->getGet('path');
         if (empty($path)) {
-            return $this->respondError('Path is required', 400);
+            return $this->failValidation('Path is required');
         }
         
         $filePath = FCPATH . str_replace(['../', '..\\'], '', $path);
         if (!file_exists($filePath) || !is_file($filePath)) {
-            return $this->respondError('File not found', 404);
+            return $this->failNotFound('File not found');
         }
         
         $mime = mime_content_type($filePath) ?: 'image/png';

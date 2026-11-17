@@ -54,10 +54,12 @@ class AuthController extends BaseController
                 'isLoggedIn' => true,
             ]);
 
-            // Set Remember Me Cookie (berlaku 30 hari)
+            // Set Remember Me Cookie (berlaku 30 hari dengan tanda tangan HMAC)
             if ($this->request->getPost('remember')) {
                 helper('cookie');
-                set_cookie('remember_admin', $admin['id'], 30 * 24 * 60 * 60);
+                $signature = hash_hmac('sha256', $admin['id'] . $admin['password'], config('App')->baseURL);
+                $cookieToken = base64_encode($admin['id'] . ':' . $signature);
+                set_cookie('remember_admin', $cookieToken, 30 * 24 * 60 * 60);
             }
 
             return redirect()->to('/admin/dashboard')

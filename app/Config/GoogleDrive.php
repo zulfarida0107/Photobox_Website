@@ -22,9 +22,11 @@ class GoogleDrive extends BaseConfig
             $this->oauthCredentials = rtrim(ROOTPATH, '/\\') . DIRECTORY_SEPARATOR . ltrim($configuredPath, '/\\');
         }
 
-        $this->folderId = env(
-            'google.drive.folderId',
-            ''
-        );
+        $rawFolderId = env('google.drive.folderId', '');
+        if (preg_match('/folders\/([a-zA-Z0-9_-]+)/', $rawFolderId, $matches)) {
+            $this->folderId = $matches[1];
+        } else {
+            $this->folderId = trim($rawFolderId);
+        }
     }
 }

@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Models;
+
+use CodeIgniter\Model;
+
+class LocationModel extends Model
+{
+    protected $table         = 'locations';
+    protected $primaryKey    = 'id';
+    protected $useAutoIncrement = false;
+    protected $returnType    = 'array';
+    protected $protectFields = true;
+    protected $allowedFields = [
+        'id',
+        'name',
+        'address',
+        'city',
+        'themes_available',
+        'status',
+        'latitude',
+        'longitude',
+        'preview_images',
+    ];
+
+    protected $useSoftDeletes = false;
+    protected $useTimestamps  = true;
+    protected $dateFormat     = 'datetime';
+    protected $createdField   = 'created_at';
+    protected $updatedField   = 'updated_at';
+
+    /**
+     * Daftar tema fisik booth yang tersedia
+     */
+    public const AVAILABLE_THEMES = [
+        'retro'    => 'Retro',
+        'mrt'      => 'MRT',
+        'vintage'  => 'Vintage',
+        'modern'   => 'Modern',
+        'neon'     => 'Neon',
+        'rustic'   => 'Rustic',
+        'classic'  => 'Classic',
+    ];
+
+    /**
+     * Ambil semua lokasi aktif
+     */
+    public function getActiveLocations()
+    {
+        return $this->where('status', 'active')->orderBy('name', 'ASC')->findAll();
+    }
+
+    /**
+     * Hitung jumlah booth di lokasi tertentu
+     */
+    public function countBoothsAt(string $locationId): int
+    {
+        return (new BoothModel())->where('location_id', $locationId)->countAllResults();
+    }
+
+    /**
+     * Decode themes_available JSON
+     */
+    public function getThemes(array $location): array
+    {
+        if (empty($location['themes_available'])) {
+            return [];
+        }
+        $themes = json_decode($location['themes_available'], true);
+        return is_array($themes) ? $themes : [];
+    }
+
+    /**
+     * Ambil gabungan tema standar + tema kustom dari seluruh lokasi
+     */
+    public function getAllAvailableThemes(): array
+    {
+        $themeModel = new ThemeModel();
+        return $themeModel->getAllThemesAssoc();
+    }
+}

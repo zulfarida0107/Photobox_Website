@@ -8,7 +8,7 @@ class Cors extends BaseConfig
 {
     public array $default = [
         'allowedOrigins' => [
-            'http://localhost:5173',
+            '*',
         ],
 
         'allowedOriginsPatterns' => [],

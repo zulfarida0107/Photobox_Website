@@ -10,23 +10,18 @@ class AlterFramesTable extends Migration
     {
         $fields = $this->db->getFieldNames('frames');
         
-        // Remove old columns if they exist
+        // Remove old category_id column if it exists
         if (in_array('category_id', $fields)) {
             $this->forge->dropColumn('frames', 'category_id');
         }
-        if (in_array('layout_id', $fields)) {
-            // Drop foreign key constraint first
-            $this->db->query('ALTER TABLE frames DROP FOREIGN KEY fk_frames_layout_id');
-            $this->forge->dropColumn('frames', 'layout_id');
-        }
 
-        // Add new columns
+        // Add new columns if missing
         $newFields = [];
         if (!in_array('category', $fields)) {
             $newFields['category'] = [
                 'type'       => 'ENUM',
-                'constraint' => ['pastel', 'cute', 'layout', 'minimalist', 'newspaper', 'magazine', 'retro 90s', 'y2k'],
-                'default'    => 'minimalist',
+                'constraint' => ['Pastel', 'Cute', 'Minimalist', 'Newspaper', 'Magazine', 'Retro 90s', 'Y2k'],
+                'default'    => 'Minimalist',
                 'after'      => 'name',
             ];
         }

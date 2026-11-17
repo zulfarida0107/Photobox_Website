@@ -147,7 +147,7 @@
                                     $badgeText  = $isActive ? 'Aktif' : 'Non-Aktif';
                                 ?>
                                 <tr class="hover:bg-blue-50/30 transition-colors group">
-                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-slate-900 font-bold text-center">#<?= esc($cust['id']) ?></td>
+                                    <td class="px-6 py-4 font-data-tabular text-data-tabular text-blue-600 font-bold text-center">#<?= esc($cust['id']) ?></td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-center gap-3">
                                             <div class="w-8 h-8 rounded-full bg-<?= $color ?>-100 flex items-center justify-center text-<?= $color ?>-700 font-bold text-xs"><?= esc($initials) ?></div>
@@ -241,7 +241,7 @@
             <div class="w-full space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-left text-sm mb-6">
                 <div class="flex justify-between border-b border-slate-100 pb-2">
                     <span class="font-semibold text-slate-500">ID Pelanggan</span>
-                    <span class="font-mono text-primary font-bold" id="modalCustId"></span>
+                    <span class="font-mono text-blue-600 font-bold" id="modalCustId"></span>
                 </div>
                 <div class="flex justify-between border-b border-slate-100 pb-2">
                     <span class="font-semibold text-slate-500">Nama Pelanggan</span>

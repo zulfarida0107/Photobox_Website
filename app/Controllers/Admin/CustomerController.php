@@ -49,9 +49,9 @@ class CustomerController extends BaseController
         // Hitung total yang terfilter untuk pagination
         $totalFiltered = $builder->countAllResults(false); // false = jangan reset query
 
-        // Ambil data dengan pagination
+        // Ambil data dengan pagination (urutan mulai dari C0001 ke atas)
         $customers = $builder
-            ->orderBy('created_at', 'DESC')
+            ->orderBy('id', 'ASC')
             ->findAll($perPage, ($currentPage - 1) * $perPage);
 
         // --- Statistik card ---
@@ -98,12 +98,8 @@ class CustomerController extends BaseController
                 ->with('error', 'Pelanggan tidak ditemukan.');
         }
 
-        $data = [
-            'title'    => 'Detail Pelanggan | Admin Panel',
-            'customer' => $customer,
-        ];
-
-        return view('Admin/Customer/CustomerDetail', $data);
+        return redirect()->to(base_url('admin/customers'))
+            ->with('info', "Detail pelanggan #{$id} dapat dilihat melalui tombol aksi detail pada tabel.");
     }
 
     // =========================================================================
@@ -231,6 +227,19 @@ class CustomerController extends BaseController
         if (!$customer) {
             return redirect()->to(base_url('admin/customers'))
                 ->with('error', 'Pelanggan tidak ditemukan.');
+        }
+
+        // Cek apakah pelanggan masih memiliki booking aktif (paid/pending/confirmed)
+        $db             = \Config\Database::connect();
+        $activeStatuses = ['paid', 'pending', 'confirmed'];
+        $activeBookings = $db->table('bookings')
+            ->whereIn('status', $activeStatuses)
+            ->where('customer_id', $id)
+            ->countAllResults();
+
+        if ($activeBookings > 0) {
+            return redirect()->to(base_url('admin/customers'))
+                ->with('error', "Pelanggan tidak dapat dihapus — terdapat {$activeBookings} booking aktif (paid/pending/confirmed). Batalkan atau selesaikan booking tersebut terlebih dahulu.");
         }
 
         $this->customerModel->delete($id);

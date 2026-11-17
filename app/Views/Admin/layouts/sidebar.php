@@ -10,7 +10,6 @@ $seg3       = $uri->getSegment(3) ?? '';
 
 // Role Admin
 $adminRole    = strtolower(session()->get('adminRole') ?? '');
-$isAdmin      = in_array($adminRole, ['admin', 'superadmin'], true);
 $isSuperAdmin = ($adminRole === 'superadmin');
 
 // Mapping segment → menu key
@@ -40,17 +39,30 @@ function sidebarClass(string $key, string $activeKey, string $clsActive, string 
     return $key === $activeKey ? $clsActive : $clsDefault;
 }
 ?>
-<aside class="fixed left-0 top-0 h-screen w-[260px] z-50 bg-white border-r border-slate-200 flex flex-col py-6 px-4 space-y-2">
-    <div class="px-4 mb-8 flex items-center gap-3">
-        <div>
-            <h1 class="text-lg font-black tracking-tight text-blue-700">CuitBox Studio</h1>
-            <p class="text-xs text-slate-500">Admin Management</p>
+<aside id="admin-sidebar" class="fixed left-0 top-0 h-screen w-[270px] md:w-[260px] z-50 bg-white border-r border-slate-200 flex flex-col py-6 px-4 space-y-2 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none overflow-y-auto">
+    <div class="px-2 mb-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-lg shadow-sm shadow-blue-500/20">
+                <span class="material-symbols-outlined text-xl">photo_camera</span>
+            </div>
+            <div>
+                <h1 class="text-base font-black tracking-tight text-blue-700 leading-tight">CuitBox Studio</h1>
+                <p class="text-[11px] text-slate-400 font-medium">Admin Management</p>
+            </div>
         </div>
+
+        <!-- Tombol Tutup Sidebar di Layar HP (Mobile) -->
+        <button type="button" 
+                onclick="toggleSidebar(false)" 
+                class="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                aria-label="Tutup Menu">
+            <span class="material-symbols-outlined text-xl">close</span>
+        </button>
     </div>
 
     <nav class="flex-1 space-y-1">
 
-        <!-- Menu Operasional (Bisa diakses semua role admin) -->
+        <!-- Menu Operasional (Bisa diakses Superadmin & Staff) -->
         <a class="<?= sidebarClass('dashboard', $activeKey, $clsActive, $clsDefault) ?>"
            href="<?= base_url('admin/dashboard') ?>">
             <span class="material-symbols-outlined">dashboard</span>
@@ -87,8 +99,8 @@ function sidebarClass(string $key, string $activeKey, string $clsActive, string 
             <span>Galeri Sesi</span>
         </a>
 
-        <!-- Menu Katalog (Admin & Superadmin) -->
-        <?php if ($isAdmin): ?>
+        <!-- Menu Khusus Superadmin (Master Data & Pengaturan) -->
+        <?php if ($isSuperAdmin): ?>
             <a class="<?= sidebarClass('print-options', $activeKey, $clsActive, $clsDefault) ?>"
                href="<?= base_url('admin/print-options') ?>">
                 <span class="material-symbols-outlined">print</span>
@@ -101,10 +113,6 @@ function sidebarClass(string $key, string $activeKey, string $clsActive, string 
                 <span>Aset Desain</span>
             </a>
 
-        <?php endif; ?>
-
-        <!-- Pengaturan Akses untuk Admin dan Superadmin -->
-        <?php if ($isAdmin): ?>
             <a class="<?= sidebarClass('settings', $activeKey, $clsActive, $clsDefault) ?>"
                href="<?= base_url('admin/settings') ?>">
                 <span class="material-symbols-outlined">admin_panel_settings</span>

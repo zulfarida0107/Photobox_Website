@@ -12,68 +12,50 @@ use Google\Service\Drive\Permission;
 class GoogleDriveService
 {
     protected Drive $drive;
-
     private PhotoModel $photoModel;
     private SessionModel $sessionModel;
 
     public function __construct()
     {
+        $serviceAccountPath = WRITEPATH . 'google/credentials.json';
+        if (file_exists($serviceAccountPath)) {
+            $client = new Client();
+            $client->setAuthConfig($serviceAccountPath);
+            $client->setScopes([Drive::DRIVE]);
+            $this->drive = new Drive($client);
+            $this->photoModel = new PhotoModel();
+            $this->sessionModel = new SessionModel();
+            return;
+        }
+
         $config = config(\Config\GoogleDrive::class);
-
         $client = new Client();
-
-        // OAuth credentials
-        $client->setAuthConfig(
-            $config->oauthCredentials
-        );
-
-        $client->setScopes([
-            Drive::DRIVE
-        ]);
-
+        $client->setAuthConfig($config->oauthCredentials);
+        $client->setScopes([Drive::DRIVE]);
         $client->setAccessType('offline');
 
         $tokenPath = WRITEPATH . 'google/token.json';
-
         if (! file_exists($tokenPath)) {
-            throw new \RuntimeException(
-                'token.json tidak ditemukan. Jalankan OAuth terlebih dahulu.'
-            );
+            throw new \RuntimeException('Credentials Google Drive tidak ditemukan.');
         }
 
-        $token = json_decode(
-            file_get_contents($tokenPath),
-            true
-        );
-
+        $token = json_decode(file_get_contents($tokenPath), true);
         $client->setAccessToken($token);
 
-        // Refresh access token otomatis jika expired
         if ($client->isAccessTokenExpired()) {
             $refreshToken = $client->getRefreshToken() ?: ($token['refresh_token'] ?? null);
-            if (! $refreshToken) {
-                throw new \RuntimeException(
-                    'Refresh token tidak tersedia. Jalankan OAuth kembali.'
-                );
+            if (!$refreshToken) {
+                throw new \RuntimeException('Refresh token tidak tersedia.');
             }
-
             $client->fetchAccessTokenWithRefreshToken($refreshToken);
             $mergedToken = array_merge($token, $client->getAccessToken() ?: []);
             if (!empty($refreshToken) && empty($mergedToken['refresh_token'])) {
                 $mergedToken['refresh_token'] = $refreshToken;
             }
-
-            file_put_contents(
-                $tokenPath,
-                json_encode(
-                    $mergedToken,
-                    JSON_PRETTY_PRINT
-                )
-            );
+            file_put_contents($tokenPath, json_encode($mergedToken, JSON_PRETTY_PRINT));
         }
 
         $this->drive = new Drive($client);
-
         $this->photoModel = new PhotoModel();
         $this->sessionModel = new SessionModel();
     }
@@ -81,7 +63,6 @@ class GoogleDriveService
     public function createFolder(string $folderName): string
     {
         $config = config(\Config\GoogleDrive::class);
-
         $params = [
             'name'     => $folderName,
             'mimeType' => 'application/vnd.google-apps.folder',
@@ -93,45 +74,28 @@ class GoogleDriveService
         $folder = new DriveFile($params);
 
         try {
-            $createdFolder = $this->drive->files->create(
-                $folder,
-                [
-                    'fields' => 'id'
-                ]
-            );
+            $createdFolder = $this->drive->files->create($folder, ['fields' => 'id']);
             return $createdFolder->id;
         } catch (\Throwable $e) {
-            // Jika parent folderId tidak ditemukan di akun Google ini, buat langsung di root Drive
             if (!empty($params['parents'])) {
                 unset($params['parents']);
                 $folder = new DriveFile($params);
-                $createdFolder = $this->drive->files->create(
-                    $folder,
-                    [
-                        'fields' => 'id'
-                    ]
-                );
+                $createdFolder = $this->drive->files->create($folder, ['fields' => 'id']);
                 return $createdFolder->id;
             }
             throw $e;
         }
     }
 
-    public function uploadFile(
-        string $folderId,
-        string $localPath,
-        string $fileName
-    ): string {
-
-        if (! file_exists($localPath)) {
+    public function uploadFile(string $folderId, string $localPath, string $fileName): string
+    {
+        if (!file_exists($localPath)) {
             if (file_exists(FCPATH . $localPath)) {
                 $localPath = FCPATH . $localPath;
             } elseif (file_exists(WRITEPATH . $localPath)) {
                 $localPath = WRITEPATH . $localPath;
             } else {
-                throw new \RuntimeException(
-                    "File tidak ditemukan: {$localPath}"
-                );
+                throw new \RuntimeException("File tidak ditemukan: {$localPath}");
             }
         }
 
@@ -147,6 +111,7 @@ class GoogleDriveService
                 $mime = 'image/jpeg';
             }
         }
+
         $metadata = new DriveFile([
             'name'     => $fileName,
             'parents'  => [$folderId],
@@ -169,68 +134,35 @@ class GoogleDriveService
     public function uploadSessionPhotos(string $sessionId): string
     {
         $session = $this->sessionModel->find($sessionId);
-
-        if (! $session) {
-            throw new \RuntimeException(
-                'Session tidak ditemukan.'
-            );
+        if (!$session) {
+            throw new \RuntimeException('Session tidak ditemukan.');
         }
 
-        $photos = $this->photoModel
-            ->where('session_id', $sessionId)
-            ->orderBy('shot_number', 'ASC')
-            ->findAll();
+        $folderId = $this->createSessionFolder("CuitBox - Sesi {$sessionId}");
 
-        if (empty($photos)) {
-            throw new \RuntimeException(
-                'Foto tidak ditemukan.'
-            );
+        $sessionDir = WRITEPATH . "uploads/sessions/{$sessionId}/";
+        if (!is_dir($sessionDir)) {
+            $sessionDir = FCPATH . "uploads/sessions/{$sessionId}/";
         }
 
-        $folderId = $this->createSessionFolder(
-            $sessionId
-        );
-
-        foreach ($photos as $photo) {
-
-            $localPath = WRITEPATH . $photo['file_path'];
-            if (!file_exists($localPath)) {
-                $localPath = FCPATH . $photo['file_path'];
-            }
-            if (!file_exists($localPath)) {
-                continue;
-            }
-
-            try {
-
-                $fileId = $this->uploadFile(
-                    $folderId,
-                    $localPath,
-                    basename($localPath)
-                );
-
-                $this->photoModel->update(
-                    $photo['id'],
-                    [
-                        'drive_file_id' => $fileId
-                    ]
-                );
-            } catch (\Throwable $e) {
-
-                log_message(
-                    'error',
-                    'Upload Google Drive gagal: ' .
-                    $localPath .
-                    ' | ' .
-                    $e->getMessage()
-                );
-
-                throw $e;
+        if (is_dir($sessionDir)) {
+            $files = glob($sessionDir . '*.*') ?: [];
+            foreach ($files as $filePath) {
+                if (is_file($filePath)) {
+                    try {
+                        $this->uploadFile(
+                            $folderId,
+                            $filePath,
+                            basename($filePath)
+                        );
+                    } catch (\Throwable $e) {
+                        log_message('warning', 'Upload file to drive error: ' . $filePath . ' | ' . $e->getMessage());
+                    }
+                }
             }
         }
 
         $this->makeFolderPublic($folderId);
-
         return $this->getFolderLink($folderId);
     }
 
@@ -247,10 +179,7 @@ class GoogleDriveService
             'allowFileDiscovery' => false,
         ]);
 
-        $this->drive->permissions->create(
-            $folderId,
-            $permission
-        );
+        $this->drive->permissions->create($folderId, $permission);
     }
 
     public function getFolderLink(string $folderId): string

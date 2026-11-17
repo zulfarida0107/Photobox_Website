@@ -117,21 +117,38 @@
         }
         .toast-container {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 9999;
-            max-width: 400px;
-            width: 100%;
+            max-width: 340px;
+            width: calc(100% - 32px);
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .toast {
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            animation: slideInRight 0.5s ease;
+            padding: 10px 16px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            animation: slideInDown 0.35s ease;
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: center;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            line-height: 1.35;
+            pointer-events: auto;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        .toast:active {
+            cursor: grabbing;
         }
         .toast-success {
             background: #10b981;
@@ -145,33 +162,15 @@
             background: #3b82f6;
             color: white;
         }
-        @keyframes slideInRight {
+        @keyframes slideInDown {
             from {
-                transform: translateX(100%);
+                transform: translateY(-20px) scale(0.95);
                 opacity: 0;
             }
             to {
-                transform: translateX(0);
+                transform: translateY(0) scale(1);
                 opacity: 1;
             }
-        }
-        .toast-close {
-            margin-left: auto;
-            cursor: pointer;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: background 0.3s;
-        }
-        .toast-close:hover {
-            background: rgba(255,255,255,0.3);
         }
         .card-content {
             position: relative;
@@ -256,7 +255,7 @@
             <main class="relative px-6 sm:px-8 pt-8 pb-8 overflow-hidden bg-white/40 backdrop-blur-sm flex-1">
                 <div class="text-center mb-6">
                     <h2 class="text-2xl font-extrabold mb-1 text-slate-800">Pilih Harga Cetak</h2>
-                    <p class="text-[10px] text-slate-600 font-medium max-w-2xl mx-auto">Pilih jumlah cetakan fisik yang sesuai dengan kebutuhan serumu.</p>
+                    <p class="text-[10px] text-slate-600 font-medium max-w-2xl mx-auto">Pilih jumlah cetakan fisik yang sesuai dengan kebutuhanmu</p>
                 </div>
 
                 <div class="frame-grid">
@@ -288,11 +287,11 @@
                                     </div>
                                     <p class="text-sm text-slate-500 mb-2 flex items-center gap-2">
                                         <span class="material-symbols-outlined text-sm align-middle">photo_camera</span>
-                                        Mendapatkan <?= esc($option['copies'] ?? 1) ?> lembar cetak foto strip fisik.
+                                        Mendapatkan <?= esc($option['copies'] ?? 1) ?> lembar cetak foto strip fisik
                                     </p>
                                     <p class="text-xs text-blue-600 mb-4 flex items-center gap-1">
                                         <span class="material-symbols-outlined text-xs align-middle">mail</span>
-                                        Dapatkan juga soft file/dokumen/file melalui Gmail terdaftar.
+                                        Mendapatkan file dokumen melalui Gmail terdaftar
                                     </p>
                                     
                                     <form action="<?= base_url('print-option/store') ?>" method="post" class="w-full mt-auto">
@@ -310,6 +309,14 @@
                             <p class="text-slate-600">Belum ada pilihan cetak tersedia. Silakan cek kembali nanti.</p>
                         </div>
                     <?php endif; ?>
+                </div>
+
+                <!-- Tombol Kembali ke Jadwal -->
+                <div class="mt-8 flex justify-center">
+                    <a href="<?= base_url('schedule') ?>" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/80 hover:bg-white text-slate-700 font-bold text-xs shadow-sm border border-slate-200 hover:border-slate-300 transition-all">
+                        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                        Kembali ke Jadwal
+                    </a>
                 </div>
             </main>
 
@@ -339,18 +346,70 @@
 
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            toast.innerHTML = `
-                <span>${message}</span>
-                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
-            `;
+            toast.innerHTML = `<span>${message}</span>`;
             container.appendChild(toast);
-            setTimeout(() => {
-                if (toast.parentElement) {
-                    toast.style.opacity = '0';
-                    toast.style.transition = 'opacity 0.5s ease';
-                    setTimeout(() => toast.remove(), 500);
+
+            function dismissToast() {
+                toast.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+                toast.style.transform = 'translateY(-40px)';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 250);
+            }
+
+            // Auto dismiss after 4s
+            let autoTimer = setTimeout(dismissToast, 4000);
+
+            // Swipe Up to dismiss logic (Touch & Drag)
+            let startY = 0;
+            let isDragging = false;
+
+            const onStart = (clientY) => {
+                clearTimeout(autoTimer);
+                startY = clientY;
+                isDragging = true;
+                toast.style.transition = 'none';
+            };
+
+            const onMove = (clientY) => {
+                if (!isDragging) return;
+                const diffY = clientY - startY;
+                if (diffY < 0) { // Dragging upwards
+                    toast.style.transform = `translateY(${diffY}px)`;
+                    toast.style.opacity = `${Math.max(0, 1 + diffY / 50)}`;
                 }
-            }, 5000);
+            };
+
+            const onEnd = (clientY) => {
+                if (!isDragging) return;
+                isDragging = false;
+                const diffY = clientY - startY;
+                if (diffY < -15) { // Swiped up by more than 15px
+                    dismissToast();
+                } else {
+                    toast.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+                    toast.style.transform = 'translateY(0)';
+                    toast.style.opacity = '1';
+                    autoTimer = setTimeout(dismissToast, 3000);
+                }
+            };
+
+            // Touch events (Mobile)
+            toast.addEventListener('touchstart', (e) => onStart(e.touches[0].clientY), { passive: true });
+            toast.addEventListener('touchmove', (e) => onMove(e.touches[0].clientY), { passive: true });
+            toast.addEventListener('touchend', (e) => onEnd(e.changedTouches[0].clientY));
+
+            // Mouse events (Desktop testing)
+            toast.addEventListener('mousedown', (e) => {
+                onStart(e.clientY);
+                const moveHandler = (ev) => onMove(ev.clientY);
+                const upHandler = (ev) => {
+                    onEnd(ev.clientY);
+                    document.removeEventListener('mousemove', moveHandler);
+                    document.removeEventListener('mouseup', upHandler);
+                };
+                document.addEventListener('mousemove', moveHandler);
+                document.addEventListener('mouseup', upHandler);
+            });
         }
 
         // Card selection
@@ -376,7 +435,7 @@
         <?php endif; ?>
 
         // Form loading state
-        document.querySelectorAll('form[action="<?= base_url('frame/store') ?>"]').forEach(form => {
+        document.querySelectorAll('form[action="<?= base_url('print-option/store') ?>"]').forEach(form => {
             form.addEventListener('submit', function(e) {
                 const button = this.querySelector('button[type="submit"]');
                 if (button) {

@@ -15,12 +15,12 @@ class EmailService
         $config = config(\Config\Email::class);
         $config->protocol = 'smtp';
         $config->SMTPHost = 'smtp.gmail.com';
-        $config->SMTPUser = 'cuitbox.studio@gmail.com';
-        $config->SMTPPass = 'mmnyzpjjpcvdxrio';
+        $config->SMTPUser = 'cuitboxstudio@gmail.com';
+        $config->SMTPPass = env('SMTP_PASS', 'mmnyzpjjpcvdxrio');
         $config->SMTPPort = 465;
         $config->SMTPCrypto = 'ssl';
         $config->SMTPAuthMethod = 'login';
-        $config->fromEmail = 'cuitbox.studio@gmail.com';
+        $config->fromEmail = 'cuitboxstudio@gmail.com';
         $config->fromName = 'CuitBox Photo Booth';
         $config->mailType = 'html';
         $config->charset = 'UTF-8';
@@ -60,7 +60,7 @@ class EmailService
             </div>
             
             <p style='color: #334155; font-size: 15px; line-height: 1.6;'>
-                Halo! Seluruh file foto (10 jepretan + 1 frame foto final) <strong>sudah kami lampirkan langsung di email ini</strong>. Anda bisa langsung mengunduh dan menyimpannya ke galeri ponsel Anda.
+                Halo! Lembar cetak frame foto final Anda <strong>sudah kami lampirkan langsung di email ini</strong>. Untuk mengunduh seluruh foto mentah hasil jepretan serta video animasi dalam resolusi penuh, silakan akses tombol Google Drive di bawah.
             </p>
 
             {$linkSection}

@@ -13,6 +13,7 @@ class PrintOptionModel extends Model
 	protected $protectFields = true;
 	protected $allowedFields = [
 		'id',
+		'name',
 		'copies',
 		'extra_price',
 	];
