@@ -44,7 +44,9 @@ $routes->group('api', static function ($routes) {
     $routes->post('payment/qr', 'Api\PaymentController::createQr');
     $routes->get('payment', 'Api\PaymentController::statusByQuery');
     $routes->get('payment/(:segment)/status', 'Api\PaymentController::status/$1');
-    $routes->match(['get', 'post'], 'payment/midtrans/callback', 'Api\PaymentController::midtransCallback');
+    $routes->match(['get', 'post'], 'payment/bayargg/callback', 'Api\PaymentController::bayarggCallback');
+    $routes->match(['get', 'post'], 'payment/callback', 'Api\PaymentController::bayarggCallback');
+    $routes->match(['get', 'post'], 'payment/midtrans/callback', 'Api\PaymentController::bayarggCallback');
 
     // ---- Manajemen Alur Sesi Pemotretan (Start, Email, Complete) ----
     $routes->post('session/start', 'Api\SessionController::start');

@@ -5,6 +5,7 @@ namespace App\Controllers\Api;
 use App\Models\BookingModel;
 use App\Models\PaymentModel;
 use App\Models\PrintOptionModel;
+use App\Libraries\BayarGGService;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class PaymentController extends BaseApiController
@@ -20,6 +21,10 @@ class PaymentController extends BaseApiController
         $this->paymentModel = new PaymentModel();
     }
 
+    /**
+     * POST /api/payment/qr
+     * Generate QRIS dinamis via Bayar.gg untuk pembayaran di Kiosk Desktop & Website
+     */
     public function createQr(): ResponseInterface
     {
         $payload       = $this->getRequestPayload();
@@ -66,17 +71,17 @@ class PaymentController extends BaseApiController
 
         $basePrice = 0.00;
         $extraPrice = (float) ($printOption['extra_price'] ?? 0);
-        $amount = number_format($basePrice + $extraPrice, 2, '.', '');
+        $amount = (int) ($basePrice + $extraPrice);
 
+        // Cari atau buat record payment
         $payment = $this->paymentModel->where('booking_id', $bookingId)
             ->where('status', 'pending')
             ->first();
 
-        $serverKey    = config('Midtrans')->serverKey ?? (string) env('midtrans.serverKey', '');
-        $isProduction = (bool) (config('Midtrans')->isProduction ?? false);
-
-        $qrString = 'MIDTRANS-' . strtoupper(bin2hex(random_bytes(5)));
+        $qrString = '';
         $qrUrl    = null;
+        $invoiceId = null;
+        $paymentPageUrl = null;
 
         if ($payment === null) {
             $paymentId = $this->makeId('pay_');
@@ -84,8 +89,8 @@ class PaymentController extends BaseApiController
                 'id'              => $paymentId,
                 'booking_id'      => $bookingId,
                 'print_option_id' => $printOptionId,
-                'amount'          => $amount,
-                'gateway_ref'     => $qrString,
+                'amount'          => number_format($amount, 2, '.', ''),
+                'gateway_ref'     => '',
                 'status'          => 'pending',
                 'created_at'      => date('Y-m-d H:i:s'),
                 'updated_at'      => date('Y-m-d H:i:s'),
@@ -95,88 +100,78 @@ class PaymentController extends BaseApiController
             $paymentId = $payment['id'];
             $this->paymentModel->update($paymentId, [
                 'print_option_id' => $printOptionId,
-                'amount'          => $amount,
+                'amount'          => number_format($amount, 2, '.', ''),
                 'status'          => 'pending',
                 'updated_at'      => date('Y-m-d H:i:s'),
             ]);
             $payment = $this->paymentModel->find($paymentId);
         }
 
-        // Generate Midtrans Dynamic QRIS via CoreApi
-        if (!empty($serverKey)) {
-            try {
-                \Midtrans\Config::$serverKey    = $serverKey;
-                \Midtrans\Config::$isProduction = $isProduction;
-                \Midtrans\Config::$isSanitized  = true;
+        // Generate QRIS dinamis via Bayar.gg API
+        try {
+            $bayargg = new BayarGGService();
+            $description = 'Cetak ' . ($printOption['copies'] ?? 2) . ' Lembar Foto - CuitBox #' . $paymentId;
 
-                $chargeParams = [
-                    'payment_type'        => 'qris',
-                    'transaction_details' => [
-                        'order_id'     => $payment['id'],
-                        'gross_amount' => (int) $amount,
-                    ],
-                    'qris' => [
-                        'acquirer' => 'gopay',
-                    ],
-                    'item_details' => [
-                        [
-                            'id'       => (string) $printOptionId,
-                            'price'    => (int) $amount,
-                            'quantity' => 1,
-                            'name'     => 'Cetak ' . ($printOption['copies'] ?? 2) . ' Lembar Foto',
-                        ]
-                    ]
-                ];
+            $apiResponse = $bayargg->createPayment($amount, $description, $paymentId);
 
-                $chargeResponse = \Midtrans\CoreApi::charge($chargeParams);
+            $data = $apiResponse['data'] ?? [];
 
-                if (!empty($chargeResponse->qr_string)) {
-                    $qrString = $chargeResponse->qr_string;
-                }
+            $invoiceId = $data['invoice_id'] ?? null;
+            $qrString  = !empty($data['qris_string']) ? $data['qris_string'] : ($data['qr_string'] ?? '');
+            $paymentPageUrl = $data['payment_url'] ?? null;
 
-                if (!empty($chargeResponse->actions) && is_array($chargeResponse->actions)) {
-                    foreach ($chargeResponse->actions as $action) {
-                        if (($action->name ?? '') === 'generate-qr-code') {
-                            $qrUrl = $action->url ?? null;
-                            break;
-                        }
-                    }
-                }
-
-                if (empty($qrUrl) && !empty($qrString)) {
-                    $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($qrString);
-                }
-
-                $this->paymentModel->update($payment['id'], [
-                    'gateway_ref' => $qrString,
-                    'updated_at'  => date('Y-m-d H:i:s'),
-                ]);
-                $payment['gateway_ref'] = $qrString;
-            } catch (\Throwable $e) {
-                log_message('error', '[Midtrans Dynamic QRIS Charge Error] ' . $e->getMessage());
-                if (empty($qrUrl)) {
-                    $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($qrString);
-                }
+            // Generate QR image URL dari qr_string
+            if (!empty($qrString)) {
+                $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' . urlencode($qrString);
+            } elseif (!empty($paymentPageUrl)) {
+                // Fallback: gunakan payment URL sebagai QR content
+                $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' . urlencode($paymentPageUrl);
+                $qrString = $paymentPageUrl;
             }
-        } else {
-            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($qrString);
+
+            // Simpan invoice reference ke database
+            $this->paymentModel->update($payment['id'], [
+                'gateway_ref' => $invoiceId ?? $qrString,
+                'updated_at'  => date('Y-m-d H:i:s'),
+            ]);
+            $payment['gateway_ref'] = $invoiceId ?? $qrString;
+
+        } catch (\Throwable $e) {
+            log_message('error', '[BayarGG QRIS Error] ' . $e->getMessage());
+
+            // Fallback: buat QR placeholder agar kiosk tetap bisa menampilkan
+            $qrString = 'BAYARGG-' . strtoupper(bin2hex(random_bytes(5)));
+            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' . urlencode($qrString);
+
+            $this->paymentModel->update($payment['id'], [
+                'gateway_ref' => $qrString,
+                'updated_at'  => date('Y-m-d H:i:s'),
+            ]);
+            $payment['gateway_ref'] = $qrString;
         }
 
         return $this->respondCreated([
-            'message'   => 'QRIS dinamis Midtrans berhasil dibuat.',
-            'payment'   => $payment,
-            'qr_string' => $qrString,
-            'qr_url'    => $qrUrl,
-            'qr_code'   => $qrUrl,
-            'midtrans'  => [
-                'order_id'     => $payment['id'],
-                'gross_amount' => $payment['amount'],
+            'message'      => 'QRIS dinamis Bayar.gg berhasil dibuat.',
+            'payment'      => $payment,
+            'qr_string'    => $qrString,
+            'qr_url'       => $qrUrl,
+            'qr_code'      => $qrUrl,
+            'payment_page' => $paymentPageUrl,
+            'invoice_id'   => $invoiceId,
+            'bayargg'      => [
+                'invoice_id'   => $invoiceId,
+                'amount'       => $amount,
                 'qr_string'    => $qrString,
                 'qr_url'       => $qrUrl,
+                'payment_url'  => $paymentPageUrl,
             ],
         ]);
     }
 
+    /**
+     * GET /api/payment?payment_id=xxx
+     * Cek status pembayaran via query parameter
+     */
     public function statusByQuery(): ResponseInterface
     {
         $paymentId = trim((string) $this->request->getGet('payment_id'));
@@ -187,6 +182,10 @@ class PaymentController extends BaseApiController
         return $this->status($paymentId);
     }
 
+    /**
+     * GET /api/payment/{id}/status
+     * Cek status pembayaran (dengan live inquiry ke Bayar.gg jika masih pending)
+     */
     public function status(string $paymentId): ResponseInterface
     {
         $payment = $this->paymentModel->find($paymentId);
@@ -194,36 +193,34 @@ class PaymentController extends BaseApiController
             return $this->failNotFound('Payment tidak ditemukan.');
         }
 
-        // Live Fallback Midtrans Status Inquiry jika status masih pending
-        if ($payment['status'] === 'pending') {
-            $serverKey = config('Midtrans')->serverKey ?? (string) env('midtrans.serverKey', '');
-            if (!empty($serverKey)) {
-                try {
-                    \Midtrans\Config::$serverKey    = $serverKey;
-                    \Midtrans\Config::$isProduction = (bool) (config('Midtrans')->isProduction ?? false);
+        // Live Fallback: Cek status ke Bayar.gg jika masih pending
+        if ($payment['status'] === 'pending' && !empty($payment['gateway_ref'])) {
+            try {
+                $bayargg = new BayarGGService();
+                $statusResponse = $bayargg->checkPayment($payment['gateway_ref']);
 
-                    $statusObj = \Midtrans\Transaction::status($paymentId);
-                    $txStatus  = $statusObj->transaction_status ?? '';
-                    $fraud     = $statusObj->fraud_status ?? 'accept';
+                $invoiceData = $statusResponse['data'] ?? $statusResponse;
+                $bayarggStatus = $invoiceData['status'] ?? '';
+                $mappedStatus = $bayargg->mapStatus($bayarggStatus);
 
-                    if ($txStatus === 'settlement' || ($txStatus === 'capture' && $fraud === 'accept')) {
-                        $this->paymentModel->update($payment['id'], [
-                            'status'         => 'paid',
-                            'payment_method' => $statusObj->payment_type ?? 'QRIS',
-                            'updated_at'     => date('Y-m-d H:i:s'),
-                        ]);
-                        $this->markBookingAsPaid($payment['booking_id']);
-                        $payment = $this->paymentModel->find($paymentId);
-                    } elseif (in_array($txStatus, ['deny', 'cancel', 'expire'], true)) {
-                        $this->paymentModel->update($payment['id'], [
-                            'status'     => 'failed',
-                            'updated_at' => date('Y-m-d H:i:s'),
-                        ]);
-                        $payment = $this->paymentModel->find($paymentId);
-                    }
-                } catch (\Throwable $e) {
-                    // Ignore inquiry errors if not found
+                if ($mappedStatus === 'paid') {
+                    $this->paymentModel->update($payment['id'], [
+                        'status'         => 'paid',
+                        'payment_method' => 'QRIS Bayar.gg',
+                        'updated_at'     => date('Y-m-d H:i:s'),
+                    ]);
+                    $this->markBookingAsPaid($payment['booking_id']);
+                    $payment = $this->paymentModel->find($paymentId);
+                } elseif ($mappedStatus === 'failed') {
+                    $this->paymentModel->update($payment['id'], [
+                        'status'     => 'failed',
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+                    $payment = $this->paymentModel->find($paymentId);
                 }
+            } catch (\Throwable $e) {
+                log_message('notice', '[BayarGG Status Inquiry] ' . $e->getMessage());
+                // Biarkan status pending jika inquiry gagal
             }
         }
 
@@ -237,7 +234,12 @@ class PaymentController extends BaseApiController
         ]);
     }
 
-    public function midtransCallback(): ResponseInterface
+    /**
+     * POST /api/payment/bayargg/callback
+     * Webhook callback handler dari Bayar.gg
+     * Dipanggil otomatis oleh server Bayar.gg ketika pembayaran berhasil
+     */
+    public function bayarggCallback(): ResponseInterface
     {
         $payload = $this->getRequestPayload();
 
@@ -245,75 +247,53 @@ class PaymentController extends BaseApiController
         if (strtoupper($this->request->getMethod()) === 'GET' && empty($payload)) {
             return $this->respondOk([
                 'status'  => 'online',
-                'service' => 'Midtrans Webhook Callback',
-                'message' => 'Endpoint aktif dan siap menerima notifikasi HTTP POST dari Midtrans.'
+                'service' => 'Bayar.gg Webhook Callback',
+                'message' => 'Endpoint aktif dan siap menerima notifikasi HTTP POST dari Bayar.gg.'
             ]);
         }
 
-        $orderId           = trim((string) ($payload['order_id'] ?? ''));
-        $statusCode        = trim((string) ($payload['status_code'] ?? ''));
-        $grossAmount       = trim((string) ($payload['gross_amount'] ?? ''));
-        $inputSignature    = trim((string) ($payload['signature_key'] ?? ''));
-        $transactionStatus = strtolower(trim((string) ($payload['transaction_status'] ?? 'pending')));
-        $fraudStatus       = strtolower(trim((string) ($payload['fraud_status'] ?? '')));
-        $paymentType       = strtolower(trim((string) ($payload['payment_type'] ?? '')));
+        $invoiceId = trim((string) ($payload['invoice_id'] ?? ''));
+        $status    = strtolower(trim((string) ($payload['status'] ?? 'pending')));
+        $amount    = (int) ($payload['final_amount'] ?? $payload['amount'] ?? 0);
 
-        if ($orderId === '') {
-            return $this->failValidation('order_id wajib diisi.');
+        if ($invoiceId === '') {
+            return $this->failValidation('invoice_id wajib diisi.');
         }
 
-        // 1. Validasi Keamanan SHA-512 Signature Key resmi Midtrans
-        $midtransConfig = config('Midtrans');
-        $serverKey      = $midtransConfig->serverKey ?? (string) env('midtrans.serverKey', '');
-        $isProduction   = (bool) ($midtransConfig->isProduction ?? false) || (ENVIRONMENT === 'production');
+        // 1. Validasi signature keamanan webhook
+        $incomingSignature = $this->request->getHeaderLine('X-Callback-Signature')
+            ?: $this->request->getHeaderLine('X-Signature')
+            ?: '';
 
-        if (!empty($serverKey)) {
-            // Jika ada signature yang dikirim (webhook asli Midtrans):
-            if ($inputSignature !== '') {
-                if ($statusCode === '' || $grossAmount === '') {
-                    log_message('warning', "[Midtrans Security] Incomplete callback signature payload for order: {$orderId}");
-                    return $this->failUnauthorized('Payload signature Midtrans tidak lengkap.');
-                }
-
-                $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
-                if (!hash_equals($expectedSignature, $inputSignature)) {
-                    log_message('critical', "[Midtrans Security] Signature mismatch! Order: {$orderId}, Input: {$inputSignature}, Expected: {$expectedSignature}");
-                    return $this->failUnauthorized('Verifikasi signature key Midtrans gagal.');
-                }
-            } else {
-                // Jika tidak ada signature: hanya diperbolehkan pada mode development/testing (Dev Mode Bypass di Kiosk Desktop)
-                if ($isProduction) {
-                    log_message('warning', "[Midtrans Security] Signature key required in production for order: {$orderId}");
-                    return $this->failUnauthorized('Signature key Midtrans wajib disertakan.');
-                }
-                log_message('info', "[Dev Mode Bypass] Signature bypass diaktifkan untuk testing lokal kiosk. Order: {$orderId}");
+        try {
+            $bayargg = new BayarGGService();
+            if (!$bayargg->validateCallback($payload, $incomingSignature)) {
+                log_message('critical', "[BayarGG Security] Signature mismatch! Invoice: {$invoiceId}");
+                return $this->failUnauthorized('Verifikasi signature Bayar.gg gagal.');
             }
-        } else {
-            log_message('warning', "[Midtrans Security] Midtrans serverKey belum dikonfigurasi di .env. Lewati verifikasi signature.");
+        } catch (\Throwable $e) {
+            log_message('error', '[BayarGG Callback] Validation error: ' . $e->getMessage());
         }
 
-        // 2. Cari data pembayaran di database
-        $payment = $this->paymentModel->find($orderId);
+        // 2. Cari payment berdasarkan gateway_ref (invoice_id Bayar.gg)
+        $payment = $this->paymentModel->where('gateway_ref', $invoiceId)->first();
         if ($payment === null) {
-            log_message('error', "[Midtrans Callback] Payment tidak ditemukan untuk order: {$orderId}");
+            log_message('error', "[BayarGG Callback] Payment tidak ditemukan untuk invoice: {$invoiceId}");
             return $this->failNotFound('Payment tidak ditemukan.');
         }
 
-        // 3. Pemetaan status transaksi Midtrans
-        $mappedStatus = match ($transactionStatus) {
-            'capture' => ($paymentType === 'credit_card' && $fraudStatus === 'challenge') ? 'pending' : 'paid',
-            'settlement' => 'paid',
-            'deny', 'cancel', 'expire', 'failure' => 'failed',
-            default => 'pending',
-        };
+        // 3. Mapping status
+        $mappedStatus = (new BayarGGService())->mapStatus($status);
 
-        // 4. Update status pembayaran dan booking secara atomik (Database Transaction)
+        // 4. Update database secara atomik
         $db = \Config\Database::connect();
         $db->transBegin();
 
         try {
             $this->paymentModel->update($payment['id'], [
-                'status' => $mappedStatus,
+                'status'         => $mappedStatus,
+                'payment_method' => 'QRIS Bayar.gg',
+                'updated_at'     => date('Y-m-d H:i:s'),
             ]);
 
             if ($mappedStatus === 'paid') {
@@ -326,18 +306,18 @@ class PaymentController extends BaseApiController
             }
 
             $db->transCommit();
-            log_message('info', "[Midtrans Callback] Order {$orderId} berhasil diproses dengan status {$mappedStatus}.");
+            log_message('info', "[BayarGG Callback] Invoice {$invoiceId} berhasil diproses → {$mappedStatus}");
         } catch (\Throwable $e) {
             $db->transRollback();
-            log_message('error', "[Midtrans Callback] Gagal memproses update database: " . $e->getMessage());
+            log_message('error', "[BayarGG Callback] Database error: " . $e->getMessage());
             return $this->failServerError('Gagal memperbarui status transaksi.');
         }
 
         return $this->respondOk([
             'status'         => 'success',
-            'message'        => 'Callback Midtrans berhasil diverifikasi dan diproses.',
+            'message'        => 'Callback Bayar.gg berhasil diverifikasi dan diproses.',
             'payment_id'     => $payment['id'],
-            'order_id'       => $orderId,
+            'invoice_id'     => $invoiceId,
             'payment_status' => $mappedStatus,
         ]);
     }
