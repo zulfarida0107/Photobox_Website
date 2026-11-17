@@ -5,7 +5,7 @@ namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 use App\Models\PrintOptionModel;
 
-class PackageAndPrintOptionController extends BaseController
+class PrintOptionController extends BaseController
 {
     protected PrintOptionModel  $printOptionModel;
 
@@ -19,7 +19,7 @@ class PackageAndPrintOptionController extends BaseController
     // =========================================================================
     public function index()
     {
-        $perPage = 5;
+        $perPage = 10;
         $currentOptPage = max(1, (int) ($this->request->getGet('opt_page') ?? 1));
         $sortOpt        = $this->request->getGet('sort_opt') ?? 'semua';
         $searchOpt      = $this->request->getGet('search_opt') ?? '';
@@ -182,6 +182,7 @@ class PackageAndPrintOptionController extends BaseController
     public function storePrintOption()
     {
         $rules = [
+            'name'        => 'required|min_length[3]|max_length[100]',
             'copies'      => 'required|is_natural_no_zero|is_unique[print_options.copies]',
             'extra_price' => 'required|is_natural_no_zero',
         ];
@@ -196,12 +197,13 @@ class PackageAndPrintOptionController extends BaseController
 
         $this->printOptionModel->insert([
             'id'          => $newId,
+            'name'        => esc($this->request->getPost('name')),
             'copies'      => (int) $this->request->getPost('copies'),
             'extra_price' => (int) $this->request->getPost('extra_price'),
         ]);
 
-        return redirect()->to(base_url('admin/print-options'))
-            ->with('success', 'Opsi cetak baru berhasil ditambahkan.');
+        return redirect()->to(base_url('admin/print-options#table-print'))
+            ->with('success', 'Opsi cetak berhasil ditambahkan.');
     }
 
     // =========================================================================
@@ -234,6 +236,7 @@ class PackageAndPrintOptionController extends BaseController
         }
 
         $rules = [
+            'name'        => 'required|min_length[3]|max_length[100]',
             'copies'      => "required|is_natural_no_zero|is_unique[print_options.copies,id,{$id}]",
             'extra_price' => 'required|is_natural_no_zero',
         ];
@@ -244,11 +247,12 @@ class PackageAndPrintOptionController extends BaseController
         }
 
         $this->printOptionModel->update($id, [
+            'name'        => esc($this->request->getPost('name')),
             'copies'      => (int) $this->request->getPost('copies'),
             'extra_price' => (int) $this->request->getPost('extra_price'),
         ]);
 
-        return redirect()->to(base_url('admin/print-options'))
+        return redirect()->to(base_url('admin/print-options#table-print'))
             ->with('success', 'Opsi cetak berhasil diperbarui.');
     }
 
@@ -259,7 +263,7 @@ class PackageAndPrintOptionController extends BaseController
     {
         $option = $this->printOptionModel->find($id);
         if (!$option) {
-            return redirect()->to(base_url('admin/print-options'))
+            return redirect()->to(base_url('admin/print-options#table-print'))
                 ->with('error', 'Opsi cetak tidak ditemukan.');
         }
 
@@ -278,7 +282,7 @@ class PackageAndPrintOptionController extends BaseController
 
         $this->printOptionModel->delete($id);
 
-        return redirect()->to(base_url('admin/print-options'))
+        return redirect()->to(base_url('admin/print-options#table-print'))
             ->with('success', 'Opsi cetak berhasil dihapus.');
     }
 }

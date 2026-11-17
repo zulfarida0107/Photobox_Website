@@ -61,6 +61,20 @@
                     </div>
 
                     <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Lokasi Fisik</span>
+                        <span class="col-span-2 text-sm font-semibold text-emerald-700">
+                            <?= !empty($booth['location_name']) ? esc($booth['location_name']) : '-' ?>
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tema Fisik</span>
+                        <span class="col-span-2 text-sm font-semibold text-purple-700 capitalize">
+                            <?= !empty($booth['theme']) ? esc($booth['theme']) : '-' ?>
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-4">
                         <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Alamat IP Perangkat</span>
                         <span class="col-span-2 text-sm text-slate-800 font-mono"><?= esc($booth['ip_address'] ?? '-') ?></span>
                     </div>

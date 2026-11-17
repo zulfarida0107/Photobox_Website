@@ -85,7 +85,7 @@
  
             <div class="lg:col-span-12 flex flex-col h-full">
 <!-- Koleksi Frame -->
-                <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm flex flex-col h-full">
+                <div id="table-frame" class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm flex flex-col h-full">
                     <div class="p-6 flex justify-between items-center bg-white border-b border-slate-100">
                         <div class="flex items-center gap-3">
                             <div class="w-1 h-6 bg-primary rounded-full"></div>
@@ -204,12 +204,19 @@
                         </table>
                     </div>
                     <!-- Pagination Frame -->
-                    <div class="mt-auto p-6 bg-white border-t border-slate-100 flex items-center justify-between">
+                    <div class="mt-auto p-6 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <span class="text-xs text-slate-500 font-medium">
-                            Menampilkan <?= count($frames ?? []) ?> dari <?= $totalFrames ?? 0 ?> Frame
+                            <?php 
+                                $total = $totalFrames ?? 0;
+                                $count = count($frames ?? []);
+                                $perPage = 10;
+                                $start = ($total == 0) ? 0 : (($currentFramePage - 1) * $perPage) + 1;
+                                $end = ($start == 0) ? 0 : min($start + $count - 1, $total);
+                            ?>
+                            Menampilkan <?= count($frames ?? []) ?> dari <?= $total ?> Frame
                         </span>
                         <div class="flex gap-2">
-                            <a href="<?= base_url('admin/frames?page=' . max(1, ($currentFramePage ?? 1) - 1) . '&search=' . urlencode($search ?? '') . '&category=' . urlencode($selectedCategory ?? '')) ?>"
+                            <a href="<?= base_url('admin/frames?page=' . max(1, ($currentFramePage ?? 1) - 1) . '&search=' . urlencode($search ?? '') . '&category=' . urlencode($selectedCategory ?? '')) ?>#table-frame"
                                class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentFramePage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_left</span>
                             </a>
@@ -227,12 +234,12 @@
                                         <?= $p ?>
                                     </div>
                                 <?php else: ?>
-                                    <a href="<?= base_url('admin/frames?page=' . $p . '&search=' . urlencode($search ?? '') . '&category=' . urlencode($selectedCategory ?? '')) ?>" class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-500 font-bold text-xs">
+                                    <a href="<?= base_url('admin/frames?page=' . $p . '&search=' . urlencode($search ?? '') . '&category=' . urlencode($selectedCategory ?? '')) ?>#table-frame" class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-500 font-bold text-xs">
                                         <?= $p ?>
                                     </a>
                                 <?php endif; ?>
                             <?php endfor; ?>
-                            <a href="<?= base_url('admin/frames?page=' . min(($totalFramePages ?? 1), ($currentFramePage ?? 1) + 1) . '&search=' . urlencode($search ?? '') . '&category=' . urlencode($selectedCategory ?? '')) ?>"
+                            <a href="<?= base_url('admin/frames?page=' . min(($totalFramePages ?? 1), ($currentFramePage ?? 1) + 1) . '&search=' . urlencode($search ?? '') . '&category=' . urlencode($selectedCategory ?? '')) ?>#table-frame"
                                class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentFramePage ?? 1) >= ($totalFramePages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
                                 <span class="material-symbols-outlined text-sm">chevron_right</span>
                             </a>
@@ -641,7 +648,7 @@
 
 <!-- Preview Modal -->
 <div id="previewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="previewModalContent">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-2xl w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="previewModalContent">
         <!-- Modal Header -->
         <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
             <h4 class="font-bold text-slate-800 flex items-center gap-2">
@@ -651,34 +658,37 @@
         </div>
         
         <!-- Modal Body -->
-        <div class="p-6 flex flex-col items-center">
-            <!-- Full Frame Image Wrapper -->
-            <div class="w-full h-64 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex items-center justify-center p-4 mb-5 shadow-inner">
-                <img id="modalFrameImage" src="" alt="Frame Full Preview" class="max-w-full max-h-full object-contain drop-shadow" />
+        <div class="p-6">
+            <div class="flex flex-col md:flex-row gap-6 items-start">
+                <!-- Preview Image -->
+                <div class="w-full md:w-1/2 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 flex-shrink-0 p-2">
+                    <img id="modalFrameImage" src="" alt="Frame Full Preview" class="w-full h-[300px] object-contain drop-shadow" />
+                </div>
+                
+                <!-- Info Section -->
+                <div class="w-full md:w-1/2 space-y-4 text-sm">
+                    <div class="border-b border-slate-100 pb-3">
+                        <span class="block text-xs font-semibold text-slate-400 mb-1">ID Frame</span>
+                        <span class="font-mono font-medium text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md" id="modalFrameId"></span>
+                    </div>
+                    <div class="border-b border-slate-100 pb-3">
+                        <span class="block text-xs font-semibold text-slate-400 mb-1">Nama Frame</span>
+                        <span class="font-bold text-lg text-slate-800" id="modalFrameName"></span>
+                    </div>
+                    <div class="border-b border-slate-100 pb-3">
+                        <span class="block text-xs font-semibold text-slate-400 mb-1">Kategori</span>
+                        <span class="font-semibold text-slate-800" id="modalFrameCategory"></span>
+                    </div>
+                    <div class="border-b border-slate-100 pb-3">
+                        <span class="block text-xs font-semibold text-slate-400 mb-1">Waktu Unggah</span>
+                        <span class="font-semibold text-slate-800" id="modalFrameUploaded"></span>
+                    </div>
+                </div>
             </div>
-
-            <!-- Details List -->
-            <div class="w-full space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-left text-sm mb-6">
-                <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <span class="font-semibold text-slate-500">ID Frame</span>
-                    <span class="font-mono text-slate-800 font-bold" id="modalFrameId"></span>
-                </div>
-                <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <span class="font-semibold text-slate-500">Nama Frame</span>
-                    <span class="text-slate-800 font-semibold" id="modalFrameName"></span>
-                </div>
-                <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <span class="font-semibold text-slate-500">Kategori</span>
-                    <span class="text-slate-800 font-semibold" id="modalFrameCategory"></span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="font-semibold text-slate-500">Waktu Unggah</span>
-                    <span class="text-slate-800" id="modalFrameUploaded"></span>
-                </div>
-            </div>
-            
-            <!-- Close Button -->
-            <button type="button" onclick="closePreviewModal()" class="w-full py-2.5 bg-primary hover:bg-primary-container text-white font-semibold text-sm rounded-lg transition-colors shadow-md">
+        </div>
+        
+        <div class="p-5 border-t border-slate-100 bg-slate-50/50">
+            <button type="button" onclick="closePreviewModal()" class="w-full py-2.5 bg-primary hover:bg-blue-700 text-white font-bold text-sm rounded-lg shadow-md transition-colors">
                 Tutup
             </button>
         </div>
@@ -891,36 +901,41 @@
 
 <!-- Preview Layout Diagram Modal -->
 <div id="previewLayoutModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="previewLayoutModalContent">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-2xl w-full mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="previewLayoutModalContent">
         <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
             <h4 class="font-bold text-slate-800 flex items-center gap-2">
                 <span class="material-symbols-outlined text-emerald-600">visibility</span>
                 Detail &amp; Preview Layout
             </h4>
         </div>
-        <div class="p-6 flex flex-col items-center">
-            <div class="w-full h-80 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex items-center justify-center p-4 mb-5 shadow-inner">
-                <img id="modalLayoutImage" src="" alt="Layout Diagram Preview" class="max-w-full max-h-full object-contain drop-shadow" />
+        <div class="p-6">
+            <div class="flex flex-col md:flex-row gap-6 items-start">
+                <div class="w-full md:w-1/2 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 flex-shrink-0 p-2">
+                    <img id="modalLayoutImage" src="" alt="Layout Diagram Preview" class="w-full h-[300px] object-contain drop-shadow" />
+                </div>
+                
+                <div class="w-full md:w-1/2 space-y-4 text-sm">
+                    <div class="border-b border-slate-100 pb-3">
+                        <span class="block text-xs font-semibold text-slate-400 mb-1">ID Layout</span>
+                        <span class="font-mono font-medium text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md" id="modalLayoutId"></span>
+                    </div>
+                    <div class="border-b border-slate-100 pb-3">
+                        <span class="block text-xs font-semibold text-slate-400 mb-1">Nama Layout</span>
+                        <span class="font-bold text-lg text-slate-800" id="modalLayoutName"></span>
+                    </div>
+                    <div class="border-b border-slate-100 pb-3">
+                        <span class="block text-xs font-semibold text-slate-400 mb-1">Jumlah Foto</span>
+                        <span class="font-bold text-blue-700" id="modalLayoutPhotoCount"></span>
+                    </div>
+                    <div class="border-b border-slate-100 pb-3">
+                        <span class="block text-xs font-semibold text-slate-400 mb-1">Rasio Foto</span>
+                        <span class="font-mono font-semibold text-slate-800" id="modalLayoutAspectRatio"></span>
+                    </div>
+                </div>
             </div>
-            <div class="w-full space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-left text-sm mb-6">
-                <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <span class="font-semibold text-slate-500">ID Layout</span>
-                    <span class="font-mono text-slate-800 font-bold" id="modalLayoutId"></span>
-                </div>
-                <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <span class="font-semibold text-slate-500">Nama Layout</span>
-                    <span class="text-slate-800 font-semibold" id="modalLayoutName"></span>
-                </div>
-                <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <span class="font-semibold text-slate-500">Jumlah Foto</span>
-                    <span class="text-blue-700 font-bold" id="modalLayoutPhotoCount"></span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="font-semibold text-slate-500">Rasio Foto</span>
-                    <span class="font-mono text-slate-800" id="modalLayoutAspectRatio"></span>
-                </div>
-            </div>
-            <button type="button" onclick="closePreviewLayoutModal()" class="w-full py-2.5 bg-primary hover:bg-blue-800 text-white font-semibold text-sm rounded-lg transition-colors shadow-md">
+        </div>
+        <div class="p-5 border-t border-slate-100 bg-slate-50/50">
+            <button type="button" onclick="closePreviewLayoutModal()" class="w-full py-2.5 bg-primary hover:bg-blue-800 text-white font-bold text-sm rounded-lg transition-colors shadow-md">
                 Tutup
             </button>
         </div>

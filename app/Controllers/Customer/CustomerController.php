@@ -7,7 +7,7 @@ use App\Models\BookingModel;
 use App\Models\CustomerModel;
 use App\Models\SlotModel;
 use App\Models\BoothModel;
-use App\Models\PackageModel;
+use App\Models\PrintOptionModel;
 
 class CustomerController extends BaseController
 {
@@ -15,7 +15,7 @@ class CustomerController extends BaseController
     protected $customerModel;
     protected $slotModel;
     protected $boothModel;
-    protected $packageModel;
+    protected $printOptionModel;
 
     public function __construct()
     {
@@ -23,7 +23,7 @@ class CustomerController extends BaseController
         $this->customerModel = new CustomerModel();
         $this->slotModel = new SlotModel();
         $this->boothModel = new BoothModel();
-        $this->packageModel = new PackageModel();
+        $this->printOptionModel = new PrintOptionModel();
     }
 
     public function index()
@@ -39,7 +39,7 @@ class CustomerController extends BaseController
     {
         $data = [
             'title'    => 'CuitBox Studio - Booking Kiosk',
-            'packages' => $this->packageModel->getActivePackages(),
+            'print_options' => $this->printOptionModel->findAll(),
             'slots'    => $this->slotModel->getAvailableSlots(date('Y-m-d')),
             'booths'   => $this->boothModel->getActiveBooths(),
         ];
@@ -51,7 +51,7 @@ class CustomerController extends BaseController
     {
         $rules = [
             'email'      => 'required|valid_email',
-            'package_id' => 'required',
+            'print_option_id' => 'required',
             'slot_id'    => 'required',
             'booth_id'   => 'required',
         ];
@@ -81,7 +81,7 @@ class CustomerController extends BaseController
                 'customer_id'       => $customer['id'],
                 'slot_id'           => $this->request->getPost('slot_id'),
                 'booth_id'          => $this->request->getPost('booth_id'),
-                'package_id'        => $this->request->getPost('package_id'),
+                'print_option_id'   => $this->request->getPost('print_option_id'),
                 'queue_number'      => $queueNumber,
                 'status'            => 'pending',
                 'payment_status'    => 'pending',

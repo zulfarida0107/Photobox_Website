@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Database\Migrations;
+
+use CodeIgniter\Database\Migration;
+
+class AddLocationIdThemeToBooths extends Migration
+{
+    public function up()
+    {
+        $fields = [
+            'location_id' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 20,
+                'null'       => true,
+                'after'      => 'id',
+            ],
+            'theme' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+                'null'       => true,
+                'after'      => 'name',
+            ],
+        ];
+        $this->forge->addColumn('booths', $fields);
+    }
+
+    public function down()
+    {
+        $this->forge->dropColumn('booths', ['location_id', 'theme']);
+    }
+}

@@ -100,8 +100,8 @@
             </div>
         </div>
 
-        <!-- Table -->
-        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+        <!-- Main Content Area -->
+        <div id="table-admin" class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
             <!-- Table Header -->
             <div class="p-6 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center bg-white gap-4">
                 <div class="flex items-center gap-3 w-full md:w-auto">
@@ -230,23 +230,36 @@
             </div>
 
             <!-- Pagination -->
-            <div class="p-6 border-t border-slate-100 bg-white flex items-center justify-between">
-                <p class="text-xs text-slate-500">
-                    Menampilkan <?= count($admins ?? []) ?> dari <?= $totalAdmins ?? 0 ?> admin
+            <div class="p-6 border-t border-slate-100 bg-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-xs text-slate-500 font-medium">
+                    Menampilkan <?= count($admins ?? []) ?> dari <?= $totalAdmins ?? 0 ?> Administrator
                 </p>
                 <div class="flex items-center gap-2">
-                    <a href="<?= base_url('admin/settings?page=' . max(1, ($currentPage ?? 1) - 1) . '&role=' . ($filterRole ?? '') . '&q=' . ($keyword ?? '')) ?>"
+                    <a href="<?= base_url('admin/settings?page=' . max(1, ($currentPage ?? 1) - 1) . '&role=' . ($filterRole ?? '') . '&q=' . ($keyword ?? '')) ?>#table-admin"
                        class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 transition-colors <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                         <span class="material-symbols-outlined text-sm">chevron_left</span>
                     </a>
-                    <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
-                        <a href="<?= base_url('admin/settings?page=' . $i . '&role=' . ($filterRole ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                           class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border border-primary bg-primary text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
+                    <?php 
+                        $cPage = $currentPage ?? 1;
+                        $tPages = $totalPages ?? 1;
+                        $startPage = max(1, $cPage - 2);
+                        $endPage   = min($tPages, $cPage + 2);
+                        if ($endPage - $startPage + 1 < 5) {
+                            if ($startPage == 1) {
+                                $endPage = min($tPages, 5);
+                            } elseif ($endPage == $tPages) {
+                                $startPage = max(1, $tPages - 4);
+                            }
+                        }
+                    ?>
+                    <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                        <a href="<?= base_url('admin/settings?page=' . $i . '&role=' . ($filterRole ?? '') . '&q=' . ($keyword ?? '')) ?>#table-admin"
+                           class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-colors <?= $i === $cPage ? 'border border-primary bg-primary text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                             <?= $i ?>
                         </a>
                     <?php endfor; ?>
-                    <a href="<?= base_url('admin/settings?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&role=' . ($filterRole ?? '') . '&q=' . ($keyword ?? '')) ?>"
-                       class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 transition-colors <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                    <a href="<?= base_url('admin/settings?page=' . min($tPages, $cPage + 1) . '&role=' . ($filterRole ?? '') . '&q=' . ($keyword ?? '')) ?>#table-admin"
+                       class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 transition-colors <?= $cPage >= $tPages ? 'opacity-40 pointer-events-none' : '' ?>">
                         <span class="material-symbols-outlined text-sm">chevron_right</span>
                     </a>
                 </div>

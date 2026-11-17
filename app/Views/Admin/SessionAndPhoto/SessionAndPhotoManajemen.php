@@ -98,9 +98,9 @@
             <!-- ============================================================
                  Tabel Sesi (8 kolom)
             ============================================================ -->
-            <div class="col-span-12 lg:col-span-8 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col">
+            <div id="table-session" class="col-span-12 lg:col-span-8 bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col mt-6">
                 <!-- Table Header -->
-                <div class="p-6 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center bg-white gap-4 rounded-t-xl">
+                <div class="p-6 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="flex items-center gap-3 w-full md:w-auto">
                         <div class="w-1 h-6 bg-primary rounded-full"></div>
                         <h4 class="font-h2 text-h2 text-on-surface">Daftar Riwayat Sesi Terkini</h4>
@@ -141,7 +141,7 @@
                             <?php if (!empty($sessions)): ?>
                                 <?php foreach ($sessions as $session): ?>
                                     <tr class="hover:bg-blue-50/30 transition-colors group">
-                                        <td class="px-6 py-4 font-medium text-slate-900 text-sm">
+                                        <td class="px-6 py-4 font-bold font-mono text-blue-600 text-sm text-center">
                                             #<?= esc($session['id']) ?>
                                         </td>
                                         <td class="px-6 py-4 text-sm text-slate-600">
@@ -154,10 +154,17 @@
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 text-sm text-slate-600">
-                                            <?= esc($session['email_recipient'] ?? '-') ?>
+                                            <?php 
+                                                $email = !empty($session['email_recipient']) ? $session['email_recipient'] : ($session['customer_email'] ?? ''); 
+                                            ?>
+                                            <?= esc($email !== '' ? $email : '-') ?>
                                         </td>
                                         <td class="px-6 py-4 text-sm text-slate-500">
-                                            <?= date('H:i', strtotime($session['created_at'])) ?> WIB
+                                            <?php
+                                                $dt = new DateTime($session['created_at']);
+                                                $dt->setTimezone(new DateTimeZone('Asia/Jakarta'));
+                                                echo $dt->format('H:i') . ' WIB';
+                                            ?>
                                         </td>
                                         <td class="px-6 py-4 text-center">
                                             <div class="flex items-center justify-center gap-2">
@@ -165,7 +172,7 @@
                                                    class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Lihat Detail">
                                                     <span class="material-symbols-outlined text-[18px]">open_in_new</span>
                                                 </a>
-                                                <?php if (!empty($session['email_recipient'])): ?>
+                                                <?php if (!empty($email)): ?>
                                                     <form action="<?= base_url('admin/sessions/' . $session['id'] . '/resend') ?>" method="post" class="inline">
                                                         <?= csrf_field() ?>
                                                         <button type="submit" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Kirim Ulang Email">
@@ -195,23 +202,36 @@
                     </table>
                 </div>
                 <!-- Pagination -->
-                <div class="p-6 border-t border-slate-100 bg-white flex items-center justify-between rounded-b-xl">
-                    <span class="text-xs text-slate-500">
-                        Menampilkan <?= count($sessions ?? []) ?> dari <?= $totalSessions ?? 0 ?> sesi
+                <div class="p-6 border-t border-slate-100 bg-white flex flex-col sm:flex-row items-center justify-between gap-4 rounded-b-xl">
+                    <span class="text-xs text-slate-500 font-medium">
+                        Menampilkan <?= count($sessions ?? []) ?> dari <?= $totalSessions ?? 0 ?> Sesi
                     </span>
                     <div class="flex gap-2">
-                        <a href="<?= base_url('admin/sessions?page=' . max(1, ($currentPage ?? 1) - 1) . '&q=' . ($keyword ?? '')) ?>"
+                        <a href="<?= base_url('admin/sessions?page=' . max(1, ($currentPage ?? 1) - 1) . '&q=' . ($keyword ?? '')) ?>#table-session"
                            class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                             <span class="material-symbols-outlined text-sm">chevron_left</span>
                         </a>
-                        <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
-                            <a href="<?= base_url('admin/sessions?page=' . $i . '&q=' . ($keyword ?? '')) ?>"
-                               class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-colors <?= $i === ($currentPage ?? 1) ? 'border border-primary bg-primary text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
+                        <?php 
+                            $cPage = $currentPage ?? 1;
+                            $tPages = $totalPages ?? 1;
+                            $startPage = max(1, $cPage - 2);
+                            $endPage   = min($tPages, $cPage + 2);
+                            if ($endPage - $startPage + 1 < 5) {
+                                if ($startPage == 1) {
+                                    $endPage = min($tPages, 5);
+                                } elseif ($endPage == $tPages) {
+                                    $startPage = max(1, $tPages - 4);
+                                }
+                            }
+                        ?>
+                        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                            <a href="<?= base_url('admin/sessions?page=' . $i . '&q=' . ($keyword ?? '')) ?>#table-session"
+                               class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-colors <?= $i === $cPage ? 'border border-primary bg-primary text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
                                 <?= $i ?>
                             </a>
                         <?php endfor; ?>
-                        <a href="<?= base_url('admin/sessions?page=' . min(($totalPages ?? 1), ($currentPage ?? 1) + 1) . '&q=' . ($keyword ?? '')) ?>"
-                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'opacity-40 pointer-events-none' : '' ?>">
+                        <a href="<?= base_url('admin/sessions?page=' . min($tPages, $cPage + 1) . '&q=' . ($keyword ?? '')) ?>#table-session"
+                           class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= $cPage >= $tPages ? 'opacity-40 pointer-events-none' : '' ?>">
                             <span class="material-symbols-outlined text-sm">chevron_right</span>
                         </a>
                     </div>
@@ -278,7 +298,7 @@
                     <h3 class="font-h2 text-h2 text-on-surface">
                         Galeri Foto
                         <?php if (!empty($gallerySession)): ?>
-                            Sesi #<?= esc($gallerySession['id']) ?>
+                            Sesi <span class="text-blue-600 font-mono">#<?= esc($gallerySession['id']) ?></span>
                         <?php endif; ?>
                     </h3>
                     <?php if (!empty($gallerySession)): ?>

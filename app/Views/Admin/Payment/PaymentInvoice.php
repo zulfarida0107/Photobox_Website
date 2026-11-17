@@ -2,7 +2,7 @@
 <?php $this->section('content'); ?>
 
 <main class="pt-16 min-h-screen flex flex-col">
-    <div class="p-6 flex-1 max-w-4xl mx-auto w-full">
+    <div class="p-6 flex-1 w-full mx-auto">
 
         <!-- Breadcrumbs -->
         <nav aria-label="Breadcrumb" class="flex mb-6 text-xs font-medium text-slate-500 print:hidden">
@@ -14,7 +14,7 @@
                 </li>
                 <li class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-[10px]">chevron_right</span>
-                    <span class="text-blue-700 font-bold">Invoice</span>
+                    <span class="text-blue-900 font-bold">Invoice</span>
                 </li>
             </ol>
         </nav>
@@ -29,7 +29,7 @@
                 <a href="<?= base_url('admin/payments') ?>" class="px-4 py-2 bg-slate-100 text-slate-700 font-bold text-sm rounded-lg hover:bg-slate-200 transition-colors flex items-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">arrow_back</span> Kembali
                 </a>
-                <button onclick="window.print()" class="px-4 py-2 bg-blue-600 text-white font-bold text-sm rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                <button onclick="window.print()" class="px-4 py-2 bg-blue-900 text-white font-bold text-sm rounded-lg hover:bg-blue-800 transition-colors flex items-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">print</span> Cetak
                 </button>
             </div>
@@ -45,7 +45,7 @@
                     <p class="text-sm font-bold text-slate-500 mt-1">NO. <?= esc($payment['id']) ?></p>
                 </div>
                 <div class="mt-4 md:mt-0 text-left md:text-right">
-                    <h3 class="text-lg font-bold text-blue-600">Photobox Studio</h3>
+                    <h3 class="text-lg font-bold text-blue-900">Photobox Studio</h3>
                     <p class="text-xs text-slate-500 mt-1">Jl. Contoh Alamat No. 123<br>Kota, Negara 12345</p>
                 </div>
             </div>
@@ -63,7 +63,7 @@
                 <div>
                     <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">Referensi Booking</h4>
                     <div class="space-y-1">
-                        <p class="text-sm"><span class="text-slate-500 w-24 inline-block">Kode Booking</span>: <span class="font-bold text-blue-600"><?= esc($payment['booking_code'] ?? '-') ?></span></p>
+                        <p class="text-sm"><span class="text-slate-500 w-24 inline-block">Kode Booking</span>: <span class="font-bold text-blue-900"><?= esc($payment['booking_code'] ?? '-') ?></span></p>
                         <p class="text-sm"><span class="text-slate-500 w-24 inline-block">Ref. Gateway</span>: <span class="font-bold"><?= esc($payment['gateway_ref'] ?? '-') ?></span></p>
                     </div>
                 </div>
@@ -102,7 +102,7 @@
                 <tfoot class="border-t-2 border-slate-200">
                     <tr>
                         <td class="py-4 px-4 text-right font-bold text-slate-600 uppercase">Total Pembayaran</td>
-                        <td class="py-4 px-4 text-right text-xl font-black text-blue-700">
+                        <td class="py-4 px-4 text-right text-xl font-black text-blue-900">
                             Rp <?= number_format($payment['amount'], 0, ',', '.') ?>
                         </td>
                     </tr>

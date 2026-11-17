@@ -1,0 +1,170 @@
+<?php $this->extend('Admin/layouts/main'); ?>
+<?php $this->section('content'); ?>
+
+<main class="pt-16 min-h-screen flex flex-col">
+    <div class="p-6 flex-1">
+
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-4">
+            <a class="hover:text-blue-700" href="<?= base_url('admin/dashboard') ?>">Dashboard</a>
+            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+            <a class="hover:text-blue-700" href="<?= base_url('admin/booths') ?>">Manajemen Booth & Lokasi</a>
+            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span class="text-blue-700">Detail Lokasi</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="mb-6 flex items-center justify-between">
+            <div>
+                <h2 class="font-h1 text-h1 text-on-surface">Detail Lokasi <?= esc($location['name']) ?></h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Informasi lokasi cabang fisik dan daftar unit mesin booth yang terdaftar di lokasi ini.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="<?= base_url('admin/locations/' . $location['id'] . '/edit') ?>"
+                   class="flex items-center gap-2 border border-slate-200 bg-white text-slate-700 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-slate-50 transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-sm">edit</span>
+                    Edit Lokasi
+                </a>
+            </div>
+        </div>
+
+        <!-- Detail Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl">
+            <!-- Main Info Card -->
+            <div class="md:col-span-2 space-y-6">
+                <div class="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-outline-variant bg-slate-50/50 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">location_on</span>
+                        <h4 class="font-bold text-on-surface">Informasi Cabang Lokasi</h4>
+                    </div>
+
+                    <div class="p-6 space-y-4 text-sm">
+                        <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-3">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">ID Lokasi</span>
+                            <span class="col-span-2 font-mono font-bold text-primary"><?= esc($location['id']) ?></span>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-3">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Nama Lokasi</span>
+                            <span class="col-span-2 font-bold text-slate-800"><?= esc($location['name']) ?></span>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-3">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Kota / Wilayah</span>
+                            <span class="col-span-2 font-semibold text-slate-700"><?= esc($location['city'] ?? '-') ?></span>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-3">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Alamat Lengkap</span>
+                            <span class="col-span-2 text-slate-700"><?= esc($location['address'] ?? '-') ?></span>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4 border-b border-slate-100 pb-3">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tema Tersedia</span>
+                            <div class="col-span-2 flex flex-wrap gap-1">
+                                <?php 
+                                    $themes = [];
+                                    if (!empty($location['themes_available'])) {
+                                        $decoded = json_decode($location['themes_available'], true);
+                                        $themes = is_array($decoded) ? $decoded : [];
+                                    }
+                                ?>
+                                <?php if (!empty($themes)): ?>
+                                    <?php foreach ($themes as $th): ?>
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 capitalize">
+                                            <?= esc($availableThemes[$th] ?? $th) ?>
+                                        </span>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <span class="text-slate-400 italic">Semua Tema</span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Status Lokasi</span>
+                            <span class="col-span-2">
+                                <?php if (($location['status'] ?? 'active') === 'active'): ?>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
+                                        <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                                        Aktif
+                                    </span>
+                                <?php else: ?>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-600 border border-red-200">
+                                        <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                                        Nonaktif
+                                    </span>
+                                <?php endif; ?>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Unit Booth Terdaftar di Lokasi Ini -->
+                <div class="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-outline-variant bg-slate-50/50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">devices</span>
+                            <h4 class="font-bold text-on-surface">Unit Mesin Booth di Lokasi Ini (<?= count($boothsAtLocation ?? []) ?> Unit)</h4>
+                        </div>
+                        <a href="<?= base_url('admin/booths/create') ?>" class="text-xs font-bold text-primary hover:underline">
+                            + Tambah Booth Baru
+                        </a>
+                    </div>
+                    <div class="divide-y divide-slate-100">
+                        <?php if (!empty($boothsAtLocation)): ?>
+                            <?php foreach ($boothsAtLocation as $b): ?>
+                                <div class="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-mono font-bold text-primary text-xs"><?= esc($b['id']) ?></span>
+                                            <span class="font-bold text-slate-800 text-sm"><?= esc($b['name']) ?></span>
+                                        </div>
+                                        <div class="text-xs text-slate-500 mt-0.5">
+                                            Tema: <span class="font-semibold text-purple-700 capitalize"><?= esc($b['theme'] ?? 'Standard') ?></span>
+                                            • IP: <span class="font-mono"><?= esc($b['ip_address'] ?? '-') ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-xs font-bold text-slate-600">Antrean: <?= esc($b['current_queue'] ?? 0) ?></span>
+                                        <a href="<?= base_url('admin/booths/' . $b['id']) ?>" class="p-1 text-emerald-600 hover:bg-emerald-50 rounded" title="Detail Booth">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="p-8 text-center text-xs text-slate-400">
+                                Belum ada mesin booth yang terdaftar di lokasi ini.
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Card -->
+            <div class="bg-white border border-outline-variant rounded-xl shadow-sm p-6 h-fit space-y-4">
+                <h4 class="font-bold text-slate-800 border-b border-slate-100 pb-3">Ringkasan Lokasi</h4>
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-500">Total Unit Booth:</span>
+                    <span class="font-black text-slate-900 text-lg"><?= count($boothsAtLocation ?? []) ?> Unit</span>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-500">Tanggal Dibuat:</span>
+                    <span class="font-medium text-slate-700 text-xs"><?= date('d M Y, H:i', strtotime($location['created_at'])) ?></span>
+                </div>
+                <div class="pt-4 border-t border-slate-100">
+                    <a href="<?= base_url('admin/booths') ?>" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg block text-center transition-colors">
+                        ← Kembali ke Manajemen Booth
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <?= $this->include('Admin/layouts/footer') ?>
+</main>
+
+<?php $this->endSection(); ?>

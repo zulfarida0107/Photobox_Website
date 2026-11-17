@@ -160,7 +160,7 @@
             </form>
 
             <!-- Data Table -->
-            <div class="overflow-x-auto">
+            <div id="table-payment" class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead class="border-y border-slate-100 bg-white">
                         <tr>
@@ -183,11 +183,12 @@
                                         'failed'  => ['bg-red-100 text-red-700',         'bg-red-500',     'Failed'],
                                         'pending' => ['bg-slate-100 text-slate-600',      'bg-slate-400',   'Pending'],
                                     ];
-                                    $st = $statusMap[$pay['status']] ?? ['bg-slate-100 text-slate-600', 'bg-slate-400', ucfirst($pay['status'])];
+                                    $statusText = empty($pay['status']) ? 'Unknown' : ucfirst($pay['status']);
+                                    $st = $statusMap[$pay['status']] ?? ['bg-slate-100 text-slate-600', 'bg-slate-400', $statusText];
                                     $isPaid = $pay['status'] === 'paid';
                                 ?>
                                 <tr class="hover:bg-blue-50/40 transition-colors">
-                                    <td class="px-6 py-4 font-semibold text-primary text-center">#<?= esc($pay['id']) ?></td>
+                                    <td class="px-6 py-4 font-semibold text-blue-600 text-center">#<?= esc($pay['id']) ?></td>
                                     <td class="px-6 py-4 text-slate-600 font-medium text-center"><?= esc($pay['booking_code'] ?? $pay['booking_id']) ?></td>
                                     <td class="px-6 py-4 text-center">
                                         <span class="px-2 py-1 bg-slate-100 rounded text-[11px] text-slate-600 font-bold">
@@ -246,13 +247,13 @@
             </div>
 
             <!-- Pagination -->
-            <div class="mt-auto p-6 bg-white border-t border-slate-100 flex items-center justify-between">
-                <span class="text-body-sm text-outline">
-                    Menampilkan <?= count($payments ?? []) ?> dari <?= number_format($totalPayments ?? 0) ?> data
+            <div class="mt-auto p-6 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <span class="text-xs text-slate-500 font-medium">
+                    Menampilkan <?= count($payments ?? []) ?> dari <?= number_format($totalPayments ?? 0) ?> Pembayaran
                 </span>
                 <div class="flex gap-2">
                     <?php $qs = '&status=' . ($filterStatus ?? '') . '&period=' . ($filterPeriod ?? '7') . '&payment_date=' . ($paymentDate ?? '') . '&q=' . urlencode($keyword ?? ''); ?>
-                    <a href="<?= base_url('admin/payments?page=' . max(1, ($currentPage ?? 1) - 1) . $qs) ?>"
+                    <a href="<?= base_url('admin/payments?page=' . max(1, ($currentPage ?? 1) - 1) . $qs) ?>#table-payment"
                        class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= ($currentPage ?? 1) <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">
                         <span class="material-symbols-outlined text-sm">chevron_left</span>
                     </a>
@@ -260,26 +261,24 @@
                     <?php
                         $cp   = $currentPage ?? 1;
                         $tp   = $totalPages  ?? 1;
-                        $pages = [];
-                        if ($tp <= 5) {
-                            $pages = range(1, $tp);
-                        } else {
-                            $pages = array_unique(array_filter([1, $cp - 1, $cp, $cp + 1, $tp], fn($p) => $p >= 1 && $p <= $tp));
-                            sort($pages);
+                        $startPage = max(1, $cp - 2);
+                        $endPage   = min($tp, $cp + 2);
+                        if ($endPage - $startPage + 1 < 5) {
+                            if ($startPage == 1) {
+                                $endPage = min($tp, 5);
+                            } elseif ($endPage == $tp) {
+                                $startPage = max(1, $tp - 4);
+                            }
                         }
-                        $prev = 0;
-                        foreach ($pages as $p):
-                            if ($prev && $p - $prev > 1): ?>
-                                <span class="px-1 py-1 text-slate-400 text-xs">...</span>
-                            <?php endif; ?>
-                            <a href="<?= base_url('admin/payments?page=' . $p . $qs) ?>"
-                               class="w-8 h-8 flex items-center justify-center border rounded-lg text-sm font-bold transition-colors <?= $p === $cp ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
-                                <?= $p ?>
-                            </a>
-                    <?php     $prev = $p;
-                        endforeach; ?>
+                    ?>
+                    <?php for ($p = $startPage; $p <= $endPage; $p++): ?>
+                        <a href="<?= base_url('admin/payments?page=' . $p . $qs) ?>#table-payment"
+                           class="w-8 h-8 flex items-center justify-center border rounded-lg text-xs font-bold transition-colors <?= $p === $cp ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' ?>">
+                            <?= $p ?>
+                        </a>
+                    <?php endfor; ?>
 
-                    <a href="<?= base_url('admin/payments?page=' . min($tp, $cp + 1) . $qs) ?>"
+                    <a href="<?= base_url('admin/payments?page=' . min($tp, $cp + 1) . $qs) ?>#table-payment"
                        class="w-8 h-8 flex items-center justify-center border border-slate-200 bg-white rounded-lg hover:bg-slate-50 transition-colors text-slate-400 <?= $cp >= $tp ? 'opacity-40 pointer-events-none' : '' ?>">
                         <span class="material-symbols-outlined text-sm">chevron_right</span>
                     </a>
